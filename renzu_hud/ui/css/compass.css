@@ -1,0 +1,44 @@
+/* googleFonts */
+@import url('https://fonts.googleapis.com/css2?family=Archivo&display=swap');
+
+/* General styling */
+* {
+	box-sizing: border-box;
+	font-family: 'Archivo', sans-serif;
+	margin: 0; padding: 0;
+}
+
+#location {
+	position:absolute;
+	top:18px;
+	right:-5px;
+	width:280px;
+}
+#container {
+	align-items: center;
+	color: rgb(241, 235, 235);
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	padding: 0 10px;
+	position: absolute;
+	margin:auto;
+}
+
+#container > section {
+	align-items: center;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+}
+
+#container > div {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+#direction, #zone, #street {
+	text-shadow: 2px 2px 3px rgba(0,0,0,0.45);
+	margin: 0 5px;
+}

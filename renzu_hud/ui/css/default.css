@@ -1,0 +1,167 @@
+@import url("reset.css");
+
+/* ------ layout
+-----------------------------------------------*/
+
+#content {
+position:absolute;
+top:1%;
+right:7%;
+}
+#logo {
+    z-index:1000;
+    position:absolute;
+    top:28px;
+    opacity:1.0;
+    right:82px;
+    margin-right:-40px;
+}
+
+.mic {
+    z-index:1000;
+    color: #d8d2d4;
+    font-size: 10px;
+    position: absolute;
+    display: block;
+    top: 95px;
+    right: 93px;
+    text-shadow: 1px 1px 1px #000000;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  #mic-radio {
+    width: 100px !important;
+    display: inline-block;
+    position: relative;
+  }
+  
+  #mic-radio i {
+    font-size: 1.2em;
+    color: orange;
+    margin-right: 5px;
+  }
+  
+  .mic span {
+    width: 10px;
+    height: 22px;
+    display: inline-block;
+  }
+  
+  .mic .azul {
+    background-image: url("../img/mic-azul.png");
+  }
+  
+  .mic .vermelho {
+    background-image: url("../img/mic-vermelho.png");
+  }
+  
+  .mic .verde {
+    background-image: url("../img/mic-verde.png");
+  }
+  
+  .mic .amarelo {
+    background-image: url("../img/mic-amarelo.png");
+  }
+
+#content h1 {
+font-family:'Cabin Sketch', arial, serif;
+text-shadow:3px 3px 0 #ddd;
+color:#193340;
+font-size:40px;
+margin-bottom:40px;
+text-align:right;
+}
+
+.skills {
+float:left;
+clear:both;
+width:100%;
+}
+
+.skills ul,
+.skills li {
+display:block;
+list-style:none;
+margin:0;
+padding:0;
+}
+
+.skills li {
+float:right;
+clear:both;
+padding:0 15px;
+height:25px;
+line-height:35px;
+color:#fff;
+margin-bottom:1px;
+font-size:18px;
+}
+
+.skills .jq {
+background:#97BE0D;
+}
+
+.skills .css {
+background:#0051ff;
+}
+
+.skills .html {
+background:#88B8E6;
+}
+
+.skills .php {
+background:#BEDBE9;
+}
+
+.skills .sql {
+background:#EDEBEE;
+}
+
+.footer {
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+background:#2D2D2D;
+color:#EAEAEA;
+padding:20px 0;
+}
+
+.footer a {
+color:#EAEAEA;
+}
+
+.footer a:hover {
+color:#E4842C;
+}
+
+.footer .inside {
+font-family: 'Cabin Sketch', arial, serif;
+font-size:22px;
+text-align:center;
+}
+
+
+#diagram {
+float:right;
+width:100px;
+height:100px;
+}
+
+.get {
+display:none;
+}
+
+/* ------ anchors
+-----------------------------------------------*/
+
+a {
+text-decoration:none;
+color:#333;
+}
+
+.progress-ring__circle {
+    transition: height 2s ease-in-out;
+  transform: rotatex(180deg);
+  transform-origin: top;  
+  }
