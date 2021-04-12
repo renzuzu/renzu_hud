@@ -17,6 +17,7 @@ end)
 -- VARIABLES
 -----------------------------------------------------------------------------------------------------------------------------------------
 local AdvStatsTable = {}
+local date = "00:00"
 local playerloaded = false
 local manual = false
 local vehicletopspeed
@@ -52,6 +53,21 @@ local PedCar
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- DATE
 -----------------------------------------------------------------------------------------------------------------------------------------
+function timeformat()
+	date = ""..hour..":"..minute..""
+	format = {
+		min = minute,
+		hour = hour
+	}
+	if newdate ~= date or newdate == nil then
+		SendNUIMessage({
+			type = "setTime",
+			content = format
+		})
+		newdate = date
+	end
+end
+
 function CalculateTimeToDisplay()
 	hour = GetClockHours()
 	minute = GetClockMinutes()
@@ -103,6 +119,7 @@ Citizen.CreateThread(function()
 		Citizen.Wait(1000)	
 		CalculateTimeToDisplay()
 		CalculateDateToDisplay()
+		timeformat()
 	end
 end)
 
@@ -605,6 +622,26 @@ Citizen.CreateThread(function()
 	end
 end)
 
+--NUI GEAR STATUS
+Citizen.CreateThread(function()
+	while true do
+		local sleep = 500
+		local ped = ped
+		local vehicle = vehicle
+		if vehicle ~= nil and vehicle ~= 0 then
+			local gear = GetVehicleCurrentGear(vehicle)
+			if newgear ~= gear or newgear == nil then
+				newgear = gear
+				SendNUIMessage({
+				type = "setGear",
+				content = gear
+				})
+			end
+		end
+		Citizen.Wait(sleep)
+	end
+end)
+
 -- MILEAGE
 local lastve = nil
 local savemile = false
@@ -667,6 +704,96 @@ Citizen.CreateThread(function()
 			saveplate = nil
 		else
 			Wait(1000)
+		end
+	end
+end)
+
+-- SIGNAL LIGHTS
+local left = false
+local right = false
+local hazard = false
+local state = false
+Citizen.CreateThread(function()
+	while true do
+		local sleep = 2000
+		local ped = ped
+		local vehicle = vehicle
+		if vehicle ~= 0 and vehicle ~= nil then
+			sleep = 6
+			if IsControlJustReleased(1,174) then
+				right = false
+				Citizen.Wait(100)
+				left = true
+				if GetVehicleIndicatorLights(vehicle) == 0 then
+					SetVehicleIndicatorLights(vehicle,1, true)
+				elseif GetVehicleIndicatorLights(vehicle) == 2 then
+					SetVehicleIndicatorLights(vehicle,0, false)
+					SetVehicleIndicatorLights(vehicle,1, true)
+				end
+			end
+
+			if IsControlJustReleased(1,175) then
+				left = false
+				Citizen.Wait(100)
+				right = true
+				if GetVehicleIndicatorLights(vehicle) == 0 then
+					SetVehicleIndicatorLights(vehicle,0, true)
+				elseif GetVehicleIndicatorLights(vehicle) == 1 then
+					SetVehicleIndicatorLights(vehicle,1, false)
+					SetVehicleIndicatorLights(vehicle,0, true)
+				end
+			end
+
+			if IsControlJustReleased(1,177) then
+				if GetVehicleIndicatorLights(vehicle) == 0 then
+					hazard = true
+					SetVehicleIndicatorLights(vehicle,0, true)
+					SetVehicleIndicatorLights(vehicle,1, true)
+				else
+					hazard = false
+					left = false
+					right = false
+					SetVehicleIndicatorLights(vehicle,0, false)
+					SetVehicleIndicatorLights(vehicle,1, false)
+				end
+			end
+			state = false
+			if not state and right then
+				state = 'right'
+			end
+			if not state and left then
+				state = 'left'
+			end
+			if hazard then
+				state = 'hazard'
+			end
+		end
+		Citizen.Wait(sleep)
+	end
+end)
+
+--NUI SIGNAL LIGHTS
+Citizen.CreateThread(function()
+	while true do
+		local sleep = 100
+		local ped = ped
+		local vehicle = vehicle
+		Citizen.Wait(sleep)
+		if vehicle ~= nil and vehicle ~= 0 then
+			-- if newsignal ~= GetVehicleIndicatorLights(vehicle) or newsignal == nil then
+			-- 	newsignal = GetVehicleIndicatorLights(vehicle)
+			-- 	SendNUIMessage({
+			-- 	type = "setSignal",
+			-- 	content = GetVehicleIndicatorLights(vehicle)
+			-- 	})
+			-- end
+			while state ~= false do
+				SendNUIMessage({
+					type = "setSignal",
+					content = state
+				})
+				Citizen.Wait(500)
+			end
 		end
 	end
 end)

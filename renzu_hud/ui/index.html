@@ -470,7 +470,7 @@
             z-index:999;
             position:absolute;
             right:350px;
-            bottom:8.5%;
+            bottom:75px;
           }
           #rpmmeter {
             font-size:20px;
@@ -509,6 +509,42 @@
             width:72px;
             font-weight: 50;
             background-color: #00000077;
+            padding:4px 5px 4px 5px;
+          }
+
+          #time {
+            margin:0 0 0 0;
+          }
+
+          #timediv {
+            text-align: center;
+            font-size:10px;
+            color:#d8d2d4;
+            z-index:1002;
+            position:absolute;
+            right:196px;
+            overflow:hidden;
+            bottom:178px;
+            width:72px;
+            font-weight: 50;
+            padding:4px 5px 4px 5px;
+          }
+
+          #gear {
+            margin:0 0 0 0;
+          }
+
+          #geardiv {
+            text-align: center;
+            font-size:10px;
+            color:#d8d2d4;
+            z-index:1002;
+            position:absolute;
+            right:60px;
+            overflow:hidden;
+            bottom:58px;
+            width:72px;
+            font-weight: 50;
             padding:4px 5px 4px 5px;
           }
 
@@ -583,23 +619,47 @@
             clip: rect(126px, 21px, 152px, 0);
             /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
           }
+
+          #left {
+            opacity:0.2;
+            color:rgb(255, 255, 255);
+            font-size:30px;
+            z-index:999;
+            position:absolute;
+            right:290px;
+            bottom:165px;
+          }
+
+          #right {
+            opacity:0.2;
+            color:rgb(255, 255, 255);
+            font-size:30px;
+            z-index:999;
+            position:absolute;
+            right:140px;
+            bottom:165px;
+          }
       </style>
 
       <div id="car" style="">
-          <img style="z-index:999;position:absolute;right:-50px;bottom:-9%;opacity:0.95;height:40%;" src="img/car.png" />
-          <svg id="rpm" style="z-index:999;position:absolute;right:-1px;bottom:1.5%;opacity:0.65;height:19%;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+          <img style="z-index:999;position:absolute;right:-50px;bottom:-81px;opacity:0.95;height:360px" src="img/car.png" />
+          <svg id="rpm" style="z-index:999;position:absolute;right:-1px;bottom:13px;opacity:0.65;height:170px;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
             <path class="bg" stroke="#ffffff0" d="M41 149.5a77 77 0 1 1 117.93 0"  fill="none"/>
             <path id="rpmpath" class="meter" stroke="#09c" d="M41 149.5a77 77 0 1 1 117.93 0" fill="none" style="width:10%;" stroke-dasharray="350" stroke-dashoffset="350"/>
           </svg>
           <div id="rpmmeter">1000</div>
           
-          <svg id="speed" style="z-index:999;position:absolute;right:263px;bottom:1.5%;opacity:0.65;height:19%;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+          <svg id="speed" style="z-index:999;position:absolute;right:263px;bottom:13px;opacity:0.65;height:170px;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
             <path class="bg" stroke="#ffffff0" d="M41 149.5a77 77 0 1 1 117.93 0"  fill="none"/>
             <path id="speedpath" class="meter" stroke="#09c" d="M41 149.5a77 77 0 1 1 117.93 0" fill="none" style="width:10%;" stroke-dasharray="350" stroke-dashoffset="350"/>
           </svg>  
           <div id="speedmeter">0</div>
           <div id="milediv"><span id="mileage">0</span> kM</div>
           <div id="distancediv"><span id="distance">0</span> <span id="distext">Dis</span></div>
+          <div id="timediv"><span id="time">00:00</span> <span id="timetext">Pm</span></div>
+          <div id="geardiv"><span id="gear">P</span> <span id="geartext">Gear</span></div>
+          <i id="right" class="fas fa-arrow-alt-right"></i>
+          <i id="left" class="fas fa-arrow-alt-left"></i>
 
           <div class="gas-bar">
             <span class="bar">

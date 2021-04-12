@@ -3,9 +3,6 @@ function pedface() {
     $.post(`https://${GetParentResourceName()}/requestface`, {}, function(data) {
         console.log("POSTED")
         let face = data;
-        console.log(face)
-        console.log(face)
-        console.log(face)
         if (face) {
             console.log("URL")
             let url = 'https://nui-img/' + face + '/' + face + '?t=' + String(Math.round(new Date().getTime() / 1000));
@@ -142,15 +139,6 @@ function setShowstatus(bool) {
 
 function setRpm(percent) {
     var rpm = (percent * 100);
-    //tacho = rpm * 0.01;
-    // const meters = document.querySelectorAll('svg[data-value] .meter');
-    // meters.forEach( (path) => {
-    //     let length = path.getTotalLength();
-    //     let value = rpm;
-    //     let to = length * ((100 - value) / 100);
-    //     //path.getBoundingClientRect();
-    //     path.style.strokeDashoffset = Math.max(0, to);
-    // });
     rpm2 = rpm.toFixed(0) * 100
     document.getElementById("rpmmeter").innerHTML = ""+rpm2+"";
     var e = document.getElementById("rpmpath");
@@ -158,9 +146,7 @@ function setRpm(percent) {
     let value = rpm;
     let to = length * ((100 - value) / 100);
     val = to / 1000
-    //console.log(to);
     e.style.strokeDashoffset = to;
-    //$('#rpm').data('value', tacho); 
 }
 
 function setSpeed(s) {
@@ -256,8 +242,81 @@ function setWaydistance(value) {
     document.getElementById("distance").innerHTML = ''+dis+''
 }
 
+function setTime(format) {
+    var cur = 'Am'
+    if (format.hour > 12) {
+        cur = 'Pm'
+        document.getElementById("timetext").innerHTML = ' Pm' 
+    } else {
+        cur = 'Am'
+        document.getElementById("timetext").innerHTML = ' Am' 
+    }
+    var formatdate = ''+format.hour+':'+format.min+''
+    if (cur == 'Pm' && format.hour > 12) {
+        format.hour = format.hour - 12
+        formatdate = ''+format.hour+':'+format.min+''
+    }
+    document.getElementById("time").innerHTML = ''+formatdate+'' 
+}
+
+function setGear(gear) {
+    if (gear == 0) {
+        gear = 'P'
+    }
+    if (gear == 1) {
+        gear = '1st'
+    }
+    if (gear == 2) {
+        gear = '2nd'
+    }
+    if (gear == 3) {
+        gear = '3rd'
+    }
+    if (gear == 4) {
+        gear = '4th'
+    }
+    if (gear == 5) {
+        gear = '5th'
+    }
+    if (gear == 6) {
+        gear = '6th'
+    }
+    document.getElementById("gear").innerHTML = ''+gear+''
+}
+
+function setSignal(value) {
+    if (value == 'hazard') {
+        document.getElementById('left').style.opacity = '0.2'
+        document.getElementById('left').style.color = 'white'
+        document.getElementById('right').style.opacity = '0.2'
+        document.getElementById('right').style.color = 'white'
+        setTimeout(function(){
+            $("#left").fadeIn();
+            $("#right").fadeIn();
+            document.getElementById('left').style.opacity = '1'
+            document.getElementById('left').style.color = 'lime'
+            document.getElementById('right').style.opacity = '1'
+            document.getElementById('right').style.color = 'lime'
+        }, 533);
+    } else {
+        document.getElementById(value).style.opacity = '0.2'
+        document.getElementById(value).style.color = 'white'
+        setTimeout(function(){
+            $("#"+value+"").fadeIn();
+            document.getElementById(value).style.opacity = '1'
+            document.getElementById(value).style.color = 'lime'
+        }, 433);
+    }
+    setTimeout(function(){
+        document.getElementById('left').style.opacity = '0.2'
+        document.getElementById('left').style.color = 'white'
+        document.getElementById('right').style.opacity = '0.2'
+        document.getElementById('right').style.color = 'white'
+    }, 733);
+}
+
 //FUNCTIONS
-var evt = {
+var renzu_hud = {
     setArmor,
     setHp,
     setMic,
@@ -274,6 +333,9 @@ var evt = {
     setBelt,
     setMileage,
     setWaydistance,
+    setTime,
+    setGear,
+    setSignal,
 
 };
 setMic(2);
@@ -281,17 +343,13 @@ setMic(2);
 window.addEventListener("message", event => {
     const item = event.data || event.detail;
     //console.log(item.type);
-    if (evt[item.type]) {
-      evt[item.type](item.content);
+    if (renzu_hud[item.type]) {
+        renzu_hud[item.type](item.content);
     }
     if (item.hud) {
-        evt[item.hud](item.content);
-        //document.getElementById("diagram").innerHTML = '';
-        //$(function(){ o.init(evt[item.hud](item.content)); });
+        renzu_hud[item.hud](item.content);
     }
     if (item.compass) {
         onMessageRecieved(event.data);
-        //document.getElementById("diagram").innerHTML = '';
-        //$(function(){ o.init(evt[item.hud](item.content)); });
     }
   });
