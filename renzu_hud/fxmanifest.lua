@@ -20,6 +20,11 @@ client_scripts {
 }
 files {
 	'ui/index.html',
+	'ui/css/*.otf',
+	'ui/css/*.ttf',
+	'ui/css/*.woff',
+	'ui/css/*.woff2',
+	'ui/fonts/Azonix.otf',
 	'ui/assets/icons.svg',
 	'ui/css/*.css',
 	'ui/js/*.js',
