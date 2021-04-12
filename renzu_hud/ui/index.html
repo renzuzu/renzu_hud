@@ -256,6 +256,58 @@
               width:135px;
               z-index:1;
             }
+
+            .gas-bar {
+              #border-radius: 88% 22% 89% 22% / 0% 100% 0% 100%;
+              overflow: hidden;
+            }
+            .gas-bar span {
+              display: block;
+            }
+            
+            .gas_progress {
+                transition: width 1s;
+                background: rgb(201, 255, 6);
+                color: #fff;
+                padding: 5px;
+                height:50px;
+            }
+            
+            .gas-bar {
+              right: 190px;
+              max-width: 50%;
+              position: absolute;
+              bottom: 148px;
+              height:4px;
+              width:80px;
+              z-index:-1;
+            }
+
+            .carhealth-bar {
+              #border-radius: 88% 22% 89% 22% / 0% 100% 0% 100%;
+              overflow: hidden;
+            }
+            .carhealth-bar span {
+              display: block;
+            }
+            
+            .carhealth_progress {
+                transition: width 1s;
+                background: rgb(14, 173, 22);
+                color: #fff;
+                padding: 5px;
+                height:50px;
+            }
+            
+            .carhealth-bar {
+              right: 200px;
+              max-width: 50%;
+              position: absolute;
+              bottom: 118px;
+              height:4px;
+              width:60px;
+              z-index:-1;
+            }
             </style>
 
     </head>
@@ -429,6 +481,108 @@
             bottom:80px;
           }
 
+          #milediv {
+            font-size:10px;
+            color:#d8d2d4;
+            z-index:1002;
+            position:absolute;
+            right:190px;
+            bottom:23px;
+            font-weight: 50;
+            background-color: #00000077;
+            padding:4px 17px 4px 17px;
+          }
+
+          #mileage {
+            margin:0 20px 0 0;
+          }
+
+          #distancediv {
+            text-align: center;
+            font-size:10px;
+            color:#d8d2d4;
+            z-index:1002;
+            position:absolute;
+            right:196px;
+            overflow:hidden;
+            bottom:55px;
+            width:72px;
+            font-weight: 50;
+            background-color: #00000077;
+            padding:4px 5px 4px 5px;
+          }
+
+          #distance {
+            margin:0 20px 0 0;
+          }
+
+          #offlight {
+            display:none;
+            z-index:1001;
+            position: absolute;
+            bottom:105px;
+            right:260px;
+          }
+          #offlightclip {
+            position: absolute;
+            width:50px;
+            clip: rect(0, 20px, 18px, 0);
+            /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
+          }
+          #onlight {
+            display:none;
+            z-index:1001;
+            position: absolute;
+            bottom:105px;
+            right:290px;
+          }
+          #onlightclip {
+            position: absolute;
+            width:50px;
+            clip: rect(0, 50px, 18px, 20px);
+            /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
+          }
+          #highlight {
+            display:none;
+            z-index:1001;
+            position: absolute;
+            bottom:170px;
+            right:290px;
+          }
+          #highlightclip {
+            position: absolute;
+            width:50px;
+            clip: rect(66px, 50px, 80px, 20px);
+            /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
+          }
+
+          #seatbelt {
+            display:none;
+            z-index:1001;
+            position: absolute;
+            bottom:234px;
+            right:260px;
+          }
+          #seatbeltclip {
+            position: absolute;
+            width:50px;
+            clip: rect(126px, 50px, 150px, 20px);
+            /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
+          }
+
+          #onseatbelt {
+            display:none;
+            z-index:1001;
+            position: absolute;
+            bottom:234px;
+            right:228px;
+          }
+          #onseatbeltclip {
+            position: absolute;
+            width:50px;
+            clip: rect(126px, 21px, 152px, 0);
+            /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
+          }
       </style>
 
       <div id="car" style="">
@@ -444,6 +598,39 @@
             <path id="speedpath" class="meter" stroke="#09c" d="M41 149.5a77 77 0 1 1 117.93 0" fill="none" style="width:10%;" stroke-dasharray="350" stroke-dashoffset="350"/>
           </svg>  
           <div id="speedmeter">0</div>
+          <div id="milediv"><span id="mileage">0</span> kM</div>
+          <div id="distancediv"><span id="distance">0</span> <span id="distext">Dis</span></div>
+
+          <div class="gas-bar">
+            <span class="bar">
+              <span class="gas_progress" id="gasbar"></span>
+            </span>
+          </div>
+          <div class="carhealth-bar">
+            <span class="bar">
+              <span class="carhealth_progress" id="carhealthbar"></span>
+            </span>
+          </div>
+
+          <div id="offlight">
+            <img id="offlightclip" src="assets/icons.svg" />
+          </div>
+          
+          <div id="onlight">
+            <img id="onlightclip" src="assets/icons.svg" />
+          </div>
+
+          <div id="highlight">
+            <img id="highlightclip" src="assets/icons.svg" />
+          </div>
+
+          <div id="seatbelt">
+            <img id="seatbeltclip" src="assets/icons.svg" />
+          </div>
+
+          <div id="onseatbelt">
+            <img id="onseatbeltclip" src="assets/icons.svg" />
+          </div>
       </div>
 
       <!-- <script>

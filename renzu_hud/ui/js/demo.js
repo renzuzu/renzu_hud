@@ -34,26 +34,38 @@ function setMic(type) {
     $("#mic-color").removeClass("verde");
     $("#mic-color").removeClass("azul");
     $("#mic-color").removeClass("vermelho");
-  
+
     switch (type) {
-      case 1:
+        case 1:
         $("#mic-text").html("Whisper");
         $("#mic-color").addClass("amarelo");
         break;
-      case 2:
+        case 2:
         $("#mic-text").html("Normal");
         $("#mic-color").addClass("verde");
         break;    
-      case 3:
+        case 3:
         $("#mic-text").html("Shout");
         $("#mic-color").addClass("vermelho");
         break;
-      default:
+        default:
         $("#mic-text").html("Normal");
         $("#mic-color").addClass("verde");
         break;
     }
-  }
+}
+
+function setFuelLevel(value) {
+    var max = 100;
+    var total = value / max
+    var gas = total * 100
+    document.getElementById("gasbar").style.width = ''+gas+'%'
+}
+
+function setCarhp(value) {
+    var hp = value * 0.1
+    document.getElementById("carhealthbar").style.width = ''+hp+'%'
+}
 
 function onMessageRecieved(event) {
     let item = event;
@@ -106,7 +118,6 @@ function onMessageRecieved(event) {
 
 function setStatus(table) {
     console.log("Status")
-    console.log(table.hunger)
     document.getElementById("hunger").style.width = ''+table.hunger+'%'
     document.getElementById("thirst").style.width = ''+table.thirst+'%'
     document.getElementById("stressbar").style.width = ''+table.stress+'%'
@@ -171,7 +182,6 @@ function setSpeed(s) {
     let value = speed;
     let to = length * ((100 - value) / 100);
     val = to / 1000
-    console.log(speed);
     e.style.strokeDashoffset = to;
 }
 
@@ -182,11 +192,68 @@ function setShow(value) {
         $("#car").animate({
             opacity: "1"
         },400);
+        setBelt(false)
+        setHeadlights(0)
   } else {
     $("#car").animate({
       opacity: "0"
     },400);
   }
+}
+
+function setHeadlights(v) {
+    if (v == 1) {
+        document.getElementById("offlight").style.display = 'none'
+        document.getElementById("onlight").style.display = 'block'
+        document.getElementById("highlight").style.display = 'none'
+    } else if (v == 2) {
+        document.getElementById("offlight").style.display = 'none'
+        document.getElementById("onlight").style.display = 'none'
+        document.getElementById("highlight").style.display = 'block'
+    } else {
+        document.getElementById("offlight").style.display = 'block'
+        document.getElementById("onlight").style.display = 'none'
+        document.getElementById("highlight").style.display = 'none'
+    }
+}
+
+function setBelt(s) {
+    if (s) {
+        document.getElementById("seatbelt").style.display = 'none'
+        document.getElementById("onseatbelt").style.display = 'block'
+    } else {
+        document.getElementById("seatbelt").style.display = 'block'
+        document.getElementById("onseatbelt").style.display = 'none'
+    }
+}
+
+function setMileage(value) {
+    mileage = value.toFixed(0);
+    if (mileage >= 100) {
+        document.getElementById("mileage").style.margin = '0 10px 0 0'
+    } else if (mileage >= 10) {
+        document.getElementById("mileage").style.margin = '0 15px 0 0'
+    }
+    document.getElementById("mileage").innerHTML = ''+mileage+''
+}
+
+function setWaydistance(value) {
+    var dis = value.toFixed(0)
+    if (dis >= 1000) {
+        document.getElementById("distance").style.margin = '0 -1px 0 0'
+    } else if (dis >= 100) {
+        document.getElementById("distance").style.margin = '0 10px 0 0'
+    } else if (dis >= 10) {
+        document.getElementById("distance").style.margin = '0 15px 0 0'
+    }
+    if (dis <= 0) {
+        document.getElementById("distext").innerHTML = ''
+        document.getElementById("distance").style.margin = '0 -4px 0 0'
+        dis = 'ARRIVE'
+    } else {
+        document.getElementById("distext").innerHTML = 'DIS'
+    }
+    document.getElementById("distance").innerHTML = ''+dis+''
 }
 
 //FUNCTIONS
@@ -198,8 +265,16 @@ var evt = {
     setShowstatus,
 
     //CAR
+    setShow,
     setRpm,
     setSpeed,
+    setCarhp,
+    setFuelLevel,
+    setHeadlights,
+    setBelt,
+    setMileage,
+    setWaydistance,
+
 };
 setMic(2);
 

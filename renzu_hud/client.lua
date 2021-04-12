@@ -32,7 +32,7 @@ local dayOfMonth = 0
 local voice = 2
 local voiceDisplay = 2
 local proximity = 25.0
-local CintoSeguranca = false
+local belt = false
 local ExNoCarro = false
 local sBuffer = {}
 local vBuffer = {}
@@ -467,13 +467,20 @@ Citizen.CreateThread(function()
 		if vehicle ~= nil and vehicle ~= 0 and inCar then
 			wait = 500
 			inCar  = true
-			-- if gasolina ~= newgas or newgas == nil then
-			-- SendNUIMessage({
-			-- type = "setFuelLevel",
-			-- content = gasolina
-			-- })
-			-- newgas = gasolina
-			-- end
+			if gasolina ~= newgas or newgas == nil then
+				SendNUIMessage({
+					type = "setFuelLevel",
+					content = gasolina
+				})
+				newgas = gasolina
+			end
+			if newcarhealth ~= hp or newcarhealth == nil then
+				SendNUIMessage({
+					hud = "setCarhp",
+					content = hp
+				})
+				newcarhealth = hp
+			end
 			if uimove then
 			Citizen.Wait(1500)
 			SendNUIMessage({
@@ -495,5 +502,171 @@ Citizen.CreateThread(function()
 			uimove = true
 		end
 		Citizen.Wait(wait)
+	end
+end)
+
+--NUI RADIO STATION
+Citizen.CreateThread(function()
+	while true do
+		local sleep = 500
+		local ped = ped
+		local vehicle = vehicle
+		local waypoint = GetFirstBlipInfoId(8)
+		if vehicle ~= 0 and DoesBlipExist(waypoint) then
+			local coord = GetEntityCoords(ped, true)
+			local dis = #(coord - GetBlipCoords(waypoint))
+			if newdis ~= dis or newdis == nil then
+				newdis = dis
+				SendNUIMessage({
+				type = "setWaydistance",
+				content = dis
+				})
+			end
+		elseif vehicle ~=0 and not DoesBlipExist(waypoint) then
+			--if newdis ~= dis or newdis == nil then
+				newdis = 0
+				SendNUIMessage({
+				type = "setWaydistance",
+				content = 0
+				})
+			--end
+			Citizen.Wait(2500)
+		end
+		Citizen.Wait(sleep)
+	end
+end)
+
+--NUI HEAD LIGHTS
+Citizen.CreateThread(function()
+	while true do
+		local sleep = 500
+		local ped = ped
+		local vehicle = vehicle
+		local off,low,high = GetVehicleLightsState(PedCar)
+		if low == 1 and high == 0 then
+			light = 1
+		elseif high == 1 then
+			light = 2
+		else
+			light = 0
+		end
+		if vehicle ~= 0 then
+			if newlight ~= light or newlight == nil then
+				newlight = light
+				SendNUIMessage({
+				type = "setHeadlights",
+				content = light
+				})
+			end
+		end
+		Citizen.Wait(sleep)
+	end
+end)
+
+Citizen.CreateThread(function()
+	while true do
+		ped = ped
+		--local car = GetVehiclePedIsIn(ped)
+		local cansleep = 2000
+		if vehicle ~= 0 then
+			cansleep = 6
+			if IsControlJustReleased(1,29) then
+				if belt then
+					SetTimeout(1000,function()
+						belt = false
+					end)
+				else
+					SetTimeout(1000,function()
+						belt = true
+					end)
+				end
+			end
+		end
+		Citizen.Wait(cansleep)
+	end
+end)
+
+--NUI BELT STATUS
+Citizen.CreateThread(function()
+	while true do
+		local sleep = 2000
+		local ped = ped
+		local vehicle = vehicle
+		if vehicle ~= nil and vehicle ~= 0 then
+			if newbelt ~= belt or newbelt == nil then
+				newbelt = belt
+				SendNUIMessage({
+				type = "setBelt",
+				content = belt
+				})
+			end
+		end
+		Citizen.Wait(sleep)
+	end
+end)
+
+-- MILEAGE
+local lastve = nil
+local savemile = false
+local saveplate = nil
+Citizen.CreateThread(function()
+	local count = 0
+	while not playerloaded and count < 3 do
+		Citizen.Wait(1000)
+		count = count + 1
+	end
+	if not playerloaded then
+		TriggerServerEvent("renzu_hud:getmile")
+	end
+	Citizen.Wait(5000)
+	while true do
+		Citizen.Wait(111)
+		local ped = ped
+		local vehicle = vehicle
+		local plate = tostring(GetVehicleNumberPlateText(vehicle))
+		local newPos = GetEntityCoords(ped)
+		local driver = GetPedInVehicleSeat(vehicle, -1)
+		if vehicle ~= nil and vehicle ~= 0 and IsPedInAnyVehicle(ped, false) and driver == ped then
+			savemile = true
+			lastve = GetVehiclePedIsIn(ped, false)
+			if plate ~= nil then
+				saveplate = string.match(GetVehicleNumberPlateText(vehicle), '%f[%d]%d[,.%d]*%f[%D]')
+				plate = saveplate
+				--if AdvStatsTable ~= nil and AdvStatsTable[plate] ~= nil then
+					if plate ~= nil and AdvStatsTable[plate] == nil then
+						AdvStatsTable[plate] = {}
+						AdvStatsTable[plate].plate = plate
+						AdvStatsTable[plate].mileage = 0
+					end
+					if plate ~= nil and AdvStatsTable[plate].plate == plate then
+						if oldPos == nil then
+							oldPos = newPos
+						end
+						local dist = #(newPos-oldPos)
+						if dist > 10.0 then
+							AdvStatsTable[plate].mileage = AdvStatsTable[plate].mileage+GetEntitySpeed(vehicle)*1/100
+							oldPos = newPos
+						end
+						--print(AdvStatsTable[plate].mileage)
+						if newmileage ~= AdvStatsTable[plate].mileage or newmileage == nil then
+							newmileage = AdvStatsTable[plate].mileage
+							SendNUIMessage({
+							type = "setMileage",
+							content = AdvStatsTable[plate].mileage
+							})
+						end
+					end
+				--end
+			end
+
+		elseif savemile and lastve ~= nil and saveplate ~= nil then
+			savemile = false
+			TriggerServerEvent('renzu_hud:savemile', tonumber(saveplate), AdvStatsTable[tostring(saveplate)])
+			Wait(1000)
+			lastve = nil
+			saveplate = nil
+		else
+			Wait(1000)
+		end
 	end
 end)
