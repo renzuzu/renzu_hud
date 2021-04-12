@@ -2,7 +2,15 @@
 
 /* ------ layout
 -----------------------------------------------*/
-
+@font-face {
+  font-family: "azonixregular";
+  src: url("azonix-webfont.woff2") format("woff2"), url("azonix-webfont.otf") format("opentype"), url("azonix-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+html {
+  font-family: "azonixregular";
+}
 #content {
 position:absolute;
 top:1%;

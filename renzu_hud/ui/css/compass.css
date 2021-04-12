@@ -1,10 +1,7 @@
-/* googleFonts */
-@import url('https://fonts.googleapis.com/css2?family=Archivo&display=swap');
-
 /* General styling */
 * {
 	box-sizing: border-box;
-	font-family: 'Archivo', sans-serif;
+	font-family: "azonixregular";
 	margin: 0; padding: 0;
 }
 
