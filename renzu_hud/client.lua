@@ -21,6 +21,7 @@ local date = "00:00"
 local playerloaded = false
 local manual = false
 local vehicletopspeed
+local uimove = false
 local reverse = false
 local savegear = 0
 local rpm = 0.2
@@ -48,18 +49,18 @@ local k_nitro = 70
 local n_boost = 15.0
 local nitro_state = 0
 local isBlack = "false"
-local PedCar
+local invehicle = false
 
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- DATE
 -----------------------------------------------------------------------------------------------------------------------------------------
 function timeformat()
 	date = ""..hour..":"..minute..""
-	format = {
-		min = minute,
-		hour = hour
-	}
-	if newdate ~= date or newdate == nil then
+	if newdate ~= date or newdate == nil and vehicle ~= nil and vehicle ~= 0 then
+		format = {
+			min = minute,
+			hour = hour
+		}
 		SendNUIMessage({
 			type = "setTime",
 			content = format
@@ -113,16 +114,6 @@ function setVoice()
 end
 
 local ped = nil
-
-Citizen.CreateThread(function()
-	while true do
-		Citizen.Wait(1000)	
-		CalculateTimeToDisplay()
-		CalculateDateToDisplay()
-		timeformat()
-	end
-end)
-
 local playerNamesDist = 3
 local key_holding = false
 
@@ -176,7 +167,7 @@ end)
 
 RegisterNUICallback('requestface', function(data, cb)
 	while not playerloaded do
-		Citizen.Wait(100)
+		Citizen.Wait(1000)
 	end
 	Citizen.Wait(5000)
     cb(getawsomeface())
@@ -225,8 +216,51 @@ local statuses = {
 }
 
 local show = false
+
+function updateStatus()
+	local fetch = false
+	sanity = 0
+	thirst = 0
+	hunger = 0
+	oxygen = GetPlayerUnderwaterTimeRemaining(PlayerId()) * 10
+	energy = 0
+	stamina = 100 - GetPlayerSprintStaminaRemaining(PlayerId())
+	TriggerEvent('esx_status:getStatusm', statuses, function(status)
+		for k,v in pairs(status) do
+			if k == 'thirst' then
+				thirst = v.getPercent()
+			end
+			if k == 'sanity' then
+				sanity = v.getPercent()
+			end
+			if k == 'energy' then
+				energy = v.getPercent()
+			end
+			if k == 'hunger' then
+				hunger = v.getPercent()
+			end
+		end
+		fetch = true
+	end)
+	while not fetch do
+		Citizen.Wait(1)
+	end
+	status = {
+		stress = tonumber(sanity),
+		oxygen = oxygen,
+		thirst = tonumber(thirst),
+		hunger = hunger,
+		energy = energy,
+		stamina = stamina
+	}
+	SendNUIMessage({
+		type = "setStatus",
+		content = status
+	})
+end
 RegisterCommand('showstatus', function()
 	show = not show
+	updateStatus()
     PlaySoundFrontend(PlayerId(), "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", true )
 	SendNUIMessage({
 		type = "setShowstatus",
@@ -239,173 +273,384 @@ Citizen.CreateThread(function()
 end)
 
 Citizen.CreateThread(function()
-	while true do
-		Citizen.Wait(500)
-		sanity = 0
-		thirst = 0
-		hunger = 0
-		oxygen = GetPlayerUnderwaterTimeRemaining(PlayerId()) * 10
-		energy = 0
-		stamina = 100 - GetPlayerSprintStaminaRemaining(PlayerId())
-		TriggerEvent('esx_status:getStatusm', statuses, function(status)
-			for k,v in pairs(status) do
-				if k == 'thirst' then
-					thirst = v.getPercent()
-				end
-				if k == 'sanity' then
-					sanity = v.getPercent()
-				end
-				if k == 'energy' then
-					energy = v.getPercent()
-				end
-				if k == 'hunger' then
-					hunger = v.getPercent()
-				end
-			end
-		end)
-		Citizen.Wait(100)
-		Citizen.Wait(1000)
-		status = {
-			stress = tonumber(sanity),
-			oxygen = oxygen,
-			thirst = tonumber(thirst),
-			hunger = hunger,
-			energy = energy,
-			stamina = stamina
-		}
-		SendNUIMessage({
-			type = "setStatus",
-			content = status
-		})
-		print("Sending status")
-		Citizen.Wait(1000)
-	end
-end)
-
-Citizen.CreateThread(function()
 	Citizen.Wait(4000)
 	local l = 0
 	while true do
-		local wait = 4000
-		--setVoice()
 		ped = PlayerPedId()
-		PedCar = GetVehiclePedIsIn(ped)
 		vehicle = GetVehiclePedIsIn(ped)
 		if vehicle ~= nil and vehicle ~= 0 then
-			hp = GetVehicleEngineHealth(PedCar)
-			--speed = math.ceil(GetEntitySpeed(PedCar) * 3.6)
-			--rpm = GetVehicleCurrentRpm(PedCar)
-			gasolina = GetVehicleFuelLevel(PedCar)
-		end
-		Citizen.Wait(2000)
-	end
-end)
-
-Citizen.CreateThread(function()
-	while ESX == nil do
-		Citizen.Wait(2000)
-	end
-	while ped == nil do
-		Citizen.Wait(1000)
-	end
-	while true do
-		local sleep = 2000
-		if vehicle ~= nil and vehicle ~= 0 then
-			sleep = 22
-			rpm = GetVehicleCurrentRpm(vehicle)
-			speed = GetEntitySpeed(vehicle)
-		end
-		Citizen.Wait(sleep)
-	end
-end)
-
-Citizen.CreateThread(function()
-	while ESX == nil do
-		Citizen.Wait(2000)
-	end
-	while ped == nil do
-		Citizen.Wait(1000)
-	end
-	while true do
-		local sleep = 500
-		if vehicle ~= nil and vehicle ~= 0 then
-			sleep = 22
-
-			if rpm < 0.21 then
-			Citizen.Wait(122)
+			if not invehicle then
+			inVehicleFunctions()
+			Citizen.Wait(100)
 			end
-			if newrpm ~= rpm or newrpm == nil then
-				newrpm = rpm
+			invehicle = true
+			hp = GetVehicleEngineHealth(vehicle)
+			gasolina = GetVehicleFuelLevel(vehicle)
+			if uimove then
+				Citizen.Wait(1500)
 				SendNUIMessage({
-					type = "setRpm",
-					content = rpm
+					type = "setShow",
+					content = true
 				})
-				-- Citizen.Wait(22)
-				-- SendNUIMessage({
-				-- 	type = "setRpm",
-				-- 	content = rpm
-				-- })
-				-- Citizen.Wait(22)
-				-- SendNUIMessage({
-				-- 	type = "setRpm",
-				-- 	content = rpm
-				-- })
-				-- Citizen.Wait(22)
-				-- SendNUIMessage({
-				-- 	type = "setRpm",
-				-- 	content = rpm
-				-- })
 			end
+			uimove = false
+		else
+			invehicle = false
+			speed = 0
+			rpm = 0
+			marcha = 0
+			VehIndicatorLight = 0
+			DisplayRadar(false)
+			if not uimove then
+				Citizen.Wait(500)
+				SendNUIMessage({
+					type = "setShow",
+					content = false
+				})
+			end
+			uimove = true
 		end
-		Citizen.Wait(sleep)
-	end
-end)
-	
-
-Citizen.CreateThread(function()
-	while ESX == nil do
 		Citizen.Wait(2000)
 	end
-	while ped == nil do
-		Citizen.Wait(1000)
-	end
-	while true do
-		local sleep = 500
-		if vehicle ~= nil and vehicle ~= 0 then
-			sleep = 22
-			if rpm < 0.21 then
-			Citizen.Wait(111)
+end)
+
+--ASYNC FUNCTION CALL VEHICLE LOOPS
+function inVehicleFunctions()
+	Citizen.CreateThread(function()
+		while not invehicle do
+			Citizen.Wait(1) -- lets wait invehicle to = true
+		end
+		RpmandSpeedLoop()
+		NuiRpm()
+		NuiSpeed()
+		NuiCarhpandGas()
+		NuiDistancetoWaypoint()
+		NuiHeadlights()
+		NuiGear()
+		NuiMileAge()
+		NuiVehicleClock()
+	end)
+end
+
+function RpmandSpeedLoop()
+	Citizen.CreateThread(function()
+		while ESX == nil do
+			Citizen.Wait(2000)
+		end
+		while ped == nil do
+			Citizen.Wait(1000)
+		end
+		while invehicle do
+			local sleep = 2000
+			if vehicle ~= nil and vehicle ~= 0 then
+				sleep = 22
+				rpm = GetVehicleCurrentRpm(vehicle)
+				speed = GetEntitySpeed(vehicle)
 			end
-			if newspeed ~= speed or newspeed == nil then
-				newspeed = speed
-				SendNUIMessage({
-					type = "setSpeed",
-					content = speed
-				})
-				-- Citizen.Wait(22)
-				-- SendNUIMessage({
-				-- 	type = "setSpeed",
-				-- 	content = speed
-				-- })
-				-- Citizen.Wait(22)
-				-- SendNUIMessage({
-				-- 	type = "setSpeed",
-				-- 	content = speed
-				-- })
-				-- Citizen.Wait(22)
-				-- SendNUIMessage({
-				-- 	type = "setSpeed",
-				-- 	content = speed
-				-- })
+			Citizen.Wait(sleep)
+		end
+		TerminateThisThread()
+	end)
+end
+
+function NuiRpm()
+	Citizen.CreateThread(function()
+		while ESX == nil do
+			Citizen.Wait(2000)
+		end
+		while ped == nil do
+			Citizen.Wait(1000)
+		end
+		while invehicle do
+			local sleep = 2500
+			if vehicle ~= nil and vehicle ~= 0 then
+				sleep = 69
+				if rpm < 0.21 then
+				Citizen.Wait(122)
+				end
+				if newrpm ~= rpm or newrpm == nil then
+					newrpm = rpm
+					SendNUIMessage({
+						type = "setRpm",
+						content = rpm
+					})
+					Citizen.Wait(22)
+					SendNUIMessage({
+						type = "setRpm",
+						content = rpm
+					})
+					Citizen.Wait(22)
+					SendNUIMessage({
+						type = "setRpm",
+						content = rpm
+					})
+					Citizen.Wait(22)
+					SendNUIMessage({
+						type = "setRpm",
+						content = rpm
+					})
+				end
+			end
+			Citizen.Wait(sleep)
+		end
+		TerminateThisThread()
+	end)
+end
+
+function NuiSpeed()
+	Citizen.CreateThread(function()
+		while ESX == nil do
+			Citizen.Wait(2000)
+		end
+		while ped == nil do
+			Citizen.Wait(1000)
+		end
+		while invehicle do
+			local sleep = 2500
+			if vehicle ~= nil and vehicle ~= 0 then
+				sleep = 69
+				if rpm < 0.21 then
+				Citizen.Wait(111)
+				end
+				if newspeed ~= speed or newspeed == nil then
+					newspeed = speed
+					SendNUIMessage({
+						type = "setSpeed",
+						content = speed
+					})
+					Citizen.Wait(22)
+					SendNUIMessage({
+						type = "setSpeed",
+						content = speed
+					})
+					Citizen.Wait(22)
+					SendNUIMessage({
+						type = "setSpeed",
+						content = speed
+					})
+					Citizen.Wait(22)
+					SendNUIMessage({
+						type = "setSpeed",
+						content = speed
+					})
+				end
+			end
+			Citizen.Wait(sleep)
+		end
+		TerminateThisThread()
+	end)
+end
+
+function NuiCarhpandGas()
+	Citizen.CreateThread(function()
+		while ESX == nil do
+			Citizen.Wait(2000)
+		end
+		local newgas = nil
+		local newgear = nil
+		local vehealth = nil
+		local belt= nil
+		local wait = 2500
+		while invehicle do
+			if vehicle ~= nil and vehicle ~= 0 then
+				wait = 1200
+				if gasolina ~= newgas or newgas == nil then
+					SendNUIMessage({
+						type = "setFuelLevel",
+						content = gasolina
+					})
+					newgas = gasolina
+				end
+				if newcarhealth ~= hp or newcarhealth == nil then
+					SendNUIMessage({
+						hud = "setCarhp",
+						content = hp
+					})
+					newcarhealth = hp
+				end
+			end
+			Citizen.Wait(wait)
+		end
+		TerminateThisThread()
+	end)
+end
+
+function NuiDistancetoWaypoint()
+	--NUI DISTANCE to Waypoint
+	Citizen.CreateThread(function()
+		while invehicle do
+			local sleep = 2500
+			local ped = ped
+			local vehicle = vehicle
+			local waypoint = GetFirstBlipInfoId(8)
+			if vehicle ~= 0 and DoesBlipExist(waypoint) then
+				local coord = GetEntityCoords(ped, true)
+				local dis = #(coord - GetBlipCoords(waypoint))
+				if newdis ~= dis or newdis == nil then
+					newdis = dis
+					SendNUIMessage({
+					type = "setWaydistance",
+					content = dis
+					})
+				end
+			elseif vehicle ~=0 and not DoesBlipExist(waypoint) then
+				--if newdis ~= dis or newdis == nil then
+					newdis = 0
+					SendNUIMessage({
+					type = "setWaydistance",
+					content = 0
+					})
+				--end
+				Citizen.Wait(2500)
+			end
+			Citizen.Wait(sleep)
+		end
+		TerminateThisThread()
+	end)
+end
+
+function NuiHeadlights()
+	--NUI HEAD LIGHTS
+	Citizen.CreateThread(function()
+		while invehicle do
+			local sleep = 2500
+			local ped = ped
+			local vehicle = vehicle
+			if vehicle ~= nil and vehicle ~= 0 then
+				sleep = 500
+				local off,low,high = GetVehicleLightsState(vehicle)
+				if low == 1 and high == 0 then
+					light = 1
+				elseif high == 1 then
+					light = 2
+				else
+					light = 0
+				end
+				if newlight ~= light or newlight == nil then
+					newlight = light
+					SendNUIMessage({
+					type = "setHeadlights",
+					content = light
+					})
+				end
+			end
+			Citizen.Wait(sleep)
+		end
+		TerminateThisThread()
+	end)
+end
+
+function NuiGear()
+	--NUI GEAR STATUS
+	Citizen.CreateThread(function()
+		while invehicle do
+			local sleep = 2500
+			local ped = ped
+			local vehicle = vehicle
+			if vehicle ~= nil and vehicle ~= 0 then
+				sleep = 500
+				local gear = GetVehicleCurrentGear(vehicle)
+				if newgear ~= gear or newgear == nil then
+					newgear = gear
+					SendNUIMessage({
+					type = "setGear",
+					content = gear
+					})
+				end
+			end
+			Citizen.Wait(sleep)
+		end
+		TerminateThisThread()
+		print("GEAR LOOP ENDED")
+	end)
+end
+
+function NuiMileAge()
+	local lastve = nil
+	local savemile = false
+	local saveplate = nil
+	Citizen.CreateThread(function()
+		local count = 0
+		while not playerloaded and count < 3 do
+			Citizen.Wait(1000)
+			count = count + 1
+		end
+		if not playerloaded then
+			TriggerServerEvent("renzu_hud:getmile")
+		end
+		Citizen.Wait(5000)
+		while invehicle do
+			Citizen.Wait(2500)
+			local ped = ped
+			local vehicle = vehicle
+			local driver = GetPedInVehicleSeat(vehicle, -1)
+			if vehicle ~= nil and vehicle ~= 0 and IsPedInAnyVehicle(ped, false) and driver == ped then
+				local plate = tostring(GetVehicleNumberPlateText(vehicle))
+				local newPos = GetEntityCoords(ped)
+				savemile = true
+				lastve = GetVehiclePedIsIn(ped, false)
+				if plate ~= nil then
+					saveplate = string.match(GetVehicleNumberPlateText(vehicle), '%f[%d]%d[,.%d]*%f[%D]')
+					plate = saveplate
+					--if AdvStatsTable ~= nil and AdvStatsTable[plate] ~= nil then
+						if plate ~= nil and AdvStatsTable[plate] == nil then
+							AdvStatsTable[plate] = {}
+							AdvStatsTable[plate].plate = plate
+							AdvStatsTable[plate].mileage = 0
+						end
+						if plate ~= nil and AdvStatsTable[plate].plate == plate then
+							if oldPos == nil then
+								oldPos = newPos
+							end
+							local dist = #(newPos-oldPos)
+							if dist > 10.0 then
+								AdvStatsTable[plate].mileage = AdvStatsTable[plate].mileage+GetEntitySpeed(vehicle)*1/100
+								oldPos = newPos
+							end
+							--print(AdvStatsTable[plate].mileage)
+							if newmileage ~= AdvStatsTable[plate].mileage or newmileage == nil then
+								newmileage = AdvStatsTable[plate].mileage
+								SendNUIMessage({
+								type = "setMileage",
+								content = AdvStatsTable[plate].mileage
+								})
+							end
+						end
+					--end
+				end
+			elseif savemile and lastve ~= nil and saveplate ~= nil then
+				savemile = false
+				TriggerServerEvent('renzu_hud:savemile', tonumber(saveplate), AdvStatsTable[tostring(saveplate)])
+				Wait(1000)
+				lastve = nil
+				saveplate = nil
+			else
+				Wait(1000)
 			end
 		end
-		Citizen.Wait(sleep)
-	end
-end)
+		TerminateThisThread()
+	end)
+end
+
+function NuiVehicleClock()
+	Citizen.CreateThread(function()
+		while invehicle do
+			local sleep = 2000
+			if vehicle ~= nil and vehicle ~= 0 then
+				sleep = 1000
+				CalculateTimeToDisplay()
+				CalculateDateToDisplay()
+				timeformat()
+			end
+			Citizen.Wait(sleep)
+		end
+		TerminateThisThread()
+	end)
+end
 
 Citizen.CreateThread(function()
 	while ESX == nil do
-	Citizen.Wait(55)
+		Citizen.Wait(55)
 	end
     local currSpeed = 0.0
     local cruiseSpeed = 999.0
@@ -417,376 +662,80 @@ Citizen.CreateThread(function()
 	local newhealth = 1111
 	local newarmor = 1111
 	while ped == 0 or ped == nil do
-	Citizen.Wait(111)
-	ped = PlayerPedId()
+		Citizen.Wait(111)
+		ped = PlayerPedId()
 	end
 	while true do
 		local carwait = 2000
 		ped = PlayerPedId()
 		health = (GetEntityHealth(ped)-100)
 		armor = GetPedArmour(ped)
-		local x,y,z = table.unpack(GetEntityCoords(ped,false))
-		street = GetStreetNameFromHashKey(GetStreetNameAtCoord(x,y,z))
-		----print("hud1")
-		if vehicle ~= nil and vehicle ~= 0 then
-			carwait = 2500
-			inCar  = true
-			PedCar = GetVehiclePedIsIn(ped)
-			DisplayRadar(true)		
-		else	
-			inCar  = false
-			PedCar = 0
-			speed = 0
-			rpm = 0
-			marcha = 0
-			cruiseIsOn = false
-			VehIndicatorLight = 0
-			DisplayRadar(false)
-		end
 		if newarmor ~= armor or newarmor == nil then
-		SendNUIMessage({
-		hud = "setArmor",
-		content = armor
-		})
-		newarmor = armor
+			SendNUIMessage({
+				hud = "setArmor",
+				content = armor
+			})
+			newarmor = armor
 		end
 		if newhealth ~= health or newhealth == nil then
-		SendNUIMessage({
-		hud = "setHp",
-		content = health
-		})
-		newhealth = health
+			SendNUIMessage({
+				hud = "setHp",
+				content = health
+			})
+			newhealth = health
 		end
-		-- ----print(newhealth)
 		if newmic ~= voiceDisplay or newmic == nil then
-		SendNUIMessage({
-		type = "setMic",
-		content = voiceDisplay
-		})
-		newmic = voiceDisplay
-		end
-	Citizen.Wait(carwait)
-	end
-end)
-
-local uimove = false
-Citizen.CreateThread(function()
-	while ESX == nil do
-	Citizen.Wait(2000)
-	end
-	local newgas = nil
-	local newgear = nil
-	local vehealth = nil
-	local belt= nil
-	local wait = 1500
-	while true do
-		----print(inCar)
-		if vehicle ~= nil and vehicle ~= 0 and inCar then
-			wait = 500
-			inCar  = true
-			if gasolina ~= newgas or newgas == nil then
-				SendNUIMessage({
-					type = "setFuelLevel",
-					content = gasolina
-				})
-				newgas = gasolina
-			end
-			if newcarhealth ~= hp or newcarhealth == nil then
-				SendNUIMessage({
-					hud = "setCarhp",
-					content = hp
-				})
-				newcarhealth = hp
-			end
-			if uimove then
-			Citizen.Wait(1500)
 			SendNUIMessage({
-			type = "setShow",
-			content = true
-
+				type = "setMic",
+				content = voiceDisplay
 			})
-			end
-			uimove = false
-		else
-			wait = 2000
-			if not uimove then
-			Citizen.Wait(500)
+			newmic = voiceDisplay
+		end
+		Citizen.Wait(carwait)
+	end
+end)
+
+function SendNuiSeatBelt()
+	if vehicle ~= nil and vehicle ~= 0 then
+		if newbelt ~= belt or newbelt == nil then
+			newbelt = belt
 			SendNUIMessage({
-			type = "setShow",
-			content = false
+			type = "setBelt",
+			content = belt
 			})
-			end
-			uimove = true
 		end
-		Citizen.Wait(wait)
 	end
-end)
+end
 
---NUI RADIO STATION
+-- YOU NEED SEATBELT SYSTEM FOR RAGDOLL, THIS IS FOR KEYBINDS ONLY for UI
 Citizen.CreateThread(function()
-	while true do
-		local sleep = 500
-		local ped = ped
-		local vehicle = vehicle
-		local waypoint = GetFirstBlipInfoId(8)
-		if vehicle ~= 0 and DoesBlipExist(waypoint) then
-			local coord = GetEntityCoords(ped, true)
-			local dis = #(coord - GetBlipCoords(waypoint))
-			if newdis ~= dis or newdis == nil then
-				newdis = dis
-				SendNUIMessage({
-				type = "setWaydistance",
-				content = dis
-				})
-			end
-		elseif vehicle ~=0 and not DoesBlipExist(waypoint) then
-			--if newdis ~= dis or newdis == nil then
-				newdis = 0
-				SendNUIMessage({
-				type = "setWaydistance",
-				content = 0
-				})
-			--end
-			Citizen.Wait(2500)
-		end
-		Citizen.Wait(sleep)
-	end
+	RegisterKeyMapping('seatbelt', 'Car Seatbelt', 'keyboard', 'B')
 end)
 
---NUI HEAD LIGHTS
-Citizen.CreateThread(function()
-	while true do
-		local sleep = 500
-		local ped = ped
-		local vehicle = vehicle
-		local off,low,high = GetVehicleLightsState(PedCar)
-		if low == 1 and high == 0 then
-			light = 1
-		elseif high == 1 then
-			light = 2
-		else
-			light = 0
-		end
-		if vehicle ~= 0 then
-			if newlight ~= light or newlight == nil then
-				newlight = light
-				SendNUIMessage({
-				type = "setHeadlights",
-				content = light
-				})
-			end
-		end
-		Citizen.Wait(sleep)
+RegisterCommand('seatbelt', function()
+	if belt then
+		SetTimeout(1000,function()
+			belt = false
+		end)
+	else
+		SetTimeout(1000,function()
+			belt = true
+		end)
 	end
-end)
-
-Citizen.CreateThread(function()
-	while true do
-		ped = ped
-		--local car = GetVehiclePedIsIn(ped)
-		local cansleep = 2000
-		if vehicle ~= 0 then
-			cansleep = 6
-			if IsControlJustReleased(1,29) then
-				if belt then
-					SetTimeout(1000,function()
-						belt = false
-					end)
-				else
-					SetTimeout(1000,function()
-						belt = true
-					end)
-				end
-			end
-		end
-		Citizen.Wait(cansleep)
-	end
-end)
-
---NUI BELT STATUS
-Citizen.CreateThread(function()
-	while true do
-		local sleep = 2000
-		local ped = ped
-		local vehicle = vehicle
-		if vehicle ~= nil and vehicle ~= 0 then
-			if newbelt ~= belt or newbelt == nil then
-				newbelt = belt
-				SendNUIMessage({
-				type = "setBelt",
-				content = belt
-				})
-			end
-		end
-		Citizen.Wait(sleep)
-	end
-end)
-
---NUI GEAR STATUS
-Citizen.CreateThread(function()
-	while true do
-		local sleep = 500
-		local ped = ped
-		local vehicle = vehicle
-		if vehicle ~= nil and vehicle ~= 0 then
-			local gear = GetVehicleCurrentGear(vehicle)
-			if newgear ~= gear or newgear == nil then
-				newgear = gear
-				SendNUIMessage({
-				type = "setGear",
-				content = gear
-				})
-			end
-		end
-		Citizen.Wait(sleep)
-	end
-end)
-
--- MILEAGE
-local lastve = nil
-local savemile = false
-local saveplate = nil
-Citizen.CreateThread(function()
-	local count = 0
-	while not playerloaded and count < 3 do
-		Citizen.Wait(1000)
-		count = count + 1
-	end
-	if not playerloaded then
-		TriggerServerEvent("renzu_hud:getmile")
-	end
-	Citizen.Wait(5000)
-	while true do
-		Citizen.Wait(111)
-		local ped = ped
-		local vehicle = vehicle
-		local plate = tostring(GetVehicleNumberPlateText(vehicle))
-		local newPos = GetEntityCoords(ped)
-		local driver = GetPedInVehicleSeat(vehicle, -1)
-		if vehicle ~= nil and vehicle ~= 0 and IsPedInAnyVehicle(ped, false) and driver == ped then
-			savemile = true
-			lastve = GetVehiclePedIsIn(ped, false)
-			if plate ~= nil then
-				saveplate = string.match(GetVehicleNumberPlateText(vehicle), '%f[%d]%d[,.%d]*%f[%D]')
-				plate = saveplate
-				--if AdvStatsTable ~= nil and AdvStatsTable[plate] ~= nil then
-					if plate ~= nil and AdvStatsTable[plate] == nil then
-						AdvStatsTable[plate] = {}
-						AdvStatsTable[plate].plate = plate
-						AdvStatsTable[plate].mileage = 0
-					end
-					if plate ~= nil and AdvStatsTable[plate].plate == plate then
-						if oldPos == nil then
-							oldPos = newPos
-						end
-						local dist = #(newPos-oldPos)
-						if dist > 10.0 then
-							AdvStatsTable[plate].mileage = AdvStatsTable[plate].mileage+GetEntitySpeed(vehicle)*1/100
-							oldPos = newPos
-						end
-						--print(AdvStatsTable[plate].mileage)
-						if newmileage ~= AdvStatsTable[plate].mileage or newmileage == nil then
-							newmileage = AdvStatsTable[plate].mileage
-							SendNUIMessage({
-							type = "setMileage",
-							content = AdvStatsTable[plate].mileage
-							})
-						end
-					end
-				--end
-			end
-
-		elseif savemile and lastve ~= nil and saveplate ~= nil then
-			savemile = false
-			TriggerServerEvent('renzu_hud:savemile', tonumber(saveplate), AdvStatsTable[tostring(saveplate)])
-			Wait(1000)
-			lastve = nil
-			saveplate = nil
-		else
-			Wait(1000)
-		end
-	end
-end)
+	SendNuiSeatBelt()
+end, false)
 
 -- SIGNAL LIGHTS
 local left = false
 local right = false
 local hazard = false
 local state = false
-Citizen.CreateThread(function()
-	while true do
-		local sleep = 2000
-		local ped = ped
-		local vehicle = vehicle
-		if vehicle ~= 0 and vehicle ~= nil then
-			sleep = 6
-			if IsControlJustReleased(1,174) then
-				right = false
-				Citizen.Wait(100)
-				left = true
-				if GetVehicleIndicatorLights(vehicle) == 0 then
-					SetVehicleIndicatorLights(vehicle,1, true)
-				elseif GetVehicleIndicatorLights(vehicle) == 2 then
-					SetVehicleIndicatorLights(vehicle,0, false)
-					SetVehicleIndicatorLights(vehicle,1, true)
-				end
-			end
 
-			if IsControlJustReleased(1,175) then
-				left = false
-				Citizen.Wait(100)
-				right = true
-				if GetVehicleIndicatorLights(vehicle) == 0 then
-					SetVehicleIndicatorLights(vehicle,0, true)
-				elseif GetVehicleIndicatorLights(vehicle) == 1 then
-					SetVehicleIndicatorLights(vehicle,1, false)
-					SetVehicleIndicatorLights(vehicle,0, true)
-				end
-			end
-
-			if IsControlJustReleased(1,177) then
-				if GetVehicleIndicatorLights(vehicle) == 0 then
-					hazard = true
-					SetVehicleIndicatorLights(vehicle,0, true)
-					SetVehicleIndicatorLights(vehicle,1, true)
-				else
-					hazard = false
-					left = false
-					right = false
-					SetVehicleIndicatorLights(vehicle,0, false)
-					SetVehicleIndicatorLights(vehicle,1, false)
-				end
-			end
-			state = false
-			if not state and right then
-				state = 'right'
-			end
-			if not state and left then
-				state = 'left'
-			end
-			if hazard then
-				state = 'hazard'
-			end
-		end
-		Citizen.Wait(sleep)
-	end
-end)
-
---NUI SIGNAL LIGHTS
-Citizen.CreateThread(function()
-	while true do
-		local sleep = 100
-		local ped = ped
-		local vehicle = vehicle
-		Citizen.Wait(sleep)
+function sendsignaltoNUI()
+	--NUI SIGNAL LIGHTS
+	Citizen.CreateThread(function()
 		if vehicle ~= nil and vehicle ~= 0 then
-			-- if newsignal ~= GetVehicleIndicatorLights(vehicle) or newsignal == nil then
-			-- 	newsignal = GetVehicleIndicatorLights(vehicle)
-			-- 	SendNUIMessage({
-			-- 	type = "setSignal",
-			-- 	content = GetVehicleIndicatorLights(vehicle)
-			-- 	})
-			-- end
+			sleep = 100
 			while state ~= false do
 				SendNUIMessage({
 					type = "setSignal",
@@ -795,5 +744,97 @@ Citizen.CreateThread(function()
 				Citizen.Wait(500)
 			end
 		end
+	end)
+end
+
+RegisterCommand('left', function()
+	local ped = ped
+	local vehicle = vehicle
+	right = false
+	Citizen.Wait(100)
+	left = true
+	if GetVehicleIndicatorLights(vehicle) == 0 then
+		SetVehicleIndicatorLights(vehicle,1, true)
+	elseif GetVehicleIndicatorLights(vehicle) == 2 then
+		SetVehicleIndicatorLights(vehicle,0, false)
+		SetVehicleIndicatorLights(vehicle,1, true)
 	end
+
+	state = false
+	if not state and right then
+		state = 'right'
+	end
+	if not state and left then
+		state = 'left'
+	end
+	if hazard then
+		state = 'hazard'
+	end
+	sendsignaltoNUI()
+end, false)
+
+Citizen.CreateThread(function()
+	RegisterKeyMapping('left', 'Signal Left', 'keyboard', 'LEFT')
+end)
+
+RegisterCommand('right', function()
+	local ped = ped
+	local vehicle = vehicle
+	left = false
+	Citizen.Wait(100)
+	right = true
+	if GetVehicleIndicatorLights(vehicle) == 0 then
+		SetVehicleIndicatorLights(vehicle,0, true)
+	elseif GetVehicleIndicatorLights(vehicle) == 1 then
+		SetVehicleIndicatorLights(vehicle,1, false)
+		SetVehicleIndicatorLights(vehicle,0, true)
+	end
+
+	state = false
+	if not state and right then
+		state = 'right'
+	end
+	if not state and left then
+		state = 'left'
+	end
+	if hazard then
+		state = 'hazard'
+	end
+	sendsignaltoNUI()
+end, false)
+
+Citizen.CreateThread(function()
+	RegisterKeyMapping('right', 'Signal Right', 'keyboard', 'RIGHT')
+end)
+
+RegisterCommand('hazard', function()
+	local ped = ped
+	local vehicle = vehicle
+	if GetVehicleIndicatorLights(vehicle) == 0 then
+		hazard = true
+		SetVehicleIndicatorLights(vehicle,0, true)
+		SetVehicleIndicatorLights(vehicle,1, true)
+	else
+		hazard = false
+		left = false
+		right = false
+		SetVehicleIndicatorLights(vehicle,0, false)
+		SetVehicleIndicatorLights(vehicle,1, false)
+	end
+
+	state = false
+	if not state and right then
+		state = 'right'
+	end
+	if not state and left then
+		state = 'left'
+	end
+	if hazard then
+		state = 'hazard'
+	end
+	sendsignaltoNUI()
+end, false)
+
+Citizen.CreateThread(function()
+	RegisterKeyMapping('hazard', 'Signal Hazard', 'keyboard', 'BACK')
 end)
