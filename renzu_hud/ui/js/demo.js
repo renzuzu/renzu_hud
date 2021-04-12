@@ -129,6 +129,66 @@ function setShowstatus(bool) {
     }
 }
 
+function setRpm(percent) {
+    var rpm = (percent * 100);
+    //tacho = rpm * 0.01;
+    // const meters = document.querySelectorAll('svg[data-value] .meter');
+    // meters.forEach( (path) => {
+    //     let length = path.getTotalLength();
+    //     let value = rpm;
+    //     let to = length * ((100 - value) / 100);
+    //     //path.getBoundingClientRect();
+    //     path.style.strokeDashoffset = Math.max(0, to);
+    // });
+    rpm2 = rpm.toFixed(0) * 100
+    document.getElementById("rpmmeter").innerHTML = ""+rpm2+"";
+    var e = document.getElementById("rpmpath");
+    let length = e.getTotalLength();
+    let value = rpm;
+    let to = length * ((100 - value) / 100);
+    val = to / 1000
+    //console.log(to);
+    e.style.strokeDashoffset = to;
+    //$('#rpm').data('value', tacho); 
+}
+
+function setSpeed(s) {
+    var takbo = (s * 3.6)
+    var max = 350
+    var bilis = takbo / max
+    speed = bilis * 100;
+    takbo = takbo.toFixed(0)
+    if (takbo >= 100) {
+        document.getElementById("speedmeter").style.right = "330px";
+    } else if (takbo >= 10) {
+        document.getElementById("speedmeter").style.right = "340px";
+    } else {
+        document.getElementById("speedmeter").style.right = "350px";
+    }
+    document.getElementById("speedmeter").innerHTML = ""+takbo+"";
+    var e = document.getElementById("speedpath");
+    let length = e.getTotalLength();
+    let value = speed;
+    let to = length * ((100 - value) / 100);
+    val = to / 1000
+    console.log(speed);
+    e.style.strokeDashoffset = to;
+}
+
+var manual = false
+function setShow(value) {
+    //console.log(value)
+  if (value) {
+        $("#car").animate({
+            opacity: "1"
+        },400);
+  } else {
+    $("#car").animate({
+      opacity: "0"
+    },400);
+  }
+}
+
 //FUNCTIONS
 var evt = {
     setArmor,
@@ -136,6 +196,10 @@ var evt = {
     setMic,
     setStatus,
     setShowstatus,
+
+    //CAR
+    setRpm,
+    setSpeed,
 };
 setMic(2);
 
