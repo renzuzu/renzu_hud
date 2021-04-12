@@ -13,7 +13,7 @@ config = {
 		g = 222;
 		b = 1;
 		a = 0.9;
-		size = 1.25;
+		size = 1.0;
 	};
 
 	crossing = {
@@ -21,7 +21,7 @@ config = {
 		g = 233;
 		b = 233;
 		a = 0.9;
-		size = 1.3;
+		size = 1.1;
 	};
 
 	direction = {
@@ -35,7 +35,7 @@ config = {
 	position = {
 		-- 0:100
 		offsetX = 17;
-		offsetY = 2.0;
+		offsetY = 1.2;
 	};
 
 	vehicleCheck = true; -- Rather or not to display HUD when player(s) are inside a vehicle

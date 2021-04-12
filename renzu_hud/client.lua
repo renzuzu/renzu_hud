@@ -106,72 +106,6 @@ Citizen.CreateThread(function()
 	end
 end)
 
-Citizen.CreateThread(function()
-	while ESX == nil do
-	Citizen.Wait(55)
-	end
-    local currSpeed = 0.0
-    local cruiseSpeed = 999.0
-    local cruiseIsOn = false
-    local seatbeltIsOn = false
-	local newdate = nil
-	local newstreet = nil
-	local newmic = nil
-	local newhealth = 1111
-	local newarmor = 1111
-	while ped == 0 or ped == nil do
-	Citizen.Wait(111)
-	ped = PlayerPedId()
-	end
-	while true do
-		local carwait = 2000
-		ped = PlayerPedId()
-		health = (GetEntityHealth(ped)-100)
-		armor = GetPedArmour(ped)
-		local x,y,z = table.unpack(GetEntityCoords(ped,false))
-		street = GetStreetNameFromHashKey(GetStreetNameAtCoord(x,y,z))
-		----print("hud1")
-		if vehicle ~= nil and vehicle ~= 0 then
-			carwait = 2500
-			inCar  = true
-			PedCar = GetVehiclePedIsIn(ped)
-			DisplayRadar(true)		
-		else	
-			inCar  = false
-			PedCar = 0
-			speed = 0
-			rpm = 0
-			marcha = 0
-			cruiseIsOn = false
-			VehIndicatorLight = 0
-			DisplayRadar(false)
-		end
-		if newarmor ~= armor or newarmor == nil then
-		SendNUIMessage({
-		hud = "setArmor",
-		content = armor
-		})
-		newarmor = armor
-		end
-		if newhealth ~= health or newhealth == nil then
-		SendNUIMessage({
-		hud = "setHp",
-		content = health
-		})
-		newhealth = health
-		end
-		-- ----print(newhealth)
-		if newmic ~= voiceDisplay or newmic == nil then
-		SendNUIMessage({
-		type = "setMic",
-		content = voiceDisplay
-		})
-		newmic = voiceDisplay
-		end
-	Citizen.Wait(carwait)
-	end
-end)
-
 local playerNamesDist = 3
 local key_holding = false
 
@@ -328,5 +262,238 @@ Citizen.CreateThread(function()
 		})
 		print("Sending status")
 		Citizen.Wait(1000)
+	end
+end)
+
+Citizen.CreateThread(function()
+	Citizen.Wait(4000)
+	local l = 0
+	while true do
+		local wait = 4000
+		--setVoice()
+		ped = PlayerPedId()
+		PedCar = GetVehiclePedIsIn(ped)
+		vehicle = GetVehiclePedIsIn(ped)
+		if vehicle ~= nil and vehicle ~= 0 then
+			hp = GetVehicleEngineHealth(PedCar)
+			--speed = math.ceil(GetEntitySpeed(PedCar) * 3.6)
+			--rpm = GetVehicleCurrentRpm(PedCar)
+			gasolina = GetVehicleFuelLevel(PedCar)
+		end
+		Citizen.Wait(2000)
+	end
+end)
+
+Citizen.CreateThread(function()
+	while ESX == nil do
+		Citizen.Wait(2000)
+	end
+	while ped == nil do
+		Citizen.Wait(1000)
+	end
+	while true do
+		local sleep = 2000
+		if vehicle ~= nil and vehicle ~= 0 then
+			sleep = 22
+			rpm = GetVehicleCurrentRpm(vehicle)
+			speed = GetEntitySpeed(vehicle)
+		end
+		Citizen.Wait(sleep)
+	end
+end)
+
+Citizen.CreateThread(function()
+	while ESX == nil do
+		Citizen.Wait(2000)
+	end
+	while ped == nil do
+		Citizen.Wait(1000)
+	end
+	while true do
+		local sleep = 500
+		if vehicle ~= nil and vehicle ~= 0 then
+			sleep = 22
+
+			if rpm < 0.21 then
+			Citizen.Wait(122)
+			end
+			if newrpm ~= rpm or newrpm == nil then
+				newrpm = rpm
+				SendNUIMessage({
+					type = "setRpm",
+					content = rpm
+				})
+				-- Citizen.Wait(22)
+				-- SendNUIMessage({
+				-- 	type = "setRpm",
+				-- 	content = rpm
+				-- })
+				-- Citizen.Wait(22)
+				-- SendNUIMessage({
+				-- 	type = "setRpm",
+				-- 	content = rpm
+				-- })
+				-- Citizen.Wait(22)
+				-- SendNUIMessage({
+				-- 	type = "setRpm",
+				-- 	content = rpm
+				-- })
+			end
+		end
+		Citizen.Wait(sleep)
+	end
+end)
+	
+
+Citizen.CreateThread(function()
+	while ESX == nil do
+		Citizen.Wait(2000)
+	end
+	while ped == nil do
+		Citizen.Wait(1000)
+	end
+	while true do
+		local sleep = 500
+		if vehicle ~= nil and vehicle ~= 0 then
+			sleep = 22
+			if rpm < 0.21 then
+			Citizen.Wait(111)
+			end
+			if newspeed ~= speed or newspeed == nil then
+				newspeed = speed
+				SendNUIMessage({
+					type = "setSpeed",
+					content = speed
+				})
+				-- Citizen.Wait(22)
+				-- SendNUIMessage({
+				-- 	type = "setSpeed",
+				-- 	content = speed
+				-- })
+				-- Citizen.Wait(22)
+				-- SendNUIMessage({
+				-- 	type = "setSpeed",
+				-- 	content = speed
+				-- })
+				-- Citizen.Wait(22)
+				-- SendNUIMessage({
+				-- 	type = "setSpeed",
+				-- 	content = speed
+				-- })
+			end
+		end
+		Citizen.Wait(sleep)
+	end
+end)
+
+Citizen.CreateThread(function()
+	while ESX == nil do
+	Citizen.Wait(55)
+	end
+    local currSpeed = 0.0
+    local cruiseSpeed = 999.0
+    local cruiseIsOn = false
+    local seatbeltIsOn = false
+	local newdate = nil
+	local newstreet = nil
+	local newmic = nil
+	local newhealth = 1111
+	local newarmor = 1111
+	while ped == 0 or ped == nil do
+	Citizen.Wait(111)
+	ped = PlayerPedId()
+	end
+	while true do
+		local carwait = 2000
+		ped = PlayerPedId()
+		health = (GetEntityHealth(ped)-100)
+		armor = GetPedArmour(ped)
+		local x,y,z = table.unpack(GetEntityCoords(ped,false))
+		street = GetStreetNameFromHashKey(GetStreetNameAtCoord(x,y,z))
+		----print("hud1")
+		if vehicle ~= nil and vehicle ~= 0 then
+			carwait = 2500
+			inCar  = true
+			PedCar = GetVehiclePedIsIn(ped)
+			DisplayRadar(true)		
+		else	
+			inCar  = false
+			PedCar = 0
+			speed = 0
+			rpm = 0
+			marcha = 0
+			cruiseIsOn = false
+			VehIndicatorLight = 0
+			DisplayRadar(false)
+		end
+		if newarmor ~= armor or newarmor == nil then
+		SendNUIMessage({
+		hud = "setArmor",
+		content = armor
+		})
+		newarmor = armor
+		end
+		if newhealth ~= health or newhealth == nil then
+		SendNUIMessage({
+		hud = "setHp",
+		content = health
+		})
+		newhealth = health
+		end
+		-- ----print(newhealth)
+		if newmic ~= voiceDisplay or newmic == nil then
+		SendNUIMessage({
+		type = "setMic",
+		content = voiceDisplay
+		})
+		newmic = voiceDisplay
+		end
+	Citizen.Wait(carwait)
+	end
+end)
+
+local uimove = false
+Citizen.CreateThread(function()
+	while ESX == nil do
+	Citizen.Wait(2000)
+	end
+	local newgas = nil
+	local newgear = nil
+	local vehealth = nil
+	local belt= nil
+	local wait = 1500
+	while true do
+		----print(inCar)
+		if vehicle ~= nil and vehicle ~= 0 and inCar then
+			wait = 500
+			inCar  = true
+			-- if gasolina ~= newgas or newgas == nil then
+			-- SendNUIMessage({
+			-- type = "setFuelLevel",
+			-- content = gasolina
+			-- })
+			-- newgas = gasolina
+			-- end
+			if uimove then
+			Citizen.Wait(1500)
+			SendNUIMessage({
+			type = "setShow",
+			content = true
+
+			})
+			end
+			uimove = false
+		else
+			wait = 2000
+			if not uimove then
+			Citizen.Wait(500)
+			SendNUIMessage({
+			type = "setShow",
+			content = false
+			})
+			end
+			uimove = true
+		end
+		Citizen.Wait(wait)
 	end
 end)
