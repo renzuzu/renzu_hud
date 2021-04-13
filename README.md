@@ -25,3 +25,7 @@ Vehicle Health Meter
 
 #Maximum Optimization
 Client Side Lua and Javascript Side
+
+# Dependency
+ESX ( OPTIONAL )
+renzu_status ( Standalone Status Function )
