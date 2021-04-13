@@ -171,7 +171,7 @@ Citizen.CreateThread(function()
 			TriggerServerEvent("renzu_hud:getmile")
 		end)
 	else
-		RegisterNetEvent('playerSpawned’')
+		RegisterNetEvent('playerSpawned')
 		AddEventHandler('playerSpawned', function(spawn)
 			playerloaded = true
 			Citizen.Wait(2000)
@@ -225,6 +225,7 @@ end
 local show = false
 
 function updateStatus()
+	Myinfo()
 	local fetch = false
 	sanity = 0
 	thirst = 0
@@ -651,6 +652,48 @@ function NuiVehicleClock()
 		end
 		TerminateThisThread()
 	end)
+end
+
+function Myinfo()
+	if config.framework == 'ESX' then
+		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+		while ESX == nil do
+			TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+			Citizen.Wait(0)
+		end
+
+		while ESX.GetPlayerData().job == nil do
+			Citizen.Wait(0)
+		end
+
+		ESX.PlayerData = ESX.GetPlayerData()
+		xPlayer = ESX.GetPlayerData()
+		local money = 0
+		local black = 0
+		local bank = 0
+		for k,v in ipairs(ESX.PlayerData.accounts) do
+			if v.name == "money" then
+				money = v.money
+			end
+			if v.name == "black_money" then
+				black = v.money
+			end
+			if v.name == "bank" then
+				bank = v.money
+			end
+		end
+		info = {
+			job = xPlayer.job.name,
+			joblabel = xPlayer.job.grade_name,
+			money = money,
+			black = black,
+			bank = bank
+		}
+		SendNUIMessage({
+			hud = "setInfo",
+			content = info
+		})
+	end
 end
 
 Citizen.CreateThread(function()

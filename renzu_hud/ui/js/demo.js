@@ -94,17 +94,17 @@ function onMessageRecieved(event) {
         let zone = [item.zone.r, item.zone.g, item.zone.b, item.zone.a];
         let street = [item.street.r, item.street.g, item.street.b, item.street.a];
       
-        // jQuery #direction to proper color & font-size configuration
-        $('#direction').css('color', 'rgba('+direction.join(', ')+')');
-        $('#direction').css('font-size', item.direction.size + 'vh');
+        // // jQuery #direction to proper color & font-size configuration
+        // $('#direction').css('color', 'rgba('+direction.join(', ')+')');
+        // $('#direction').css('font-size', item.direction.size + 'vh');
 
-        // jQuery #street to proper color & font-size configuration
-        $('#street').css('color', 'rgba('+street.join(', ')+')');
-        $('#street').css('font-size', item.street.size + 'vh');
+        // // jQuery #street to proper color & font-size configuration
+        // $('#street').css('color', 'rgba('+street.join(', ')+')');
+        // $('#street').css('font-size', item.street.size + 'vh');
 
-        // jQuery #zone to proper color & font-size configuration
-        $('#zone').css('color', 'rgba('+zone.join(', ')+')');
-        $('#zone').css('font-size', item.zone.size + 'vh');
+        // // jQuery #zone to proper color & font-size configuration
+        // $('#zone').css('color', 'rgba('+zone.join(', ')+')');
+        // $('#zone').css('font-size', item.zone.size + 'vh');
 
         for (let i=0; i < borderDOM.length; i++) {
             borderDOM[i].style.color = 'rgba('+border.join(', ')+')';
@@ -156,7 +156,7 @@ function setSpeed(s) {
     speed = bilis * 100;
     takbo = takbo.toFixed(0)
     if (takbo >= 100) {
-        document.getElementById("speedmeter").style.right = "238px";
+        document.getElementById("speedmeter").style.right = "242px";
     } else if (takbo >= 10) {
         document.getElementById("speedmeter").style.right = "248px";
     } else {
@@ -284,6 +284,17 @@ function setGear(gear) {
     document.getElementById("gear").innerHTML = ''+gear+''
 }
 
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function setInfo(table) {
+    document.getElementById("joblabel").innerHTML = ''+table.job+': '+table.joblabel+''
+    document.getElementById("moneylabel").innerHTML = ''+numberWithCommas(table.money)+''
+    document.getElementById("black_moneylabel").innerHTML = ''+numberWithCommas(table.black)+''
+    document.getElementById("banklabel").innerHTML = ''+numberWithCommas(table.bank)+''
+}
+
 function setSignal(value) {
     if (value == 'hazard') {
         document.getElementById('left').style.opacity = '0.2'
@@ -336,6 +347,7 @@ var renzu_hud = {
     setTime,
     setGear,
     setSignal,
+    setInfo,
 
 };
 setMic(2);

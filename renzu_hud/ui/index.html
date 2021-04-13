@@ -114,13 +114,13 @@
             }
             
             .food-bar {
-              right: 90px;
+              right: 115px;
               max-width: 50%;
               position: absolute;
-              top: 140px;
-              height:19px;
-              width:140px;
-              z-index:1;
+              top: 440px;
+              height:17px;
+              width:105px;
+              z-index:1000;
             }
 
             .water-bar {
@@ -141,13 +141,13 @@
             }
             
             .water-bar {
-              right: 90px;
+              right: 115px;
               max-width: 50%;
               position: absolute;
-              top: 198px;
-              height:19px;
-              width:140px;
-              z-index:1;
+              top: 488px;
+              height:17px;
+              width:105px;
+              z-index:1000;
             }
 
             .stress-bar {
@@ -168,13 +168,13 @@
             }
             
             .stress-bar {
-              right: 90px;
+              right: 115px;
               max-width: 50%;
               position: absolute;
-              top: 258px;
-              height:19px;
-              width:120px;
-              z-index:1;
+              top: 528px;
+              height:15px;
+              width:105px;
+              z-index:1000;
             }
 
             .stamina-bar {
@@ -187,6 +187,7 @@
             }
             
             .stamina_progress {
+                z-index:1002;
                 transition: width 1s;
                 background: rgb(16, 255, 136);
                 color: #fff;
@@ -195,13 +196,13 @@
             }
             
             .stamina-bar {
-              right: 85px;
+              right: 115px;
               max-width: 50%;
               position: absolute;
-              top: 311px;
-              height:19px;
-              width:135px;
-              z-index:1;
+              top: 571px;
+              height:15px;
+              width:105px;
+              z-index:1000;
             }
 
             .oxygen-bar {
@@ -222,13 +223,13 @@
             }
             
             .oxygen-bar {
-              right: 90px;
+              right: 115px;
               max-width: 50%;
               position: absolute;
-              top: 371px;
-              height:19px;
-              width:135px;
-              z-index:1;
+              top: 621px;
+              height:15px;
+              width:105px;
+              z-index:1000;
             }
             .energy-bar {
               transform: rotate(180deg);
@@ -248,13 +249,13 @@
             }
             
             .energy-bar {
-              right: 90px;
+              right: 115px;
               max-width: 50%;
               position: absolute;
-              top: 425px;
-              height:19px;
-              width:135px;
-              z-index:1;
+              top: 665px;
+              height:15px;
+              width:105px;
+              z-index:1000;
             }
 
             .gas-bar {
@@ -312,7 +313,7 @@
 
     </head>
     <body style="margin:0; overflow:hidden;">
-        <div id="logo"><img style="border-radius: 50%;" id="pedface" src="https://cdn.discordapp.com/attachments/696445330480300032/790173823202099240/newnewnewlogos.png" height="70"></div>
+        <div id="logo"><img style="border-radius: 50%;" id="pedface" src="" height="70"></div>
     <style>
       #status {
         display:none;
@@ -321,52 +322,329 @@
         display: none;
       }
       #food {
-        z-index:1001;
+        z-index:1002;
         color:orange;
         position:absolute;
-        right:50px;
-        top:136px;
-        font-size:27px;
+        right:83px;
+        top:438px;
+        font-size:21px;
       }
       #water {
-        z-index:1001;
+        z-index:1002;
         color:rgb(19, 101, 255);
         position:absolute;
-        right:53px;
-        top:195px;
-        font-size:27px;
+        right:85px;
+        top:483px;
+        font-size:21px;
       }
       #stress {
-        z-index:1001;
+        z-index:1002;
         color:rgb(255, 16, 68);
         position:absolute;
-        right:49px;
-        top:252px;
-        font-size:27px;
+        right:82px;
+        top:527px;
+        font-size:21px;
       }
       #stamina {
-        z-index:1001;
+        z-index:1002;
         color:rgb(16, 255, 136);
         position:absolute;
-        right:51px;
-        top:308px;
-        font-size:27px;
+        right:84px;
+        top:572px;
+        font-size:21px;
       }
       #oxygen {
-        z-index:1001;
+        z-index:1002;
         color:rgb(15, 227, 255);
         position:absolute;
-        right:47px;
-        top:366px;
-        font-size:26px;
+        right:82px;
+        top:616px;
+        font-size:18px;
       }
       #energy {
-        z-index:1001;
+        z-index:1002;
         color:rgb(24, 20, 255);
         position:absolute;
-        right:47px;
-        top:423px;
+        right:81px;
+        top:660px;
+        font-size:18px;
+      }
+    </style>
+
+    <style>
+      #zone {
+        font-size: 1vh !important;
+        color:rgb(9,222,1,0.9);
+      }
+      svg path {
+        will-change: auto;
+        stroke-width: 20px;
+        #stroke: hsl(217, 100%, 49%);
+        #stroke-dasharray: 1;
+        stroke-miterlimit: round;
+        transition: stroke-dashoffset 1ms ease-in-out;
+      }
+      #speedmeter {
         font-size:25px;
+        color:#d8d2d4;
+        z-index:999;
+        position:absolute;
+        right:258px;
+        bottom:65px;
+      }
+      #rpmmeter {
+        font-size:17px;
+        color:#d8d2d4;
+        z-index:1002;
+        position:absolute;
+        right:37.5px;
+        bottom:65px;
+      }
+
+      #milediv {
+        font-size:8px;
+        color:#d8d2d4;
+        z-index:1002;
+        position:absolute;
+        right:130px;
+        bottom:19px;
+        font-weight: 50;
+        background-color: #00000077;
+        padding:4px 15px 4px 15px;
+      }
+
+      #mileage {
+        margin:0 20px 0 0;
+      }
+
+      #distancediv {
+        text-align: center;
+        font-size:7px;
+        color:#d8d2d4;
+        z-index:1002;
+        position:absolute;
+        right:139.3px;
+        overflow:hidden;
+        bottom:44px;
+        width:58px;
+        font-weight: 50;
+        background-color: #00000077;
+        padding:4px 5px 4px 5px;
+      }
+
+      #time {
+        margin:0 0 0 0;
+      }
+
+      #timediv {
+        text-align: center;
+        font-size:8px;
+        color:#d8d2d4;
+        z-index:1002;
+        position:absolute;
+        right:132px;
+        overflow:hidden;
+        bottom:139.5px;
+        width:72px;
+        font-weight: 50;
+        padding:4px 5px 4px 5px;
+      }
+
+      #gear {
+        margin:0 0 0 0;
+      }
+
+      #geardiv {
+        text-align: center;
+        font-size:8px;
+        color:#d8d2d4;
+        z-index:1002;
+        position:absolute;
+        right:30px;
+        overflow:hidden;
+        bottom:45.5px;
+        width:72px;
+        font-weight: 50;
+        padding:4px 5px 4px 5px;
+      }
+
+      #distance {
+        margin:0 20px 0 0;
+      }
+
+      #offlight {
+        display:none;
+        z-index:1001;
+        position: absolute;
+        /* bottom:105px;
+        right:260px; */
+        bottom:85px;
+        right:190px;
+      }
+      #offlightclip {
+        position: absolute;
+        width:50px;
+        clip: rect(0, 20px, 18px, 0);
+        /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
+      }
+      #onlight {
+        display:none;
+        z-index:1001;
+        position: absolute;
+        bottom:85px;
+        right:220px;
+      }
+      #onlightclip {
+        position: absolute;
+        width:50px;
+        clip: rect(0, 50px, 18px, 20px);
+        /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
+      }
+      #highlight {
+        display:none;
+        z-index:1001;
+        position: absolute;
+        bottom:150px;
+        right:226px;
+      }
+      #highlightclip {
+        position: absolute;
+        width:50px;
+        clip: rect(66px, 50px, 80px, 20px);
+        /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
+      }
+
+      #seatbelt {
+        display:none;
+        z-index:1001;
+        position: absolute;
+        bottom:214px;
+        right:190px;
+      }
+      #seatbeltclip {
+        position: absolute;
+        width:50px;
+        clip: rect(126px, 50px, 150px, 20px);
+        /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
+      }
+
+      #onseatbelt {
+        display:none;
+        z-index:1001;
+        position: absolute;
+        bottom:214.5px;
+        right:160px;
+      }
+      #onseatbeltclip {
+        position: absolute;
+        width:50px;
+        clip: rect(126px, 21px, 152px, 0);
+        /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
+      }
+
+      #left {
+        opacity:0.2;
+        color:rgb(255, 255, 255);
+        font-size:30px;
+        z-index:999;
+        position:absolute;
+        right:215px;
+        bottom:130px;
+      }
+
+      #right {
+        opacity:0.2;
+        color:rgb(255, 255, 255);
+        font-size:30px;
+        z-index:999;
+        position:absolute;
+        right:95px;
+        bottom:130px;
+      }
+
+      #job {
+        z-index:1001;
+        color:rgb(231, 231, 231);
+        position:absolute;
+        right:220px;
+        top:162px;
+        font-size:27px;
+      }
+      #joblabel {
+        text-align: center;
+        z-index:1001;
+        color:rgb(231, 231, 231);
+        position:absolute;
+        right:90px;
+        top:172px;
+        font-size:9px;
+      }
+
+      #money {
+        z-index:1001;
+        color:rgb(231, 231, 231);
+        position:absolute;
+        right:220px;
+        top:212px;
+        font-size:27px;
+      }
+      #moneylabel {
+        z-index:1001;
+        color:rgb(231, 231, 231);
+        position:absolute;
+        right:90px;
+        top:222px;
+        font-size:12px;
+      }
+
+      #black_money {
+        z-index:1001;
+        color:rgb(231, 231, 231);
+        position:absolute;
+        right:220px;
+        top:268px;
+        font-size:27px;
+      }
+      #black_moneylabel {
+        z-index:1001;
+        color:rgb(231, 231, 231);
+        position:absolute;
+        right:90px;
+        top:278px;
+        font-size:12px;
+      }
+
+      #bank {
+        z-index:1001;
+        color:rgb(231, 231, 231);
+        position:absolute;
+        right:217px;
+        top:322px;
+        font-size:21px;
+      }
+      #banklabel {
+        z-index:1001;
+        color:rgb(231, 231, 231);
+        position:absolute;
+        right:90px;
+        top:332px;
+        font-size:12px;
+      }
+      #info {
+        z-index:1001;
+        color:rgb(231, 231, 231);
+        position:absolute;
+        right:128px;
+        top:116px;
+        font-size:10px;
+      }
+      #stats {
+        z-index:1001;
+        color:rgb(231, 231, 231);
+        position:absolute;
+        right:120px;
+        top:387px;
+        font-size:10px;
       }
     </style>
     <div>
@@ -379,7 +657,22 @@
       <i id="stamina" class="fad fa-running"></i>
       <i id="oxygen" class="fad fa-lungs"></i>
       <i id="energy" class="fad fa-bed"></i>
-      <img style="z-index:999;position:absolute;right:20px;top:120px;opacity:1" src="img/ui.png" />
+      <img style="z-index:999;position:absolute;right:25px;top:380px;opacity:0.9;width:260px;height:350px;" src="img/rpui.png" />
+      <img style="z-index:1001;position:absolute;right:60px;top:425px;opacity:1;height:270px;" src="img/ui.png" />
+
+      <div id="rpui">
+        <i id="job" class="far fa-user-hard-hat"></i>
+        <div id="joblabel">Meralco: Employee</div>
+        <i id="money" class="fad fa-wallet"></i>
+        <div id="moneylabel">1,000,000</div>
+        <i id="black_money" class="fad fa-box-usd"></i>
+        <div id="black_moneylabel">1,000,000</div>
+        <i id="bank" class="fad fa-money-check"></i>
+        <div id="banklabel">100,000,000</div>
+        <img style="z-index:999;position:absolute;right:25px;top:110px;opacity:0.8;width:260px;height:280px;" src="img/rpui.png" />
+        <div id="info">My Info:</div>
+        <div id="stats">My Status:</div>
+      </div>
     </div>
 
     <div id="uibar">
@@ -434,7 +727,7 @@
       </div>
   </div>
 
-      <div class="mic">
+      <div class="mic" style="display:none;">
         <small id="mic-radio"><i class="fas fa-headphones"></i></small>
         <span id="mic-color" class="azul"></span>
       </div>
@@ -443,205 +736,16 @@
       <div id="location">
         <div id="container">
           <section>
-            <span id="border">|</span>
-            <h4 id="direction"></h4>
-            <span id="border">|</span>
+            <span id="border" style="font-size:2.5vh !important; color:rgba(255, 233, 233, 0.65) !important">|</span>
+            <h4 id="direction" style="font-size:2.5vh !important; color:rgba(255, 233, 233, 0.9) !important"></h4>
+            <span id="border" style="font-size:2.5vh !important; color:rgba(255, 233, 233, 0.65) !important">|</span>
           </section>
-          
           <div>
             <p id="zone"></p>
-            <p id="street"></p>
+            <p id="street" style="font-size:1.1vh !important; color:rgba(255, 233, 233, 0.9) !important"></p>
           </div>
         </div>
       </div>
-
-      <style>
-          svg path {
-            will-change: auto;
-            stroke-width: 20px;
-            #stroke: hsl(217, 100%, 49%);
-            #stroke-dasharray: 1;
-            stroke-miterlimit: round;
-            transition: stroke-dashoffset 1ms ease-in-out;
-          }
-          #speedmeter {
-            font-size:30px;
-            color:#d8d2d4;
-            z-index:999;
-            position:absolute;
-            right:258px;
-            bottom:55px;
-          }
-          #rpmmeter {
-            font-size:17px;
-            color:#d8d2d4;
-            z-index:1002;
-            position:absolute;
-            right:37.5px;
-            bottom:65px;
-          }
-
-          #milediv {
-            font-size:8px;
-            color:#d8d2d4;
-            z-index:1002;
-            position:absolute;
-            right:130px;
-            bottom:19px;
-            font-weight: 50;
-            background-color: #00000077;
-            padding:4px 15px 4px 15px;
-          }
-
-          #mileage {
-            margin:0 20px 0 0;
-          }
-
-          #distancediv {
-            text-align: center;
-            font-size:7px;
-            color:#d8d2d4;
-            z-index:1002;
-            position:absolute;
-            right:139.3px;
-            overflow:hidden;
-            bottom:44px;
-            width:58px;
-            font-weight: 50;
-            background-color: #00000077;
-            padding:4px 5px 4px 5px;
-          }
-
-          #time {
-            margin:0 0 0 0;
-          }
-
-          #timediv {
-            text-align: center;
-            font-size:8px;
-            color:#d8d2d4;
-            z-index:1002;
-            position:absolute;
-            right:132px;
-            overflow:hidden;
-            bottom:139.5px;
-            width:72px;
-            font-weight: 50;
-            padding:4px 5px 4px 5px;
-          }
-
-          #gear {
-            margin:0 0 0 0;
-          }
-
-          #geardiv {
-            text-align: center;
-            font-size:8px;
-            color:#d8d2d4;
-            z-index:1002;
-            position:absolute;
-            right:30px;
-            overflow:hidden;
-            bottom:45.5px;
-            width:72px;
-            font-weight: 50;
-            padding:4px 5px 4px 5px;
-          }
-
-          #distance {
-            margin:0 20px 0 0;
-          }
-
-          #offlight {
-            display:none;
-            z-index:1001;
-            position: absolute;
-            /* bottom:105px;
-            right:260px; */
-            bottom:85px;
-            right:190px;
-          }
-          #offlightclip {
-            position: absolute;
-            width:50px;
-            clip: rect(0, 20px, 18px, 0);
-            /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
-          }
-          #onlight {
-            display:none;
-            z-index:1001;
-            position: absolute;
-            bottom:85px;
-            right:220px;
-          }
-          #onlightclip {
-            position: absolute;
-            width:50px;
-            clip: rect(0, 50px, 18px, 20px);
-            /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
-          }
-          #highlight {
-            display:none;
-            z-index:1001;
-            position: absolute;
-            bottom:150px;
-            right:226px;
-          }
-          #highlightclip {
-            position: absolute;
-            width:50px;
-            clip: rect(66px, 50px, 80px, 20px);
-            /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
-          }
-
-          #seatbelt {
-            display:none;
-            z-index:1001;
-            position: absolute;
-            bottom:214px;
-            right:190px;
-          }
-          #seatbeltclip {
-            position: absolute;
-            width:50px;
-            clip: rect(126px, 50px, 150px, 20px);
-            /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
-          }
-
-          #onseatbelt {
-            display:none;
-            z-index:1001;
-            position: absolute;
-            bottom:214.5px;
-            right:160px;
-          }
-          #onseatbeltclip {
-            position: absolute;
-            width:50px;
-            clip: rect(126px, 21px, 152px, 0);
-            /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
-          }
-
-          #left {
-            opacity:0.2;
-            color:rgb(255, 255, 255);
-            font-size:30px;
-            z-index:999;
-            position:absolute;
-            right:215px;
-            bottom:130px;
-          }
-
-          #right {
-            opacity:0.2;
-            color:rgb(255, 255, 255);
-            font-size:30px;
-            z-index:999;
-            position:absolute;
-            right:95px;
-            bottom:130px;
-          }
-      </style>
 
       <div id="car" style="">
           <img style="z-index:999;position:absolute;right:-50px;bottom:-61px;opacity:0.95;height:280px" src="img/car.png" />
