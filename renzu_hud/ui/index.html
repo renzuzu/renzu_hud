@@ -274,12 +274,12 @@
             }
             
             .gas-bar {
-              right: 190px;
+              right: 139px;
               max-width: 50%;
               position: absolute;
-              bottom: 148px;
+              bottom: 117px;
               height:4px;
-              width:80px;
+              width:61px;
               z-index:-1;
             }
 
@@ -300,12 +300,12 @@
             }
             
             .carhealth-bar {
-              right: 200px;
+              right: 147px;
               max-width: 50%;
               position: absolute;
-              bottom: 118px;
-              height:4px;
-              width:60px;
+              bottom: 93px;
+              height:5px;
+              width:42px;
               z-index:-1;
             }
             </style>
@@ -465,32 +465,32 @@
             transition: stroke-dashoffset 1ms ease-in-out;
           }
           #speedmeter {
-            font-size:35px;
+            font-size:30px;
             color:#d8d2d4;
             z-index:999;
             position:absolute;
-            right:350px;
-            bottom:75px;
+            right:258px;
+            bottom:55px;
           }
           #rpmmeter {
-            font-size:20px;
+            font-size:17px;
             color:#d8d2d4;
             z-index:1002;
             position:absolute;
-            right:70px;
-            bottom:80px;
+            right:37.5px;
+            bottom:65px;
           }
 
           #milediv {
-            font-size:10px;
+            font-size:8px;
             color:#d8d2d4;
             z-index:1002;
             position:absolute;
-            right:190px;
-            bottom:23px;
+            right:130px;
+            bottom:19px;
             font-weight: 50;
             background-color: #00000077;
-            padding:4px 17px 4px 17px;
+            padding:4px 15px 4px 15px;
           }
 
           #mileage {
@@ -499,14 +499,14 @@
 
           #distancediv {
             text-align: center;
-            font-size:10px;
+            font-size:7px;
             color:#d8d2d4;
             z-index:1002;
             position:absolute;
-            right:196px;
+            right:139.3px;
             overflow:hidden;
-            bottom:55px;
-            width:72px;
+            bottom:44px;
+            width:58px;
             font-weight: 50;
             background-color: #00000077;
             padding:4px 5px 4px 5px;
@@ -518,13 +518,13 @@
 
           #timediv {
             text-align: center;
-            font-size:10px;
+            font-size:8px;
             color:#d8d2d4;
             z-index:1002;
             position:absolute;
-            right:196px;
+            right:132px;
             overflow:hidden;
-            bottom:178px;
+            bottom:139.5px;
             width:72px;
             font-weight: 50;
             padding:4px 5px 4px 5px;
@@ -536,13 +536,13 @@
 
           #geardiv {
             text-align: center;
-            font-size:10px;
+            font-size:8px;
             color:#d8d2d4;
             z-index:1002;
             position:absolute;
-            right:60px;
+            right:30px;
             overflow:hidden;
-            bottom:58px;
+            bottom:45.5px;
             width:72px;
             font-weight: 50;
             padding:4px 5px 4px 5px;
@@ -556,8 +556,10 @@
             display:none;
             z-index:1001;
             position: absolute;
-            bottom:105px;
-            right:260px;
+            /* bottom:105px;
+            right:260px; */
+            bottom:85px;
+            right:190px;
           }
           #offlightclip {
             position: absolute;
@@ -569,8 +571,8 @@
             display:none;
             z-index:1001;
             position: absolute;
-            bottom:105px;
-            right:290px;
+            bottom:85px;
+            right:220px;
           }
           #onlightclip {
             position: absolute;
@@ -582,8 +584,8 @@
             display:none;
             z-index:1001;
             position: absolute;
-            bottom:170px;
-            right:290px;
+            bottom:150px;
+            right:226px;
           }
           #highlightclip {
             position: absolute;
@@ -596,8 +598,8 @@
             display:none;
             z-index:1001;
             position: absolute;
-            bottom:234px;
-            right:260px;
+            bottom:214px;
+            right:190px;
           }
           #seatbeltclip {
             position: absolute;
@@ -610,8 +612,8 @@
             display:none;
             z-index:1001;
             position: absolute;
-            bottom:234px;
-            right:228px;
+            bottom:214.5px;
+            right:160px;
           }
           #onseatbeltclip {
             position: absolute;
@@ -626,8 +628,8 @@
             font-size:30px;
             z-index:999;
             position:absolute;
-            right:290px;
-            bottom:165px;
+            right:215px;
+            bottom:130px;
           }
 
           #right {
@@ -636,20 +638,20 @@
             font-size:30px;
             z-index:999;
             position:absolute;
-            right:140px;
-            bottom:165px;
+            right:95px;
+            bottom:130px;
           }
       </style>
 
       <div id="car" style="">
-          <img style="z-index:999;position:absolute;right:-50px;bottom:-81px;opacity:0.95;height:360px" src="img/car.png" />
-          <svg id="rpm" style="z-index:999;position:absolute;right:-1px;bottom:13px;opacity:0.65;height:170px;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+          <img style="z-index:999;position:absolute;right:-50px;bottom:-61px;opacity:0.95;height:280px" src="img/car.png" />
+          <svg id="rpm" style="z-index:999;position:absolute;right:-34px;bottom:12px;opacity:0.65;height:132px;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
             <path class="bg" stroke="#ffffff0" d="M41 149.5a77 77 0 1 1 117.93 0"  fill="none"/>
             <path id="rpmpath" class="meter" stroke="#09c" d="M41 149.5a77 77 0 1 1 117.93 0" fill="none" style="width:10%;" stroke-dasharray="350" stroke-dashoffset="350"/>
           </svg>
           <div id="rpmmeter">1000</div>
           
-          <svg id="speed" style="z-index:999;position:absolute;right:263px;bottom:13px;opacity:0.65;height:170px;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+          <svg id="speed" style="z-index:999;position:absolute;right:171px;bottom:12px;opacity:0.65;height:132px;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
             <path class="bg" stroke="#ffffff0" d="M41 149.5a77 77 0 1 1 117.93 0"  fill="none"/>
             <path id="speedpath" class="meter" stroke="#09c" d="M41 149.5a77 77 0 1 1 117.93 0" fill="none" style="width:10%;" stroke-dasharray="350" stroke-dashoffset="350"/>
           </svg>  

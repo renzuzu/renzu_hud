@@ -1,5 +1,5 @@
 config = {
-	-- Customization options
+	-- STREET LOCATION Customization options
 	border = {
 		r = 255;
 		g = 255;
@@ -40,3 +40,53 @@ config = {
 
 	vehicleCheck = true; -- Rather or not to display HUD when player(s) are inside a vehicle
 }
+
+config.framework = 'ESX' -- ESX | VRP | QSHIT | STANDALONE
+--CHANGE ACCORDING TO YOUR STATUS ESX STATUS OR ANY STATUS MOD
+config.status = {
+	'energy',
+	'thirst',
+	'sanity',
+	'hunger'
+}
+
+config.keybinds = {
+	--TOGGLE STATUS
+	showstatus = 'INSERT',
+	--UI VOICE
+	voip = 'Z',
+	--signal lights
+	signal_left = 'LEFT',
+	signal_right = 'RIGHT',
+	signal_hazard = 'BACK',
+	-- seatbelt
+	car_seatbelt = 'B',
+}
+
+config.commands = {
+	--TOGGLE STATUS
+	showstatus = 'showstatus',
+	--UI VOICE
+	voip = 'voice',
+	--signal lights
+	signal_left = 'left',
+	signal_right = 'right',
+	signal_hazard = 'hazard',
+	-- seatbelt
+	car_seatbelt = 'seatbelt',
+}
+
+--OPTIMIZATION
+-- DONT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING!
+config.uitop_sleep = 2000
+config.gear_sleep = 700
+config.lights_sleep = 1000
+config.direction_sleep = 2500
+config.NuiCarhpandGas_sleep = 1500
+config.car_mainloop_sleep = 2000
+config.rpm_speed_loop = 22
+config.idle_rpm_speed_sleep = 111
+config.Rpm_sleep = 111
+config.Rpm_sleep_2 = 22
+config.Speed_sleep = 111
+config.Speed_sleep_2 = 22

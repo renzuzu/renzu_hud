@@ -156,11 +156,11 @@ function setSpeed(s) {
     speed = bilis * 100;
     takbo = takbo.toFixed(0)
     if (takbo >= 100) {
-        document.getElementById("speedmeter").style.right = "330px";
+        document.getElementById("speedmeter").style.right = "238px";
     } else if (takbo >= 10) {
-        document.getElementById("speedmeter").style.right = "340px";
+        document.getElementById("speedmeter").style.right = "248px";
     } else {
-        document.getElementById("speedmeter").style.right = "350px";
+        document.getElementById("speedmeter").style.right = "258px";
     }
     document.getElementById("speedmeter").innerHTML = ""+takbo+"";
     var e = document.getElementById("speedpath");

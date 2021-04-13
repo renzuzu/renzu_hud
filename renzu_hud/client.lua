@@ -1,22 +1,26 @@
 ESX = nil
 Citizen.CreateThread(function()
-	while ESX == nil do
-		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
-		Citizen.Wait(0)
-	end
+	if config.framework == 'ESX' then
+		while ESX == nil do
+			TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+			Citizen.Wait(0)
+		end
 
-	while ESX.GetPlayerData().job == nil do
-		Citizen.Wait(0)
-	end
+		while ESX.GetPlayerData().job == nil do
+			Citizen.Wait(0)
+		end
 
-	ESX.PlayerData = ESX.GetPlayerData()
-	xPlayer = ESX.GetPlayerData()
-	Citizen.Wait(5000)
+		ESX.PlayerData = ESX.GetPlayerData()
+		xPlayer = ESX.GetPlayerData()
+		Citizen.Wait(5000)
+	else
+		ESX = true
+	end
 end)
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- VARIABLES
 -----------------------------------------------------------------------------------------------------------------------------------------
-local AdvStatsTable = {}
+local veh_stats = {}
 local date = "00:00"
 local playerloaded = false
 local manual = false
@@ -122,7 +126,7 @@ local particleslight = {}
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- VOICE FUNC
 -----------------------------------------------------------------------------------------------------------------------------------------
-RegisterCommand('voice', function()
+RegisterCommand(config.commands['voip'], function()
     if proximity == 3.0 then
 		voiceDisplay = 1
 		proximity = 10.0
@@ -134,10 +138,14 @@ RegisterCommand('voice', function()
 		proximity = 3.0
 	end
 	setVoice()
+	SendNUIMessage({
+		type = "setMic",
+		content = voiceDisplay
+	})
 end, false)
 
 Citizen.CreateThread(function()
-	RegisterKeyMapping('voice', 'Voice Proximity', 'keyboard', 'Z')
+	RegisterKeyMapping(config.commands['voip'], 'Voice Proximity', 'keyboard', config.keybinds['voip'])
 end)
 
 local newfreq = nil
@@ -154,12 +162,22 @@ end)
 
 local pedshot = false
 
-RegisterNetEvent('esx:playerLoaded')
-AddEventHandler('esx:playerLoaded', function(xPlayer)
-	--ESX.PlayerData = xPlayer
-	playerloaded = true
-	Citizen.Wait(2000)
-	TriggerServerEvent("renzu_hud:getmile")
+Citizen.CreateThread(function()
+	if config.framework == 'ESX' then
+		RegisterNetEvent('esx:playerLoaded')
+		AddEventHandler('esx:playerLoaded', function(xPlayer)
+			playerloaded = true
+			Citizen.Wait(2000)
+			TriggerServerEvent("renzu_hud:getmile")
+		end)
+	else
+		RegisterNetEvent('playerSpawned’')
+		AddEventHandler('playerSpawned', function(spawn)
+			playerloaded = true
+			Citizen.Wait(2000)
+			TriggerServerEvent("renzu_hud:getmile")	
+		end)
+	end
 end)
 
 
@@ -194,26 +212,15 @@ function getawsomeface()
 		headshotTxd = GetPedheadshotTxdString(tempHandle)
 		headshot = headshotTxd
 	end
-	print(tempHandle)
-	print(tempHandle)
-	print(tempHandle)
-	print(tempHandle)
 
 	return headshotTxd
 end
 
 function ClearPedHeadshots()
 		if headshot ~= nil or headshot ~= 0 then
-        UnregisterPedheadshot(headshot)
+        	UnregisterPedheadshot(headshot)
 		end
 end
-
-local statuses = {
-	'energy',
-	'thirst',
-	'sanity',
-	'hunger'
-}
 
 local show = false
 
@@ -225,7 +232,7 @@ function updateStatus()
 	oxygen = GetPlayerUnderwaterTimeRemaining(PlayerId()) * 10
 	energy = 0
 	stamina = 100 - GetPlayerSprintStaminaRemaining(PlayerId())
-	TriggerEvent('esx_status:getStatusm', statuses, function(status)
+	TriggerEvent('esx_status:getStatusm', config.status, function(status)
 		for k,v in pairs(status) do
 			if k == 'thirst' then
 				thirst = v.getPercent()
@@ -258,7 +265,7 @@ function updateStatus()
 		content = status
 	})
 end
-RegisterCommand('showstatus', function()
+RegisterCommand(config.commands['showstatus'], function()
 	show = not show
 	updateStatus()
     PlaySoundFrontend(PlayerId(), "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", true )
@@ -269,7 +276,7 @@ RegisterCommand('showstatus', function()
 end, false)
 
 Citizen.CreateThread(function()
-	RegisterKeyMapping('showstatus', 'HUD Status UI', 'keyboard', 'INSERT')
+	RegisterKeyMapping(config.commands['showstatus'], 'HUD Status UI', 'keyboard', config.keybinds['showstatus'])
 end)
 
 Citizen.CreateThread(function()
@@ -280,8 +287,8 @@ Citizen.CreateThread(function()
 		vehicle = GetVehiclePedIsIn(ped)
 		if vehicle ~= nil and vehicle ~= 0 then
 			if not invehicle then
-			inVehicleFunctions()
-			Citizen.Wait(100)
+				inVehicleFunctions()
+				Citizen.Wait(100)
 			end
 			invehicle = true
 			hp = GetVehicleEngineHealth(vehicle)
@@ -310,7 +317,7 @@ Citizen.CreateThread(function()
 			end
 			uimove = true
 		end
-		Citizen.Wait(2000)
+		Citizen.Wait(config.car_mainloop_sleep)
 	end
 end)
 
@@ -343,7 +350,7 @@ function RpmandSpeedLoop()
 		while invehicle do
 			local sleep = 2000
 			if vehicle ~= nil and vehicle ~= 0 then
-				sleep = 22
+				sleep = config.rpm_speed_loop
 				rpm = GetVehicleCurrentRpm(vehicle)
 				speed = GetEntitySpeed(vehicle)
 			end
@@ -364,9 +371,9 @@ function NuiRpm()
 		while invehicle do
 			local sleep = 2500
 			if vehicle ~= nil and vehicle ~= 0 then
-				sleep = 69
+				sleep = config.Rpm_sleep
 				if rpm < 0.21 then
-				Citizen.Wait(122)
+				Citizen.Wait(config.idle_rpm_speed_sleep)
 				end
 				if newrpm ~= rpm or newrpm == nil then
 					newrpm = rpm
@@ -374,17 +381,17 @@ function NuiRpm()
 						type = "setRpm",
 						content = rpm
 					})
-					Citizen.Wait(22)
+					Citizen.Wait(config.Rpm_sleep_2)
 					SendNUIMessage({
 						type = "setRpm",
 						content = rpm
 					})
-					Citizen.Wait(22)
+					Citizen.Wait(config.Rpm_sleep_2)
 					SendNUIMessage({
 						type = "setRpm",
 						content = rpm
 					})
-					Citizen.Wait(22)
+					Citizen.Wait(config.Rpm_sleep_2)
 					SendNUIMessage({
 						type = "setRpm",
 						content = rpm
@@ -408,9 +415,9 @@ function NuiSpeed()
 		while invehicle do
 			local sleep = 2500
 			if vehicle ~= nil and vehicle ~= 0 then
-				sleep = 69
+				sleep = config.Speed_sleep
 				if rpm < 0.21 then
-				Citizen.Wait(111)
+				Citizen.Wait(config.idle_rpm_speed_sleep)
 				end
 				if newspeed ~= speed or newspeed == nil then
 					newspeed = speed
@@ -418,17 +425,17 @@ function NuiSpeed()
 						type = "setSpeed",
 						content = speed
 					})
-					Citizen.Wait(22)
+					Citizen.Wait(config.Speed_sleep_2)
 					SendNUIMessage({
 						type = "setSpeed",
 						content = speed
 					})
-					Citizen.Wait(22)
+					Citizen.Wait(config.Speed_sleep_2)
 					SendNUIMessage({
 						type = "setSpeed",
 						content = speed
 					})
-					Citizen.Wait(22)
+					Citizen.Wait(config.Speed_sleep_2)
 					SendNUIMessage({
 						type = "setSpeed",
 						content = speed
@@ -453,7 +460,7 @@ function NuiCarhpandGas()
 		local wait = 2500
 		while invehicle do
 			if vehicle ~= nil and vehicle ~= 0 then
-				wait = 1200
+				wait = config.NuiCarhpandGas_sleep
 				if gasolina ~= newgas or newgas == nil then
 					SendNUIMessage({
 						type = "setFuelLevel",
@@ -479,7 +486,7 @@ function NuiDistancetoWaypoint()
 	--NUI DISTANCE to Waypoint
 	Citizen.CreateThread(function()
 		while invehicle do
-			local sleep = 2500
+			local sleep = config.direction_sleep
 			local ped = ped
 			local vehicle = vehicle
 			local waypoint = GetFirstBlipInfoId(8)
@@ -501,7 +508,7 @@ function NuiDistancetoWaypoint()
 					content = 0
 					})
 				--end
-				Citizen.Wait(2500)
+				Citizen.Wait(config.direction_sleep)
 			end
 			Citizen.Wait(sleep)
 		end
@@ -517,7 +524,7 @@ function NuiHeadlights()
 			local ped = ped
 			local vehicle = vehicle
 			if vehicle ~= nil and vehicle ~= 0 then
-				sleep = 500
+				sleep = config.lights_sleep
 				local off,low,high = GetVehicleLightsState(vehicle)
 				if low == 1 and high == 0 then
 					light = 1
@@ -548,7 +555,7 @@ function NuiGear()
 			local ped = ped
 			local vehicle = vehicle
 			if vehicle ~= nil and vehicle ~= 0 then
-				sleep = 500
+				sleep = config.gear_sleep
 				local gear = GetVehicleCurrentGear(vehicle)
 				if newgear ~= gear or newgear == nil then
 					newgear = gear
@@ -590,37 +597,35 @@ function NuiMileAge()
 				savemile = true
 				lastve = GetVehiclePedIsIn(ped, false)
 				if plate ~= nil then
-					saveplate = string.match(GetVehicleNumberPlateText(vehicle), '%f[%d]%d[,.%d]*%f[%D]')
+					--saveplate = string.match(GetVehicleNumberPlateText(vehicle), '%f[%d]%d[,.%d]*%f[%D]')
+					saveplate = string.gsub(GetVehicleNumberPlateText(vehicle), "%s+", "")
 					plate = saveplate
-					--if AdvStatsTable ~= nil and AdvStatsTable[plate] ~= nil then
-						if plate ~= nil and AdvStatsTable[plate] == nil then
-							AdvStatsTable[plate] = {}
-							AdvStatsTable[plate].plate = plate
-							AdvStatsTable[plate].mileage = 0
+					if plate ~= nil and veh_stats[plate] == nil then
+						veh_stats[plate] = {}
+						veh_stats[plate].plate = plate
+						veh_stats[plate].mileage = 0
+					end
+					if plate ~= nil and veh_stats[plate].plate == plate then
+						if oldPos == nil then
+							oldPos = newPos
 						end
-						if plate ~= nil and AdvStatsTable[plate].plate == plate then
-							if oldPos == nil then
-								oldPos = newPos
-							end
-							local dist = #(newPos-oldPos)
-							if dist > 10.0 then
-								AdvStatsTable[plate].mileage = AdvStatsTable[plate].mileage+GetEntitySpeed(vehicle)*1/100
-								oldPos = newPos
-							end
-							--print(AdvStatsTable[plate].mileage)
-							if newmileage ~= AdvStatsTable[plate].mileage or newmileage == nil then
-								newmileage = AdvStatsTable[plate].mileage
-								SendNUIMessage({
-								type = "setMileage",
-								content = AdvStatsTable[plate].mileage
-								})
-							end
+						local dist = #(newPos-oldPos)
+						if dist > 10.0 then
+							veh_stats[plate].mileage = veh_stats[plate].mileage+GetEntitySpeed(vehicle)*1/100
+							oldPos = newPos
 						end
-					--end
+						if newmileage ~= veh_stats[plate].mileage or newmileage == nil then
+							newmileage = veh_stats[plate].mileage
+							SendNUIMessage({
+							type = "setMileage",
+							content = veh_stats[plate].mileage
+							})
+						end
+					end
 				end
 			elseif savemile and lastve ~= nil and saveplate ~= nil then
 				savemile = false
-				TriggerServerEvent('renzu_hud:savemile', tonumber(saveplate), AdvStatsTable[tostring(saveplate)])
+				TriggerServerEvent('renzu_hud:savemile', saveplate, veh_stats[tostring(saveplate)])
 				Wait(1000)
 				lastve = nil
 				saveplate = nil
@@ -666,7 +671,7 @@ Citizen.CreateThread(function()
 		ped = PlayerPedId()
 	end
 	while true do
-		local carwait = 2000
+		local sleep = config.uitop_sleep
 		ped = PlayerPedId()
 		health = (GetEntityHealth(ped)-100)
 		armor = GetPedArmour(ped)
@@ -684,14 +689,7 @@ Citizen.CreateThread(function()
 			})
 			newhealth = health
 		end
-		if newmic ~= voiceDisplay or newmic == nil then
-			SendNUIMessage({
-				type = "setMic",
-				content = voiceDisplay
-			})
-			newmic = voiceDisplay
-		end
-		Citizen.Wait(carwait)
+		Citizen.Wait(sleep)
 	end
 end)
 
@@ -709,10 +707,10 @@ end
 
 -- YOU NEED SEATBELT SYSTEM FOR RAGDOLL, THIS IS FOR KEYBINDS ONLY for UI
 Citizen.CreateThread(function()
-	RegisterKeyMapping('seatbelt', 'Car Seatbelt', 'keyboard', 'B')
+	RegisterKeyMapping(config.commands['car_seatbelt'], 'Car Seatbelt', 'keyboard', config.keybinds['car_seatbelt'])
 end)
 
-RegisterCommand('seatbelt', function()
+RegisterCommand(config.commands['car_seatbelt'], function()
 	if belt then
 		SetTimeout(1000,function()
 			belt = false
@@ -747,7 +745,7 @@ function sendsignaltoNUI()
 	end)
 end
 
-RegisterCommand('left', function()
+RegisterCommand(config.commands['signal_left'], function()
 	local ped = ped
 	local vehicle = vehicle
 	right = false
@@ -774,10 +772,10 @@ RegisterCommand('left', function()
 end, false)
 
 Citizen.CreateThread(function()
-	RegisterKeyMapping('left', 'Signal Left', 'keyboard', 'LEFT')
+	RegisterKeyMapping(config.commands['signal_left'], 'Signal Left', 'keyboard', config.keybinds['signal_left'])
 end)
 
-RegisterCommand('right', function()
+RegisterCommand(config.commands['signal_right'], function()
 	local ped = ped
 	local vehicle = vehicle
 	left = false
@@ -804,10 +802,10 @@ RegisterCommand('right', function()
 end, false)
 
 Citizen.CreateThread(function()
-	RegisterKeyMapping('right', 'Signal Right', 'keyboard', 'RIGHT')
+	RegisterKeyMapping(config.commands['signal_right'], 'Signal Right', 'keyboard', config.keybinds['signal_right'])
 end)
 
-RegisterCommand('hazard', function()
+RegisterCommand(config.commands['signal_hazard'], function()
 	local ped = ped
 	local vehicle = vehicle
 	if GetVehicleIndicatorLights(vehicle) == 0 then
@@ -836,5 +834,5 @@ RegisterCommand('hazard', function()
 end, false)
 
 Citizen.CreateThread(function()
-	RegisterKeyMapping('hazard', 'Signal Hazard', 'keyboard', 'BACK')
+	RegisterKeyMapping(config.commands['signal_hazard'], 'Signal Hazard', 'keyboard', config.keybinds['signal_hazard'])
 end)
