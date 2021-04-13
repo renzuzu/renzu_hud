@@ -6,12 +6,12 @@ Fivem HUD
 ![alt text](https://i.imgur.com/k5hSCGO.png)
 
 # STATUS HOTKEY (SHOW / HIDE)
-INSERT
-#CAR HOTKEY ( Signal Lights and Hazard )
+INSERT (show or hide HUD STATS)
+# CAR HOTKEY ( Signal Lights and Hazard )
 Arrow right & Arrow Left
 Hazard = Backspace
 
-#CAR HUD Feature
+# CAR HUD Feature
 ![alt text](https://i.imgur.com/AIvst4Q.png)
 
 Mileage System
