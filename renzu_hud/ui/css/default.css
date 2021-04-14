@@ -31,8 +31,8 @@ right:7%;
     font-size: 10px;
     position: absolute;
     display: block;
-    top: 95px;
-    right: 93px;
+    top: 92px;
+    right: 112px;
     text-shadow: 1px 1px 1px #000000;
     transition: all 0.2s ease-in-out;
   }
@@ -56,18 +56,26 @@ right:7%;
   }
   
   .mic .azul {
+    background-size: 80%;
+    background-repeat: no-repeat;
     background-image: url("../img/mic-azul.png");
   }
   
   .mic .vermelho {
+    background-size: 80%;
+    background-repeat: no-repeat;
     background-image: url("../img/mic-vermelho.png");
   }
   
   .mic .verde {
+    background-size: 80%;
+    background-repeat: no-repeat;
     background-image: url("../img/mic-verde.png");
   }
   
   .mic .amarelo {
+    background-size: 80%;
+    background-repeat: no-repeat;
     background-image: url("../img/mic-amarelo.png");
   }
 

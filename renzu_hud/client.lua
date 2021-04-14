@@ -224,8 +224,10 @@ end
 
 local show = false
 
-function updateStatus()
-	Myinfo()
+function updateStatus(pressed)
+	if not config.statusv2 or pressed then
+		Myinfo()
+	end
 	local fetch = false
 	sanity = 0
 	thirst = 0
@@ -266,9 +268,20 @@ function updateStatus()
 		content = status
 	})
 end
+
+	Citizen.CreateThread(function()
+		if config.statusv2 then
+			while true do
+				local sleep = config.statusv2_sleep
+				updateStatus()
+				Citizen.Wait(sleep)
+			end
+		end
+	end)
+
 RegisterCommand(config.commands['showstatus'], function()
 	show = not show
-	updateStatus()
+	updateStatus(true)
     PlaySoundFrontend(PlayerId(), "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", true )
 	SendNUIMessage({
 		type = "setShowstatus",
@@ -709,6 +722,7 @@ Citizen.CreateThread(function()
 	local newmic = nil
 	local newhealth = 1111
 	local newarmor = 1111
+	Citizen.Wait(1000)
 	while ped == 0 or ped == nil do
 		Citizen.Wait(111)
 		ped = PlayerPedId()

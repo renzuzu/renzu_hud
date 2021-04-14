@@ -20,7 +20,7 @@
         <style>
             @-webkit-keyframes loader {
               0% {
-                width: 0;
+                width: -3%;
               }
               100% {
                 width: 100%;
@@ -29,7 +29,7 @@
             
             @keyframes loader {
               0% {
-                width: 0;
+                width: -3%;
               }
               100% {
                 width: 100%;
@@ -41,6 +41,8 @@
             }
 
             .armor-bar {
+              transform: rotate(180deg);
+              background: rgba(3, 30, 54, 0.8);
               #border-radius: 88% 22% 89% 22% / 0% 100% 0% 100%;
               overflow: hidden;
             }
@@ -53,16 +55,16 @@
                 background: rgba(1,110,204,0.8);
                 #background: radial-gradient(circle, rgba(1,110,204,0.8) 0%, rgba(34,168,237,0.8) 78%, rgba(10,80,255,0.8) 95%, rgba(36,77,255,0.8) 100%);
                 color: #fff;
-                padding: 5px;
+                padding: 0px;
                 height:50px;
             }
 
             .armor-bar {
-              right: 110px;
+              right: 112px;
               max-width: 50%;
               position: absolute;
-              top: 84px;
-              height:19px;
+              top: 82px;
+              height:17px;
               width:150px;
               z-index:1;
             }
@@ -70,6 +72,8 @@
 
 
             .health-bar {
+              transform: rotate(180deg);
+              background: rgba(41, 0, 0, 0.8);
               #border-radius: 88% 22% 89% 22% / 0% 100% 0% 100%;
               overflow: hidden;
             }
@@ -79,7 +83,7 @@
             
             .health_progress {
                 transition: width 1s;
-                background: rgba(168,255,0,0.8);
+                background: rgba(199, 24, 18, 0.8);
                 color: #fff;
                 padding: 5px;
                 height:50px;
@@ -89,8 +93,8 @@
               right: 120px;
               max-width: 50%;
               position: absolute;
-              top: 58px;
-              height:19px;
+              top: 57px;
+              height:18px;
               width:140px;
               z-index:1;
             }
@@ -369,11 +373,122 @@
         top:660px;
         font-size:18px;
       }
+
+
+      #hex {
+        z-index:1005;
+        position:absolute;
+        left:352px;
+        bottom:23px;
+        font-size:21px;
+      }
+
+      #food2 {
+        #clip: rect(10px, 100px, 100px, 0);
+        /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
+        z-index:1003;
+        color:orange;
+        position:absolute;
+        left:352px;
+        bottom:23px;
+        font-size:21px;
+      }
+      #food2bg {
+        background: transparent;
+        border:0px;
+        #filter: drop-shadow(0px 0px 1px #dda044);
+        z-index:1002;
+        color:rgb(47, 31, 0);
+        position:absolute;
+        left:352px;
+        bottom:23px;
+        font-size:21px;
+      }
+      #water2 {
+        z-index:1003;
+        color:rgb(19, 101, 255);
+        position:absolute;
+        left:400px;
+        bottom:23px;
+        font-size:21px;
+      }
+      #water2bg {
+        z-index:1002;
+        color:rgb(1, 20, 54);
+        position:absolute;
+        left:400px;
+        bottom:23px;
+        font-size:21px;
+      }
+      #stress2 {
+        z-index:1003;
+        color:rgb(255, 16, 68);
+        position:absolute;
+        left:445px;
+        bottom:23px;
+        font-size:21px;
+      }
+      #stress2bg {
+        z-index:1002;
+        color:rgb(255, 60, 1);
+        position:absolute;
+        left:445px;
+        bottom:23px;
+        font-size:21px;
+      }
+      #stamina2 {
+        z-index:1003;
+        color:rgb(16, 255, 136);
+        position:absolute;
+        left:492px;
+        bottom:23px;
+        font-size:21px;
+      }
+      #stamina2bg {
+        z-index:1002;
+        color:rgb(1, 34, 17);
+        position:absolute;
+        left:492px;
+        bottom:23px;
+        font-size:21px;
+      }
+      #oxygen2 {
+        z-index:1003;
+        color:rgb(15, 227, 255);
+        position:absolute;
+        left:535px;
+        bottom:25px;
+        font-size:18px;
+      }
+      #oxygen2bg {
+        z-index:1002;
+        color:rgb(16, 47, 51);
+        position:absolute;
+        left:535px;
+        bottom:25px;
+        font-size:18px;
+      }
+      #energy2 {
+        z-index:1003;
+        color:rgb(24, 20, 255);
+        position:absolute;
+        left:582px;
+        bottom:23px;
+        font-size:18px;
+      }
+      #energy2bg {
+        z-index:1002;
+        color:rgb(4, 3, 41);
+        position:absolute;
+        left:582px;
+        bottom:23px;
+        font-size:18px;
+      }
     </style>
 
     <style>
       #zone {
-        font-size: 1vh !important;
+        font-size: 8px !important;
         color:rgb(9,222,1,0.9);
       }
       svg path {
@@ -648,7 +763,7 @@
       }
     </style>
     <div>
-        <img style="z-index:999;position:absolute;right:20px;top:20px;opacity:1" src="img/status.png" />
+        <img style="z-index:999;position:absolute;right:20px;top:-10px;opacity:1;height:160px;" src="img/status.png" />
     </div>
     <div id="status">
       <i id="food" class="fad fa-cheeseburger"></i>
@@ -673,6 +788,30 @@
         <div id="info">My Info:</div>
         <div id="stats">My Status:</div>
       </div>
+    </div>
+    <div id="status2" style="">
+      <!-- <span id="hex" class="fa-stack fa-2x">
+        <i class="fal fa-hexagon fa-stack-2x" style="color:ffffff;font-size:20px;z-index: 1004;"></i>
+        <i class="fad fa-cheeseburger fa-stack-1x fa-inverse"></i>
+      </span>
+      <li class="icon" id="healths"><i class="fas fa-heart"></i><span>a</span></li>
+      <i class="fal fa-hexagon fa-stack-2x" style="color:ffffff;font-size:20px;z-index: 1004;">
+        <span style="display: block; position: absolute; left: 50%; bottom: 0; transform: translate(-50%,0); width: 100%; height: 100%; background: linear-gradient(180deg, #ff8000 0%, #cd6700 100%);"></span>
+      </i> -->
+      <i id="food2" class="fad fa-cheeseburger"></i>
+      <i id="water2" class="fad fa-glass"></i>
+      <i id="stress2" class="fad fa-head-side-brain"></i>
+      <i id="stamina2" class="fad fa-running"></i>
+      <i id="oxygen2" class="fad fa-lungs"></i>
+      <i id="energy2" class="fad fa-bed"></i>
+      <i id="food2bg" class="fad fa-cheeseburger"></i>
+      <i id="water2bg" class="fad fa-glass"></i>
+      <i id="stress2bg" class="fad fa-head-side-brain"></i>
+      <i id="stamina2bg" class="fad fa-running"></i>
+      <i id="oxygen2bg" class="fad fa-lungs"></i>
+      <i id="energy2bg" class="fad fa-bed"></i>
+      <!-- <img style="z-index:1001;position:absolute;right:123px;top:-5px;opacity:1;height:80px;" src="img/status2.png" /> -->
+      <img style="z-index:1001;position:absolute;left:320px;bottom:-21px;opacity:1;height:110px;" src="img/status2.png" />
     </div>
 
     <div id="uibar">
@@ -727,8 +866,8 @@
       </div>
   </div>
 
-      <div class="mic" style="display:none;">
-        <small id="mic-radio"><i class="fas fa-headphones"></i></small>
+      <div class="mic">
+        <small style="display:none;" id="mic-radio"><i class="fas fa-headphones"></i></small>
         <span id="mic-color" class="azul"></span>
       </div>
 
@@ -736,13 +875,13 @@
       <div id="location">
         <div id="container">
           <section>
-            <span id="border" style="font-size:2.5vh !important; color:rgba(255, 233, 233, 0.65) !important">|</span>
-            <h4 id="direction" style="font-size:2.5vh !important; color:rgba(255, 233, 233, 0.9) !important"></h4>
-            <span id="border" style="font-size:2.5vh !important; color:rgba(255, 233, 233, 0.65) !important">|</span>
+            <span id="border" style="font-size:15px !important; color:rgba(255, 233, 233, 0.65) !important">|</span>
+            <h4 id="direction" style="font-size:22px !important; color:rgba(255, 233, 233, 0.9) !important"></h4>
+            <span id="border" style="font-size:15px !important; color:rgba(255, 233, 233, 0.65) !important">|</span>
           </section>
           <div>
             <p id="zone"></p>
-            <p id="street" style="font-size:1.1vh !important; color:rgba(255, 233, 233, 0.9) !important"></p>
+            <p id="street" style="font-size:10px !important; color:rgba(255, 233, 233, 0.9) !important"></p>
           </div>
         </div>
       </div>

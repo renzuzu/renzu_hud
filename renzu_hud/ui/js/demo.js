@@ -113,6 +113,10 @@ function onMessageRecieved(event) {
     }
 }
 
+function toclip(val) {
+    return 20 - (val / 5)
+}
+
 function setStatus(table) {
     console.log("Status")
     document.getElementById("hunger").style.width = ''+table.hunger+'%'
@@ -121,6 +125,13 @@ function setStatus(table) {
     document.getElementById("staminabar").style.width = ''+table.stamina+'%'
     document.getElementById("oxygenbar").style.width = ''+table.oxygen+'%'
     document.getElementById("energybar").style.width = ''+table.energy+'%'
+    console.log(''+toclip(table.hunger)+'')
+    document.getElementById("food2").style.clip = 'rect('+toclip(table.hunger)+', 100px, 100px, 0)'
+    document.getElementById("water2").style.clip = 'rect('+toclip(table.thirst)+', 100px, 100px, 0)'
+    document.getElementById("stress2").style.clip = 'rect('+toclip(table.stress)+', 100px, 100px, 0)'
+    document.getElementById("stamina2").style.clip = 'rect('+toclip(table.stamina)+', 100px, 100px, 0)'
+    document.getElementById("oxygen2").style.clip = 'rect('+toclip(table.oxygen)+', 100px, 100px, 0)'
+    document.getElementById("energy2").style.clip = 'rect('+toclip(table.energy)+', 100px, 100px, 0)'
 }
 
 function setShowstatus(bool) {
