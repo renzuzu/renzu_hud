@@ -6,7 +6,7 @@ This one is the V2 Display in screen all the time
 
 # Status UI preview
 Status V1 (TOGGLE Version - Default Key is Insert ) (can be disabled in config and use v2 only)
-![alt text](https://i.imgur.com/q62Lw9z.pn)
+![alt text](https://i.imgur.com/q62Lw9z.png)
 Status V2 Display in screen all the time (can be disabled in config)
 ![alt text](https://i.imgur.com/G1alCmX.png)
 
