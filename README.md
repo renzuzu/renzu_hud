@@ -1,9 +1,7 @@
 # renzu_hud
 Fivem HUD 
 # Main UI preview
-![alt text](https://i.imgur.com/tHC9EBR.png)
-This one is the V2 Display in screen all the time
-
+![alt text](https://i.imgur.com/Xiutygp.png)
 # Status UI preview
 Status V1 (TOGGLE Version - Default Key is Insert ) (can be disabled in config and use v2 only)
 ![alt text](https://i.imgur.com/q62Lw9z.png)
