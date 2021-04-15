@@ -16,12 +16,25 @@ position:absolute;
 top:1%;
 right:7%;
 }
+#pedface {
+  position:absolute;
+  top:-5px;
+  right:-1px;
+  transform: scale(1.4);
+  transform-origin: 50% 50%;
+}
 #logo {
+    display: inline-block;
+    #border: 50%;
+    border-radius: 50px 50px 50px 50px;
+    width:70px;
+    height:70px;
+    overflow:hidden;
     z-index:1000;
     position:absolute;
-    top:28px;
+    top:34px;
     opacity:1.0;
-    right:82px;
+    right:103px;
     margin-right:-40px;
 }
 

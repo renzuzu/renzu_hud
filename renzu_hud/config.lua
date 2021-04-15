@@ -65,6 +65,7 @@ config.keybinds = {
 	signal_hazard = 'BACK',
 	-- seatbelt
 	car_seatbelt = 'B',
+	entering = 'F'
 }
 
 config.commands = {
@@ -78,6 +79,7 @@ config.commands = {
 	signal_hazard = 'hazard',
 	-- seatbelt
 	car_seatbelt = 'seatbelt',
+	entering = 'entervehicle'
 }
 
 --OPTIMIZATION

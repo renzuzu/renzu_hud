@@ -16,6 +16,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
   <script src="https://kit.fontawesome.com/44e6403392.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="css/compass.css" />
+  <link rel="stylesheet" href="css/map.css" type="text/css">
+  <!-- <script src="ui.js" type="text/javascript"></script> -->
   <link href="css/default.css" rel="stylesheet" type="text/css" />
         <style>
             @-webkit-keyframes loader {
@@ -279,12 +281,12 @@
             }
             
             .gas-bar {
-              right: 139px;
+              right: 165px;
               max-width: 50%;
               position: absolute;
-              bottom: 117px;
-              height:4px;
-              width:61px;
+              bottom: 150px;
+              height:7px;
+              width:45px;
               z-index:-1;
             }
 
@@ -305,19 +307,19 @@
             }
             
             .carhealth-bar {
-              right: 147px;
+              right: 110px;
               max-width: 50%;
               position: absolute;
-              bottom: 93px;
-              height:5px;
-              width:42px;
+              bottom: 150px;
+              height:7px;
+              width:32px;
               z-index:-1;
             }
             </style>
 
     </head>
     <body style="margin:0; overflow:hidden;">
-        <div id="logo"><img style="border-radius: 50%;" id="pedface" src="" height="70"></div>
+        <div id="logo"><img style="border-radius: 50%;" id="pedface" src="https://nui-img/pedmugshot_01/pedmugshot_01?t123" height="70"></div>
     <style>
       #status {
         display:none;
@@ -505,15 +507,32 @@
         z-index:999;
         position:absolute;
         right:258px;
-        bottom:65px;
+        bottom:85px;
+      }
+      #speedtext {
+        font-size:10px;
+        color:#d8d2d4;
+        z-index:999;
+        position:absolute;
+        right:258px;
+        bottom:110px;
+        font-weight:900;
       }
       #rpmmeter {
         font-size:17px;
         color:#d8d2d4;
         z-index:1002;
         position:absolute;
-        right:37.5px;
-        bottom:65px;
+        right:75.5px;
+        bottom:90px;
+      }
+      #rpmtext {
+        font-size:7px;
+        color:#d8d2d4;
+        z-index:1002;
+        position:absolute;
+        right:80.5px;
+        bottom:110px;
       }
 
       #milediv {
@@ -521,10 +540,10 @@
         color:#d8d2d4;
         z-index:1002;
         position:absolute;
-        right:130px;
-        bottom:19px;
+        right:150px;
+        bottom:33px;
         font-weight: 50;
-        background-color: #00000077;
+        #background-color: #00000077;
         padding:4px 15px 4px 15px;
       }
 
@@ -534,17 +553,17 @@
 
       #distancediv {
         text-align: center;
-        font-size:7px;
+        font-size:7.5px;
         color:#d8d2d4;
         z-index:1002;
         position:absolute;
-        right:139.3px;
+        right:102.3px;
         overflow:hidden;
-        bottom:44px;
+        bottom:33px;
         width:58px;
         font-weight: 50;
-        background-color: #00000077;
-        padding:4px 5px 4px 5px;
+        #background-color: #00000077;
+        padding:2px 2px 4px 1px;
       }
 
       #time {
@@ -557,9 +576,9 @@
         color:#d8d2d4;
         z-index:1002;
         position:absolute;
-        right:132px;
+        right:147px;
         overflow:hidden;
-        bottom:139.5px;
+        bottom:163.5px;
         width:72px;
         font-weight: 50;
         padding:4px 5px 4px 5px;
@@ -575,9 +594,9 @@
         color:#d8d2d4;
         z-index:1002;
         position:absolute;
-        right:30px;
+        right:65px;
         overflow:hidden;
-        bottom:45.5px;
+        bottom:65.5px;
         width:72px;
         font-weight: 50;
         padding:4px 5px 4px 5px;
@@ -593,8 +612,8 @@
         position: absolute;
         /* bottom:105px;
         right:260px; */
-        bottom:85px;
-        right:190px;
+        bottom:32px;
+        right:255px;
       }
       #offlightclip {
         position: absolute;
@@ -606,8 +625,8 @@
         display:none;
         z-index:1001;
         position: absolute;
-        bottom:85px;
-        right:220px;
+        bottom:32px;
+        right:290px;
       }
       #onlightclip {
         position: absolute;
@@ -619,8 +638,8 @@
         display:none;
         z-index:1001;
         position: absolute;
-        bottom:150px;
-        right:226px;
+        bottom:98px;
+        right:287px;
       }
       #highlightclip {
         position: absolute;
@@ -633,8 +652,8 @@
         display:none;
         z-index:1001;
         position: absolute;
-        bottom:214px;
-        right:190px;
+        bottom:162px;
+        right:270px;
       }
       #seatbeltclip {
         position: absolute;
@@ -647,8 +666,8 @@
         display:none;
         z-index:1001;
         position: absolute;
-        bottom:214.5px;
-        right:160px;
+        bottom:162.5px;
+        right:238px;
       }
       #onseatbeltclip {
         position: absolute;
@@ -660,21 +679,21 @@
       #left {
         opacity:0.2;
         color:rgb(255, 255, 255);
-        font-size:30px;
+        font-size:20px;
         z-index:999;
         position:absolute;
-        right:215px;
-        bottom:130px;
+        right:228px;
+        bottom:120px;
       }
 
       #right {
         opacity:0.2;
         color:rgb(255, 255, 255);
-        font-size:30px;
+        font-size:20px;
         z-index:999;
         position:absolute;
-        right:95px;
-        bottom:130px;
+        right:125px;
+        bottom:120px;
       }
 
       #job {
@@ -887,18 +906,21 @@
       </div>
 
       <div id="car" style="">
-          <img style="z-index:999;position:absolute;right:-50px;bottom:-61px;opacity:0.95;height:280px" src="img/car.png" />
-          <svg id="rpm" style="z-index:999;position:absolute;right:-34px;bottom:12px;opacity:0.65;height:132px;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
-            <path class="bg" stroke="#ffffff0" d="M41 149.5a77 77 0 1 1 117.93 0"  fill="none"/>
-            <path id="rpmpath" class="meter" stroke="#09c" d="M41 149.5a77 77 0 1 1 117.93 0" fill="none" style="width:10%;" stroke-dasharray="350" stroke-dashoffset="350"/>
+          <img style="z-index:999;position:absolute;right:10px;bottom:10px;opacity:0.95;height:180px" src="img/carui2.png?img/car.png" />
+          <!-- z-index:998;position:absolute;right:-27px;bottom:15px;opacity:0.65;height:125px;transform: rotate(-270deg) scaleX(-1); <svg id="rpm" style="z-index:999;position:absolute;right:-34px;bottom:12px;opacity:0.65;height:132px;transform: rotate(90deg);transform: scaleX(-1);" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1"> -->
+
+          <svg id="rpm" style="z-index:998;position:absolute;right:-27px;bottom:15px;opacity:0.65;height:125px;transform: rotate(-270deg) scaleX(-1);" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+            <path class="bg" stroke="#ffffff0" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
+            <path id="rpmpath" class="meter" stroke="#09c" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="width:10%;" stroke-dasharray="350" stroke-dashoffset="350"/>
           </svg>
           <div id="rpmmeter">1000</div>
-          
-          <svg id="speed" style="z-index:999;position:absolute;right:171px;bottom:12px;opacity:0.65;height:132px;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
-            <path class="bg" stroke="#ffffff0" d="M41 149.5a77 77 0 1 1 117.93 0"  fill="none"/>
-            <path id="speedpath" class="meter" stroke="#09c" d="M41 149.5a77 77 0 1 1 117.93 0" fill="none" style="width:10%;" stroke-dasharray="350" stroke-dashoffset="350"/>
+          <div id="rpmtext">x 1000rpm</div>
+          <svg id="speed" style="z-index:998;position:absolute;right:201px;bottom:15px;opacity:0.65;height:125px;transform: rotate(-90deg)" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+            <path class="bg" stroke="#ffffff0" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
+            <path id="speedpath" class="meter" stroke="#09c" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="width:10%;" stroke-dasharray="350" stroke-dashoffset="350"/>
           </svg>  
           <div id="speedmeter">0</div>
+          <div id="speedtext">kMH</div>
           <div id="milediv"><span id="mileage">0</span> kM</div>
           <div id="distancediv"><span id="distance">0</span> <span id="distext">Dis</span></div>
           <div id="timediv"><span id="time">00:00</span> <span id="timetext">Pm</span></div>
@@ -953,5 +975,37 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script src="nui://game/ui/jquery.js" type="text/javascript"></script>
         <script src="js/demo.js"></script>
+          <style>
+            #start {
+              display:block;
+              z-index: 1010;
+              position:absolute;
+              right:155px;
+              bottom:70px;
+              height:60px;
+              width:60px;
+            }
+          </style>
+          <a id="start"></a>
+          <div class="carhudmap">
+              <center>
+                <div class="loading">
+                    <p id="waiting2">Loading... <img src="img/loading.png" alt="loading" id="intay2" /></p>
+                </div>
+              </center>
+              <div class="fadeout"></div>
+              <img src="img/carblip.png" alt="." id="carblip" />
+              <p id="xyz">&#160;X&#160;1259<br>&#160;Y&#160;9562&#160;</p>
+              <div class="centermap">
+                <div class="maploc">
+                    <div id="maploc">
+                      <div id="here"></div>
+                    </div>
+                </div>
+              </div>
+          </div>
+      <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+      <script src="js/map.js"></script>
+      
     </body>
 </html>

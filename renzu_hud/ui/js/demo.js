@@ -17,6 +17,18 @@ function pedface() {
 }
 pedface();
 
+$(document).on('click','#start',function(){
+    console.log("START")
+    $.post(`https://${GetParentResourceName()}/pushtostart`, {}, function(data) {}); 
+});
+
+$("body").on("keyup", function (key) {
+    console.log("GETOUT VEH")
+    if (key.which == '70') {
+        $.post(`https://${GetParentResourceName()}/getoutvehicle`, {}, function(data) {});
+    }
+});
+
 function setArmor(s) {
     document.getElementById("armor").style.width = ''+s+'%'
 }

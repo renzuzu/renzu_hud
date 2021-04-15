@@ -1,0 +1,127 @@
+:root { --d-g: calc(var(--m_f) + 2*var(--m_l) + var(--h_lg)); --h_lg: 5px; --m_l: 10px; --m_f: 15px; --mr-b: 10px; --h-bs: 1vh; --d-bsa: 32px; --l-m: 200px; --h-f1a: calc((4 - 0.08*4)*var(--d-bsa) + 4px); --f_sr: 0.3vh; --b_fd2: calc(var(--d-bsa) + var(--h-f1a) + var(--f_sr)); --f_a_b1: #1862ad; --bt_mp1: calc(var(--d-bsa) + var(--h-f1a) + var(--f_sr)); --h_mpz: 170px; --bt_mp1: calc(var(--b_fd2) + 2*var(--d-bsa) + 4px + var(--f_sr)); --m_zm: 7; --pw1z: calc(32); --w_imp: calc(var(--pw1z)*var(--w_mprt)); --w_mprt: 30vmin; --m_x0z: calc(0.4586 - 0.0002); --m_y0z: calc(0.3259 - 0.0007); --m_bx1: calc(var(--w_imp)*(1 - var(--m_x0z))); --m_byzz: calc(var(--w_imp)*(1 - var(--m_y0z))); --CoordsX: 394.97; --CoordsY: 6585.32; --dviuy: 12435; --cyhux: calc(var(--w_imp) / var(--dviuy) ); --cdx_dc21: calc(var(--CoordsX)*var(--cyhux)); --cy_dc2: calc(var(--CoordsY)*var(--cyhux)); --w_oppa1: 0; --w_oppa2: 1; --mprcz: 0; }
+
+.fadeout {
+    position: absolute;
+    /* bottom: calc((var(--d-bsa) - 0.08*4*var(--d-bsa))*3 + 15.9vh ); */
+    height: calc(var(--h_mpz));
+    width: calc(var(--l-m) - 2.2vw); 
+    /* right: calc(var(--m_f) + 1.1vw); */
+    background: #2795b6; /* var(--f_a_b1);*/
+    /* box-shadow: inset 0 0 20px; */
+    overflow: hidden;
+    z-index: 9;
+}
+
+.loading, #waiting2, #intay2 {
+    opacity: var(--w_oppa2);
+    z-index: 10;
+}
+
+.loading {
+    position: absolute;
+    /* background: -webkit-linear-gradient(45deg, rgba(0,0,0,0.8) 0%,rgba(0,0,0,0.4) 100%); */
+    right: 10px;
+    bottom: 10px;
+}
+
+#waiting2 {
+    margin: 0 10px 0 10px;
+    color: white;
+    text-shadow: #000000 1px 1px, #000000 -1px 1px, #000000 -1px -1px, #000000 1px -1px;
+    font-size:2vmin;
+    font-family: 'Chalet', sans-serif;
+}
+
+#intay2 {
+    vertical-align: middle!important;
+    margin: 4px 0px 4px 4px;
+    animation: myrotate 1.5s infinite linear;
+}
+
+#waitText {
+    margin: 0 10px 0 10px;
+    color: white;
+    text-shadow: #000000 1px 1px, #000000 -1px 1px, #000000 -1px -1px, #000000 1px -1px;
+    font-size:120%;
+    font-family: 'Chalet', sans-serif;
+}
+
+#wait {
+    vertical-align: middle!important;
+    margin: 4px 0px 4px 4px;
+    animation: myrotate 1.5s infinite linear;
+}
+
+@keyframes myrotate {
+    0% {
+      transform: rotate(0deg); 
+    }
+   100% {
+      transform: rotate(359deg); 
+   }
+}
+
+.carhudmap {
+    border-radius: 10%;
+    position: absolute;
+    bottom: calc((var(--d-bsa) - 0.08*4*var(--d-bsa))*3 + -15px );/*var(--bt_mp1);*/
+    height: calc(var(--h_mpz) - 75px);
+    width: calc(var(--l-m) - 90px);
+    right: calc(var(--m_f) 130px);
+    background: #2795b6; /* var(--f_a_b1);*/
+    /* box-shadow: inset 0 0 20px; */
+    overflow: hidden;
+    z-index: 1007;
+}
+
+.centermap {
+    position: relative;
+    bottom: calc(var(--w_imp) - 0.3*var(--h_mpz))!important;
+    height: calc(2*var(--w_imp));
+    width: calc(2*var(--w_imp)); 
+    left: calc(-1*var(--w_imp) + 0.5*var(--l-m) - 0.5*90px )!important;
+    transform: rotate(20deg);
+}
+
+.maploc {
+    position: absolute;
+    bottom: calc(var(--m_byzz) - var(--cy_dc2))!important;
+    height: var(--w_imp)!important;
+    width: var(--w_imp)!important; 
+    left: calc(var(--m_bx1) - var(--cdx_dc21))!important;
+    transform: rotate(0deg)!important; /* Ne pas changer */
+}
+
+.map {
+    width: var(--w_mprt);
+    margin: 0;
+    padding: 0;
+    vertical-align: middle;
+    float: left;
+    z-index: 5;
+}
+
+#carblip {
+    position: absolute;
+    bottom: calc(0.5*var(--h_mpz) - 40px );
+    height: 20px;
+    transform: translateX(-50%) translateY(50%) rotate(0deg);;
+    left: calc(0.5*var(--l-m) - 0.5*90px);
+    /* background: var(--f_a_b1); */
+    /* box-shadow: inset 0 0 20px; */
+    z-index: 4!important;
+    filter: drop-shadow(1px 1px 1px black) drop-shadow(0px 0px 1px black);
+}
+
+#xyz {
+    position: absolute;
+    left: var(--f_sr);
+    bottom: var(--f_sr)!important;
+    margin: 0 var(--f_sr) var(--f_sr) var(--f_sr);
+    z-index: 4!important;
+    background: -webkit-linear-gradient(45deg, rgba(0,0,0,0.5) 0%,rgba(0,0,0,0.3) 100%);
+    filter: drop-shadow(0px 0px 2px black);
+    color: rgb(148, 148, 148);
+    font-family: monospace;
+    font-size:8px !important;
+}

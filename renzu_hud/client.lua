@@ -293,6 +293,21 @@ Citizen.CreateThread(function()
 	RegisterKeyMapping(config.commands['showstatus'], 'HUD Status UI', 'keyboard', config.keybinds['showstatus'])
 end)
 
+start = false
+breakstart = false
+
+RegisterNUICallback('pushtostart', function(data, cb)
+	start = true
+	breakstart = false
+end)
+
+RegisterNUICallback('getoutvehicle', function(data, cb)
+	start = false
+	breakstart = false
+	SetNuiFocus(false,false)
+	TaskLeaveVehicle(ped,vehicle,0)
+end)
+
 Citizen.CreateThread(function()
 	Citizen.Wait(4000)
 	local l = 0
@@ -300,11 +315,6 @@ Citizen.CreateThread(function()
 		ped = PlayerPedId()
 		vehicle = GetVehiclePedIsIn(ped)
 		if vehicle ~= nil and vehicle ~= 0 then
-			if not invehicle then
-				inVehicleFunctions()
-				Citizen.Wait(100)
-			end
-			invehicle = true
 			hp = GetVehicleEngineHealth(vehicle)
 			gasolina = GetVehicleFuelLevel(vehicle)
 			if uimove then
@@ -315,7 +325,40 @@ Citizen.CreateThread(function()
 				})
 			end
 			uimove = false
+
+			if not invehicle then
+				if GetPedInVehicleSeat(vehicle, -1) == ped then
+					breakstart = false
+					SetNuiFocus(true, true)
+					while not start and not breakstart do
+						SetVehicleEngineOn(vehicle,false,true,true)
+						if GetVehiclePedIsIn(ped) == 0 then
+							start = false
+							breakstart = true
+						end
+						--print("loop not started")
+						Citizen.Wait(1)
+					end
+					start = true
+					SetNuiFocus(false,false)
+					Citizen.Wait(100)
+					SetVehicleEngineOn(vehicle,true,false,true)
+					print("starting engine")
+					while not GetIsVehicleEngineRunning do
+						print("starting")
+						SetVehicleEngineOn(vehicle,true,false,true)
+						Citizen.Wait(0)
+					end
+					Citizen.Wait(200)
+					start = true
+				end
+				Citizen.Wait(200)
+				inVehicleFunctions()
+				Citizen.Wait(100)
+			end
+			invehicle = true
 		else
+			start = false
 			invehicle = false
 			speed = 0
 			rpm = 0
@@ -859,7 +902,53 @@ RegisterCommand(config.commands['signal_right'], function()
 end, false)
 
 Citizen.CreateThread(function()
-	RegisterKeyMapping(config.commands['signal_right'], 'Signal Right', 'keyboard', config.keybinds['signal_right'])
+	RegisterKeyMapping(config.commands['signal_left'], 'Signal Left', 'keyboard', config.keybinds['signal_left'])
+end)
+
+RegisterCommand(config.commands['entering'], function()
+	local p = PlayerPedId()
+	v = GetVehiclePedIsEntering(p)
+	local mycoords = GetEntityCoords(p)
+	if not IsPedInAnyVehicle(p) and IsAnyVehicleNearPoint(mycoords.x,mycoords.y,mycoords.z,10.0) then
+		print("ENTERING")
+		while GetVehiclePedIsTryingToEnter(p) == 0 do
+			v = GetVehiclePedIsTryingToEnter(p)
+			Citizen.Wait(0)
+		end
+		local count = 0
+		while not IsPedInAnyVehicle(p) and not start and count < 400 do
+			Citizen.Wait(1)
+			count = count + 1
+			--print(count)
+			SetVehicleEngineOn(v,false,true,true)
+			--print("waiting to get in")
+			if GetVehiclePedIsTryingToEnter(p) ~= 0 then
+				v = GetVehiclePedIsTryingToEnter(p)
+			end
+			if v ~= 0 then
+				print(GetVehiclePedIsTryingToEnter(p))
+			end
+		end
+		print("clear")
+		print(v)
+		print(GetPedInVehicleSeat(v, -1))
+		print(p)
+		if GetPedInVehicleSeat(v, -1) == p and not GetIsVehicleEngineRunning(v) then
+			print("Disable auto start")
+			SetVehicleEngineOn(v,false,true,true)
+			while not start and IsPedInAnyVehicle(p) do
+				if not start and IsVehicleEngineStarting(v) then
+					SetVehicleEngineOn(v,false,true,true)
+					print("not started yet")
+				end
+				Citizen.Wait(0)
+			end
+		end
+	end
+end, false)
+
+Citizen.CreateThread(function()
+	RegisterKeyMapping(config.commands['entering'], 'Enter Vehicle', 'keyboard', config.keybinds['entering'])
 end)
 
 RegisterCommand(config.commands['signal_hazard'], function()
