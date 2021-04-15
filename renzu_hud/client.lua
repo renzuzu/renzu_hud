@@ -902,7 +902,7 @@ RegisterCommand(config.commands['signal_right'], function()
 end, false)
 
 Citizen.CreateThread(function()
-	RegisterKeyMapping(config.commands['signal_left'], 'Signal Left', 'keyboard', config.keybinds['signal_left'])
+	RegisterKeyMapping(config.commands['signal_right'], 'Signal Right', 'keyboard', config.keybinds['signal_right'])
 end)
 
 RegisterCommand(config.commands['entering'], function()
