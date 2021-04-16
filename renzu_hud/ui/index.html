@@ -502,36 +502,40 @@
         transition: stroke-dashoffset 1ms ease-in-out;
       }
       #speedmeter {
+        text-shadow: 2px 2px 5px rgb(4, 40, 117);
         font-size:25px;
         color:#d8d2d4;
         z-index:999;
         position:absolute;
-        right:258px;
+        right:268px;
         bottom:85px;
       }
       #speedtext {
+        text-shadow: 2px 2px 5px rgb(4, 40, 117);
         font-size:10px;
         color:#d8d2d4;
         z-index:999;
         position:absolute;
-        right:258px;
+        right:268px;
         bottom:110px;
         font-weight:900;
       }
       #rpmmeter {
+        text-shadow: 2px 2px 5px rgb(4, 40, 117);
         font-size:17px;
         color:#d8d2d4;
         z-index:1002;
         position:absolute;
-        right:75.5px;
+        right:65.5px;
         bottom:90px;
       }
       #rpmtext {
+        text-shadow: 2px 2px 5px rgb(4, 40, 117);
         font-size:7px;
         color:#d8d2d4;
         z-index:1002;
         position:absolute;
-        right:80.5px;
+        right:70.5px;
         bottom:110px;
       }
 
@@ -553,17 +557,17 @@
 
       #distancediv {
         text-align: center;
-        font-size:7.5px;
-        color:#d8d2d4;
-        z-index:1002;
+        font-size:8.5px;
+        color:#d7d8d2;
+        z-index:1011;
         position:absolute;
-        right:102.3px;
+        right:145.3px;
         overflow:hidden;
-        bottom:33px;
-        width:58px;
-        font-weight: 50;
-        #background-color: #00000077;
-        padding:2px 2px 4px 1px;
+        bottom:53px;
+        width:78px;
+        font-weight: 100;
+        background-color: #000000a8;
+        padding:3px 8px 3px 8px;
       }
 
       #time {
@@ -594,7 +598,7 @@
         color:#d8d2d4;
         z-index:1002;
         position:absolute;
-        right:65px;
+        right:55px;
         overflow:hidden;
         bottom:65.5px;
         width:72px;
@@ -607,7 +611,7 @@
       }
 
       #offlight {
-        display:none;
+        display:block;
         z-index:1001;
         position: absolute;
         /* bottom:105px;
@@ -649,7 +653,7 @@
       }
 
       #seatbelt {
-        display:none;
+        display:block;
         z-index:1001;
         position: absolute;
         bottom:162px;
@@ -676,24 +680,92 @@
         /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
       }
 
+      #doorclose {
+        width:18px;
+        display:block;
+        z-index:1001;
+        position: absolute;
+        bottom:13.5px;
+        right:200px;
+      }
+      #dooropen {
+        height:18px;
+        display:none;
+        z-index:1001;
+        position: absolute;
+        bottom:13.5px;
+        right:200px;
+      }
+
+      #trunkclose {
+        width:22px;
+        display:block;
+        z-index:1001;
+        position: absolute;
+        bottom:11px;
+        right:175px;
+      }
+      #trunkopen {
+        height:22px;
+        display:none;
+        z-index:1001;
+        position: absolute;
+        bottom:11px;
+        right:175px;
+      }
+
+      #hoodclose {
+        width:22px;
+        display:block;
+        z-index:1001;
+        position: absolute;
+        bottom:11px;
+        right:150px;
+      }
+      #hoodopen {
+        height:22px;
+        display:none;
+        z-index:1001;
+        position: absolute;
+        bottom:11px;
+        right:150px;
+      }
+
+      #handbrakeclose {
+        width:20px;
+        display:block;
+        z-index:1001;
+        position: absolute;
+        bottom:12px;
+        right:125px;
+      }
+      #handbrakeopen {
+        height:20px;
+        display:none;
+        z-index:1001;
+        position: absolute;
+        bottom:12px;
+        right:125px;
+      }
+
       #left {
         opacity:0.2;
         color:rgb(255, 255, 255);
-        font-size:20px;
+        font-size:18px;
         z-index:999;
         position:absolute;
-        right:228px;
-        bottom:120px;
+        right:245px;
+        bottom:122px;
       }
 
       #right {
         opacity:0.2;
         color:rgb(255, 255, 255);
-        font-size:20px;
+        font-size:18px;
         z-index:999;
         position:absolute;
-        right:125px;
-        bottom:120px;
+        right:108px;
+        bottom:122px;
       }
 
       #job {
@@ -906,18 +978,18 @@
       </div>
 
       <div id="car" style="">
-          <img style="z-index:999;position:absolute;right:10px;bottom:10px;opacity:0.95;height:180px" src="img/carui2.png?img/car.png" />
+          <img id="carui" style="z-index:999;position:absolute;right:10px;bottom:10px;opacity:0.95;height:180px" src="img/carui_false.png?img/car.png" />
           <!-- z-index:998;position:absolute;right:-27px;bottom:15px;opacity:0.65;height:125px;transform: rotate(-270deg) scaleX(-1); <svg id="rpm" style="z-index:999;position:absolute;right:-34px;bottom:12px;opacity:0.65;height:132px;transform: rotate(90deg);transform: scaleX(-1);" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1"> -->
 
           <svg id="rpm" style="z-index:998;position:absolute;right:-27px;bottom:15px;opacity:0.65;height:125px;transform: rotate(-270deg) scaleX(-1);" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
-            <path class="bg" stroke="#ffffff0" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
-            <path id="rpmpath" class="meter" stroke="#09c" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="width:10%;" stroke-dasharray="350" stroke-dashoffset="350"/>
+            <path class="bg" stroke="#00A5FF78" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
+            <path id="rpmpath" class="meter" stroke="#fff" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="width:10%;" stroke-dasharray="280" stroke-dashoffset="280"/>
           </svg>
           <div id="rpmmeter">1000</div>
           <div id="rpmtext">x 1000rpm</div>
           <svg id="speed" style="z-index:998;position:absolute;right:201px;bottom:15px;opacity:0.65;height:125px;transform: rotate(-90deg)" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
-            <path class="bg" stroke="#ffffff0" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
-            <path id="speedpath" class="meter" stroke="#09c" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="width:10%;" stroke-dasharray="350" stroke-dashoffset="350"/>
+            <path class="bg" stroke="#00A5FF78" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
+            <path id="speedpath" class="meter" stroke="#fff" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="width:10%;" stroke-dasharray="290" stroke-dashoffset="290"/>
           </svg>  
           <div id="speedmeter">0</div>
           <div id="speedtext">kMH</div>
@@ -958,6 +1030,16 @@
           <div id="onseatbelt">
             <img id="onseatbeltclip" src="assets/icons.svg" />
           </div>
+            <div id="carfunc">
+              <img id="doorclose" src="img/doorclose.png" />
+              <img id="dooropen" src="img/dooropen.png" />
+              <img id="trunkopen" src="img/trunkopen.png" />
+              <img id="trunkclose" src="img/trunkclose.png" />
+              <img id="hoodopen" src="img/hoodopen.png" />
+              <img id="hoodclose" src="img/hoodclose.png" />
+              <img id="handbrakeopen" src="img/handbrakeopen.png" />
+              <img id="handbrakeclose" src="img/handbrakeclose.png" />
+            </div>
       </div>
 
       <!-- <script>
@@ -987,6 +1069,9 @@
             }
           </style>
           <a id="start"></a>
+          <div id="shift" style="bottom:140px;position:absolute;right:-46px;background-repeat: no-repeat !important;">
+            <div id="shifter" style="background-repeat: no-repeat !important;height:150px;width:150px; background-size:90px 130px !important;opacity:0.81;"></div>
+          </div>
           <div class="carhudmap">
               <center>
                 <div class="loading">
@@ -995,7 +1080,6 @@
               </center>
               <div class="fadeout"></div>
               <img src="img/carblip.png" alt="." id="carblip" />
-              <p id="xyz">&#160;X&#160;1259<br>&#160;Y&#160;9562&#160;</p>
               <div class="centermap">
                 <div class="maploc">
                     <div id="maploc">

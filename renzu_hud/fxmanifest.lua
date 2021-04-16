@@ -1,5 +1,7 @@
 fx_version 'cerulean'
-
+-- Renzu HUD
+-- YOU ARE NOT ALLOWED TO SELL THIS
+-- MADE BY Renzuzu
 game 'gta5'
 
 lua54 'on'
@@ -17,7 +19,8 @@ client_scripts {
 	"config.lua",
 	"client.lua",
 	"street.lua",
-	"map.lua"
+	"map.lua",
+	"manual.lua",
 }
 files {
 	'ui/index.html',

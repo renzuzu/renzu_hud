@@ -44,7 +44,6 @@ function updatemapa(pos, prop, dy, dx) {
       parseFloat(dx).toPrecision(1);
     }
   }
-  document.getElementById("xyz").innerHTML = "&#160;X&#160;" + r + dy + "&#160;<br>&#160;Y&#160;" + i + dx + "&#160;";
 }
 
 Number.prototype.toFixedFunc = function(length) {

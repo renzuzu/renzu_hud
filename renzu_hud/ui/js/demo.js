@@ -34,7 +34,6 @@ function setArmor(s) {
 }
 
 function setHp(s) {
-    console.log(s)
     document.getElementById("health").style.width = ''+s+'%'
 }
 
@@ -130,14 +129,12 @@ function toclip(val) {
 }
 
 function setStatus(table) {
-    console.log("Status")
     document.getElementById("hunger").style.width = ''+table.hunger+'%'
     document.getElementById("thirst").style.width = ''+table.thirst+'%'
     document.getElementById("stressbar").style.width = ''+table.stress+'%'
     document.getElementById("staminabar").style.width = ''+table.stamina+'%'
     document.getElementById("oxygenbar").style.width = ''+table.oxygen+'%'
     document.getElementById("energybar").style.width = ''+table.energy+'%'
-    console.log(''+toclip(table.hunger)+'')
     document.getElementById("food2").style.clip = 'rect('+toclip(table.hunger)+', 100px, 100px, 0)'
     document.getElementById("water2").style.clip = 'rect('+toclip(table.thirst)+', 100px, 100px, 0)'
     document.getElementById("stress2").style.clip = 'rect('+toclip(table.stress)+', 100px, 100px, 0)'
@@ -170,6 +167,15 @@ function setRpm(percent) {
     let to = length * ((100 - value) / 100);
     val = to / 1000
     e.style.strokeDashoffset = to;
+    if (percent > 0.9) {
+        e.style.stroke = 'red';
+    } else if (percent > 0.7) {
+        e.style.stroke = 'orange';
+    } else if (percent > 0.4) {
+        e.style.stroke = 'yellow';
+    } else {
+        e.style.stroke = 'white';
+    }
 }
 
 function setSpeed(s) {
@@ -179,11 +185,11 @@ function setSpeed(s) {
     speed = bilis * 100;
     takbo = takbo.toFixed(0)
     if (takbo >= 100) {
-        document.getElementById("speedmeter").style.right = "242px";
+        document.getElementById("speedmeter").style.right = "252px";
     } else if (takbo >= 10) {
-        document.getElementById("speedmeter").style.right = "248px";
-    } else {
         document.getElementById("speedmeter").style.right = "258px";
+    } else {
+        document.getElementById("speedmeter").style.right = "268px";
     }
     document.getElementById("speedmeter").innerHTML = ""+takbo+"";
     var e = document.getElementById("speedpath");
@@ -349,6 +355,70 @@ function setSignal(value) {
     }, 733);
 }
 
+function setManual(bool) {
+    manual = bool
+    if (bool) {
+        $("#shift").animate({
+            opacity: "1"
+        },400);
+    } else {
+        $("#shift").animate({
+            opacity: "0"
+        },400);
+    }
+}
+
+function setShift(gear) {
+    $("#shifter").css(
+        "background-image",
+        'url("shifter/' + gear + '.png")'
+      );
+}
+
+function setStart(bool) {
+      $("#carui").attr("src", "img/carui_"+bool+".png")
+}
+
+function setDoor(s) {
+    if (s == 2) {
+        document.getElementById('dooropen').style.display = 'block'
+        document.getElementById('doorclose').style.display = 'none'
+    } else {
+        document.getElementById('dooropen').style.display = 'none'
+        document.getElementById('doorclose').style.display = 'block'
+    }
+}
+
+function setHood(s) {
+    if (s == 2) {
+        document.getElementById('hoodopen').style.display = 'block'
+        document.getElementById('hoodclose').style.display = 'none'
+    } else {
+        document.getElementById('hoodopen').style.display = 'none'
+        document.getElementById('hoodclose').style.display = 'block'
+    }
+}
+
+function setTrunk(s) {
+    if (s == 2) {
+        document.getElementById('trunkopen').style.display = 'block'
+        document.getElementById('trunkclose').style.display = 'none'
+    } else {
+        document.getElementById('trunkopen').style.display = 'none'
+        document.getElementById('trunkclose').style.display = 'block'
+    }
+}
+
+function setBrake(s) {
+    if (s) {
+        document.getElementById('handbrakeopen').style.display = 'block'
+        document.getElementById('handbrakeclose').style.display = 'none'
+    } else {
+        document.getElementById('handbrakeopen').style.display = 'none'
+        document.getElementById('handbrakeclose').style.display = 'block'
+    }
+}
+
 //FUNCTIONS
 var renzu_hud = {
     setArmor,
@@ -371,6 +441,13 @@ var renzu_hud = {
     setGear,
     setSignal,
     setInfo,
+    setManual,
+    setShift,
+    setStart,
+    setDoor,
+    setHood,
+    setTrunk,
+    setBrake,
 
 };
 setMic(2);

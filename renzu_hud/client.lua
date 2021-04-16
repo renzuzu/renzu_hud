@@ -20,40 +20,42 @@ end)
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- VARIABLES
 -----------------------------------------------------------------------------------------------------------------------------------------
-local veh_stats = {}
-local date = "00:00"
-local playerloaded = false
-local manual = false
-local vehicletopspeed
-local uimove = false
-local reverse = false
-local savegear = 0
-local rpm = 0.2
-local hour = 0
-local vali = false
-local minute = 0
-local segundos = 0
-local month = ""
-local dayOfMonth = 0
-local voice = 2
-local voiceDisplay = 2
-local proximity = 25.0
-local belt = false
-local ExNoCarro = false
-local sBuffer = {}
-local vBuffer = {}
-local displayValue = true
-local gasolina = 0
-local street = nil
-local vehicle
-local hp = 0
-local shifter = false
-local hasNitro = true
-local k_nitro = 70
-local n_boost = 15.0
-local nitro_state = 0
-local isBlack = "false"
-local invehicle = false
+veh_stats = {}
+entering = false
+ismapopen = true
+date = "00:00"
+playerloaded = false
+manual = false
+vehicletopspeed = nil
+uimove = false
+reverse = false
+savegear = 0
+rpm = 0.2
+hour = 0
+vali = false
+minute = 0
+segundos = 0
+month = ""
+dayOfMonth = 0
+voice = 2
+voiceDisplay = 2
+proximity = 25.0
+belt = false
+ExNoCarro = false
+sBuffer = {}
+vBuffer = {}
+displayValue = true
+gasolina = 0
+street = nil
+vehicle = nil
+hp = 0
+shifter = false
+hasNitro = true
+k_nitro = 70
+n_boost = 15.0
+nitro_state = 0
+isBlack = "false"
+invehicle = false
 
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- DATE
@@ -325,11 +327,14 @@ Citizen.CreateThread(function()
 				})
 			end
 			uimove = false
-
 			if not invehicle then
-				if GetPedInVehicleSeat(vehicle, -1) == ped then
+				if GetPedInVehicleSeat(vehicle, -1) == ped and entering then
 					breakstart = false
 					SetNuiFocus(true, true)
+					print("NUI FOCUS")
+					print("NUI FOCUS")
+					print("NUI FOCUS")
+					print("NUI FOCUS")
 					while not start and not breakstart do
 						SetVehicleEngineOn(vehicle,false,true,true)
 						if GetVehiclePedIsIn(ped) == 0 then
@@ -351,13 +356,24 @@ Citizen.CreateThread(function()
 					end
 					Citizen.Wait(200)
 					start = true
+					SendNUIMessage({
+						type = "setStart",
+						content = start
+					})
 				end
 				Citizen.Wait(200)
 				inVehicleFunctions()
 				Citizen.Wait(100)
+				if manual then
+					SendNUIMessage({
+						type = "setManual",
+						content = true
+					})
+				end
 			end
 			invehicle = true
 		else
+			entering = false
 			start = false
 			invehicle = false
 			speed = 0
@@ -393,6 +409,8 @@ function inVehicleFunctions()
 		NuiGear()
 		NuiMileAge()
 		NuiVehicleClock()
+		NuiVehicledoorstatus()
+		NuiVehicleHandbrake()
 	end)
 end
 
@@ -571,6 +589,30 @@ function NuiDistancetoWaypoint()
 		end
 		TerminateThisThread()
 	end)
+
+	Citizen.CreateThread(function()
+		while invehicle do
+			local sleep = config.direction_sleep
+			local ped = ped
+			local vehicle = vehicle
+			local waypoint = GetFirstBlipInfoId(8)
+			if vehicle ~= 0 and DoesBlipExist(waypoint) then
+				sleep = 0
+				local coord = GetEntityCoords(ped, true)
+				local x, y, z = table.unpack(GetBlipCoords(waypoint))
+				local dis = #(coord - GetBlipCoords(waypoint))
+				unusedBool, spawnZ = GetGroundZAndNormalFor_3dCoord(x, y, 9999.0, 1)
+				local zsize = dis * 0.5
+				if zsize < 2 then
+					zsize = 2
+				end
+				DrawMarker(0,x,y,spawnZ+1.5,0,0,0,0.0,0,0,zsize*0.05,zsize*0.01,zsize+0.0+(zsize*0.45),0,196,255,50,0,0,0,1)
+				DrawMarker(22,x,y,spawnZ+zsize+0.0,0,0,0,0.0,0,0,zsize*0.1,zsize*0.1,zsize*0.1,0,196,255,50,0,0,0,1)
+			end
+			Citizen.Wait(sleep)
+		end
+		TerminateThisThread()
+	end)
 end
 
 function NuiHeadlights()
@@ -703,6 +745,89 @@ function NuiVehicleClock()
 				CalculateTimeToDisplay()
 				CalculateDateToDisplay()
 				timeformat()
+			end
+			Citizen.Wait(sleep)
+		end
+		TerminateThisThread()
+	end)
+end
+
+function NuiVehicledoorstatus()
+	--NUI DOOR OPEN STATUS
+	Citizen.CreateThread(function()
+		Citizen.Wait(1000)
+		while invehicle do
+			local sleep = 2000
+			local ped = ped
+			local vehicle = vehicle
+			local door = true
+			local hood = 0
+			local trunk = 0
+			if vehicle ~= nil and vehicle ~= 0 then
+				----print(GetVehicleDoorStatus(vehicle))
+				for i = 0, 6 do
+					if GetVehicleDoorAngleRatio(vehicle,i) ~= 0.0 then
+						door = false
+						break
+					end
+				end
+				if door then
+					doorstatus = 0
+				else
+					doorstatus = 2
+				end
+				if newdoorstatus ~= doorstatus or newdoorstatus == nil then
+					newdoorstatus = doorstatus
+					SendNUIMessage({
+					type = "setDoor",
+					content = doorstatus
+					})
+				end
+				if GetVehicleDoorAngleRatio(vehicle,4) ~= 0.0 then
+					hood = 2
+				end
+
+				if newhood ~= hood or newhood == nil then
+					newhood = hood
+					SendNUIMessage({
+					type = "setHood",
+					content = hood
+					})
+				end
+
+				if GetVehicleDoorAngleRatio(vehicle,5) ~= 0.0 then
+					trunk = 2
+				end
+				if newtrunk ~= trunk or newtrunk == nil then
+					newtrunk = trunk
+					SendNUIMessage({
+					type = "setTrunk",
+					content = trunk
+					})
+				end
+			end
+			Citizen.Wait(sleep)
+		end
+		TerminateThisThread()
+	end)
+end
+
+function NuiVehicleHandbrake()
+	--NUI HANDBRAKE
+	Citizen.CreateThread(function()
+		while invehicle do
+			local sleep = 500
+			local ped = ped
+			local vehicle = vehicle
+			if vehicle ~= nil and vehicle ~= 0 then
+				local brake = GetVehicleHandbrake(vehicle)
+				if newbrake ~= brake or newbrake == nil then
+					newbrake = brake
+					SendNUIMessage({
+					type = "setBrake",
+					content = brake
+					})
+				end
 			end
 			Citizen.Wait(sleep)
 		end
@@ -934,6 +1059,7 @@ RegisterCommand(config.commands['entering'], function()
 		print(GetPedInVehicleSeat(v, -1))
 		print(p)
 		if GetPedInVehicleSeat(v, -1) == p and not GetIsVehicleEngineRunning(v) then
+			entering = true
 			print("Disable auto start")
 			SetVehicleEngineOn(v,false,true,true)
 			while not start and IsPedInAnyVehicle(p) do
@@ -943,6 +1069,27 @@ RegisterCommand(config.commands['entering'], function()
 				end
 				Citizen.Wait(0)
 			end
+		end
+	elseif start and IsPedInAnyVehicle(p) and GetVehicleDoorLockStatus(v) ~= 2 or manual and IsPedInAnyVehicle(p) and GetVehicleDoorLockStatus(v) ~= 2 then
+		if start then
+			SendNUIMessage({
+				type = "setStart",
+				content = false
+			})
+		end
+		if manual then
+			SendNUIMessage({
+				type = "setManual",
+				content = false
+			})
+		end
+		SendNUIMessage({
+			type = "setShow",
+			content = false
+		})
+		if ismapopen then
+			SendNUIMessage({type = 'bukas'})
+			ismapopen =  false
 		end
 	end
 end, false)
