@@ -62,7 +62,7 @@
             }
 
             .armor-bar {
-              right: 112px;
+              right: 72px;
               max-width: 50%;
               position: absolute;
               top: 82px;
@@ -92,7 +92,7 @@
             }
             
             .health-bar {
-              right: 120px;
+              right: 80px;
               max-width: 50%;
               position: absolute;
               top: 57px;
@@ -315,11 +315,38 @@
               width:32px;
               z-index:-1;
             }
+
+
+            .cartemp-bar {
+              #border-radius: 88% 22% 89% 22% / 0% 100% 0% 100%;
+              overflow: hidden;
+            }
+            .cartemp-bar span {
+              display: block;
+            }
+            
+            .cartemp_progress {
+                transition: width 1s;
+                background: rgb(170, 207, 5);
+                color: #fff;
+                padding: 5px;
+                height:50px;
+            }
+            
+            .cartemp-bar {
+              right: 224px;
+              max-width: 50%;
+              position: absolute;
+              bottom: 150px;
+              height:7px;
+              width:31px;
+              z-index:-1;
+            }
             </style>
 
     </head>
-    <body style="margin:0; overflow:hidden;">
-        <div id="logo"><img style="border-radius: 50%;" id="pedface" src="https://nui-img/pedmugshot_01/pedmugshot_01?t123" height="70"></div>
+    <body style="margin:0; overflow:hidden;" id="uibody">
+    <div id="logo"><img style="border-radius: 50%;" id="pedface" src="https://nui-img/pedmugshot_01/pedmugshot_01?t123" height="70"></div>
     <style>
       #status {
         display:none;
@@ -553,6 +580,22 @@
 
       #mileage {
         margin:0 20px 0 0;
+      }
+
+      #modediv {
+        font-size:7.5px;
+        color:#d8d2d4;
+        z-index:1002;
+        position:absolute;
+        right:90px;
+        bottom:33px;
+        font-weight: 50;
+        #background-color: #00000077;
+        padding:4px 15px 4px 15px;
+      }
+
+      #mode {
+        margin:0 8px 0 0;
       }
 
       #distancediv {
@@ -854,7 +897,7 @@
       }
     </style>
     <div>
-        <img style="z-index:999;position:absolute;right:20px;top:-10px;opacity:1;height:160px;" src="img/status.png" />
+        <img style="z-index:999;position:absolute;right:-20px;top:-10px;opacity:1;height:160px;" src="img/status.png" />
     </div>
     <div id="status">
       <i id="food" class="fad fa-cheeseburger"></i>
@@ -971,8 +1014,8 @@
             <span id="border" style="font-size:15px !important; color:rgba(255, 233, 233, 0.65) !important">|</span>
           </section>
           <div>
+            <p id="street" style="font-size:8px !important; color:rgba(255, 233, 233, 0.9) !important; padding-top:-10px;"></p>
             <p id="zone"></p>
-            <p id="street" style="font-size:10px !important; color:rgba(255, 233, 233, 0.9) !important"></p>
           </div>
         </div>
       </div>
@@ -982,15 +1025,77 @@
           <!-- z-index:998;position:absolute;right:-27px;bottom:15px;opacity:0.65;height:125px;transform: rotate(-270deg) scaleX(-1); <svg id="rpm" style="z-index:999;position:absolute;right:-34px;bottom:12px;opacity:0.65;height:132px;transform: rotate(90deg);transform: scaleX(-1);" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1"> -->
 
           <svg id="rpm" style="z-index:998;position:absolute;right:-27px;bottom:15px;opacity:0.65;height:125px;transform: rotate(-270deg) scaleX(-1);" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
-            <path class="bg" stroke="#00A5FF78" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
-            <path id="rpmpath" class="meter" stroke="#fff" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="width:10%;" stroke-dasharray="280" stroke-dashoffset="280"/>
+            <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
+            <defs>
+              <filter id="dropshadow" width="170%" height="110%">
+                  <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
+                  <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+                values="1.000  0.000  0.000  0.000  0.000 
+                0.000  1.000  0.000  0.000  0.000 
+                0.000  0.000  6.000  0.000  0.000 
+                0.000  0.000  0.000  1.000  0.000" />
+                  <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="5"></feGaussianBlur>
+                  <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+              </filter>
+            </defs>
+            <path id="rpmpath" class="meter" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="filter:url(#dropshadow)" stroke-dasharray="280" stroke-dashoffset="280"/>
           </svg>
           <div id="rpmmeter">1000</div>
           <div id="rpmtext">x 1000rpm</div>
           <svg id="speed" style="z-index:998;position:absolute;right:201px;bottom:15px;opacity:0.65;height:125px;transform: rotate(-90deg)" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
-            <path class="bg" stroke="#00A5FF78" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
-            <path id="speedpath" class="meter" stroke="#fff" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="width:10%;" stroke-dasharray="290" stroke-dashoffset="290"/>
-          </svg>  
+            <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
+            <defs>
+              <filter id="dropshadow" width="170%" height="110%">
+                  <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
+                  <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+                values="1.000  0.000  0.000  0.000  0.000 
+                0.000  1.000  0.000  0.000  0.000 
+                0.000  0.000  6.000  0.000  0.000 
+                0.000  0.000  0.000  1.000  0.000" />
+                  <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="5"></feGaussianBlur>
+                  <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+              </filter>
+            </defs>
+            <path id="speedpath" class="meter" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="filter:url(#dropshadow)" stroke-dasharray="290" stroke-dashoffset="290"/>
+          </svg>
+
+          <svg id="coolant" style="z-index:998;position:absolute;right:211px;bottom:10px;opacity:0.65;height:165px;transform: rotate(-90deg)" xmlns="http://www.w3.org/2000/svg" height="250" width="200" viewBox="0 0 250 200" data-value="1">
+            <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
+            <defs>
+              <filter id="dropshadow" width="170%" height="110%">
+                  <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
+                  <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+                values="1.000  0.000  0.000  0.000  0.000 
+                0.000  1.000  0.000  0.000  0.000 
+                0.000  0.000  6.000  0.000  0.000 
+                0.000  0.000  0.000  1.000  0.000" />
+                  <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="5"></feGaussianBlur>
+                  <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+              </filter>
+            </defs>
+            <path style="stroke-width: 7px;stroke: rgb(0, 101, 253);" id="coolantpath" class="meter" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" stroke-dasharray="290" stroke-dashoffset="0"/>
+          </svg>
+
+          <svg id="oil" style="z-index:998;position:absolute;right:-39px;bottom:10px;opacity:0.65;height:165px;transform:rotate(-270deg) scaleX(-1);" xmlns="http://www.w3.org/2000/svg" height="250" width="200" viewBox="0 0 250 200" data-value="1">
+            <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
+            <defs>
+              <filter id="dropshadow" width="170%" height="110%">
+                  <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
+                  <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+                values="1.000  0.000  0.000  0.000  0.000 
+                0.000  1.000  0.000  0.000  0.000 
+                0.000  0.000  6.000  0.000  0.000 
+                0.000  0.000  0.000  1.000  0.000" />
+                  <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="1"></feGaussianBlur>
+                  <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+              </filter>
+            </defs>
+            <path style="stroke-width: 7px;stroke: rgb(128, 221, 22);" id="oilpath" class="meter" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" stroke-dasharray="290" stroke-dashoffset="0"/>
+          </svg>
+
+          <div id="body" style="z-index:-1;position:absolute;border-radius:41%;right:21px;bottom:10px;height:175px;width:330px;background-color: #00000078;"></div>
+
+          <div id="modediv"><span id="mode">ECO</span></div>
           <div id="speedmeter">0</div>
           <div id="speedtext">kMH</div>
           <div id="milediv"><span id="mileage">0</span> kM</div>
@@ -1008,6 +1113,11 @@
           <div class="carhealth-bar">
             <span class="bar">
               <span class="carhealth_progress" id="carhealthbar"></span>
+            </span>
+          </div>
+          <div class="cartemp-bar">
+            <span class="bar">
+              <span class="cartemp_progress" id="cartempbar"></span>
             </span>
           </div>
 
@@ -1040,7 +1150,7 @@
               <img id="handbrakeopen" src="img/handbrakeopen.png" />
               <img id="handbrakeclose" src="img/handbrakeclose.png" />
             </div>
-      </div>
+    </div>
 
       <!-- <script>
         console.clear();
@@ -1056,7 +1166,6 @@
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script src="nui://game/ui/jquery.js" type="text/javascript"></script>
-        <script src="js/demo.js"></script>
           <style>
             #start {
               display:block;
@@ -1083,13 +1192,14 @@
               <div class="centermap">
                 <div class="maploc">
                     <div id="maploc">
-                      <div id="here"></div>
+                      <div id="mapdiv"></div>
                     </div>
                 </div>
               </div>
           </div>
       <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
       <script src="js/map.js"></script>
+      <script src="js/demo.js"></script>
       
     </body>
 </html>

@@ -1,12 +1,12 @@
-fx_version 'cerulean'
+fx_version 'adamant'
 -- Renzu HUD
 -- YOU ARE NOT ALLOWED TO SELL THIS
 -- MADE BY Renzuzu
 game 'gta5'
 
-lua54 'on'
-is_cfxv2 'yes'
-use_fxv2_oal 'true'
+-- lua54 'on'
+-- is_cfxv2 'yes'
+-- use_fxv2_oal 'true'
 
 ui_page {
     'ui/index.html',
@@ -19,7 +19,6 @@ client_scripts {
 	"config.lua",
 	"client.lua",
 	"street.lua",
-	"map.lua",
 	"manual.lua",
 }
 files {

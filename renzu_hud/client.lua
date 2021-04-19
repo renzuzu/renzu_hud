@@ -22,7 +22,7 @@ end)
 -----------------------------------------------------------------------------------------------------------------------------------------
 veh_stats = {}
 entering = false
-ismapopen = true
+ismapopen = false
 date = "00:00"
 playerloaded = false
 manual = false
@@ -311,7 +311,25 @@ RegisterNUICallback('getoutvehicle', function(data, cb)
 end)
 
 Citizen.CreateThread(function()
-	Citizen.Wait(4000)
+	Citizen.Wait(3000)
+	--WHEN RESTARTED IN CAR
+	if not uimove then
+		SendNUIMessage({
+			type = "setShow",
+			content = false
+		})
+	end
+	uimove = true
+	SendNUIMessage({map = true, type = 'sarado'})
+	if GetVehiclePedIsIn(PlayerPedId()) ~= 0 then
+		Citizen.Wait(100)
+		start = true
+		SendNUIMessage({
+			type = "setStart",
+			content = start
+		})
+	end
+	--WHEN RESTARTED IN CAR
 	local l = 0
 	while true do
 		ped = PlayerPedId()
@@ -331,10 +349,6 @@ Citizen.CreateThread(function()
 				if GetPedInVehicleSeat(vehicle, -1) == ped and entering then
 					breakstart = false
 					SetNuiFocus(true, true)
-					print("NUI FOCUS")
-					print("NUI FOCUS")
-					print("NUI FOCUS")
-					print("NUI FOCUS")
 					while not start and not breakstart do
 						SetVehicleEngineOn(vehicle,false,true,true)
 						if GetVehiclePedIsIn(ped) == 0 then
@@ -362,6 +376,7 @@ Citizen.CreateThread(function()
 					})
 				end
 				Citizen.Wait(200)
+				cansmoke = true
 				inVehicleFunctions()
 				Citizen.Wait(100)
 				if manual then
@@ -380,7 +395,7 @@ Citizen.CreateThread(function()
 			rpm = 0
 			marcha = 0
 			VehIndicatorLight = 0
-			DisplayRadar(false)
+			--DisplayRadar(false)
 			if not uimove then
 				Citizen.Wait(500)
 				SendNUIMessage({
@@ -388,6 +403,11 @@ Citizen.CreateThread(function()
 					content = false
 				})
 			end
+			if ismapopen then
+				SendNUIMessage({map = true, type = 'sarado'})
+				ismapopen = false
+			end
+			Citizen.Wait(1000)
 			uimove = true
 		end
 		Citizen.Wait(config.car_mainloop_sleep)
@@ -411,6 +431,9 @@ function inVehicleFunctions()
 		NuiVehicleClock()
 		NuiVehicledoorstatus()
 		NuiVehicleHandbrake()
+		NuiShowMap()
+		NuiEngineTemp()
+		fuelusagerun()
 	end)
 end
 
@@ -431,7 +454,7 @@ function RpmandSpeedLoop()
 			end
 			Citizen.Wait(sleep)
 		end
-		TerminateThisThread()
+		--TerminateThisThread()
 	end)
 end
 
@@ -475,7 +498,7 @@ function NuiRpm()
 			end
 			Citizen.Wait(sleep)
 		end
-		TerminateThisThread()
+		--TerminateThisThread()
 	end)
 end
 
@@ -519,7 +542,7 @@ function NuiSpeed()
 			end
 			Citizen.Wait(sleep)
 		end
-		TerminateThisThread()
+		--TerminateThisThread()
 	end)
 end
 
@@ -553,7 +576,7 @@ function NuiCarhpandGas()
 			end
 			Citizen.Wait(wait)
 		end
-		TerminateThisThread()
+		--TerminateThisThread()
 	end)
 end
 
@@ -587,7 +610,7 @@ function NuiDistancetoWaypoint()
 			end
 			Citizen.Wait(sleep)
 		end
-		TerminateThisThread()
+		--TerminateThisThread()
 	end)
 
 	Citizen.CreateThread(function()
@@ -611,7 +634,7 @@ function NuiDistancetoWaypoint()
 			end
 			Citizen.Wait(sleep)
 		end
-		TerminateThisThread()
+		--TerminateThisThread()
 	end)
 end
 
@@ -642,7 +665,7 @@ function NuiHeadlights()
 			end
 			Citizen.Wait(sleep)
 		end
-		TerminateThisThread()
+		--TerminateThisThread()
 	end)
 end
 
@@ -666,7 +689,7 @@ function NuiGear()
 			end
 			Citizen.Wait(sleep)
 		end
-		TerminateThisThread()
+		--TerminateThisThread()
 		print("GEAR LOOP ENDED")
 	end)
 end
@@ -703,6 +726,14 @@ function NuiMileAge()
 						veh_stats[plate] = {}
 						veh_stats[plate].plate = plate
 						veh_stats[plate].mileage = 0
+						veh_stats[plate].oil = 100
+						veh_stats[plate].coolant = 100
+					end
+					if veh_stats[plate].coolant == nil then
+						veh_stats[plate].coolant = 100
+					end
+					if veh_stats[plate].oil == nil then
+						veh_stats[plate].oil = 100
 					end
 					if plate ~= nil and veh_stats[plate].plate == plate then
 						if oldPos == nil then
@@ -732,7 +763,7 @@ function NuiMileAge()
 				Wait(1000)
 			end
 		end
-		TerminateThisThread()
+		--TerminateThisThread()
 	end)
 end
 
@@ -748,7 +779,7 @@ function NuiVehicleClock()
 			end
 			Citizen.Wait(sleep)
 		end
-		TerminateThisThread()
+		--TerminateThisThread()
 	end)
 end
 
@@ -808,7 +839,7 @@ function NuiVehicledoorstatus()
 			end
 			Citizen.Wait(sleep)
 		end
-		TerminateThisThread()
+		--TerminateThisThread()
 	end)
 end
 
@@ -831,7 +862,298 @@ function NuiVehicleHandbrake()
 			end
 			Citizen.Wait(sleep)
 		end
-		TerminateThisThread()
+		--TerminateThisThread()
+	end)
+end
+
+function NuiShowMap()
+	CreateThread(function()
+		if config.centercarhud == 'map' then
+			Citizen.Wait(1000)
+			while not start do
+				Citizen.Wait(10)
+			end
+			SendNUIMessage({map = true, type = 'bukas'})
+			ismapopen =  true
+			Wait(250)
+			while invehicle do
+				--print(GetNuiCursorPosition())
+				local Plyped = PlayerPedId()
+				if start then
+					local myh = GetEntityHeading(Plyped) + GetGameplayCamRelativeHeading()
+					local camheading = GetGameplayCamRelativeHeading()
+					local xz, yz, zz = table.unpack(GetEntityCoords(Plyped))
+					if oldxz ~= xz or oldcamheading ~= camheading or camheading == nil and xz == nil then
+						oldcamheading = camheading
+						oldxz = xz
+						SendNUIMessage({map = true, type = "updatemapa",myheading = myh,camheading = camheading,x = xz,y = yz,})
+					end
+				end
+				Wait(100)
+			end
+			--TerminateThisThread()
+		end
+	end)
+end
+
+lastveh = nil
+cansmoke = true
+
+RegisterNetEvent('start:smoke')
+AddEventHandler('start:smoke', function(ent,coord)
+	local mycoord = GetEntityCoords(ped,false)
+	local dis = #(mycoord - coord)
+	local ent = ent
+	if dis < 100 then --SILLY WAY TO AVOID ONE SYNC INFINITY ISSUE, you can input < 200 up to 400 radius, yes its 400 not 300
+		StartSmoke(ent)
+	end
+end)
+
+refresh = false
+
+function getveh()
+	local v = GetVehiclePedIsIn(PlayerPedId(), false)
+	if v == 0 then
+		v = GetPlayersLastVehicle()
+		print("last veh")
+	end
+	if v == 0 then
+		v = GetClosestVehicle(GetEntityCoords(PlayerPedId()), 5.000, 0, 70)
+		print("NEAR VEH")
+	end
+	print(v)
+	return tonumber(v)
+end
+
+RegisterCommand('testsmoke', function(source, args, raw)
+	SetVehicleEngineTemperature(getveh(), GetVehicleEngineTemperature(getveh()) + config.addheat)
+	Citizen.Wait(100)
+	StartSmoke(getveh())
+end)
+
+function LoadPTFX(lib)
+	UseParticleFxAsset(lib)
+	if not HasNamedPtfxAssetLoaded(lib) then
+    	RequestNamedPtfxAsset(lib)
+	end
+    while not HasNamedPtfxAssetLoaded(lib) do
+        Wait(10)
+    end
+end
+
+local smokes = {}
+
+function StartSmoke(ent)
+    Citizen.CreateThread(function()
+		local ent = ent
+		print(GetVehicleEngineTemperature(ent))
+		while GetVehicleEngineTemperature(ent) > config.overheatmin do
+			local Smoke = 0
+			local part1 = false
+			Citizen.CreateThread(function()
+				LoadPTFX('core')
+				Smoke = Citizen.InvokeNative(0xDDE23F30CC5A0F03, 'ent_amb_stoner_vent_smoke', ent, 0.05, 0, 0, 0, 0, 0, 28, 0.4, false, false, false, 0, 0, 0, 0)
+				RemoveNamedPtfxAsset("core")
+				print("start shit")
+				print(Smoke)
+				part1 = true
+			end)
+			while not part1 do
+				Citizen.Wait(1011)
+			end
+			Citizen.Wait(400)
+			table.insert(smokes, {handle = Smoke})
+			removeFCK()
+			Citizen.Wait(500)
+			print("waiting for Particles to gone")
+		end
+		refresh = false
+		Citizen.Wait(5000)
+    end)
+end
+
+function removeFCK()
+	Citizen.CreateThread(function()
+		for _,parts in pairs(smokes) do
+			print("removing "..parts.handle.."")
+			if parts.handle ~= nil and parts.handle ~= 0 and isparticleexist(parts.handle) then
+				print("deleted "..parts.handle.."")
+				stopparticles(parts.handle, true)
+				-- Wait(0)
+				--RemoveParticleFx(parts.handle, true)
+				smokes[_].handle = nil
+				smokes[_] = nil
+			else
+				print("checking "..parts.handle.."")
+				--Citizen.InvokeNative(0x8F75998877616996, parts.handle, 0)
+				--stopparticles(parts.handle, true)
+				smokes[_] = nil
+				--RemoveParticleFxFromEntity(getveh())
+			end
+		end
+		smokes = {}
+	end)
+end
+
+local useshit = GetHashKey('USE_PARTICLE_FX_ASSET') & 0x9C720B61
+function usefuckingshit(val)
+    return Citizen.InvokeNative(0x6C38AF3693A69A91, val)
+end
+
+function isparticleexist(val)
+    return Citizen.InvokeNative(0x74AFEF0D2E1E409B, val)
+end
+
+function stopparticles(val,bool)
+    return Citizen.InvokeNative(0x8F75998877616996, val, 0)
+end
+
+local shitfuck = GetHashKey('START_NETWORKED_PARTICLE_FX_LOOPED_ON_ENTITY_BONE') & 0xF478EFCF
+function startfuckingbullshit(effect, ent, shit1, shit2, shit3, shit4, shit5, shit6, bone, size, fuck1, fuck2, fuck3)
+    return Citizen.InvokeNative(0xDDE23F30CC5A0F03, effect, ent, shit1, shit2, shit3, shit4, shit5, shit6, bone, size, fuck1, fuck2, fuck3, 0, 0, 0, 0)
+end
+
+local triggered = false
+function NuiEngineTemp()
+	--NUI ENGINE TEMPERATURE STATUS
+	Citizen.CreateThread(function()
+		local newtemp = 0
+		if GetVehicleEngineTemperature(vehicle) < config.overheatmin then
+			RemoveParticleFxFromEntity(vehicle)
+		end
+		--PREVENT PLAYER VEHICLE FOR STARTING UP A VERY HOT ENGINE
+		local toohot = false
+		Citizen.CreateThread(function()
+			while GetVehicleEngineTemperature(vehicle) > config.overheatmin and invehicle do
+				--print("still hot")
+				toohot = true
+				SetVehicleCurrentRpm(vehicle, 0.0)
+				SetVehicleEngineOn(vehicle,false,true,true)
+				Citizen.Wait(0)
+			end
+			-- IF ENGINE IS OKAY REPEAT BELOW LOOP IS BROKEN DUE TO toohot boolean
+			if toohot and GetVehicleEngineTemperature(vehicle) < config.overheatmin then
+				NuiEngineTemp()
+				--TerminateThisThread()
+			end
+		end)
+		Citizen.Wait(1000)
+		--triggered = false
+		while invehicle and not toohot do
+			local sleep = 2000
+			local ped = ped
+			local vehicle = vehicle
+			if vehicle ~= nil and vehicle ~= 0 then
+				sleep = 1000
+				local temp = GetVehicleEngineTemperature(vehicle)
+				local overheat = false
+				while rpm > config.dangerrpm and config.engineoverheat do
+					rpm = GetVehicleCurrentRpm(vehicle)
+					Citizen.Wait(1000)
+					SetVehicleEngineCanDegrade(vehicle, true)
+					SetVehicleEngineTemperature(vehicle, GetVehicleEngineTemperature(vehicle) + config.addheat)
+					if newtemp ~= enginetemp or newtemp == nil then
+						newtemp = temp
+						SendNUIMessage({
+						type = "setTemp",
+						content = GetVehicleEngineTemperature(vehicle)
+						})
+						if GetVehicleEngineTemperature(vehicle) >= config.overheatmin then
+							explosion = 0
+							explode = PlaySoundFromEntity(GetSoundId(), "Engine_fail", vehicle, "DLC_PILOT_ENGINE_FAILURE_SOUNDS", 0, 0)
+							SetVehicleEngineTemperature(vehicle, GetVehicleEngineTemperature(vehicle) + config.overheatadd)
+							if not triggered then
+								triggered = true
+								TriggerServerEvent("renzu_hud:smokesync", vehicle, GetEntityCoords(vehicle,false))
+							end
+							while explosion < 500 do
+								--print("explode")
+								SetVehicleCurrentRpm(vehicle, 0.0)
+								SetVehicleEngineOn(vehicle,false,true,true)
+								explosion = explosion + 1
+								Citizen.Wait(0)
+							end
+							--removeFCK()
+							Citizen.Wait(500)
+							smokeonhood = false
+							if not overheat then
+								overheat = true
+								Citizen.CreateThread(function()
+										Citizen.Wait(5000)
+										if vehicle == 0 then
+											vehicle = GetVehiclePedIsIn(ped,true)
+										end
+										Citizen.Wait(1000)
+										SetVehicleEngineOn(vehicle,false,true,true)
+										if cansmoke and invehicle then
+											--StartSmoke(vehicle)
+										end
+									--end
+									Citizen.Wait(1000)
+									smokeonhood = true
+									--TerminateThisThread()
+								end)
+							end
+							explosion = 0
+							Citizen.Wait(3000)
+							if GetVehicleEngineTemperature(vehicle) < config.overheatmin then
+								StopSound(explode)
+								ReleaseSoundId(explode)
+							end
+						end
+					end
+					--print(temp)
+				end
+				--print(temp)
+				if newtemp ~= enginetemp or newtemp == nil then
+					newtemp = temp
+					SendNUIMessage({
+					type = "setTemp",
+					content = temp
+					})
+				end
+			end
+			Citizen.Wait(sleep)
+		end
+		Citizen.Wait(2000)
+		while invehicle do
+			Citizen.Wait(1)
+		end
+		Citizen.Wait(1000)
+		overheatoutveh = false
+		--removeFCK()
+		Citizen.Wait(1000)
+		Citizen.CreateThread(function()
+			while GetVehicleEngineTemperature(GetVehiclePedIsIn(ped,true)) > config.overheatmin and not toohot do
+				overheatoutveh = true
+				while not smokeonhood do
+					Citizen.Wait(1)
+				end
+				vehicle = GetVehiclePedIsIn(ped,true)
+				print("SMOKING")
+				local done = false
+				Citizen.Wait(5000)
+				Notify("Engine Temp: "..GetVehicleEngineTemperature(GetVehiclePedIsIn(ped,true)).."")
+				Citizen.Wait(1000)
+			end
+			overheatoutveh = false
+			--TerminateThisThread()
+		end)
+		Citizen.Wait(2000)
+		while overheatoutveh do
+			Citizen.Wait(100)
+		end
+		local cleanup = false
+		--removeFCK()
+		if not cleanup then
+			--RemoveParticleFxFromEntity(vehicle)
+		end
+		refresh = true
+		--RemoveParticleFxInRange(GetWorldPositionOfEntityBone(GetVehiclePedIsIn(ped,true), 28),20.0)
+		--RemoveParticleFxFromEntity(getveh())
+		Citizen.Wait(2000)
+		triggered = false
+		--TerminateThisThread()
 	end)
 end
 
@@ -1088,9 +1410,13 @@ RegisterCommand(config.commands['entering'], function()
 			content = false
 		})
 		if ismapopen then
-			SendNUIMessage({type = 'bukas'})
-			ismapopen =  false
+			SendNUIMessage({map = true, type = 'sarado'})
+			ismapopen = false
 		end
+		while IsPedInAnyVehicle(ped, false) do
+			Citizen.Wait(0)
+		end
+		invehicle = false
 	end
 end, false)
 
@@ -1129,3 +1455,215 @@ end, false)
 Citizen.CreateThread(function()
 	RegisterKeyMapping(config.commands['signal_hazard'], 'Signal Hazard', 'keyboard', config.keybinds['signal_hazard'])
 end)
+
+function drawTxt(text,font,x,y,scale,r,g,b,a)
+	SetTextFont(font)
+	SetTextScale(scale,scale)
+	SetTextColour(r,g,b,a)
+	SetTextOutline()
+	SetTextCentre(1)
+	SetTextEntry("STRING")
+	AddTextComponentString(text)
+	DrawText(x,y)
+end
+
+local turbo = 1.5
+
+function turbolevel(value, lvl)
+    if value > lvl then
+        return lvl
+    end
+    return value
+end
+
+function max(boost, rpm)
+    if boost > 3.0 then
+        boost = 3.0
+    end
+    if boost < 0.0 then
+        return 0.0
+    end
+    return turbolevel(boost, turbo)
+
+end
+
+local mode = 'NORMAL'
+
+function Round(num,numDecimalPlaces)
+	local mult = 10^(numDecimalPlaces or 0)
+	return math.floor(num*mult+0.5) / mult
+end
+
+function Fuel(vehicle)
+	if IsVehicleEngineOn(vehicle) then
+		local rpm = GetVehicleCurrentRpm(vehicle)
+		local gear = GetVehicleCurrentGear(vehicle)
+		local engineload = (rpm * (gear / 10))
+		local result = (config.fuelusage[Round(GetVehicleCurrentRpm(vehicle),1)] * (config.classes[GetVehicleClass(vehicle)] or 1.0) / 15)
+		local advformula = result + (result * engineload)
+		if mode == 'SPORTS' then
+			advformula = advformula * 1.5
+		end
+		if mode == 'ECO' then
+			advformula = advformula * 0.5
+		end
+		--print("FUEL USAGE: "..result..", ADV: "..advformula.." EngineLoad: "..engineload.."")
+		SetVehicleFuelLevel(vehicle,GetVehicleFuelLevel(vehicle) - advformula)
+		DecorSetFloat(vehicle,config.fueldecor,GetVehicleFuelLevel(vehicle))
+	end
+end
+
+local regdecor = false
+function fuelusagerun()
+	Citizen.CreateThread(function()
+		if not regdecor then
+			regdecor = true
+			DecorRegister(config.fueldecor,1)
+		end
+		while invehicle do
+			Citizen.Wait(2000)
+			local ped = ped
+			if GetPedInVehicleSeat(vehicle,-1) == ped then
+				Fuel(vehicle)
+			end
+		end
+	end)
+end
+
+function vehiclemode()
+	if mode == 'NORMAL' then
+		mode = 'SPORTS'
+
+		SendNUIMessage({
+			type = "setMode",
+			content = mode
+		})
+
+		local sound = false
+		Citizen.CreateThread(function()
+			while mode == 'SPORTS' do
+				local sleep = 2000
+				--local ply = PlayerPedId()
+				local reset = true
+				local vehicle = vehicle
+				if vehicle ~= 0 then
+					sleep = 7
+					local vehicleSpeed = 0
+					local rpm = GetVehicleCurrentRpm(vehicle)
+					local gear = GetVehicleCurrentGear(vehicle)
+					local engineload = (rpm * (gear / 10))
+					if rpm > 1.15 then
+					else
+						rpm = rpm * turbo
+					end
+					local vehicleSpeed = GetVehicleTurboPressure(vehicle)
+					local speed = GetEntitySpeed(vehicle) * 3.6
+					if sound and IsControlJustReleased(1, 32) then
+					StopSound(soundofnitro)
+					ReleaseSoundId(soundofnitro)
+					sound = false
+					end
+					if IsControlPressed(1, 32) then
+						SetVehicleTurboPressure(vehicle, max((rpm * 1) + engineload))
+						if not sound then
+							soundofnitro = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
+							sound = true
+						end
+					end
+					if reset and not IsControlPressed(1, 32) then
+						SetVehicleTurboPressure(vehicle, 0)
+					end
+					vehicleSpeed = GetVehicleTurboPressure(vehicle)
+					if gear == 0 then
+						gear = 1
+					end
+					SetVehicleCheatPowerIncrease(vehicle, 1.0)
+					local boost = vehicleSpeed * 7
+					--drawTxt("BOOST ADDED:  "..boost.."",4,0.5,0.93,0.50,255,255,255,180)
+					--drawTxt("BOOST PRESSURE:  "..vehicleSpeed.."",4,0.5,0.83,0.50,255,255,255,180)
+					--drawTxt("BOOST LVL:  "..GetVehicleCheatPowerIncrease(vehicle).."",4,0.5,0.79,0.50,255,255,255,180)
+					if IsControlPressed(1, 32) and GetVehicleCurrentRpm(vehicle) > 0.4 and vehicleSpeed > (turbo / 2) then
+					SetVehicleCheatPowerIncrease(vehicle, boost)
+					end
+					local vehicleMaxSpeed = 3.0
+				end
+				Citizen.Wait(sleep)
+			end
+		end)
+	elseif mode == 'SPORTS' then
+		mode = 'ECO'
+		SendNUIMessage({
+			type = "setMode",
+			content = mode
+		})
+		local sound = false
+		Citizen.CreateThread(function()
+			while mode == 'ECO' do
+				local sleep = 2000
+				--local ply = PlayerPedId()
+				local reset = true
+				local vehicle = vehicle
+				if vehicle ~= 0 then
+					sleep = 7
+					local vehicleSpeed = 0
+					local rpm = GetVehicleCurrentRpm(vehicle)
+					local gear = GetVehicleCurrentGear(vehicle)
+					local engineload = (rpm * (gear / 10))
+					if rpm > 1.15 then
+					else
+						rpm = rpm * -0.5
+					end
+					local vehicleSpeed = GetVehicleTurboPressure(vehicle)
+					local speed = GetEntitySpeed(vehicle) * 3.6
+					if sound and IsControlJustReleased(1, 32) then
+					StopSound(soundofnitro)
+					ReleaseSoundId(soundofnitro)
+					sound = false
+					end
+					if IsControlPressed(1, 32) then
+						SetVehicleTurboPressure(vehicle, max((rpm * 1) + engineload))
+						if not sound then
+							soundofnitro = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
+							sound = true
+						end
+					end
+					if reset and not IsControlPressed(1, 32) then
+						SetVehicleTurboPressure(vehicle, 0)
+					end
+					vehicleSpeed = GetVehicleTurboPressure(vehicle)
+					if gear == 0 then
+						gear = 1
+					end
+					SetVehicleCheatPowerIncrease(vehicle, 1.0)
+					local boost = vehicleSpeed * 7
+					if IsControlPressed(1, 32) and GetVehicleCurrentRpm(vehicle) > 0.4 and vehicleSpeed > (turbo / 2) then
+					SetVehicleCheatPowerIncrease(vehicle, boost)
+					end
+					local vehicleMaxSpeed = 3.0
+				end
+				Citizen.Wait(sleep)
+			end
+		end)
+	else
+		mode = 'NORMAL'
+		SendNUIMessage({
+			type = "setMode",
+			content = mode
+		})
+	end
+end
+
+RegisterCommand(config.commands['mode'], function()
+	vehiclemode()
+end, false)
+
+Citizen.CreateThread(function()
+	mode = 'NORMAL'
+	RegisterKeyMapping(config.commands['mode'], 'Vehicle Mode', 'keyboard', config.keybinds['mode'])
+end)
+
+function Notify(msg)
+	SetNotificationTextEntry('STRING')
+	AddTextComponentString(msg)
+	DrawNotification(0,1)
+end

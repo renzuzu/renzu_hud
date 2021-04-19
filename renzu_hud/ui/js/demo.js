@@ -15,7 +15,6 @@ function pedface() {
         }  
     });
 }
-pedface();
 
 $(document).on('click','#start',function(){
     console.log("START")
@@ -419,6 +418,40 @@ function setBrake(s) {
     }
 }
 
+function CarMap(detalye) {
+    var detail = detalye;
+    if (detail.type == "updatemapa") {
+        $(".centermap").css("transform", "rotate(" + detail.myheading + "deg)");
+        $("#carblip").css("transform", "translateX(-50%) translateY(50%) rotate(" + detail.camheading + "deg)");
+        $(":root").css("--Y", detail.y);
+        $(":root").css("--X", detail.x);
+    } else {
+        if (detail.type == "sarado") {
+            $(".carhudmap").fadeOut();
+            var lastCssUpdate = (new Date).getTime();
+            var a = 0;
+            for (; a < 1e7 && !((new Date).getTime() - lastCssUpdate > 350); a++) {}
+            $("#gps").fadeOut();
+        }
+        if (detail.type =="bukas") {
+            $("#gps").fadeIn();
+            var lastCssUpdate = (new Date).getTime();
+            var a = 0;
+            for (; a < 1e7 && !((new Date).getTime() - lastCssUpdate > 350); a++) {}
+            $(".carhudmap").fadeIn();
+        }
+    }
+}
+
+function setTemp(temp) {
+    var temp = temp - 50
+    document.getElementById("cartempbar").style.width = ''+temp+'%'
+}
+
+function setMode(value) {
+    document.getElementById("mode").innerHTML = value;
+}
+setMode('NORMAL')
 //FUNCTIONS
 var renzu_hud = {
     setArmor,
@@ -448,9 +481,37 @@ var renzu_hud = {
     setHood,
     setTrunk,
     setBrake,
+    setTemp,
+    setMode,
 
 };
 setMic(2);
+
+let gps = true;
+var mapdiv = document.getElementById("mapdiv");
+var zoom = 7;
+var content = "";
+var index = 1;
+var complete = true;
+let status = true;
+let statusA = true;
+
+function startmap() {
+  for (; index < mp(zoom) + 1; index++) {
+    var jump = 1;
+    generatedimg(jump,zoom,content,index)
+  }
+}
+
+function mp(val) {
+  return Math.pow(2, val - 2)
+}
+
+function generatedimg(var1,var2,var3,var4) {
+  for (; var1 < mp(var2) + 1; var1++) {
+    content = content + "<img src='https://raw.githubusercontent.com/renzuzu/carmap/main/carmap/satellite/" + var2 + "_" + var1 + "_" + var4 + ".png' class='map' id='map' />";
+  }
+}
 
 window.addEventListener("message", event => {
     const item = event.data || event.detail;
@@ -464,4 +525,24 @@ window.addEventListener("message", event => {
     if (item.compass) {
         onMessageRecieved(event.data);
     }
-  });
+    if (item.map) {
+        CarMap(item);
+    }
+});
+
+function downloadcomplete() {
+  complete = true;
+}
+
+function append(div) {
+  $('#'+div+'').append(content)
+}
+
+setInterval(() => {
+  if (complete) {$(".fadeout").fadeOut();$(".loading").fadeOut();}
+}, 550);
+
+startmap()
+append('mapdiv')
+setTimeout(downloadcomplete, 4000)
+pedface()

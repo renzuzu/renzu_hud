@@ -214,7 +214,6 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                         --speedtable(speed,savegear)
                         if (GetVehicleCurrentRpm(vehicle) * 100.0) > (tractioncontrol(GetVehicleWheelSpeed(vehicle,1) * 3.6,savegear) * 90.0) then
                         SetRpm(vehicle, speedtable(speed,savegear))
-                        print("rpm")
                         else
                             SetRpm(vehicle, rpm+0.1)
                             SetVehicleMaxSpeed(vehicle,speed)

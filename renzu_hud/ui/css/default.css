@@ -34,7 +34,7 @@ right:7%;
     position:absolute;
     top:34px;
     opacity:1.0;
-    right:103px;
+    right:63px;
     margin-right:-40px;
 }
 
@@ -45,7 +45,7 @@ right:7%;
     position: absolute;
     display: block;
     top: 92px;
-    right: 112px;
+    right: 72px;
     text-shadow: 1px 1px 1px #000000;
     transition: all 0.2s ease-in-out;
   }

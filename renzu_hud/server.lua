@@ -33,3 +33,10 @@ AddEventHandler("renzu_hud:getmile", function()
 	TriggerClientEvent('renzu_hud:receivemile', source, adv_table)
 	end
 end)
+
+RegisterServerEvent("renzu_hud:smokesync")
+AddEventHandler("renzu_hud:smokesync", function(ent,coord)
+	local ent = ent
+	local coord = coord
+	TriggerClientEvent('start:smoke', -1, ent,coord)
+end)
