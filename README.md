@@ -15,9 +15,12 @@ Arrow right & Arrow Left
 Hazard = Backspace
 
 # CAR HUD Feature
-![alt text](https://i.imgur.com/AIvst4Q.png)
+![alt text](https://i.imgur.com/1zJtIyY.png)
 
 Mileage System
+Manual Transmission Possible
+Built in Car Map
+Waypoint Large Marker
 Distance to Waypoint Calculation to UI
 Clock
 Gear
