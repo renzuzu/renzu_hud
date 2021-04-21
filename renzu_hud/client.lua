@@ -420,6 +420,12 @@ Citizen.CreateThread(function()
 				SendNUIMessage({map = true, type = 'sarado'})
 				ismapopen = false
 			end
+			if manual then
+				SendNUIMessage({
+					type = "setManual",
+					content = false
+				})
+			end
 			Citizen.Wait(1000)
 			uimove = true
 		end
