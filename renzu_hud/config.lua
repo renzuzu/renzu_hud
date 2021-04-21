@@ -54,6 +54,9 @@ config.dangerrpm = 0.92 -- 9200 rpm, above this level temp will rise
 config.addheat = 10 -- additional temp for everytime the dangerrpm is reach
 config.overheatmin = 150 -- engine will explode when the temperature rise to this level
 config.overheatadd = 500 -- additional temperature when engine explodes
+-- Vehicle Mode
+config.boost = 1.5 -- Boost Level when sports mode is activated eg. 1.5 Bar, you can put upt o 3.0 or even 5.0 but pretty sure it will be unrealistic acceleration ( this affect Fuel Consumption )
+config.eco = 0.5 -- Eco Level when Eco Mode is activated (this affect the efficiency of fuel)
 --STATUS MODE ( disabled v2 if you want optimize version ( FETCH ONLY The Player Status if Toggled ) else v2 is running loop default of 1sec)
 config.statusv2 = true -- enable this if you want the status hud in bottom part , false if toggle mode
 config.statusv2_sleep = 1000 -- 1sec
@@ -128,7 +131,8 @@ config.keybinds = {
 	-- seatbelt
 	car_seatbelt = 'B',
 	entering = 'F',
-	mode = 'RSHIFT'
+	mode = 'RSHIFT',
+	differential = 'RCONTROL'
 }
 
 --COMMANDS FOR KEYBINDS
@@ -144,7 +148,8 @@ config.commands = {
 	-- seatbelt
 	car_seatbelt = 'seatbelt',
 	entering = 'entervehicle',
-	mode = 'mode'
+	mode = 'mode',
+	differential = 'differential'
 }
 
 --OPTIMIZATION

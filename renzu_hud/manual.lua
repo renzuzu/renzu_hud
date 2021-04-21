@@ -41,7 +41,7 @@ function Nuimanualtranny()
                     content = manual
                     })
                 end
-                print(savegear)
+                --print(savegear)
                 if newgear ~= savegear or newgear == nil then
                     SendNUIMessage({
                     type = "setShift",
@@ -111,6 +111,13 @@ function NuiManualEtcFunc()
     end)
 end
 
+function ShowHelpNotification(msg, thisFrame, beep, duration)
+	AddTextEntry('notishit', msg)
+    print(msg)
+    DisplayHelpTextThisFrame('notishit', false)
+
+end
+
 function NuiMainmanualLoop() -- Dont edit unless you know the system how it works.
     Citizen.CreateThread(function()
         while manual do
@@ -144,12 +151,12 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                         savegear = 0
                         reverse = false
                         SetVehicleGear(vehicle,0)
-                        ESX.ShowHelpNotification("Neutral", true, 1, 5)
+                        ShowHelpNotification("Neutral", true, 1, 5)
                     else
                         if maxgear >= (savegear + 1) then
                             savegear = savegear + 1
                             SetVehicleGear(vehicle,currentgear + 1)
-                            ESX.ShowHelpNotification(savegear, true, 1, 5)
+                            ShowHelpNotification(savegear, true, 1, 5)
                         end
                     end
                     Citizen.Wait(100)
@@ -160,9 +167,9 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                     savegear = savegear - 1
                     SetVehicleGear(vehicle,currentgear - 1)
                     if savegear == 0 then
-                        ESX.ShowHelpNotification('NEUTRAL', true, 1, 5)
+                        ShowHelpNotification('NEUTRAL', true, 1, 5)
                     else
-                        ESX.ShowHelpNotification(savegear, true, 1, 5)
+                        ShowHelpNotification(savegear, true, 1, 5)
                     end
                     Citizen.Wait(100)
                 end
@@ -177,7 +184,7 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                 end
 
                 if savegear == 0 and IsControlPressed(1, 20) and IsControlJustReleased(1, 173) or savegear == 0 and clutch and IsControlJustReleased(1, 173) then
-                    ESX.ShowHelpNotification('REVERSE', true, 1, 5)
+                    ShowHelpNotification('REVERSE', true, 1, 5)
                     marcha = "R"
                     savegear = 0
                     reverse = true
@@ -213,8 +220,8 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                     --else
                         --speedtable(speed,savegear)
                         if (GetVehicleCurrentRpm(vehicle) * 100.0) > (tractioncontrol(GetVehicleWheelSpeed(vehicle,1) * 3.6,savegear) * 85.0) then
-                        SetRpm(vehicle, speedtable(speed,savegear))
-                        else
+                            SetRpm(vehicle, speedtable(speed,savegear))
+                        elseif rpm > 0.5 then
                             SetRpm(vehicle, rpm+0.1)
                             SetVehicleMaxSpeed(vehicle,speed)
                             Wait(51)
@@ -243,25 +250,25 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                 -- end
                 end
                 if speed < 5 and savegear > 3 then
-                SetVehicleGear(vehicle,1)
+                    SetVehicleGear(vehicle,1)
                 end
 
                 --neutral launch control
                 if IsControlPressed(1, 20) and IsControlPressed(1, 32) and speed < 11 and rpm >= 0.5 or clutch and IsControlPressed(1, 32) and speed < 11 and rpm >= 0.5 then
-                SetVehicleCurrentRpm(vehicle,0.6)
-                Citizen.Wait(11)
-                SetVehicleCurrentRpm(vehicle,0.5)
-                Citizen.Wait(11)	
-                SetVehicleCurrentRpm(vehicle,1.2)
-                Citizen.Wait(55)
-                SetVehicleCurrentRpm(vehicle,0.7)
-                Citizen.Wait(11)
-                SetVehicleCurrentRpm(vehicle,1.4)
-                Citizen.Wait(11)
-                SetVehicleCurrentRpm(vehicle,0.7)
-                Citizen.Wait(55)
-                SetVehicleCurrentRpm(vehicle,0.8)
-                Citizen.Wait(55)
+                    SetVehicleCurrentRpm(vehicle,0.6)
+                    Citizen.Wait(11)
+                    SetVehicleCurrentRpm(vehicle,0.5)
+                    Citizen.Wait(11)	
+                    SetVehicleCurrentRpm(vehicle,1.2)
+                    Citizen.Wait(55)
+                    SetVehicleCurrentRpm(vehicle,0.7)
+                    Citizen.Wait(11)
+                    SetVehicleCurrentRpm(vehicle,1.4)
+                    Citizen.Wait(11)
+                    SetVehicleCurrentRpm(vehicle,0.7)
+                    Citizen.Wait(55)
+                    SetVehicleCurrentRpm(vehicle,0.8)
+                    Citizen.Wait(55)
                 end
                 
                 --DISABLE FOR NOW H-SHIFTER LOGITECH KEYBINDS (ACTIVATE THIS IF YOU KNOW WHAT YOU ARE DOING - You need to config the logitech game profiler to use this keybinds)
@@ -270,36 +277,36 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                 --     if IsControlPressed(0, 162) and clutch then
                 --         savegear = 1
                 --         SetVehicleGear(vehicle,1)
-                --         ESX.ShowHelpNotification(savegear, true, 1, 5)
+                --         ShowHelpNotification(savegear, true, 1, 5)
                 --     end
 
                 --     if IsControlPressed(0, 110) and clutch then
                 --         savegear = 2
                 --         SetVehicleGear(vehicle,2)
-                --         ESX.ShowHelpNotification(savegear, true, 1, 5)
+                --         ShowHelpNotification(savegear, true, 1, 5)
                 --     end
 
                 --     if IsControlPressed(0, 163) and clutch then
                 --         savegear = 3
                 --         SetVehicleGear(vehicle,3)
-                --         ESX.ShowHelpNotification(savegear, true, 1, 5)
+                --         ShowHelpNotification(savegear, true, 1, 5)
                 --     end
 
                 --     if IsControlPressed(0, 117) and clutch then
                 --         savegear = 4
                 --         SetVehicleGear(vehicle,4)
-                --         ESX.ShowHelpNotification(savegear, true, 1, 5)
+                --         ShowHelpNotification(savegear, true, 1, 5)
                 --     end
 
                 --     if IsControlPressed(0, 111) and clutch then
                 --         savegear = 5
                 --         SetVehicleGear(vehicle,5)
-                --         ESX.ShowHelpNotification(savegear, true, 1, 5)
+                --         ShowHelpNotification(savegear, true, 1, 5)
                 --     end
                 --     if IsControlPressed(0, 118) and clutch then
                 --         savegear = 6
                 --         SetVehicleGear(vehicle,6)
-                --         ESX.ShowHelpNotification(savegear, true, 1, 5)
+                --         ShowHelpNotification(savegear, true, 1, 5)
                 --     end
                 -- end
             else
@@ -379,7 +386,7 @@ end
 
 -- MAIN MANUAL SYSTEM LOOP ( EDIT THIS if you know the system )
 function speedtable(speed,gear)
-    --ESX.ShowHelpNotification(percentage(20,60), true, 1, 5)
+    --ShowHelpNotification(percentage(20,60), true, 1, 5)
     --SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", 250*1.000000)
     --local drive = GetVehicleHandlingFloat(vehicle, "CHandlingData", "fDriveInertia")
     --local force = GetVehicleHandlingFloat(vehicle ,"CHandlingData", "fInitialDriveForce")

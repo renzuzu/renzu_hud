@@ -16,6 +16,8 @@ Citizen.CreateThread(function()
 	else
 		ESX = true
 	end
+	DecorRegister("INERTIA", 1)
+	DecorRegister("DRIVEFORCE", 1)
 end)
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- VARIABLES
@@ -392,6 +394,10 @@ Citizen.CreateThread(function()
 						content = true
 					})
 				end
+				SendNUIMessage({
+					type = "setDifferential",
+					content = GetVehicleHandlingFloat(vehicle, "CHandlingData","fDriveBiasFront")
+				})
 			end
 			invehicle = true
 		else
@@ -1473,7 +1479,7 @@ function drawTxt(text,font,x,y,scale,r,g,b,a)
 	DrawText(x,y)
 end
 
-local turbo = 1.5
+local turbo = config.boost
 
 function turbolevel(value, lvl)
     if value > lvl then
@@ -1508,10 +1514,10 @@ function Fuel(vehicle)
 		local result = (config.fuelusage[Round(GetVehicleCurrentRpm(vehicle),1)] * (config.classes[GetVehicleClass(vehicle)] or 1.0) / 15)
 		local advformula = result + (result * engineload)
 		if mode == 'SPORTS' then
-			advformula = advformula * 1.5
+			advformula = advformula * config.boost
 		end
 		if mode == 'ECO' then
-			advformula = advformula * 0.5
+			advformula = advformula * config.eco
 		end
 		--print("FUEL USAGE: "..result..", ADV: "..advformula.." EngineLoad: "..engineload.."")
 		SetVehicleFuelLevel(vehicle,GetVehicleFuelLevel(vehicle) - advformula)
@@ -1556,14 +1562,19 @@ function turboboost(gear)
 	return engineload 
 end
 
+local busy = false
 function vehiclemode()
+	PlaySoundFrontend(PlayerId(), 'NAV_UP_DOWN', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 1)
 	if mode == 'NORMAL' then
 		mode = 'SPORTS'
-
 		SendNUIMessage({
 			type = "setMode",
 			content = mode
 		})
+		Citizen.Wait(500)
+		while busy do
+			Citizen.Wait(10)
+		end
 		local rpm = GetVehicleCurrentRpm(vehicle)
 		local gear = GetVehicleCurrentGear(vehicle)
 		Citizen.CreateThread(function()
@@ -1584,6 +1595,10 @@ function vehiclemode()
 		local sound = false
 		Citizen.CreateThread(function()
 			local newgear = 0
+			olddriveinertia = GetVehicleHandlingFloat(vehicle, "CHandlingData","fDriveInertia")
+			oldriveforce = GetVehicleHandlingFloat(vehicle, "CHandlingData","fInitialDriveForce")
+			DecorSetFloat(vehicle, "INERTIA", olddriveinertia)
+			DecorSetFloat(vehicle, "DRIVEFORCE", oldriveforce)
 			while mode == 'SPORTS' do
 				local sleep = 2000
 				--local ply = PlayerPedId()
@@ -1619,12 +1634,16 @@ function vehiclemode()
 							Citizen.Wait(1)
 							lag = lag + 1
 						end
-						--SetVehicleTurboPressure(vehicle, max((rpm * 1) + engineload))
 						if not sound then
 							soundofnitro = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
 							sound = true
 						end
 					else
+						if sound then
+							StopSound(soundofnitro)
+							ReleaseSoundId(soundofnitro)
+							sound = false
+						end
 						Citizen.Wait(500) -- TURBO LAG
 					end
 					if reset and not IsControlPressed(1, 32) then
@@ -1634,17 +1653,28 @@ function vehiclemode()
 					if gear == 0 then
 						gear = 1
 					end
-					--SetVehicleCheatPowerIncrease(vehicle, 1.0)
 					local boost = vehicleSpeed * 7
-					--drawTxt("BOOST ADDED:  "..boost.."",4,0.5,0.93,0.50,255,255,255,180)
-					--drawTxt("BOOST PRESSURE:  "..vehicleSpeed.."",4,0.5,0.83,0.50,255,255,255,180)
-					--drawTxt("BOOST LVL:  "..GetVehicleCheatPowerIncrease(vehicle).."",4,0.5,0.79,0.50,255,255,255,180)
 					if IsControlPressed(1, 32) and GetVehicleCurrentRpm(vehicle) > 0.4 and vehicleSpeed > (turbo / 2) then
-					SetVehicleCheatPowerIncrease(vehicle, boost)
+						SetVehicleHandlingFloat(vehicle, "CHandlingData", "fDriveInertia", boost / 10)
+						SetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveForce", engineload)
+						SetVehicleCheatPowerIncrease(vehicle, boost)
 					end
 				end
 				Citizen.Wait(sleep)
 			end
+			busy = true
+			Citizen.Wait(100)
+			SetVehicleHandlingFloat(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
+			SetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
+			while not GetVehicleHandlingFloat(vehicle, "CHandlingData","fDriveInertia") == DecorGetFloat(vehicle,"INERTIA") and invehicle do
+				SetVehicleHandlingFloat(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
+				Citizen.Wait(0)
+			end
+			while not GetVehicleHandlingFloat(vehicle, "CHandlingData","fInitialDriveForce") == DecorGetFloat(vehicle,"DRIVEFORCE") and invehicle do
+				SetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
+				Citizen.Wait(0)
+			end
+			busy = false
 			StopSound(soundofnitro)
 			ReleaseSoundId(soundofnitro)
 		end)
@@ -1654,8 +1684,15 @@ function vehiclemode()
 			type = "setMode",
 			content = mode
 		})
+		Citizen.Wait(500)
+		while busy do
+			Citizen.Wait(10)
+		end
 		local sound = false
 		Citizen.CreateThread(function()
+			local olddriveinertia = 1.0
+			olddriveinertia = GetVehicleHandlingFloat(vehicle, "CHandlingData","fDriveInertia")
+			SetVehicleHandlingFloat(vehicle, "CHandlingData", "fDriveInertia", config.eco)
 			while mode == 'ECO' do
 				local sleep = 2000
 				--local ply = PlayerPedId()
@@ -1663,46 +1700,20 @@ function vehiclemode()
 				local vehicle = vehicle
 				if vehicle ~= 0 then
 					sleep = 7
-					local vehicleSpeed = 0
-					local rpm = GetVehicleCurrentRpm(vehicle)
-					local gear = GetVehicleCurrentGear(vehicle)
-					local engineload = (rpm * (gear / 10))
-					if rpm > 1.15 then
-					else
-						rpm = rpm * -0.5
-					end
-					local vehicleSpeed = GetVehicleTurboPressure(vehicle)
-					--local speed = GetEntitySpeed(vehicle) * 3.6
-					if sound and IsControlJustReleased(1, 32) then
-					StopSound(soundofnitro)
-					ReleaseSoundId(soundofnitro)
-					sound = false
-					end
 					if IsControlPressed(1, 32) then
-						SetVehicleTurboPressure(vehicle, max((rpm * 1) + engineload))
-						if not sound then
-							soundofnitro = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
-							sound = true
-						end
-					else
-						Citizen.Wait(500)
+					SetVehicleCheatPowerIncrease(vehicle, config.eco+0.4)
 					end
-					if reset and not IsControlPressed(1, 32) then
-						SetVehicleTurboPressure(vehicle, 0)
-					end
-					vehicleSpeed = GetVehicleTurboPressure(vehicle)
-					if gear == 0 then
-						gear = 1
-					end
-					--SetVehicleCheatPowerIncrease(vehicle, 1.0)
-					local boost = vehicleSpeed * 7
-					if IsControlPressed(1, 32) and GetVehicleCurrentRpm(vehicle) > 0.4 and vehicleSpeed > (turbo / 2) then
-					SetVehicleCheatPowerIncrease(vehicle, boost)
-					end
-					local vehicleMaxSpeed = 3.0
 				end
 				Citizen.Wait(sleep)
 			end
+			busy = true
+			Citizen.Wait(100)
+			SetVehicleHandlingFloat(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
+			while not GetVehicleHandlingFloat(vehicle, "CHandlingData","fDriveInertia") == DecorGetFloat(vehicle,"INERTIA") and invehicle do
+				SetVehicleHandlingFloat(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
+				Citizen.Wait(0)
+			end
+			busy = false
 			StopSound(soundofnitro)
 			ReleaseSoundId(soundofnitro)
 		end)
@@ -1722,6 +1733,63 @@ end, false)
 Citizen.CreateThread(function()
 	mode = 'NORMAL'
 	RegisterKeyMapping(config.commands['mode'], 'Vehicle Mode', 'keyboard', config.keybinds['mode'])
+end)
+
+local old_diff = nil
+local togglediff = false
+function differential()
+	print("pressed")
+	local diff = GetVehicleHandlingFloat(vehicle, "CHandlingData","fDriveBiasFront")
+	print(diff)
+	if diff > 0.01 and diff < 0.9 and old_diff == nil and not togglediff then -- default 4wd
+		old_diff = diff -- save old
+		diff = 0.0 -- change to rearwheel
+		togglediff = true
+	elseif old_diff ~= nil and togglediff then
+		diff = old_diff
+		SetVehicleHandlingFloat(vehicle, "CHandlingData", "fDriveBiasFront", diff)
+		togglediff = false
+		old_diff = nil
+	elseif diff == 1.0 and not togglediff and old_diff == nil then -- Front Wheel Drive
+		print("FWD")
+		diff =  0.5
+		old_diff = 1.0
+		togglediff = true
+	elseif diff == 0.0 and not togglediff and old_diff == nil then -- Rear Wheel Drive
+		old_diff = 0.0
+		diff = 0.5
+		togglediff = true
+	end
+	if togglediff then
+		PlaySoundFrontend(PlayerId(), 'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 1)
+	else
+		PlaySoundFrontend(PlayerId(), 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 1)
+	end
+	SendNUIMessage({
+		type = "setDifferential",
+		content = diff
+	})
+	Citizen.Wait(500)
+	Citizen.CreateThread(function()
+		SetVehicleHandlingFloat(vehicle, "CHandlingData", "fDriveBiasFront", diff)
+		while togglediff and invehicle do
+			Citizen.Wait(1000)
+		end
+		Citizen.Wait(300)
+		if not invehicle then
+			togglediff = false
+			old_diff = 0
+		end
+	end)
+	
+end
+
+RegisterCommand(config.commands['differential'], function()
+	differential()
+end, false)
+
+Citizen.CreateThread(function()
+	RegisterKeyMapping(config.commands['differential'], '4WD Mode', 'keyboard', config.keybinds['differential'])
 end)
 
 function Notify(msg)

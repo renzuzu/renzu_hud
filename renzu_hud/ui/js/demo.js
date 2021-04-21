@@ -462,6 +462,17 @@ function setMode(value) {
 }
 setMode('NORMAL')
 
+function setDifferential(value) {
+    if (value == 0.0) {
+        value = 'RWD'
+    } else if (value == 1.0) {
+        value = 'FWD'
+    } else {
+        value = 'AWD'
+    }
+    document.getElementById("diff").innerHTML = value;
+}
+
 //FUNCTIONS
 var renzu_hud = {
     setArmor,
@@ -494,6 +505,7 @@ var renzu_hud = {
     setBrake,
     setTemp,
     setMode,
+    setDifferential,
 
 };
 setMic(2);
