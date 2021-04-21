@@ -1,14 +1,18 @@
 local adv_table = {}
-MySQL.Async.fetchAll("SELECT adv_stats,plate FROM owned_vehicles", {}, function(results)
-	if #results > 0 then
-		for k,v in pairs(results) do
-			if v.adv_stats and v.plate ~= nil then
-				local stats = json.decode(v.adv_stats)
-				stats.plate = string.gsub(v.plate, "%s+", "")
-				adv_table[v.plate] = stats
+Citizen.CreateThread(function()
+	Citizen.Wait(10000)
+	MySQL.Async.fetchAll("SELECT adv_stats,plate FROM owned_vehicles", {}, function(results)
+		if #results > 0 then
+			for k,v in pairs(results) do
+				if v.adv_stats and v.plate ~= nil then
+					local stats = json.decode(v.adv_stats)
+					stats.plate = string.gsub(v.plate, "%s+", "")
+					adv_table[v.plate] = stats
+				end
 			end
 		end
-	end
+	end)
+	print("^g RENZU HUD STARTED!")
 end)
 
 RegisterServerEvent("renzu_hud:savemile")

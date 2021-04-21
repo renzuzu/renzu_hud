@@ -38,12 +38,17 @@ config = {
 		offsetY = 1.2;
 	};
 
-	vehicleCheck = true; -- Rather or not to display HUD when player(s) are inside a vehicle
+	vehicleCheck = true;
 }
 
 config.framework = 'ESX' -- ESX | VRP | QSHIT | STANDALONE
 --CHANGE ACCORDING TO YOUR STATUS ESX STATUS OR ANY STATUS MOD
 config.centercarhud = 'map' -- Feature of Car hud - MAP , MP3 (IF YOU CHOOSE MP3 you need renzu_mp3 as dependency, and renzu_mp3 need xsound)
+-- minimap
+config.useminimapeverytime = true -- FORCE display radarmap all the time? (USE THIS ONLY IF Some of your other script use displayradar(FALSE) , its advisable to disable this config instead remove it on your other script, default GTA show the Minimap everytime)
+config.usecircleminimap = true -- display oval minimap instead of box radar map?
+config.removemaphealthandarmor = false -- FORCE REMOVE HEALTHBAR AND ARMOR FROM MINIMAP (This will cause more infinite loop just to disable the hp and armor, will cause more Cpu ms at resmon) -- USE THIS ONLY IF minimap.gfx is not working for you, its on the stream folder, it remove health and armor automatically
+--OVERHEAT FUNC
 config.engineoverheat = true -- ENGINE EXPLODE AND OVERHEAT FEATURE (IF REVING 9200 RPM ABOVE Engine Temperature will rise, explode it if too hot , temp value = 150)
 config.dangerrpm = 0.92 -- 9200 rpm, above this level temp will rise
 config.addheat = 10 -- additional temp for everytime the dangerrpm is reach
@@ -59,9 +64,12 @@ config.status = {
 	'hunger'
 }
 
+--CUSTOM FUEL SYSTEM (YOU NEED TO DISABLE Your Other Vehicle Fuel management to make this work specially for the ECO Mode)
+config.usecustomfuel = true -- needed if you want to use ECO and Sports Mode Fuel Cost Effect
 config.fueldecor = "_FUEL_LEVEL"
 
 config.classes = {
+	--change the value example 0.6, the greater the value the greater fuel consumption
 	[0] = 0.6, -- Compacts
 	[1] = 0.6, -- Sedans
 	[2] = 0.6, -- SUVs
@@ -87,6 +95,9 @@ config.classes = {
 }
 
 config.fuelusage = {
+	--UP TO 1.4 YES some vehicle overev to 1.4 level.
+	-- change the value if need to change the main fuel consumption system
+	-- the greater the value the greater consumption
 	[1.4] = 2.7,
 	[1.3] = 2.5,
 	[1.2] = 2.4,
@@ -104,6 +115,7 @@ config.fuelusage = {
 	[0.0] = 0.0,
 }
 
+-- HERE YOU CAN CHANGE THE KEYBINDS
 config.keybinds = {
 	--TOGGLE STATUS
 	showstatus = 'INSERT',
@@ -119,6 +131,7 @@ config.keybinds = {
 	mode = 'RSHIFT'
 }
 
+--COMMANDS FOR KEYBINDS
 config.commands = {
 	--TOGGLE STATUS
 	showstatus = 'showstatus',
@@ -142,9 +155,9 @@ config.lights_sleep = 1000
 config.direction_sleep = 2500
 config.NuiCarhpandGas_sleep = 1500
 config.car_mainloop_sleep = 2000
-config.rpm_speed_loop = 22
-config.idle_rpm_speed_sleep = 111
-config.Rpm_sleep = 111
-config.Rpm_sleep_2 = 22
-config.Speed_sleep = 111
-config.Speed_sleep_2 = 22
+config.rpm_speed_loop = 52
+config.idle_rpm_speed_sleep = 151
+config.Rpm_sleep = 151
+config.Rpm_sleep_2 = 52
+config.Speed_sleep = 151
+config.Speed_sleep_2 = 52

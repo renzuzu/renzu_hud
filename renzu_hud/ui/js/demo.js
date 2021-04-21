@@ -156,6 +156,15 @@ function setShowstatus(bool) {
     }
 }
 
+function setShowstatusv2(bool) {
+    console.log(bool)
+    if (bool) {
+        $("#status2").fadeIn();
+    } else {
+        $("#status2").fadeOut();
+    }
+}
+
 function setRpm(percent) {
     var rpm = (percent * 100);
     rpm2 = rpm.toFixed(0) * 100
@@ -452,6 +461,7 @@ function setMode(value) {
     document.getElementById("mode").innerHTML = value;
 }
 setMode('NORMAL')
+
 //FUNCTIONS
 var renzu_hud = {
     setArmor,
@@ -459,6 +469,7 @@ var renzu_hud = {
     setMic,
     setStatus,
     setShowstatus,
+    setShowstatusv2,
 
     //CAR
     setShow,

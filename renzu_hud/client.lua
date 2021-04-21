@@ -237,25 +237,27 @@ function updateStatus(pressed)
 	oxygen = GetPlayerUnderwaterTimeRemaining(PlayerId()) * 10
 	energy = 0
 	stamina = 100 - GetPlayerSprintStaminaRemaining(PlayerId())
-	TriggerEvent('esx_status:getStatusm', config.status, function(status)
-		for k,v in pairs(status) do
-			if k == 'thirst' then
-				thirst = v.getPercent()
-			end
-			if k == 'sanity' then
-				sanity = v.getPercent()
-			end
-			if k == 'energy' then
-				energy = v.getPercent()
-			end
-			if k == 'hunger' then
-				hunger = v.getPercent()
-			end
+	local status = exports['standalone_status']:GetStatus(config.status)--, function(status)
+	for k,v in pairs(status) do
+		--print(k)
+		Wait(100)
+		--print(v)
+		if k == 'thirst' then
+			thirst = v / 10000
 		end
-		fetch = true
-	end)
+		if k == 'sanity' then
+			sanity = v / 10000
+		end
+		if k == 'energy' then
+			energy = v / 10000
+		end
+		if k == 'hunger' then
+			hunger = v / 10000
+		end
+	end
+	fetch = true
 	while not fetch do
-		Citizen.Wait(1)
+		Citizen.Wait(111)
 	end
 	status = {
 		stress = tonumber(sanity),
@@ -272,6 +274,11 @@ function updateStatus(pressed)
 end
 
 	Citizen.CreateThread(function()
+		Citizen.Wait(1000)
+		SendNUIMessage({
+			type = "setShowstatusv2",
+			content = config.statusv2
+		})
 		if config.statusv2 then
 			while true do
 				local sleep = config.statusv2_sleep
@@ -797,6 +804,7 @@ function NuiVehicledoorstatus()
 			if vehicle ~= nil and vehicle ~= 0 then
 				----print(GetVehicleDoorStatus(vehicle))
 				for i = 0, 6 do
+					Wait(10)
 					if GetVehicleDoorAngleRatio(vehicle,i) ~= 0.0 then
 						door = false
 						break
@@ -847,10 +855,11 @@ function NuiVehicleHandbrake()
 	--NUI HANDBRAKE
 	Citizen.CreateThread(function()
 		while invehicle do
-			local sleep = 500
+			local sleep = 2500
 			local ped = ped
 			local vehicle = vehicle
 			if vehicle ~= nil and vehicle ~= 0 then
+				sleep = 500
 				local brake = GetVehicleHandbrake(vehicle)
 				if newbrake ~= brake or newbrake == nil then
 					newbrake = brake
@@ -889,7 +898,7 @@ function NuiShowMap()
 						SendNUIMessage({map = true, type = "updatemapa",myheading = myh,camheading = camheading,x = xz,y = yz,})
 					end
 				end
-				Wait(100)
+				Wait(200)
 			end
 			--TerminateThisThread()
 		end
@@ -1117,7 +1126,7 @@ function NuiEngineTemp()
 		end
 		Citizen.Wait(2000)
 		while invehicle do
-			Citizen.Wait(1)
+			Citizen.Wait(111)
 		end
 		Citizen.Wait(1000)
 		overheatoutveh = false
@@ -1127,7 +1136,7 @@ function NuiEngineTemp()
 			while GetVehicleEngineTemperature(GetVehiclePedIsIn(ped,true)) > config.overheatmin and not toohot do
 				overheatoutveh = true
 				while not smokeonhood do
-					Citizen.Wait(1)
+					Citizen.Wait(111)
 				end
 				vehicle = GetVehiclePedIsIn(ped,true)
 				print("SMOKING")
@@ -1372,9 +1381,6 @@ RegisterCommand(config.commands['entering'], function()
 			if GetVehiclePedIsTryingToEnter(p) ~= 0 then
 				v = GetVehiclePedIsTryingToEnter(p)
 			end
-			if v ~= 0 then
-				print(GetVehiclePedIsTryingToEnter(p))
-			end
 		end
 		print("clear")
 		print(v)
@@ -1414,7 +1420,7 @@ RegisterCommand(config.commands['entering'], function()
 			ismapopen = false
 		end
 		while IsPedInAnyVehicle(ped, false) do
-			Citizen.Wait(0)
+			Citizen.Wait(11)
 		end
 		invehicle = false
 	end
@@ -1516,18 +1522,38 @@ end
 local regdecor = false
 function fuelusagerun()
 	Citizen.CreateThread(function()
-		if not regdecor then
-			regdecor = true
-			DecorRegister(config.fueldecor,1)
-		end
-		while invehicle do
-			Citizen.Wait(2000)
-			local ped = ped
-			if GetPedInVehicleSeat(vehicle,-1) == ped then
-				Fuel(vehicle)
+		if config.usecustomfuel then
+			if not regdecor then
+				regdecor = true
+				DecorRegister(config.fueldecor,1)
+			end
+			while invehicle do
+				Citizen.Wait(2000)
+				local ped = ped
+				if GetPedInVehicleSeat(vehicle,-1) == ped then
+					Fuel(vehicle)
+				end
 			end
 		end
 	end)
+end
+
+function turboboost(gear)
+	local engineload = 0.05
+	if gear == 1 then
+		engineload = 0.05
+	elseif gear == 2 then
+		engineload = 0.15
+	elseif gear == 3 then
+		engineload = 0.22
+	elseif gear == 4 then
+		engineload = 0.275
+	elseif gear == 5 then
+		engineload = 0.3
+	elseif gear == 6 then
+		engineload = 0.5
+	end
+	return engineload 
 end
 
 function vehiclemode()
@@ -1538,9 +1564,26 @@ function vehiclemode()
 			type = "setMode",
 			content = mode
 		})
+		local rpm = GetVehicleCurrentRpm(vehicle)
+		local gear = GetVehicleCurrentGear(vehicle)
+		Citizen.CreateThread(function()
+			local newgear = 0
+			while mode == 'SPORTS' do
+				local sleep = 2000
+				--local ply = PlayerPedId()
+				local vehicle = vehicle
+				if vehicle ~= 0 then
+					sleep = 10
+					rpm = GetVehicleCurrentRpm(vehicle)
+					gear = GetVehicleCurrentGear(vehicle)
+				end
+				Citizen.Wait(sleep)
+			end
+		end)
 
 		local sound = false
 		Citizen.CreateThread(function()
+			local newgear = 0
 			while mode == 'SPORTS' do
 				local sleep = 2000
 				--local ply = PlayerPedId()
@@ -1548,27 +1591,41 @@ function vehiclemode()
 				local vehicle = vehicle
 				if vehicle ~= 0 then
 					sleep = 7
+					-- if newgear ~= gear then -- emulation CLUTCH delay
+					-- 	SetVehicleClutch(vehicle,0.5)
+					-- 	Citizen.Wait(1)
+					-- 	SetVehicleClutch(vehicle,0.0)
+					-- end
+					newgear = gear
 					local vehicleSpeed = 0
-					local rpm = GetVehicleCurrentRpm(vehicle)
-					local gear = GetVehicleCurrentGear(vehicle)
 					local engineload = (rpm * (gear / 10))
 					if rpm > 1.15 then
 					else
 						rpm = rpm * turbo
 					end
 					local vehicleSpeed = GetVehicleTurboPressure(vehicle)
-					local speed = GetEntitySpeed(vehicle) * 3.6
+					--local speed = GetEntitySpeed(vehicle) * 3.6
 					if sound and IsControlJustReleased(1, 32) then
-					StopSound(soundofnitro)
-					ReleaseSoundId(soundofnitro)
-					sound = false
+						StopSound(soundofnitro)
+						ReleaseSoundId(soundofnitro)
+						sound = false
 					end
+
+					local lag = 0
 					if IsControlPressed(1, 32) then
-						SetVehicleTurboPressure(vehicle, max((rpm * 1) + engineload))
+						while lag < 200 and engineload < turboboost(gear) and IsControlPressed(1, 32) do
+							engineload = (rpm * (gear / 10))
+							SetVehicleTurboPressure(vehicle, max((rpm * 1) + engineload + (lag * engineload)))
+							Citizen.Wait(1)
+							lag = lag + 1
+						end
+						--SetVehicleTurboPressure(vehicle, max((rpm * 1) + engineload))
 						if not sound then
 							soundofnitro = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
 							sound = true
 						end
+					else
+						Citizen.Wait(500) -- TURBO LAG
 					end
 					if reset and not IsControlPressed(1, 32) then
 						SetVehicleTurboPressure(vehicle, 0)
@@ -1577,7 +1634,7 @@ function vehiclemode()
 					if gear == 0 then
 						gear = 1
 					end
-					SetVehicleCheatPowerIncrease(vehicle, 1.0)
+					--SetVehicleCheatPowerIncrease(vehicle, 1.0)
 					local boost = vehicleSpeed * 7
 					--drawTxt("BOOST ADDED:  "..boost.."",4,0.5,0.93,0.50,255,255,255,180)
 					--drawTxt("BOOST PRESSURE:  "..vehicleSpeed.."",4,0.5,0.83,0.50,255,255,255,180)
@@ -1585,10 +1642,11 @@ function vehiclemode()
 					if IsControlPressed(1, 32) and GetVehicleCurrentRpm(vehicle) > 0.4 and vehicleSpeed > (turbo / 2) then
 					SetVehicleCheatPowerIncrease(vehicle, boost)
 					end
-					local vehicleMaxSpeed = 3.0
 				end
 				Citizen.Wait(sleep)
 			end
+			StopSound(soundofnitro)
+			ReleaseSoundId(soundofnitro)
 		end)
 	elseif mode == 'SPORTS' then
 		mode = 'ECO'
@@ -1614,7 +1672,7 @@ function vehiclemode()
 						rpm = rpm * -0.5
 					end
 					local vehicleSpeed = GetVehicleTurboPressure(vehicle)
-					local speed = GetEntitySpeed(vehicle) * 3.6
+					--local speed = GetEntitySpeed(vehicle) * 3.6
 					if sound and IsControlJustReleased(1, 32) then
 					StopSound(soundofnitro)
 					ReleaseSoundId(soundofnitro)
@@ -1626,6 +1684,8 @@ function vehiclemode()
 							soundofnitro = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
 							sound = true
 						end
+					else
+						Citizen.Wait(500)
 					end
 					if reset and not IsControlPressed(1, 32) then
 						SetVehicleTurboPressure(vehicle, 0)
@@ -1634,7 +1694,7 @@ function vehiclemode()
 					if gear == 0 then
 						gear = 1
 					end
-					SetVehicleCheatPowerIncrease(vehicle, 1.0)
+					--SetVehicleCheatPowerIncrease(vehicle, 1.0)
 					local boost = vehicleSpeed * 7
 					if IsControlPressed(1, 32) and GetVehicleCurrentRpm(vehicle) > 0.4 and vehicleSpeed > (turbo / 2) then
 					SetVehicleCheatPowerIncrease(vehicle, boost)
@@ -1643,6 +1703,8 @@ function vehiclemode()
 				end
 				Citizen.Wait(sleep)
 			end
+			StopSound(soundofnitro)
+			ReleaseSoundId(soundofnitro)
 		end)
 	else
 		mode = 'NORMAL'
@@ -1667,3 +1729,48 @@ function Notify(msg)
 	AddTextComponentString(msg)
 	DrawNotification(0,1)
 end
+
+--ETC
+
+local minimap
+Citizen.CreateThread(function()
+	local count = 0
+	while not playerloaded or count < 5 do -- REAL WAY TO REMOVE HEALTHBAR AND ARMOR WITHOUT USING THE LOOP ( LOAP minimap.gfx first ) then on spawn load the circlemap
+		count = count + 1
+		Citizen.Wait(1000)
+	end
+	if config.usecircleminimap then -- FIVEM Client needs to be restarted if you want to reverse the config, change from circle to default mode.
+		RequestStreamedTextureDict("circlemap", false)
+		while not HasStreamedTextureDictLoaded("circlemap") do
+			Wait(100)
+		end
+		AddReplaceTexture("platform:/textures/graphics", "radarmasksm", "circlemap", "radarmasksm")
+
+		SetMinimapClipType(1)
+		SetMinimapComponentPosition("minimap", "L", "B", 0.025, -0.03, 0.153, 0.21)
+		SetMinimapComponentPosition("minimap_mask", "L", "B", 0.135, 0.12, 0.093, 0.164)
+		SetMinimapComponentPosition("minimap_blur", "L", "B", 0.012, 0.022, 0.256, 0.337)
+
+	 	minimap = RequestScaleformMovie("minimap")
+
+		SetRadarBigmapEnabled(true, false)
+		Citizen.Wait(100)
+		SetRadarBigmapEnabled(false, false)
+	end
+end)
+
+Citizen.CreateThread(function()
+	if config.removemaphealthandarmor or config.useminimapeverytime then
+		while true do
+			Citizen.Wait(0)
+			if config.removemaphealthandarmor then -- FALSE ONLY - ACTIVATE only if you still see health and armor, it should be already removed from the minimap.gfx else check all your script!
+				BeginScaleformMovieMethod(minimap, "SETUP_HEALTH_ARMOUR")
+				ScaleformMovieMethodAddParamInt(3)
+				EndScaleformMovieMethod()
+			end
+			if config.useminimapeverytime then
+				DisplayRadar(true)
+			end
+		end
+	end
+end)
