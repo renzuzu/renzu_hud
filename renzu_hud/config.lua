@@ -41,6 +41,8 @@ config = {
 	vehicleCheck = true;
 }
 
+Renzuzu = Citizen
+
 config.framework = 'ESX' -- ESX | VRP | QSHIT | STANDALONE
 --CHANGE ACCORDING TO YOUR STATUS ESX STATUS OR ANY STATUS MOD
 config.centercarhud = 'map' -- Feature of Car hud - MAP , MP3 (IF YOU CHOOSE MP3 you need renzu_mp3 as dependency, and renzu_mp3 need xsound)
@@ -54,13 +56,27 @@ config.dangerrpm = 0.92 -- 9200 rpm, above this level temp will rise
 config.addheat = 10 -- additional temp for everytime the dangerrpm is reach
 config.overheatmin = 150 -- engine will explode when the temperature rise to this level
 config.overheatadd = 500 -- additional temperature when engine explodes
+config.reduce_coolant = 10 -- Reduce Coolant  ( This will trigger if vehicle constantly reaching the maximum temperature) Like in Real Vehicle Coolant Reserve handle will reduce a water/coolant to prevent the radiator overflowing due to the Water Temperature.
+config.reducetemp_onwateradd = 300 -- Reduce Engine Temperature when Coolant/Water is used
 -- Vehicle Mode
 config.boost = 1.5 -- Boost Level when sports mode is activated eg. 1.5 Bar, you can put upt o 3.0 or even 5.0 but pretty sure it will be unrealistic acceleration ( this affect Fuel Consumption )
 config.eco = 0.5 -- Eco Level when Eco Mode is activated (this affect the efficiency of fuel)
---STATUS MODE ( disabled v2 if you want optimize version ( FETCH ONLY The Player Status if Toggled ) else v2 is running loop default of 1sec)
+--MILEAGE
+config.mileage_update = 1000 -- This will Affect the Mileage update speed
+config.mileage_speed = 2.0 -- ( Lesser Number value eg . 0.5 = Less Mile age for the car) greater number like 1.5 2.0 = x1.5, x2 output, You Can Change this so you can have a RP for Changing Vehicle Oil Etc.. sooner than later.
+config.needchangeoil = true -- Vehicle Oil need to be change or else performance will degrade ( ESX FRAMEWORK NEEDED else commands only for standalone )
+config.mileagemax = 10000 -- Maximum mileage for vehicle before needing a Change Oil.
+config.degrade_engine = 0.8 -- 0.8 = 80% of 100% Performance ex. 1.0 = no change to performance, 0.8 is minus 20% performance - Degrade Engine Performance when current mileage is greater than the mileagemax
+--SEATBELT
+config.enableseatbeltfunc = true -- enable custom seatbelt function
+config.reducepedhealth = true -- reduce ped when having a accident
+config.shouldblackout = true -- Black out the ped
+config.hazyeffect = true -- have a hazy effect after the impact
+config.impactdamagetoped = 0.5 -- 0.5 = 50%, 1.0 = 100% ( Calculated based on the Vehicle Speed )
+--STATUS ( disabled v2 if you want the optimize version ( FETCH ONLY The Player Status if Toggled ) else v2 is running loop default of 1sec)
 config.statusv2 = true -- enable this if you want the status hud in bottom part , false if toggle mode
 config.statusv2_sleep = 1000 -- 1sec
-config.status = {
+config.status = { -- maximum 4 only for now, and it is preconfigured, (this is not the ordering for ui).
 	'energy',
 	'thirst',
 	'sanity',
@@ -130,9 +146,12 @@ config.keybinds = {
 	signal_hazard = 'BACK',
 	-- seatbelt
 	car_seatbelt = 'B',
+	-- Enter Vehicle -- This is needed to throw a function and loop while entering a vehicle
 	entering = 'F',
-	mode = 'RSHIFT',
-	differential = 'RCONTROL'
+	-- Switch Vehicle mode eg. Sports mode and Eco mode
+	mode = 'RSHIFT', -- Right Shift
+	--switching differential eg. 4WD,RWD,FWD
+	differential = 'RCONTROL' -- Right CTRL
 }
 
 --COMMANDS FOR KEYBINDS
@@ -166,3 +185,46 @@ config.Rpm_sleep = 151
 config.Rpm_sleep_2 = 52
 config.Speed_sleep = 151
 config.Speed_sleep_2 = 52
+Creation = Renzuzu.CreateThread
+Renzu_Hud = Renzuzu.InvokeNative
+ClientEvent = TriggerEvent
+RenzuNetEvent = RegisterNetEvent
+RenzuEventHandler = AddEventHandler
+RenzuCommand = RegisterCommand
+RenzuSendUI = SendNUIMessage
+RenzuKeybinds = RegisterKeyMapping
+RenzuNuiCallback = RegisterNUICallback
+
+-- GEAR FUNCTION
+function SetRpm(veh, val)
+    Renzu_Hud(0x2A01A8FC, veh, val)
+end
+function SetVehicleNextGear(veh, gear)
+    Renzu_Hud(GetHashKey('SET_VEHICLE_NEXT_GEAR') & 0xFFFFFFFF, veh, gear)
+end
+function SetVehicleCurrentGear(veh, gear)
+    Renzu_Hud(GetHashKey('SET_VEHICLE_CURRENT_GEAR') & 0xFFFFFFFF, veh, gear)
+end
+
+function Renzu_SetGear(vehicle, gear)
+    if gear >= 6 then
+        gear = 6
+    end
+    ForceVehicleGear(vehicle, gear)
+end
+
+function LockSpeed(veh,speed)
+    Renzu_Hud(0xBAA045B4E42F3C06, veh, speed)
+end
+
+function VehicleSpeed(veh)
+    return Renzu_Hud(0xD5037BA82E12416F, veh, Citizen.ResultAsFloat())
+end
+
+function VehicleRpm(veh)
+    return Renzu_Hud(0xE7B12B54, veh, Citizen.ResultAsFloat())
+end
+
+function WheelSpeed(veh,int)
+    return Renzu_Hud(0x149C9DA0, veh, int, Citizen.ResultAsFloat())
+end

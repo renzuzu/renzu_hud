@@ -208,6 +208,27 @@ function setSpeed(s) {
     e.style.strokeDashoffset = to;
 }
 
+function setCoolant(percent) {
+    var water = (percent);
+    rpm2 = water.toFixed(0)
+    //document.getElementById("rpmmeter").innerHTML = ""+rpm2+"";
+    var e = document.getElementById("coolantpath");
+    let length = e.getTotalLength();
+    let value = water;
+    let to = length * ((100 - value) / 100);
+    val = to / 1000
+    e.style.strokeDashoffset = to;
+    // if (percent > 0.9) {
+    //     e.style.stroke = 'red';
+    // } else if (percent > 0.7) {
+    //     e.style.stroke = 'orange';
+    // } else if (percent > 0.4) {
+    //     e.style.stroke = 'yellow';
+    // } else {
+    //     e.style.stroke = 'white';
+    // }
+}
+
 var manual = false
 function setShow(value) {
     //console.log(value)
@@ -506,6 +527,7 @@ var renzu_hud = {
     setTemp,
     setMode,
     setDifferential,
+    setCoolant,
 
 };
 setMic(2);
