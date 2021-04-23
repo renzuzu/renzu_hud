@@ -32,5 +32,6 @@ files {
 	'ui/css/*.css',
 	'ui/js/*.js',
 	'ui/img/*.png',
+	'ui/sounds/*.ogg',
 	'ui/shifter/*.png'
 }

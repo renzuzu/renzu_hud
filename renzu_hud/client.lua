@@ -400,7 +400,7 @@ Creation(function()
 				end
 				RenzuSendUI({
 					type = "setDifferential",
-					content = GetVehicleHandlingFloat(vehicle, "CHandlingData","fDriveBiasFront")
+					content = GetVehStats(vehicle, "CHandlingData","fDriveBiasFront")
 				})
 			end
 			invehicle = true
@@ -457,6 +457,7 @@ function inVehicleFunctions()
 		NuiShowMap()
 		NuiEngineTemp()
 		fuelusagerun()
+		SendNuiSeatBelt()
 	end)
 end
 
@@ -472,8 +473,8 @@ function RpmandSpeedLoop()
 			local sleep = 2000
 			if vehicle ~= nil and vehicle ~= 0 then
 				sleep = config.rpm_speed_loop
-				rpm = GetVehicleCurrentRpm(vehicle)
-				speed = GetEntitySpeed(vehicle)
+				rpm = VehicleRpm(vehicle)
+				speed = VehicleSpeed(vehicle)
 			end
 			Renzuzu.Wait(sleep)
 		end
@@ -643,7 +644,7 @@ function NuiDistancetoWaypoint()
 			local vehicle = vehicle
 			local waypoint = GetFirstBlipInfoId(8)
 			if vehicle ~= 0 and DoesBlipExist(waypoint) then
-				sleep = 0
+				sleep = 5
 				local coord = GetEntityCoords(ped, true)
 				local x, y, z = table.unpack(GetBlipCoords(waypoint))
 				local dis = #(coord - GetBlipCoords(waypoint))
@@ -701,7 +702,7 @@ function NuiGear()
 			local vehicle = vehicle
 			if vehicle ~= nil and vehicle ~= 0 then
 				sleep = config.gear_sleep
-				local gear = GetVehicleCurrentGear(vehicle)
+				local gear = GetGear(vehicle)
 				if newgear ~= gear or newgear == nil then
 					newgear = gear
 					RenzuSendUI({
@@ -737,9 +738,12 @@ function NuiMileAge()
 			end
 			while invehicle do
 				local wait = 10000
+				while veh_stats[plate] == nil and invehicle do
+					Renzuzu.Wait(1000)
+				end
 				local mileage = veh_stats[plate].mileage
 				degrade = 1.0
-				if mileage >= config.mileagemax then
+				while mileage >= config.mileagemax do
 					wait = 1
 					--print(mileage)
 					degrade = config.degrade_engine
@@ -752,6 +756,7 @@ function NuiMileAge()
 						Renzuzu.Wait(wait)
 					end
 					SetVehicleBoost(vehicle, config.degrade_engine)
+					Renzuzu.Wait(wait)
 				end
 				Renzuzu.Wait(wait)
 			end
@@ -773,7 +778,7 @@ function NuiMileAge()
 					if plate ~= nil and veh_stats[plate] == nil then
 						veh_stats[plate] = {}
 						veh_stats[plate].plate = plate
-						veh_stats[plate].mileage = 10000
+						veh_stats[plate].mileage = 0
 						veh_stats[plate].oil = 100
 						veh_stats[plate].coolant = 100
 					end
@@ -1104,7 +1109,7 @@ function NuiEngineTemp()
 				local temp = GetVehicleEngineTemperature(vehicle)
 				local overheat = false
 				while rpm > config.dangerrpm and config.engineoverheat do
-					rpm = GetVehicleCurrentRpm(vehicle)
+					rpm = VehicleRpm(vehicle)
 					Renzuzu.Wait(1000)
 					SetVehicleEngineCanDegrade(vehicle, true)
 					SetVehicleEngineTemperature(vehicle, GetVehicleEngineTemperature(vehicle) + config.addheat)
@@ -1114,7 +1119,7 @@ function NuiEngineTemp()
 						type = "setTemp",
 						content = GetVehicleEngineTemperature(vehicle)
 						})
-						if GetVehicleEngineTemperature(vehicle) >= config.overheatmin and veh_stats[plate].coolant ~= nil and veh_stats[plate].coolant <= 20 then
+						if plate ~= nil and GetVehicleEngineTemperature(vehicle) >= config.overheatmin and veh_stats[plate].coolant ~= nil and veh_stats[plate].coolant <= 20 then
 							explosion = 0
 							explode = PlaySoundFromEntity(GetSoundId(), "Engine_fail", vehicle, "DLC_PILOT_ENGINE_FAILURE_SOUNDS", 0, 0)
 							SetVehicleEngineTemperature(vehicle, GetVehicleEngineTemperature(vehicle) + config.overheatadd)
@@ -1156,7 +1161,7 @@ function NuiEngineTemp()
 								StopSound(explode)
 								ReleaseSoundId(explode)
 							end
-						elseif GetVehicleEngineTemperature(vehicle) >= config.overheatmin and (veh_stats[plate].coolant ~= nil and veh_stats[plate].coolant >= 20) then
+						elseif GetVehicleEngineTemperature(vehicle) >= config.overheatmin and veh_stats[plate] ~= nil and (veh_stats[plate].coolant ~= nil and veh_stats[plate].coolant >= 20) then
 							veh_stats[plate].coolant = veh_stats[plate].coolant - config.reduce_coolant
 							RenzuSendUI({
 								type = "setCoolant",
@@ -1302,34 +1307,202 @@ Creation(function()
 	end
 end)
 
-function SendNuiSeatBelt()
-	if vehicle ~= nil and vehicle ~= 0 then
-		if newbelt ~= belt or newbelt == nil then
-			newbelt = belt
-			RenzuSendUI({
-			type = "setBelt",
-			content = belt
-			})
-		end
+function haveseatbelt(veh)
+	local vc = GetVehicleClass(veh)
+	return (vc >= 0 and vc <= 7) or (vc >= 9 and vc <= 12) or (vc >= 17 and vc <= 20)
+end	
+
+function looking(entity)
+	local hr = GetEntityHeading(entity) + 90.0
+	if hr < 0.0 then
+		hr = 360.0 + hr
+	end
+	hr = hr * 0.0174533
+	return { x = math.cos(hr) * 2.0, y = math.sin(hr) * 2.0 }
+end
+
+function forwardvect(speed)
+	speed = speed / 10
+	return GetEntityForwardVector(getveh()) * speed
+end
+
+local alreadyblackout = false
+local sounded = false
+
+function DoblackOut()
+	if not alreadyblackout then
+		alreadyblackout = true
+		Citizen.CreateThread(function()
+			DoScreenFadeOut(1150)
+			while not IsScreenFadedOut() do
+				Citizen.Wait(0)
+			end
+			Citizen.Wait(1000)
+			DoScreenFadeIn(250)
+			alreadyblackout = false
+		
+		end)
+	end
+end
+function accidentsound()
+	if not sounded then
+		sounded = true
+		Citizen.CreateThread(function()
+			PlaySoundFrontend(-1, "SCREEN_FLASH", "CELEBRATION_SOUNDSET", 1)
+			Citizen.Wait(1)
+			sounded = false
+		end)
 	end
 end
 
--- YOU NEED SEATBELT SYSTEM FOR RAGDOLL, THIS IS FOR KEYBINDS ONLY for UI
+function impactdamagetoveh()
+	if alreadyblackout then
+		if not accident then
+			accident = true
+			Citizen.CreateThread(function()
+				local vehicle = GetVehiclePedIsIn(PlayerPedId(-1), false)
+				local tyre = math.random(0, 15)
+				local tankdamage = math.random(150, 300)
+				local enginedamage = math.random(150, 300) 
+				local vehiclebodydamage = math.random(150, 300)
+				SetVehiclePetrolTankHealth(vehicle,GetVehiclePetrolTankHealth(vehicle) - tankdamage )
+				SetVehicleTyreBurst(vehicle,tyre, 0 , 80.0)
+				SetVehicleEngineHealth(vehicle ,GetVehicleEngineHealth(vehicle) - enginedamage)
+				SetVehicleBodyHealth(vehicle, GetVehicleBodyHealth(vehicle) - vehiclebodydamage) 
+				SetVehicleOilLevel(vehicle, GetVehicleOilLevel(vehicle) + 5.0 ) -- max is 15?
+				SetVehicleCanLeakOil(vehicle, true)
+				SetVehicleEngineTemperature(vehicle, GetVehicleEngineTemperature(vehicle) + 45.0 )
+				Citizen.Wait(3000) 
+				accident = false
+			end)
+		end 
+	end
+end
+
+function hazyeffect()
+	Citizen.CreateThread(function()
+		Citizen.Wait(3000)
+		StartScreenEffect('PeyoteEndOut', 0, true)
+		StartScreenEffect('Dont_tazeme_bro', 0, true)
+		StartScreenEffect('MP_race_crash', 0, true)
+		local count = 0
+		while not IsEntityDead(GetPlayerPed(-1)) and count < 5000 do
+			count = count + 1
+			StartScreenEffect('PeyoteEndOut', 0, true)
+			StartScreenEffect('Dont_tazeme_bro', 0, true)
+			StartScreenEffect('MP_race_crash', 0, true)
+			Citizen.Wait(1)
+		end
+		if config.sanity_stressAdd then
+			TriggerEvent('esx_status:add', 'sanity', 40000)
+		end
+		StopScreenEffect('PeyoteEndOut')
+		StopScreenEffect('Dont_tazeme_bro')
+		StopScreenEffect('MP_race_crash')
+	end)
+end
+
+function SendNuiSeatBelt()
+	Citizen.Wait(300)
+	if vehicle ~= nil and vehicle ~= 0 and config.enableseatbeltfunc then
+		Creation(function()
+			local Session = {}
+			local Velocity = {}
+			local lastspeed = 0
+			while config.enableseatbeltfunc and not belt and invehicle do
+				local sleep = 500
+
+				Session[2] = Session[1]
+				Session[1] = GetEntitySpeed(vehicle)
+				if Session[1] > 15 then
+					sleep = 100
+				end
+				if Session[1] > 30 then
+					sleep = 50
+				end
+				if Session[2] ~= nil and not belt and GetEntitySpeedVector(vehicle,true).y > 1.0 and Session[1] > 15.25 and (Session[2] - Session[1]) > (Session[1] * 0.255) then
+					local coord = GetEntityCoords(ped)
+					local ahead = forwardvect(Session[1])
+					if config.reducepedhealth then
+						local kmh = lastspeed
+						local damage = GetEntityHealth(ped) - (kmh * config.impactdamagetoped)
+						if damage < 0 then
+							damage = 0
+						end
+						SetEntityHealth(ped,damage)
+					end
+					if config.shouldblackout then
+						DoblackOut()
+						accidentsound()
+					end
+					if config.hazyeffect then
+						hazyeffect()
+					end
+					if config.impactdamagetoveh then
+						impactdamagetoveh()
+					end
+					Citizen.Wait(100)
+					SetEntityCoords(ped,coord.x+ahead.x,coord.y+ahead.y,coord.z-0.47,true,true,true)
+					SetEntityVelocity(ped,Velocity[2].x,Velocity[2].y,Velocity[2].z)
+					Citizen.Wait(1)
+					SetPedToRagdoll(ped, 1000, 1000, 0, 0, 0, 0)
+					PopOutVehicleWindscreen(vehicle)
+				end
+				if not skip then
+					lastspeed = GetEntitySpeed(vehicle) * 3.6
+					skip = true
+				else
+					skip = false
+				end
+				Velocity[2] = Velocity[1]
+				Velocity[1] = GetEntityVelocity(vehicle)
+				Renzuzu.Wait(sleep)
+			end
+			while config.enableseatbeltfunc and belt and invehicle do
+				local sleep = 5
+				if belt then
+					DisableControlAction(0,75)
+				end
+				Renzuzu.Wait(sleep)
+			end
+			Session[1],Session[2] = 0.0,0.0
+		end)
+	end
+end
+
+-- SEATBELT
 Creation(function()
 	RenzuKeybinds(config.commands['car_seatbelt'], 'Car Seatbelt', 'keyboard', config.keybinds['car_seatbelt'])
 end)
 
 RenzuCommand(config.commands['car_seatbelt'], function()
-	if belt then
-		SetTimeout(1000,function()
-			belt = false
-		end)
-	else
-		SetTimeout(1000,function()
-			belt = true
-		end)
+	if haveseatbelt() then
+		if belt then
+			SetTimeout(1000,function()
+				belt = false
+				if newbelt ~= belt or newbelt == nil then
+					newbelt = belt
+					RenzuSendUI({
+					type = "setBelt",
+					content = belt
+					})
+				end
+				SendNuiSeatBelt()
+			end)
+		else
+			SetTimeout(1000,function()
+				belt = true
+				if newbelt ~= belt or newbelt == nil then
+					newbelt = belt
+					RenzuSendUI({
+					type = "setBelt",
+					content = belt
+					})
+				end
+				SendNuiSeatBelt()
+			end)
+		end
 	end
-	SendNuiSeatBelt()
 end, false)
 
 -- SIGNAL LIGHTS
@@ -1553,10 +1726,10 @@ end
 
 function Fuel(vehicle)
 	if IsVehicleEngineOn(vehicle) then
-		local rpm = GetVehicleCurrentRpm(vehicle)
-		local gear = GetVehicleCurrentGear(vehicle)
+		local rpm = VehicleRpm(vehicle)
+		local gear = GetGear(vehicle)
 		local engineload = (rpm * (gear / 10))
-		local result = (config.fuelusage[Round(GetVehicleCurrentRpm(vehicle),1)] * (config.classes[GetVehicleClass(vehicle)] or 1.0) / 15)
+		local result = (config.fuelusage[Round(VehicleRpm(vehicle),1)] * (config.classes[GetVehicleClass(vehicle)] or 1.0) / 15)
 		local advformula = result + (result * engineload)
 		if mode == 'SPORTS' then
 			advformula = advformula * config.boost
@@ -1620,8 +1793,8 @@ function vehiclemode()
 		while busy do
 			Renzuzu.Wait(10)
 		end
-		local rpm = GetVehicleCurrentRpm(vehicle)
-		local gear = GetVehicleCurrentGear(vehicle)
+		local rpm = VehicleRpm(vehicle)
+		local gear = GetGear(vehicle)
 		Creation(function()
 			local newgear = 0
 			while mode == 'SPORTS' do
@@ -1630,8 +1803,8 @@ function vehiclemode()
 				local vehicle = vehicle
 				if vehicle ~= 0 then
 					sleep = 10
-					rpm = GetVehicleCurrentRpm(vehicle)
-					gear = GetVehicleCurrentGear(vehicle)
+					rpm = VehicleRpm(vehicle)
+					gear = GetGear(vehicle)
 				end
 				Renzuzu.Wait(sleep)
 			end
@@ -1640,10 +1813,12 @@ function vehiclemode()
 		local sound = false
 		Creation(function()
 			local newgear = 0
-			olddriveinertia = GetVehicleHandlingFloat(vehicle, "CHandlingData","fDriveInertia")
-			oldriveforce = GetVehicleHandlingFloat(vehicle, "CHandlingData","fInitialDriveForce")
+			olddriveinertia = GetVehStats(vehicle, "CHandlingData","fDriveInertia")
+			oldriveforce = GetVehStats(vehicle, "CHandlingData","fInitialDriveForce")
 			DecorSetFloat(vehicle, "INERTIA", olddriveinertia)
 			DecorSetFloat(vehicle, "DRIVEFORCE", oldriveforce)
+			local turbosound = 0
+			local oldgear = 0
 			while mode == 'SPORTS' do
 				local sleep = 2000
 				--local ply = PlayerPedId()
@@ -1664,7 +1839,7 @@ function vehiclemode()
 						rpm = rpm * turbo
 					end
 					local vehicleSpeed = GetVehicleTurboPressure(vehicle)
-					--local speed = GetEntitySpeed(vehicle) * 3.6
+					--local speed = VehicleSpeed(vehicle) * 3.6
 					if sound and IsControlJustReleased(1, 32) then
 						StopSound(soundofnitro)
 						ReleaseSoundId(soundofnitro)
@@ -1673,16 +1848,24 @@ function vehiclemode()
 
 					local lag = 0
 					if IsControlPressed(1, 32) then
+						if not sound then
+							soundofnitro = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
+							sound = true
+						end
 						while lag < 200 and engineload < turboboost(gear) and IsControlPressed(1, 32) do
 							engineload = (rpm * (gear / 10))
 							SetVehicleTurboPressure(vehicle, max((rpm * 1) + engineload + (lag * engineload)))
 							Renzuzu.Wait(1)
 							lag = lag + 1
 						end
-						if not sound then
-							soundofnitro = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
-							sound = true
+						if rpm > 0.65 and rpm < 0.95 and turbosound < 10 and gear == oldgear and engineload > turboboost(gear) then
+							turbosound = turbosound + 1
+							SetVehicleBoostActive(vehicle, 1, 0)
+							SetVehicleBoostActive(vehicle, 0, 0)
+						else
+							turbosound = 0
 						end
+						oldgear = gear
 					else
 						if sound then
 							StopSound(soundofnitro)
@@ -1702,9 +1885,9 @@ function vehiclemode()
 					if degrade ~= 1.0 then
 						boost = boost * (degrade / config.boost)
 					end
-					if IsControlPressed(1, 32) and GetVehicleCurrentRpm(vehicle) > 0.4 and vehicleSpeed > (turbo / 2) then
-						SetVehicleHandlingFloat(vehicle, "CHandlingData", "fDriveInertia", boost / 10)
-						SetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveForce", engineload)
+					if IsControlPressed(1, 32) and VehicleRpm(vehicle) > 0.4 and vehicleSpeed > (turbo / 2) then
+						SetVehStats(vehicle, "CHandlingData", "fDriveInertia", boost / 10)
+						SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", engineload)
 						SetVehicleBoost(vehicle, boost)
 					end
 				end
@@ -1712,15 +1895,21 @@ function vehiclemode()
 			end
 			busy = true
 			Renzuzu.Wait(100)
-			SetVehicleHandlingFloat(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
-			SetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
-			while not GetVehicleHandlingFloat(vehicle, "CHandlingData","fDriveInertia") == DecorGetFloat(vehicle,"INERTIA") and invehicle do
-				SetVehicleHandlingFloat(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
-				Renzuzu.Wait(0)
-			end
-			while not GetVehicleHandlingFloat(vehicle, "CHandlingData","fInitialDriveForce") == DecorGetFloat(vehicle,"DRIVEFORCE") and invehicle do
-				SetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
-				Renzuzu.Wait(0)
+			if DecorGetFloat(vehicle,"INERTIA") ~= 0.0 and DecorGetFloat(vehicle,"DRIVEFORCE") ~= 0.0 then
+				SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
+				SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
+				while not GetVehStats(vehicle, "CHandlingData","fDriveInertia") == DecorGetFloat(vehicle,"INERTIA") and invehicle do
+					if DecorGetFloat(vehicle,"INERTIA") ~= nil then
+						SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
+					end
+					Renzuzu.Wait(0)
+				end
+				while not GetVehStats(vehicle, "CHandlingData","fInitialDriveForce") == DecorGetFloat(vehicle,"DRIVEFORCE") and invehicle do
+					if DecorGetFloat(vehicle,"DRIVEFORCE") ~= nil then
+						SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
+					end
+					Renzuzu.Wait(0)
+				end
 			end
 			busy = false
 			StopSound(soundofnitro)
@@ -1739,8 +1928,8 @@ function vehiclemode()
 		local sound = false
 		Creation(function()
 			local olddriveinertia = 1.0
-			olddriveinertia = GetVehicleHandlingFloat(vehicle, "CHandlingData","fDriveInertia")
-			SetVehicleHandlingFloat(vehicle, "CHandlingData", "fDriveInertia", config.eco)
+			olddriveinertia = GetVehStats(vehicle, "CHandlingData","fDriveInertia")
+			SetVehStats(vehicle, "CHandlingData", "fDriveInertia", config.eco)
 			while mode == 'ECO' do
 				local sleep = 2000
 				--local ply = PlayerPedId()
@@ -1760,10 +1949,12 @@ function vehiclemode()
 			end
 			busy = true
 			Renzuzu.Wait(100)
-			SetVehicleHandlingFloat(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
-			while not GetVehicleHandlingFloat(vehicle, "CHandlingData","fDriveInertia") == DecorGetFloat(vehicle,"INERTIA") and invehicle do
-				SetVehicleHandlingFloat(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
-				Renzuzu.Wait(0)
+			if DecorGetFloat(vehicle,"INERTIA") ~= 0.0 then
+				SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
+				while not GetVehStats(vehicle, "CHandlingData","fDriveInertia") == DecorGetFloat(vehicle,"INERTIA") and invehicle do
+					SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
+					Renzuzu.Wait(0)
+				end
 			end
 			busy = false
 			StopSound(soundofnitro)
@@ -1791,7 +1982,7 @@ local old_diff = nil
 local togglediff = false
 function differential()
 	print("pressed")
-	local diff = GetVehicleHandlingFloat(vehicle, "CHandlingData","fDriveBiasFront")
+	local diff = GetVehStats(vehicle, "CHandlingData","fDriveBiasFront")
 	print(diff)
 	if diff > 0.01 and diff < 0.9 and old_diff == nil and not togglediff then -- default 4wd
 		old_diff = diff -- save old
@@ -1799,7 +1990,7 @@ function differential()
 		togglediff = true
 	elseif old_diff ~= nil and togglediff then
 		diff = old_diff
-		SetVehicleHandlingFloat(vehicle, "CHandlingData", "fDriveBiasFront", diff)
+		SetVehStats(vehicle, "CHandlingData", "fDriveBiasFront", diff)
 		togglediff = false
 		old_diff = nil
 	elseif diff == 1.0 and not togglediff and old_diff == nil then -- Front Wheel Drive
@@ -1823,7 +2014,7 @@ function differential()
 	})
 	Renzuzu.Wait(500)
 	Creation(function()
-		SetVehicleHandlingFloat(vehicle, "CHandlingData", "fDriveBiasFront", diff)
+		SetVehStats(vehicle, "CHandlingData", "fDriveBiasFront", diff)
 		while togglediff and invehicle do
 			Renzuzu.Wait(1000)
 		end
@@ -2050,11 +2241,12 @@ function changeoil()
 	SetVehicleDoorShut(getveh(),4,false)
 	Renzuzu.Wait(300)
 	ClearPedTasks(ped)
-	veh_stats[plate].coolant = 100
-	SetVehicleEngineTemperature(getveh(), GetVehicleEngineTemperature(getveh()) - config.reducetemp_onwateradd)
+	veh_stats[plate].oil = 100
+	veh_stats[plate].mileage = 0
+	degrade = 1.0
 	RenzuSendUI({
-		type = "setCoolant",
-		content = 100
+		type = "setMileage",
+		content = 0
 	})
 	Renzuzu.Wait(100)
 	print(plate)
@@ -2068,6 +2260,31 @@ RenzuCommand('changeoil', function(source, args, raw)
 	changeoil()
 end)
 
-function SetVehicleBoost(vehicle,val)
-	Renzu_Hud(0xB59E4BD37AE292DB, vehicle,val)
+local cruising = false
+function Cruisecontrol()
+	PlaySoundFrontend(PlayerId(), "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", true )
+	cruising = not cruising
+	Citizen.Wait(500)
+	Citizen.CreateThread(function()
+		RenzuSendUI({
+			type = "setCruiseControl",
+			content = cruising
+		})
+		local topspeed = GetVehStats(GetVehiclePedIsIn(GetPlayerPed(-1), false), "CHandlingData", "fInitialDriveMaxFlatVel") * 0.64
+		local speed = VehicleSpeed(vehicle)
+		while invehicle and cruising do
+			SetEntityMaxSpeed(vehicle,speed)
+			Citizen.Wait(1000)
+		end
+		SetEntityMaxSpeed(vehicle,topspeed)
+		cruising = false
+	end)
 end
+
+RenzuCommand(config.commands['cruisecontrol'], function()
+	Cruisecontrol()
+end, false)
+
+Creation(function()
+	RenzuKeybinds(config.commands['cruisecontrol'], 'Vehicle Cruise Control', 'keyboard', config.keybinds['cruisecontrol'])
+end)

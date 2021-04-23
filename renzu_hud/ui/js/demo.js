@@ -236,7 +236,6 @@ function setShow(value) {
         $("#car").animate({
             opacity: "1"
         },400);
-        setBelt(false)
         setHeadlights(0)
   } else {
     $("#car").animate({
@@ -263,20 +262,44 @@ function setHeadlights(v) {
 
 function setBelt(s) {
     if (s) {
+        playsoundSeatbelt(s)
         document.getElementById("seatbelt").style.display = 'none'
         document.getElementById("onseatbelt").style.display = 'block'
     } else {
+        playsoundSeatbelt(s)
         document.getElementById("seatbelt").style.display = 'block'
         document.getElementById("onseatbelt").style.display = 'none'
     }
 }
 
+function playsoundSeatbelt(bool) {
+    var audioPlayer = null;
+    if (audioPlayer != null) {
+        audioPlayer.pause();
+    }
+    audioPlayer = new Audio("./sounds/" + bool + ".ogg");
+    audioPlayer.volume = 0.8;
+    audioPlayer.play();
+}
+
 function setMileage(value) {
     mileage = value.toFixed(0);
-    if (mileage >= 100) {
+    if (mileage >= 1000) {
+        document.getElementById("mileage").style.margin = '0 2px 0 0'
+    } else if (mileage >= 100) {
         document.getElementById("mileage").style.margin = '0 10px 0 0'
     } else if (mileage >= 10) {
         document.getElementById("mileage").style.margin = '0 15px 0 0'
+    }
+
+    //color
+    var e = document.getElementById("oilpath");
+    if (mileage >= 5000 && mileage < 10000) {
+        e.style.stroke = 'yellow'
+    } else if(mileage >=10000){
+        e.style.stroke = '#C85A17'
+    } else {
+        e.style.stroke = 'lime'
     }
     document.getElementById("mileage").innerHTML = ''+mileage+''
 }
@@ -494,6 +517,14 @@ function setDifferential(value) {
     document.getElementById("diff").innerHTML = value;
 }
 
+function setCruiseControl(bool) {
+    if (bool) {
+        document.getElementById('cruisetext').style.color = 'lime'
+    } else {
+        document.getElementById('cruisetext').style.color = '#1817179f'
+    }
+}
+
 //FUNCTIONS
 var renzu_hud = {
     setArmor,
@@ -528,6 +559,7 @@ var renzu_hud = {
     setMode,
     setDifferential,
     setCoolant,
+    setCruiseControl,
 
 };
 setMic(2);

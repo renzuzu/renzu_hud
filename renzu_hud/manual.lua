@@ -1,14 +1,18 @@
 maxgear = 5
 RenzuCommand('manual', function()
 	if manual then
-	    local topspeed = GetVehicleHandlingFloat(GetVehiclePedIsIn(GetPlayerPed(-1), false), "CHandlingData", "fInitialDriveMaxFlatVel") * 0.64
+	    local topspeed = GetVehStats(GetVehiclePedIsIn(GetPlayerPed(-1), false), "CHandlingData", "fInitialDriveMaxFlatVel") * 0.64
 	    LockSpeed(vehicle,topspeed)
 	    ForceVehicleGear(vehicle, 1)
 	    SetVehicleHandbrake(vehicle,false)
+        RenzuSendUI({
+            type = "setManual",
+            content = false
+        })
     elseif not manual then
         Creation(function()
-            maxgear = GetVehicleHandlingFloat(vehicle, "CHandlingData","nInitialDriveGears")
-            vehicletopspeed = GetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel")
+            maxgear = GetVehStats(vehicle, "CHandlingData","nInitialDriveGears")
+            vehicletopspeed = GetVehStats(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel")
             while not manual do -- ASYNC WAITING FOR MANUAL BOOL = TRUE
                 Renzuzu.Wait(0)
             end
@@ -65,8 +69,8 @@ function NuiClutchloop()
             --if manual else sleep
             if manual and vehicle ~= nil then
                 sleep = 6
-                --savegear = GetVehicleCurrentGear(vehicle)
-                if IsControlJustReleased(2, 193) and manual or IsControlPressed(2, 193) or IsControlJustReleased(1, 20) and manual or IsControlPressed(1, 20) and manual or IsControlPressed(1, 20) and IsControlPressed(1, 32) and manual then
+                --savegear = GetGear(vehicle)
+                if RCR(2, 193) and manual or RCP(2, 193) or RCR(1, 20) and manual or RCP(1, 20) and manual or RCP(1, 20) and RCP(1, 32) and manual then
                     clutch = true
                     sleep = 1000
                 end
@@ -82,9 +86,9 @@ end
 -- 		local sleep = 2000
 -- 		if shifter then
 -- 			sleep = 6
--- 			if not IsControlPressed(0, 162) and not IsControlPressed(0, 110) and not IsControlPressed(0, 163) and not IsControlPressed(0, 117) and not IsControlPressed(0, 111) and not IsControlPressed(0, 118) and shifter then
+-- 			if not RCP(0, 162) and not RCP(0, 110) and not RCP(0, 163) and not RCP(0, 117) and not RCP(0, 111) and not RCP(0, 118) and shifter then
 -- 				Renzuzu.Wait(2000)
--- 				if not IsControlPressed(0, 162) and not IsControlPressed(0, 110) and not IsControlPressed(0, 163) and not IsControlPressed(0, 117) and not IsControlPressed(0, 111) and not IsControlPressed(0, 118) and shifter then
+-- 				if not RCP(0, 162) and not RCP(0, 110) and not RCP(0, 163) and not RCP(0, 117) and not RCP(0, 111) and not RCP(0, 118) and shifter then
 -- 				savegear = 0
 -- 				Renzu_SetGear(vehicle,0)
 -- 				end
@@ -140,13 +144,13 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                     SetVehicleEngineOn(vehicle,false,false,false)
                 end
 
-                if not enginerunning and IsControlPressed(1, 32) then
+                if not enginerunning and RCP(1, 32) then
                     SetVehicleEngineOn(vehicle,true,false,false)
                     savegear = 0
                 end
 
                 --up shifting with or power shifting mode (while clutch is pressed)
-                if IsControlJustReleased(1, 172) and clutch or IsControlPressed(1, 32) and IsControlJustReleased(1, 172) and clutch and IsControlJustReleased(1, 20) or IsControlPressed(1, 32) and IsControlJustReleased(1, 172) and clutch and IsControlJustReleased(2, 193) then
+                if RCR(1, 172) and clutch or RCP(1, 32) and RCR(1, 172) and clutch and RCR(1, 20) or RCP(1, 32) and RCR(1, 172) and clutch and RCR(2, 193) then
                     if reverse then
                         savegear = 0
                         reverse = false
@@ -163,7 +167,7 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                 end
 
                 --down shifting with or power shifting mode
-                if IsControlJustReleased(1, 173) and savegear > 0 and clutch or IsControlPressed(1, 32) and IsControlJustReleased(1, 173) and savegear > 0 and clutch and IsControlJustReleased(1, 20) then
+                if RCR(1, 173) and savegear > 0 and clutch or RCP(1, 32) and RCR(1, 173) and savegear > 0 and clutch and RCR(1, 20) then
                     savegear = savegear - 1
                     Renzu_SetGear(vehicle,currentgear - 1)
                     if savegear == 0 then
@@ -175,7 +179,7 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                 end
 
                 --clutch mode with force handbrake if less than 10 kmh
-                if IsControlPressed(1, 20) or IsControlPressed(2, 193) then
+                if RCP(1, 20) or RCP(2, 193) then
                     --ForceVehicleGear(vehicle, 0)
                     if speed < 10 then
                         ForceVehicleGear(vehicle, 0)
@@ -183,7 +187,7 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                     end
                 end
 
-                if savegear == 0 and IsControlPressed(1, 20) and IsControlJustReleased(1, 173) or savegear == 0 and clutch and IsControlJustReleased(1, 173) then
+                if savegear == 0 and RCP(1, 20) and RCR(1, 173) or savegear == 0 and clutch and RCR(1, 173) then
                     ShowHelpNotification('REVERSE', true, 1, 5)
                     marcha = "R"
                     savegear = 0
@@ -197,7 +201,7 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                 end
 
                 --if handbrake disable it when gear is >= 1
-                if handbrake and not IsControlPressed(1, 20) and savegear > 0 and not clutch or IsControlPressed(1, 33) and reverse and not clutch then
+                if handbrake and not RCP(1, 20) and savegear > 0 and not clutch or RCP(1, 33) and reverse and not clutch then
                     --ForceVehicleGear(vehicle, 0)
                     if speed < 10 then
                         SetVehicleHandbrake(vehicle,false)
@@ -208,7 +212,7 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                 Renzu_Hud(GetHashKey('SET_VEHICLE_CURRENT_GEAR') & 0xFFFFFFFF, vehicle, savegear)
                 Renzu_Hud(GetHashKey('SET_VEHICLE_NEXT_GEAR') & 0xFFFFFFFF, vehicle, savegear)
                 --speedtable(speed,savegear)
-                if not IsControlPressed(1, 22) and speed > 5 then
+                if not RCP(1, 22) and speed > 5 then
                     if rpm >=0.3 and rpm <= 0.5 then
                     --SetRpm(vehicle, 1.0)
                     --else
@@ -232,7 +236,7 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                     end
                 end
                 -- local pedal = false
-                -- if IsControlPressed(1, 32) then
+                -- if RCP(1, 32) then
                 --     pedal = true
                 -- end
                 -- if not pedal then
@@ -254,56 +258,56 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                 end
 
                 --neutral launch control
-                if IsControlPressed(1, 20) and IsControlPressed(1, 32) and speed < 11 and rpm >= 0.5 or clutch and IsControlPressed(1, 32) and speed < 11 and rpm >= 0.5 then
+                if RCP(1, 20) and RCP(1, 32) and speed < 11 and rpm >= 0.5 and speed <= 5 or clutch and RCP(1, 32) and speed < 11 and rpm >= 0.5 and speed <= 5 then
                     SetRpm(vehicle,0.6)
-                    Renzuzu.Wait(11)
-                    SetRpm(vehicle,0.5)
-                    Renzuzu.Wait(11)	
-                    SetRpm(vehicle,1.2)
-                    Renzuzu.Wait(55)
-                    SetRpm(vehicle,0.7)
-                    Renzuzu.Wait(11)
-                    SetRpm(vehicle,1.4)
-                    Renzuzu.Wait(11)
-                    SetRpm(vehicle,0.7)
-                    Renzuzu.Wait(55)
-                    SetRpm(vehicle,0.8)
+                        Renzuzu.Wait(11)
+                            SetRpm(vehicle,0.5)
+                                 Renzuzu.Wait(11)	
+                                    SetRpm(vehicle,1.2)
+                                        Renzuzu.Wait(55)
+                                            SetRpm(vehicle,0.7)
+                                        Renzuzu.Wait(11)
+                                    SetRpm(vehicle,1.4)
+                                Renzuzu.Wait(11)
+                            SetRpm(vehicle,0.7)
+                        Renzuzu.Wait(55)
+                        SetRpm(vehicle,0.8)
                     Renzuzu.Wait(55)
                 end
                 
                 --DISABLE FOR NOW H-SHIFTER LOGITECH KEYBINDS (ACTIVATE THIS IF YOU KNOW WHAT YOU ARE DOING - You need to config the logitech game profiler to use this keybinds)
                 -- if shifter then
                 --     -- SHIFTER
-                --     if IsControlPressed(0, 162) and clutch then
+                --     if RCP(0, 162) and clutch then
                 --         savegear = 1
                 --         Renzu_SetGear(vehicle,1)
                 --         ShowHelpNotification(savegear, true, 1, 5)
                 --     end
 
-                --     if IsControlPressed(0, 110) and clutch then
+                --     if RCP(0, 110) and clutch then
                 --         savegear = 2
                 --         Renzu_SetGear(vehicle,2)
                 --         ShowHelpNotification(savegear, true, 1, 5)
                 --     end
 
-                --     if IsControlPressed(0, 163) and clutch then
+                --     if RCP(0, 163) and clutch then
                 --         savegear = 3
                 --         Renzu_SetGear(vehicle,3)
                 --         ShowHelpNotification(savegear, true, 1, 5)
                 --     end
 
-                --     if IsControlPressed(0, 117) and clutch then
+                --     if RCP(0, 117) and clutch then
                 --         savegear = 4
                 --         Renzu_SetGear(vehicle,4)
                 --         ShowHelpNotification(savegear, true, 1, 5)
                 --     end
 
-                --     if IsControlPressed(0, 111) and clutch then
+                --     if RCP(0, 111) and clutch then
                 --         savegear = 5
                 --         Renzu_SetGear(vehicle,5)
                 --         ShowHelpNotification(savegear, true, 1, 5)
                 --     end
-                --     if IsControlPressed(0, 118) and clutch then
+                --     if RCP(0, 118) and clutch then
                 --         savegear = 6
                 --         Renzu_SetGear(vehicle,6)
                 --         ShowHelpNotification(savegear, true, 1, 5)
@@ -388,16 +392,16 @@ end
 function speedtable(speed,gear)
     --ShowHelpNotification(percentage(20,60), true, 1, 5)
     --SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", 250*1.000000)
-    --local drive = GetVehicleHandlingFloat(vehicle, "CHandlingData", "fDriveInertia")
-    --local force = GetVehicleHandlingFloat(vehicle ,"CHandlingData", "fInitialDriveForce")
+    --local drive = GetVehStats(vehicle, "CHandlingData", "fDriveInertia")
+    --local force = GetVehStats(vehicle ,"CHandlingData", "fInitialDriveForce")
 	if vehicletopspeed ~= nil then
-		--local vehicletopspeed = GetVehicleHandlingFloat(GetVehiclePedIsIn(GetPlayerPed(-1), false), "CHandlingData", "fInitialDriveMaxFlatVel")
-		local first = (vehicletopspeed * 0.33) * 0.9
-		local second = (vehicletopspeed * 0.57) * 0.9
-		local third = (vehicletopspeed * 0.84) * 0.9
-		local fourth = (vehicletopspeed * 1.22) * 0.9
-		local fifth = (vehicletopspeed * 1.45) * 0.9
-		local sixth = (vehicletopspeed * 1.60) * 0.9
+		--local vehicletopspeed = GetVehStats(GetVehiclePedIsIn(GetPlayerPed(-1), false), "CHandlingData", "fInitialDriveMaxFlatVel")
+		local first = (vehicletopspeed * config.firstgear) * 0.9
+		local second = (vehicletopspeed * config.secondgear) * 0.9
+		local third = (vehicletopspeed * config.thirdgear) * 0.9
+		local fourth = (vehicletopspeed * config.fourthgear) * 0.9
+		local fifth = (vehicletopspeed * config.fifthgear) * 0.9
+		local sixth = (vehicletopspeed * config.sixthgear) * 0.9
 		local currentgear = savegear
 		if currentgear == 1 and speed <= first then
 
