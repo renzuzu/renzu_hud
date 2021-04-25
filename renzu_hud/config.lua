@@ -41,7 +41,53 @@ config = {
 	vehicleCheck = true;
 }
 
+-----------------------------------------------------------------------------------------------------------------------------------------
+-- VARIABLES
+-----------------------------------------------------------------------------------------------------------------------------------------
+veh_stats = {}
 Renzuzu = Citizen
+entering = false
+mode = 'NORMAL'
+ismapopen = false
+date = "00:00"
+plate = nil
+degrade = 1.0
+playerloaded = false
+manual = false
+vehicletopspeed = nil
+uimove = false
+reverse = false
+savegear = 0
+rpm = 0.2
+hour = 0
+vali = false
+minute = 0
+globaltopspeed = nil
+segundos = 0
+month = ""
+dayOfMonth = 0
+voice = 2
+voiceDisplay = 2
+proximity = 25.0
+belt = false
+ExNoCarro = false
+sBuffer = {}
+vBuffer = {}
+displayValue = true
+gasolina = 0
+street = nil
+vehicle = nil
+hp = 0
+shifter = false
+hasNitro = true
+k_nitro = 70
+n_boost = 15.0
+boost = 1.0
+nitro_state = 0
+isBlack = "false"
+invehicle = false
+topspeedmodifier = 1.0
+switch = false
 
 config.framework = 'ESX' -- ESX | VRP | QSHIT | STANDALONE
 --CHANGE ACCORDING TO YOUR STATUS ESX STATUS OR ANY STATUS MOD
@@ -61,8 +107,9 @@ config.reducetemp_onwateradd = 300 -- Reduce Engine Temperature when Coolant/Wat
 -- Vehicle Mode
 config.boost = 1.5 -- Boost Level when sports mode is activated eg. 1.5 Bar, you can put upt o 3.0 or even 5.0 but pretty sure it will be unrealistic acceleration ( this affect Fuel Consumption )
 config.sports_increase_topspeed = true -- do you want the topspeed will be affected? some Fivem Servers Likes a demonic topspeed :D - not good in RP. Boost only affects engine torque and horsepower not the gear ratio and final drive of transmision which affects topspeed
-config.topspeed_multiplier = 1.5 -- if sports_increase_topspeed is enable, multiplier 1.5 = x1.5 eg. normal top speed 200kmh if you put 1.5 the new topspeed is 300kmh
+config.topspeed_multiplier = 1.1 -- if sports_increase_topspeed is enable, multiplier 1.5 = x1.5 eg. normal top speed 200kmh if you put 1.5 the new topspeed is 300kmh
 config.eco = 0.5 -- Eco Level when Eco Mode is activated (this affect the efficiency of fuel)
+config.boost_sound = false
 --MILEAGE
 config.mileage_update = 1000 -- This will Affect the Mileage update speed
 config.mileage_speed = 2.0 -- ( Lesser Number value eg . 0.5 = Less Mile age for the car) greater number like 1.5 2.0 = x1.5, x2 output, You Can Change this so you can have a RP for Changing Vehicle Oil Etc.. sooner than later.
@@ -71,28 +118,60 @@ config.mileagemax = 10000 -- Maximum mileage for vehicle before needing a Change
 config.degrade_engine = 0.8 -- 0.8 = 80% of 100% Performance ex. 1.0 = no change to performance, 0.8 is minus 20% performance - Degrade Engine Performance when current mileage is greater than the mileagemax
 --SEATBELT
 config.enableseatbeltfunc = true -- enable custom seatbelt function
-config.reducepedhealth = true -- reduce ped when having a accident
+config.reducepedhealth = true -- reduce ped health when having a accident
 config.shouldblackout = true -- Black out the ped
-config.hazyeffect = true -- have a hazy effect after the impact
+config.hazyeffect = false -- have a hazy effect after the impact
 config.addsanity_stress = true -- add sanity or stress status
 config.sanity_stressAdd = 40000 -- value to add
 config.impactdamagetoped = 1.0 -- 0.5 = 50%, 1.0 = 100% ( Calculated based on the Vehicle Speed KMH )
 config.impactdamagetoveh = true -- apply damage to vehicle, burst random tires, remove windshield
 --STATUS ( disabled v2 if you want the optimize version ( FETCH ONLY The Player Status if Toggled ) else v2 is running loop default of 1sec)
-config.statusv2 = false -- enable this if you want the status hud in bottom part , false if toggle mode
+config.statusv2 = true -- enable this if you want the status hud in bottom part , false if toggle mode
 config.statusv2_sleep = 1000 -- 1sec
 config.driving_affect_status = true -- should the status will be affected during Driving a vehicle?
 config.driving_affected_status = 'sanity' -- change whatever status you want to be affected during driving
 config.driving_status_mode = 'add' -- (add, remove) add will add a value to status, remove will remove a status value.
+config.driving_status_val = 10000 -- status value to add/remove
+config.driving_status_radius = 200 -- driving distance to add status
 config.firing_affect_status = true -- Firing Weapons affects status?
 config.firing_affected_status = 'sanity' -- Affected Status during gunplay
 config.firing_status_mode = 'add' -- Status Function (add,remove) add will add a value to status, remove will remove a status value.
+config.firing_statusaddval = 100000 -- value to add when firing a weapons
+config.firing_bullets = 100 -- number of bullets or firing events to trigger the status function.
+config.killing_affect_status = true -- do you want the status to be affected when you kill some player , ped, animals.
+config.killing_affected_status = 'sanity'
+config.killing_status_mode = 'add' -- (add,remove) add will add a value to status, remove will remove a status value.
+config.killing_status_val = 100000 -- status value to add/remove per kill
+config.running_affect_status = true -- if player is running (not sprint) status will affected?
+config.running_affected_status = 'thirst' -- change this to whatever status you wanted to be affected
+config.running_status_mode = 'remove' -- should add or remove? its up to you. affected status if running
+config.running_status_val = 10000 -- how much we add / remove to the status?
+config.melee_combat_affect_status = true -- melee attack like punch,kick,pistolwhiping,etc can affect the status?
+config.melee_combat_affected_status = 'sanity' -- type of status
+config.melee_combat_status_mode = 'remove' -- status remove or add?
+config.melee_combat_status_val = 10000 -- value to add/remove
+config.parachute_affect_status = true -- while parachuting mode can add status?
+config.parachute_affected_status = 'sanity' -- type of status
+config.parachute_status_mode = 'remove' -- status remove or add?
+config.parachute_status_val = 10000 -- value to add/remove
+--status standalone purpose (use this only if you need it)
+-- Add / Remove Status when playing some animations
+config.playing_animation_affect_status = true
+config.status_animation = {
+	--this is a DICT
+	{ dict = 'mp_player_inteat@burger', name='mp_player_int_eat_burger', status = 'hunger', mode = 'add', val = '300000'},
+	{ dict = 'mp_player_inteat@burger', name='mp_player_int_eat_burger_fp', status = 'hunger', mode = 'add', val = '300000'},
+	{ dict = 'mp_player_intdrink', name='loop_bottle', status = 'thirst', mode = 'add', val = '300000'},
+	{ dict = 'mp_player_intdrink', name='loop_bottle_fp', status = 'thirst', mode = 'add', val = '300000'},
+	{ dict = 'amb@world_human_aa_smoke@male@idle_a', name='idle_c', status = 'sanity', mode = 'remove', val = '10000'},
+}
 config.status = { -- maximum 4 only for now, and it is preconfigured, (this is not the ordering for ui).
 	'energy',
 	'thirst',
 	'sanity',
 	'hunger'
 }
+--changable to status is sanity or energy you can rename it for example: stress, but it works the same way. (changing the status name is for advanced user only, dont change it if you are not sure) you might want to use renzu_status (AKA standalone_status) converted esx_status to standalone framework, using that the status will work 100%.
 
 --CUSTOM FUEL SYSTEM (YOU NEED TO DISABLE Your Other Vehicle Fuel management to make this work specially for the ECO Mode)
 config.usecustomfuel = true -- needed if you want to use ECO and Sports Mode Fuel Cost Effect
@@ -156,14 +235,14 @@ config.keybinds = {
 	signal_right = 'RIGHT',
 	signal_hazard = 'BACK',
 	-- seatbelt
-	car_seatbelt = 'B',
+	car_seatbelt = 'B', -- Seatbelt ui and seatbelt function
 	-- Enter Vehicle -- This is needed to throw a function and loop while entering a vehicle
 	entering = 'F',
 	-- Switch Vehicle mode eg. Sports mode and Eco mode
-	mode = 'RSHIFT', -- Right Shift
+	mode = 'RSHIFT', -- Right Shift Activate vehiclde mode
 	--switching differential eg. 4WD,RWD,FWD
-	differential = 'RCONTROL', -- Right CTRL
-	cruisecontrol = 'RMENU' -- Right Alt
+	differential = 'RCONTROL', -- Right CTRL Change Differential eg. 4wd,fwd,rwd
+	cruisecontrol = 'RMENU' -- Right Alt CRUISE CONTROL
 }
 
 --COMMANDS FOR KEYBINDS
@@ -185,6 +264,15 @@ config.commands = {
 }
 
 --MANUAL TRANNY Gear Ratio ( Do not Edit if you know what you are doing ) This is not the actual Gear Ratio numbers/settings in real life!
+config.gears = {
+	[0] = 0.00,
+	[1] = 0.33,
+	[2] = 0.57,
+	[3] = 0.84,
+	[4] = 1.22,
+	[5] = 1.45,
+	[6] = 1.60
+}
 config.firstgear = 0.33 -- DEFAULT 0.33
 config.secondgear = 0.57 -- DEFAULT 0.57
 config.thirdgear = 0.84 -- DEFAULT 0.84

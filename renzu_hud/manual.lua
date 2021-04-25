@@ -1,8 +1,8 @@
 maxgear = 5
 RenzuCommand('manual', function()
 	if manual then
-	    local topspeed = GetVehStats(GetVehiclePedIsIn(GetPlayerPed(-1), false), "CHandlingData", "fInitialDriveMaxFlatVel") * 0.64
-	    LockSpeed(vehicle,topspeed)
+	    local topspeed = GetVehStats(GetVehiclePedIsIn(GetPlayerPed(-1), false), "CHandlingData", "fInitialDriveMaxFlatVel") * 1.3
+	    LockSpeed(vehicle,topspeed / 3.6)
 	    ForceVehicleGear(vehicle, 1)
 	    SetVehicleHandbrake(vehicle,false)
         RenzuSendUI({
@@ -39,6 +39,7 @@ function Nuimanualtranny()
             if vehicle ~= nil and vehicle ~= 0 then
                 sleep = 300
                 if newmanual ~= manual or newmanual == nil then
+                    --vehicletopspeed = GetVehStats(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel")
                     newmanual = manual
                     RenzuSendUI({
                     type = "setManual",
@@ -151,6 +152,7 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
 
                 --up shifting with or power shifting mode (while clutch is pressed)
                 if RCR(1, 172) and clutch or RCP(1, 32) and RCR(1, 172) and clutch and RCR(1, 20) or RCP(1, 32) and RCR(1, 172) and clutch and RCR(2, 193) then
+                    ClearVehicleTasks(vehicle)
                     if reverse then
                         savegear = 0
                         reverse = false
@@ -159,22 +161,24 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                     else
                         if maxgear >= (savegear + 1) then
                             savegear = savegear + 1
-                            Renzu_SetGear(vehicle,currentgear + 1)
+                            Renzu_SetGear(vehicle,savegear + 1)
                             ShowHelpNotification(savegear, true, 1, 5)
                         end
                     end
+                    ClearVehicleTasks(vehicle)
                     Renzuzu.Wait(100)
                 end
 
                 --down shifting with or power shifting mode
                 if RCR(1, 173) and savegear > 0 and clutch or RCP(1, 32) and RCR(1, 173) and savegear > 0 and clutch and RCR(1, 20) then
                     savegear = savegear - 1
-                    Renzu_SetGear(vehicle,currentgear - 1)
+                    Renzu_SetGear(vehicle,savegear - 1)
                     if savegear == 0 then
                         ShowHelpNotification('NEUTRAL', true, 1, 5)
                     else
                         ShowHelpNotification(savegear, true, 1, 5)
                     end
+                    ClearVehicleTasks(vehicle)
                     Renzuzu.Wait(100)
                 end
 
@@ -209,8 +213,10 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                 end
 
                 --main loop manual system
+                Citizen.InvokeNative(0x8923dd42, vehicle, savegear)
                 Renzu_Hud(GetHashKey('SET_VEHICLE_CURRENT_GEAR') & 0xFFFFFFFF, vehicle, savegear)
                 Renzu_Hud(GetHashKey('SET_VEHICLE_NEXT_GEAR') & 0xFFFFFFFF, vehicle, savegear)
+                --SetVehicleHighGear(vehicle, savegear)
                 --speedtable(speed,savegear)
                 if not RCP(1, 22) and speed > 5 then
                     if rpm >=0.3 and rpm <= 0.5 then
@@ -329,6 +335,9 @@ function percentage(partialValue, totalValue)
     if needle >= 1.0 then
         needle = 1.0
     end
+    if needle <= 0.0 then
+        needle = 0.0
+    end
     return needle
 end
 
@@ -388,12 +397,58 @@ function DrawScreenText2D(x, y, message, dropShadow, outline)
     DrawText(x, y)
 end
 
+local finaldrive = 4.44
+local gear_ratio = {
+    [0] = 0.0,
+    [1] = 3.230,
+    [2] = 2.105,
+    [3] = 1.458,
+    [4] = 1.107,
+    [5] = 0.848,
+    [6] = 0.678
+}
+
+local gearup = false
+function antistall(speed, speedreduce, savegear, gearname, rpm, vehicle, currentgear, saferpm, driveforce)
+    if speed - (speedreduce * driveforce) <= (gearname - speedreduce) then
+        gearup = currentgear
+        Renzu_SetGear(vehicle,currentgear - 1)
+        if RCP(1, 32) then
+            SetVehicleBoost(vehicle, 1.0)
+            Wait(1)
+            if mode == 'SPORTS' then
+                SetVehicleClutch(vehicle,0.8)
+                Wait(10)
+                print("ANTI STALL")
+                torque = GetVehicleCheatPowerIncrease(vehicle) * topspeedmodifier
+                SetVehicleBoost(vehicle, boost * maxgear + (torque / currentgear))
+            else
+                SetVehicleClutch(vehicle,0.9)
+                print("ANTI STALL")
+                SetVehicleReduceTraction(vehicle, true)
+                ModifyVehicleTopSpeed(vehicle, 0.5)
+                torque = GetVehicleCheatPowerIncrease(vehicle)
+                SetVehicleBoost(vehicle, (saferpm * maxgear) + (torque / currentgear))
+            end
+        end
+    end
+end
+
 -- MAIN MANUAL SYSTEM LOOP ( EDIT THIS if you know the system )
 function speedtable(speed,gear)
+    olddriveinertia = GetVehStats(vehicle, "CHandlingData","fDriveInertia")
+    oldriveforce = GetVehStats(vehicle, "CHandlingData","fInitialDriveForce")
+    oldtopspeed = GetVehStats(vehicle, "CHandlingData","fInitialDriveMaxFlatVel") * olddriveinertia -- normalize
+    local engineload = oldriveforce + ((rpm * olddriveinertia) * (gear / oldriveforce))
+    local speedreduce = (oldtopspeed) * (config.gears[gear] * olddriveinertia) / gear * oldriveforce * engineload
+    speedreduce = (speedreduce / maxgear) * oldriveforce + (gear / rpm) / maxgear
     --ShowHelpNotification(percentage(20,60), true, 1, 5)
     --SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", 250*1.000000)
     --local drive = GetVehStats(vehicle, "CHandlingData", "fDriveInertia")
     --local force = GetVehStats(vehicle ,"CHandlingData", "fInitialDriveForce")
+    if mode == 'SPORTS' and globaltopspeed ~= nil then
+        vehicletopspeed = globaltopspeed
+    end
 	if vehicletopspeed ~= nil then
 		--local vehicletopspeed = GetVehStats(GetVehiclePedIsIn(GetPlayerPed(-1), false), "CHandlingData", "fInitialDriveMaxFlatVel")
 		local first = (vehicletopspeed * config.firstgear) * 0.9
@@ -404,62 +459,124 @@ function speedtable(speed,gear)
 		local sixth = (vehicletopspeed * config.sixthgear) * 0.9
 		local currentgear = savegear
 		if currentgear == 1 and speed <= first then
-
-		LockSpeed(vehicle, first)
-
-		return	percentage(speed,first)
-
+		    LockSpeed(vehicle, first)
+            return	percentage(speed,first)
 		elseif currentgear == 2 and speed <= second then
-		if speed <= (first - (first * 0.22925)) then
-			Renzu_SetGear(vehicle,currentgear - 1)
-		end
-		LockSpeed(vehicle, second)
-
-		return	percentage(speed,second)
-
+            saferpm = olddriveinertia
+            antistall(speed, speedreduce, savegear, first, rpm, vehicle, currentgear, saferpm, oldriveforce)
+		    LockSpeed(vehicle, second)
+		    return	percentage(speed,second)
 		elseif currentgear == 3 and speed <= third then
-		if speed <= (second) then
-			Renzu_SetGear(vehicle,currentgear - 1)
-		end
-		LockSpeed(vehicle, third)
-
-		return	percentage(speed,third)
-
+            saferpm = olddriveinertia
+            antistall(speed, speedreduce, savegear, second, rpm, vehicle, currentgear, saferpm, oldriveforce)
+		    LockSpeed(vehicle, third)
+		    return	percentage(speed,third)
 		elseif currentgear == 4 and speed <= fourth then
-		if speed <= (third) then
-			Renzu_SetGear(vehicle,currentgear - 1)
-		end
-		LockSpeed(vehicle, fourth)
-
-		return	percentage(speed,fourth)
-
+            saferpm = olddriveinertia
+            antistall(speed, speedreduce, savegear, third, rpm, vehicle, currentgear, saferpm, oldriveforce)
+		    LockSpeed(vehicle, fourth)
+		    return	percentage(speed,fourth)
 		elseif currentgear == 5 and speed <= fifth then
-		if speed <= (fourth - (first * 0.22925)) then
-			Renzu_SetGear(vehicle,currentgear - 1)
-		end
-		LockSpeed(vehicle, fifth)
-
-		return	percentage(speed,fifth)
-
+            saferpm = olddriveinertia
+            antistall(speed, speedreduce, savegear, fourth, rpm, vehicle, currentgear, saferpm, oldriveforce)
+		    LockSpeed(vehicle, fifth)
+		    return	percentage(speed,fifth)
 		elseif currentgear == 6 and speed <= sixth then
-		if speed <= (fifth - (fifth * 0.11525)) then
+		    --if speed <= (fifth - (fifth * 0.11525)) then
 			Renzu_SetGear(vehicle,currentgear - 1)
-		end
-		return	percentage(speed,sixth)
+		    --end
+		    return	percentage(speed,sixth)
 		elseif currentgear > 0 then
-			return 1.4
+			return 1.1
 		else
 			return 0.2
 		end
 
 	end
 end
+-- function speedtable(speed,gear)
+--     if savegear < 1 then return end
+--     olddriveinertia = GetVehStats(vehicle, "CHandlingData","fDriveInertia")
+--     oldriveforce = GetVehStats(vehicle, "CHandlingData","fInitialDriveForce")
+--     oldtopspeed = GetVehStats(vehicle, "CHandlingData","fInitialDriveMaxFlatVel") -- normalize
+--     local real_ratio = oldtopspeed * olddriveinertia * oldriveforce / 4.2
+--     --ShowHelpNotification(percentage(20,60), true, 1, 5)
+--     --SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", 250*1.000000)
+--     --local drive = GetVehStats(vehicle, "CHandlingData", "fDriveInertia")
+--     --local force = GetVehStats(vehicle ,"CHandlingData", "fInitialDriveForce")
+-- 	if vehicletopspeed ~= nil then
+-- 		--local vehicletopspeed = GetVehStats(GetVehiclePedIsIn(GetPlayerPed(-1), false), "CHandlingData", "fInitialDriveMaxFlatVel")
+-- 		local first = (vehicletopspeed * config.firstgear) * 0.9
+-- 		local second = (vehicletopspeed * config.secondgear) * 0.9
+-- 		local third = (vehicletopspeed * config.thirdgear) * 0.9
+-- 		local fourth = (vehicletopspeed * config.fourthgear) * 0.9
+-- 		local fifth = (vehicletopspeed * config.fifthgear) * 0.9
+-- 		local sixth = (vehicletopspeed * config.sixthgear) * 0.9
+--         local ratio = (vehicletopspeed / real_ratio) * olddriveinertia
+--         engineload = (2.0 * (savegear / savegear))
+--         local currentspeed = ratio / gear_ratio[savegear]
+-- 		local currentgear = savegear
+--         local shitspeed = currentspeed * 3.6
+--         print(speed,shitspeed)
+-- 		if currentgear == 1 and speed <= shitspeed then
+--             SetEntityMaxSpeed(vehicle,currentspeed)
+-- 		--LockSpeed(vehicle, speedPerGear)
+-- 		return	percentage(speed,shitspeed)
+
+-- 		elseif currentgear == 2 and speed <= shitspeed then
+-- 		if speed <= (ratio / gear_ratio[savegear - 1] * 3.5) then
+-- 			Renzu_SetGear(vehicle,currentgear - 1)
+-- 		end
+--         --LockSpeed(vehicle, second)
+--         SetEntityMaxSpeed(vehicle,currentspeed)
+-- 		return	percentage(speed,shitspeed)
+
+-- 		elseif currentgear == 3 and speed <= shitspeed then
+-- 		--if speed <= ratio / gear_ratio[currentgear] * 3.6 then
+-- 			Renzu_SetGear(vehicle,currentgear - 1)
+--             print(ratio / gear_ratio[currentgear] * 3.6)
+-- 		--end
+--         SetEntityMaxSpeed(vehicle,currentspeed)
+--         --LockSpeed(vehicle, third)
+--         return	percentage(speed,shitspeed)
+
+-- 		elseif currentgear == 4 and speed <= shitspeed then
+-- 		--if speed <= (ratio / gear_ratio[currentgear - 1] * 3.4) then
+-- 			Renzu_SetGear(vehicle,currentgear - 1)
+-- 		--end
+-- 		LockSpeed(vehicle, currentspeed)
+
+-- 		return	percentage(speed,shitspeed)
+
+-- 		elseif currentgear == 5 and speed <= shitspeed then
+-- 		--if speed <= (ratio / gear_ratio[currentgear - 1] * 3.7) then
+-- 			Renzu_SetGear(vehicle,currentgear - 1)
+-- 		--end
+-- 		LockSpeed(vehicle, currentspeed)
+
+-- 		return	percentage(speed,shitspeed)
+
+-- 		elseif currentgear == 6 and speed <= sixth then
+-- 		if speed <= (fifth - (fifth * 0.11525)) then
+-- 			Renzu_SetGear(vehicle,currentgear - 1)
+-- 		end
+-- 		return	percentage(speed,sixth)
+-- 		elseif currentgear > 0 then
+-- 			return 1.4
+-- 		else
+-- 			return 0.2
+-- 		end
+
+-- 	end
+-- end
 
 -- FORCE GTA NATIVE TO STOP SWITCHING GEARS AUTOMATICALLY
 function ForceVehicleGear (vehicle, gear)
     ----print(GetVehicleThrottleOffset(vehicle))
     SetVehicleCurrentGear(vehicle, gear)
     SetVehicleNextGear(vehicle, gear)
+    --savegear = gear
+    --SetVehicleHighGear(vehicle, gear)
     --SetVehicleHighGear(vehicle, gear)
     return gear
 end

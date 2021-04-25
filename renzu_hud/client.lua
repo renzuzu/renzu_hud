@@ -18,49 +18,8 @@ Creation(function()
 	end
 	DecorRegister("INERTIA", 1)
 	DecorRegister("DRIVEFORCE", 1)
+	DecorRegister("TOPSPEED", 1)
 end)
------------------------------------------------------------------------------------------------------------------------------------------
--- VARIABLES
------------------------------------------------------------------------------------------------------------------------------------------
-veh_stats = {}
-entering = false
-mode = 'NORMAL'
-ismapopen = false
-date = "00:00"
-plate = nil
-degrade = 1.0
-playerloaded = false
-manual = false
-vehicletopspeed = nil
-uimove = false
-reverse = false
-savegear = 0
-rpm = 0.2
-hour = 0
-vali = false
-minute = 0
-segundos = 0
-month = ""
-dayOfMonth = 0
-voice = 2
-voiceDisplay = 2
-proximity = 25.0
-belt = false
-ExNoCarro = false
-sBuffer = {}
-vBuffer = {}
-displayValue = true
-gasolina = 0
-street = nil
-vehicle = nil
-hp = 0
-shifter = false
-hasNitro = true
-k_nitro = 70
-n_boost = 15.0
-nitro_state = 0
-isBlack = "false"
-invehicle = false
 
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- DATE
@@ -793,10 +752,20 @@ function NuiMileAge()
 						if oldPos == nil then
 							oldPos = newPos
 						end
+						if oldPos2 == nil then
+							oldPos2 = newPos
+						end
 						local dist = #(newPos-oldPos)
 						if dist > 10.0 then
 							veh_stats[plate].mileage = veh_stats[plate].mileage+(( dist / 1000 ) * config.mileage_speed) -- dist = meter / 1000 = kmh, this might be inaccurate
 							oldPos = newPos
+						end
+						if config.driving_affect_status then
+							local dist2 = #(newPos-oldPos2)
+							if dist2 > config.driving_status_radius then
+								oldPos2 = newPos
+								TriggerEvent('esx_status:'..config.driving_status_mode..'', config.driving_affected_status, config.driving_status_val)
+							end
 						end
 						if newmileage ~= veh_stats[plate].mileage or newmileage == nil then
 							newmileage = veh_stats[plate].mileage
@@ -1708,14 +1677,14 @@ function turbolevel(value, lvl)
     return value
 end
 
-function max(boost, rpm)
-    if boost > 3.0 then
-        boost = 3.0
+function max(b, rpm)
+    if b > 3.0 then
+        b = 3.0
     end
-    if boost < 0.0 then
+    if b < 0.0 then
         return 0.0
     end
-    return turbolevel(boost, turbo)
+    return turbolevel(b, turbo)
 
 end
 
@@ -1805,6 +1774,7 @@ function vehiclemode()
 					sleep = 10
 					rpm = VehicleRpm(vehicle)
 					gear = GetGear(vehicle)
+					topspeedmodifier = config.topspeed_multiplier
 				end
 				Renzuzu.Wait(sleep)
 			end
@@ -1815,10 +1785,19 @@ function vehiclemode()
 			local newgear = 0
 			olddriveinertia = GetVehStats(vehicle, "CHandlingData","fDriveInertia")
 			oldriveforce = GetVehStats(vehicle, "CHandlingData","fInitialDriveForce")
+			oldtopspeed = GetVehStats(vehicle, "CHandlingData","fInitialDriveMaxFlatVel") -- normalize
 			DecorSetFloat(vehicle, "INERTIA", olddriveinertia)
 			DecorSetFloat(vehicle, "DRIVEFORCE", oldriveforce)
+			DecorSetFloat(vehicle, "TOPSPEED", oldtopspeed)
+			globaltopspeed = DecorGetFloat(vehicle,"TOPSPEED") * config.topspeed_multiplier
+			local fixedshit = (config.topspeed_multiplier * 1.0)
+			local old = oldtopspeed * 1.0
+			SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", old * fixedshit)
 			local turbosound = 0
 			local oldgear = 0
+			--SetVehStats(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", oldtopspeed * 2.0)
+			local fo = oldtopspeed * 0.64
+			--SetEntityMaxSpeed(vehicle,fo * 2.0)
 			while mode == 'SPORTS' do
 				local sleep = 2000
 				--local ply = PlayerPedId()
@@ -1852,13 +1831,14 @@ function vehiclemode()
 							soundofnitro = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
 							sound = true
 						end
+						--SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", oldtopspeed*3.500000)
 						while lag < 200 and engineload < turboboost(gear) and IsControlPressed(1, 32) do
 							engineload = (rpm * (gear / 10))
 							SetVehicleTurboPressure(vehicle, max((rpm * 1) + engineload + (lag * engineload)))
 							Renzuzu.Wait(1)
 							lag = lag + 1
 						end
-						if rpm > 0.65 and rpm < 0.95 and turbosound < 10 and gear == oldgear and engineload > turboboost(gear) then
+						if config.boost_sound and rpm > 0.65 and rpm < 0.95 and turbosound < 10 and gear == oldgear and engineload > turboboost(gear) then
 							turbosound = turbosound + 1
 							SetVehicleBoostActive(vehicle, 1, 0)
 							SetVehicleBoostActive(vehicle, 0, 0)
@@ -1881,7 +1861,7 @@ function vehiclemode()
 					if gear == 0 then
 						gear = 1
 					end
-					local boost = (vehicleSpeed * 7)
+					boost = (vehicleSpeed * 7)
 					if degrade ~= 1.0 then
 						boost = boost * (degrade / config.boost)
 					end
@@ -1889,13 +1869,19 @@ function vehiclemode()
 						SetVehStats(vehicle, "CHandlingData", "fDriveInertia", boost / 10)
 						SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", engineload)
 						SetVehicleBoost(vehicle, boost)
+						if config.sports_increase_topspeed then
+							SetVehicleEnginePowerMultiplier(vehicle,boost * config.topspeed_multiplier)
+						end
 					end
 				end
 				Renzuzu.Wait(sleep)
 			end
+			globaltopspeed = nil
+			topspeedmodifier = 1.0
 			busy = true
 			Renzuzu.Wait(100)
 			if DecorGetFloat(vehicle,"INERTIA") ~= 0.0 and DecorGetFloat(vehicle,"DRIVEFORCE") ~= 0.0 then
+				SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", DecorGetFloat(vehicle,"TOPSPEED"))
 				SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
 				SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
 				while not GetVehStats(vehicle, "CHandlingData","fDriveInertia") == DecorGetFloat(vehicle,"INERTIA") and invehicle do
@@ -1911,6 +1897,7 @@ function vehiclemode()
 					Renzuzu.Wait(0)
 				end
 			end
+			SetVehicleEnginePowerMultiplier(vehicle, 1.0) -- just incase
 			busy = false
 			StopSound(soundofnitro)
 			ReleaseSoundId(soundofnitro)
@@ -2287,4 +2274,87 @@ end, false)
 
 Creation(function()
 	RenzuKeybinds(config.commands['cruisecontrol'], 'Vehicle Cruise Control', 'keyboard', config.keybinds['cruisecontrol'])
+end)
+
+Creation(function()
+	if config.firing_affect_status then
+		while ped == nil or ped == 0 do
+			Citizen.Wait(100)
+		end
+		local count = 0
+		local killed = {}
+		while true do
+			local lastent = nil
+			local pid = PlayerId()
+			while IsPlayerFreeAiming(pid) do
+				if IsPedShooting(ped) then
+					if config.killing_affect_status then
+						val, ent = GetEntityPlayerIsFreeAimingAt(pid)
+						--print("shooting")
+						if lastent ~= nil and lastent ~= 0 then
+							if not killed[lastent] and IsEntityDead(lastent) and GetPedSourceOfDeath(lastent) == ped then
+								killed[lastent] = true
+								print("LAST ENTITY IS DEAD "..lastent.."")
+								lastent = nil
+								TriggerEvent('esx_status:'..config.killing_status_mode..'', config.killing_affected_status, config.killing_status_val)
+								Citizen.Wait(100)
+							end
+						end
+						if ent ~= lastent then
+							lastent = nil
+						end
+					end
+					if count > config.firing_bullets then
+						count = 0
+						TriggerEvent('esx_status:'..config.firing_status_mode..'', config.firing_affected_status, config.firing_statusaddval)
+						--print("STATUS ADDED")
+					end
+					count = count + 1
+					--print(count)
+					lastent = ent
+					Citizen.Wait(5)
+				end
+				--print("aiming")
+				Citizen.Wait(5)
+			end
+			Citizen.Wait(2000) -- 2 seconds wait to check if player is aiming, more optimized 100x than to loop wait(0) just to check if player is firing or not
+		end
+	end
+end)
+
+Creation(function()
+	if config.running_affect_status or config.melee_combat_affect_status or config.parachute_affect_status or config.playing_animation_affect_status then
+		while true do
+			if config.running_affect_status then
+				while IsPedRunning(ped) do
+					Citizen.Wait(1000)
+					TriggerEvent('esx_status:'..config.running_status_mode..'', config.running_affected_status, config.running_status_val)
+				end
+			end
+			if config.melee_combat_affect_status then
+				while IsPedInMeleeCombat(ped) do
+					Citizen.Wait(1000)
+					TriggerEvent('esx_status:'..config.melee_combat_status_mode..'', config.melee_combat_affected_status, config.melee_combat_status_val)
+				end	
+			end
+			if config.parachute_affect_status then
+				while IsPedInParachuteFreeFall(ped) do
+					Citizen.Wait(1000)
+					TriggerEvent('esx_status:'..config.parachute_status_mode..'', config.parachute_affected_status, config.parachute_status_val)
+				end	
+			end
+			if config.playing_animation_affect_status then
+				--if IsEntityPlayingAnim(ped, )
+				for k,v in pairs(config.status_animation) do
+					Wait(0)
+					if IsEntityPlayingAnim(ped, v.dict, v.name, 3) then
+						print("LOADED")
+						TriggerEvent('esx_status:'..v.mode..'', v.status, v.val)
+						Citizen.Wait(1000)
+					end
+				end
+			end
+			Citizen.Wait(1000)
+		end
+	end
 end)
