@@ -525,6 +525,25 @@ function setCruiseControl(bool) {
     }
 }
 
+function setShowBodyUi(bool) {
+    if (bool) {
+        document.getElementById('bodyui').style.display = 'block'
+        $("#bodystatus").fadeIn();
+    } else {
+        document.getElementById('bodyui').style.display = 'none'
+        $("#bodystatus").fadeOut();
+    }
+}
+
+function setUpdateBodyStatus(table) {
+    for (const key in table) {
+        console.log(key)
+        var val = table[key] * 0.1;
+        console.log(val)
+        document.getElementById(key).style.opacity = val;
+    }
+}
+
 //FUNCTIONS
 var renzu_hud = {
     setArmor,
@@ -533,7 +552,8 @@ var renzu_hud = {
     setStatus,
     setShowstatus,
     setShowstatusv2,
-
+    setShowBodyUi,
+    setUpdateBodyStatus,
     //CAR
     setShow,
     setRpm,

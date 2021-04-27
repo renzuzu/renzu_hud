@@ -1,3 +1,5 @@
+ESX = nil
+TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 local adv_table = {}
 Citizen.CreateThread(function()
 	Citizen.Wait(10000)
@@ -43,4 +45,28 @@ AddEventHandler("renzu_hud:smokesync", function(ent,coord)
 	local ent = ent
 	local coord = coord
 	TriggerClientEvent('start:smoke', -1, ent,coord)
+end)
+bodytable = {}
+RegisterServerEvent('renzu_hud:checkbody')
+AddEventHandler('renzu_hud:checkbody', function()
+	local source = source
+	local xPlayer = ESX.GetPlayerFromId(source)
+	local done = false
+	MySQL.Async.fetchAll("SELECT bodystatus FROM users WHERE identifier=@identifier",{['@identifier'] = xPlayer.identifier},	function(res)
+		if res[1].bodystatus and json.decode(res[1].bodystatus) ~= nil then 
+			done = json.decode(res[1].bodystatus)
+			print(res[1].bodystatus)
+			print(done)
+		end
+		print(done)
+		TriggerClientEvent('renzu_hud:bodystatus', source, done)
+	end)
+end)
+
+RegisterServerEvent('renzu_hud:savebody')
+AddEventHandler('renzu_hud:savebody', function(bodystatus)
+	local xPlayer = ESX.GetPlayerFromId(source)
+	local identifier = xPlayer.identifier
+	bodytable[identifier] = bodystatus
+	MySQL.Async.execute('UPDATE users SET bodystatus=@bodystatus WHERE identifier=@identifier',{['@bodystatus'] = json.encode(bodystatus),['@identifier'] = identifier})
 end)

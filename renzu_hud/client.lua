@@ -204,7 +204,7 @@ function updateStatus(pressed)
 	local status = exports['standalone_status']:GetStatus(config.status)--, function(status)
 	for k,v in pairs(status) do
 		--print(k)
-		Wait(100)
+		Wait(1)
 		--print(v)
 		if k == 'thirst' then
 			thirst = v / 10000
@@ -221,7 +221,7 @@ function updateStatus(pressed)
 	end
 	fetch = true
 	while not fetch do
-		Renzuzu.Wait(111)
+		Renzuzu.Wait(1)
 	end
 	status = {
 		stress = tonumber(sanity),
@@ -396,12 +396,31 @@ Creation(function()
 	end
 end)
 
+finaldrive, flywheel, maxspeed = 0,0,0
+function SavevehicleHandling()
+	if not DecorExistOn(vehicle, "INERTIA") then
+		finaldrive = GetVehStats(vehicle, "CHandlingData","fDriveInertia")
+		DecorSetFloat(vehicle, "INERTIA", finaldrive)
+	end
+	if not DecorExistOn(vehicle, "DRIVEFORCE") then
+		flywheel = GetVehStats(vehicle, "CHandlingData","fInitialDriveForce")
+		DecorSetFloat(vehicle, "DRIVEFORCE", flywheel)
+	end
+	if not DecorExistOn(vehicle, "TOPSPEED") then
+		maxspeed = GetVehStats(vehicle, "CHandlingData","fInitialDriveMaxFlatVel")
+		DecorSetFloat(vehicle, "TOPSPEED", maxspeed)
+		print("Vehicle Data Saved")
+	end
+end
+
 --ASYNC FUNCTION CALL VEHICLE LOOPS
 function inVehicleFunctions()
 	Creation(function()
 		while not invehicle do
 			Renzuzu.Wait(1) -- lets wait invehicle to = true
 		end
+		SavevehicleHandling()
+		SetForceHdVehicle(vehicle, true)
 		RpmandSpeedLoop()
 		NuiRpm()
 		NuiSpeed()
@@ -1786,9 +1805,9 @@ function vehiclemode()
 			olddriveinertia = GetVehStats(vehicle, "CHandlingData","fDriveInertia")
 			oldriveforce = GetVehStats(vehicle, "CHandlingData","fInitialDriveForce")
 			oldtopspeed = GetVehStats(vehicle, "CHandlingData","fInitialDriveMaxFlatVel") -- normalize
-			DecorSetFloat(vehicle, "INERTIA", olddriveinertia)
-			DecorSetFloat(vehicle, "DRIVEFORCE", oldriveforce)
-			DecorSetFloat(vehicle, "TOPSPEED", oldtopspeed)
+			-- DecorSetFloat(vehicle, "INERTIA", olddriveinertia)
+			-- DecorSetFloat(vehicle, "DRIVEFORCE", oldriveforce)
+			-- DecorSetFloat(vehicle, "TOPSPEED", oldtopspeed)
 			globaltopspeed = DecorGetFloat(vehicle,"TOPSPEED") * config.topspeed_multiplier
 			local fixedshit = (config.topspeed_multiplier * 1.0)
 			local old = oldtopspeed * 1.0
@@ -2358,3 +2377,243 @@ Creation(function()
 		end
 	end
 end)
+
+-- BODY STATUS
+life = 100
+receive = 'new'
+bodystatus = {}
+bonecategory = {}
+parts = {}
+bodyui = false
+function BodyUi()
+	bodyui = not bodyui
+	RenzuSendUI({
+		type = "setShowBodyUi",
+		content = bodyui
+	})
+end
+
+RenzuCommand(config.commands['bodystatus'], function()
+	BodyUi()
+end, false)
+
+Creation(function()
+	RenzuKeybinds(config.commands['bodystatus'], 'Open Body Status', 'keyboard', config.keybinds['bodystatus'])
+end)
+
+RegisterNetEvent('renzu_hud:bodystatus')
+AddEventHandler('renzu_hud:bodystatus', function(status)
+	local status = status
+	print("TIKOL")
+	receive = true
+	print("receive")
+	bodystatus = status
+end)
+
+Creation(function()
+	if config.bodystatus then
+		Citizen.Wait(1000)
+		TriggerServerEvent('renzu_hud:checkbody')
+		while receive == 'new' do
+			Citizen.Wait(1)
+		end
+		print("Loop")
+		print(bodystatus)
+		for type,val in pairs(config.buto) do
+			if bodystatus then 
+				bonecategory[type] = bodystatus[type] 
+			else 
+				bonecategory[type] = 0
+			end
+			parts[type] = {}
+			for bone,val in pairs(val) do
+				parts[type][bone] = 0
+			end
+		end
+		RenzuSendUI({
+			type = "setUpdateBodyStatus",
+			content = bonecategory
+		})
+		while config.bodystatus do
+		Citizen.Wait(config.bodystatuswait)
+		BodyMain()
+		end
+	end
+end)
+
+local body = false
+local arm = false
+local armbone = 0
+local armbone2 = 0
+local leg = false
+local head = false
+Creation(function()
+	if config.bodystatus then
+		local tick = 0
+		while receive == 'new' do
+			Citizen.Wait(100)
+		end
+		while config.bodystatus and receive do
+			Citizen.Wait(1500)
+			tick = tick + 1000
+			local ped = ped
+			local pid = PlayerId()
+			if bonecategory["ped_head"] > 0 then
+				SetTimecycleModifier(config.headtimecycle)
+				SetTimecycleModifierStrength(math.min(bonecategory["ped_head"] / 1, 1.1))
+				head = true
+			else
+				if head then
+					ClearTimecycleModifier() 
+					head = false 
+				end
+			end
+			if bonecategory["ped_body"] > 0 then
+				if not body then
+					bodydamage()
+				end
+				body = true
+				if tick % (1000 / (bonecategory["ped_body"] / 10)) == 1 then
+					local plyHealth = GetEntityHealth(ped)
+					SetPlayerHealthRechargeMultiplier(pid, 0.0)
+				end
+			elseif body then
+				body = false
+			else
+				body = false
+			end
+
+			if bonecategory["right_hand"] > 0 or bonecategory["left_hand"] > 0 then
+				if not arm then
+					armdamage()
+				end
+				arm = true
+				if bonecategory["right_hand"] > bonecategory["left_hand"] then  
+					armbone = bonecategory["RightArm"]
+				else 
+					armbone2 = bonecategory["LeftArm"]
+				end
+			else
+				arm = false
+			end
+
+			if bonecategory and bonecategory["left_leg"] and bonecategory["right_leg"] and (bonecategory["left_leg"] >= 2 or bonecategory["right_leg"] >= 2) then
+				if not leg then
+					RequestAnimSet("move_m@injured")
+					legdamage()
+				end
+				leg = true
+				SetPedMoveRateOverride(plyPed, 0.6)
+				SetPedMovementClipset(plyPed, "move_m@injured", true)
+			elseif leg then
+				leg = false
+				ResetPedMovementClipset(GetPlayerPed(-1))
+				ResetPedWeaponMovementClipset(GetPlayerPed(-1))
+				ResetPedStrafeClipset(GetPlayerPed(-1))
+				SetPedMoveRateOverride(plyPed, 1.0)
+			else
+				leg = false
+			end
+		end
+	end
+end)
+
+function bodydamage()
+	Creation(function()
+		while body do
+			Citizen.Wait(5000)
+			if GetEntityHealth(PlayerPedId()) > config.chesteffect_minhealth then
+				SetEntityHealth(PlayerPedId(),GetEntityHealth(PlayerPedId()) - config.chesteffect_healthdegrade)
+			end
+		end
+	end)
+end
+
+function recoil(r)
+	tv = 0
+	if GetFollowPedCamViewMode() ~= 4 then
+		repeat 
+			Wait(0)
+			p = GetGameplayCamRelativePitch()
+			SetGameplayCamRelativePitch(p+0.3, config.thirdperson_armrecoil)
+			tv = tv+0.1
+		until tv >= r and arm
+	else
+		repeat 
+			Wait(0)
+			p = GetGameplayCamRelativePitch()
+			if r > 0.1 then
+				SetGameplayCamRelativePitch(p+0.6, config.firstperson_armrecoil)
+				tv = tv+0.6
+			else
+				SetGameplayCamRelativePitch(p+0.016, 0.333)
+				tv = tv+0.1
+			end
+		until tv >= r and arm
+	end
+end
+
+function armdamage()
+	Creation(function()
+		while arm do
+			Citizen.Wait(55)
+			if IsPedShooting(PlayerPedId()) then
+				if armbone > armbone2 then
+					recoil(armbone / 5.0)
+				else
+					recoil(armbone2 / 5.0)
+				end
+			end
+		end
+	end)
+end
+
+function legdamage()
+	Creation(function()
+		while leg do
+			Citizen.Wait(1)
+			SetPedMoveRateOverride(PlayerPedId(), config.legeffectmovement	)
+			SetPedMovementClipset(PlayerPedId(), "move_m@injured", true)
+		end
+	end)
+end
+
+function CheckBody()  
+	local ok, id = GetPedLastDamageBone(ped)
+	print(ok,id)
+	if ok then
+		for damagetype,val in pairs(config.buto) do
+			for bone,index in pairs(val) do
+				if index == id then 
+					return bone,damagetype
+				end
+			end
+		end
+	end
+	return false
+end
+
+local oldlife = GetEntityHealth(PlayerPedId())
+function BodyMain()
+	local life = GetEntityHealth(ped)
+	if life < oldlife then    
+		print("new life")
+		local index,bodytype = CheckBody()
+		if not config.weaponsonly or not HasEntityBeenDamagedByWeapon(ped, 0 , 1) and HasEntityBeenDamagedByWeapon(ped, 0 , 2) and config.weaponsonly then
+			--if isWeapon(GetPedCauseOfDeath(PlayerPedId())) then
+		if index and bodytype then
+			if index ~= nil and parts[bodytype] ~= nil and parts[bodytype][index] ~= nil and bonecategory ~= nil and bonecategory[bodytype] ~= nil then
+				parts[bodytype][index] = parts[bodytype][index] + config.damageadd
+				bonecategory[bodytype] = bonecategory[bodytype] + config.damageadd
+				print("saving")
+				RenzuSendUI({
+					type = "setUpdateBodyStatus",
+					content = bonecategory
+				})
+				TriggerServerEvent('renzu_hud:savebody', bonecategory)
+			end
+		end
+		end
+	end
+	oldlife = GetEntityHealth(ped)
+end
