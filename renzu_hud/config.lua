@@ -44,7 +44,7 @@ config = {
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- VARIABLES
 -----------------------------------------------------------------------------------------------------------------------------------------
-veh_stats = {}
+veh_stats = nil
 Renzuzu = Citizen
 entering = false
 mode = 'NORMAL'
@@ -83,14 +83,31 @@ hasNitro = true
 k_nitro = 70
 n_boost = 15.0
 boost = 1.0
-nitro_state = 0
+nitro_state = 100
 isBlack = "false"
 invehicle = false
 topspeedmodifier = 1.0
 switch = false
+life = 100
+receive = 'new'
+bodystatus = {}
+bonecategory = {}
+parts = {}
+bodyui = false
+body = false
+arm = false
+armbone = 0
+armbone2 = 0
+leg = false
+head = false
+shooting = false
+manualstatus = false
+traction = nil
+traction2 = nil
 
 config.framework = 'ESX' -- ESX | VRP | QSHIT | STANDALONE
 --CHANGE ACCORDING TO YOUR STATUS ESX STATUS OR ANY STATUS MOD
+config.carui = 'minimal'
 config.centercarhud = 'map' -- Feature of Car hud - MAP , MP3 (IF YOU CHOOSE MP3 you need renzu_mp3 as dependency, and renzu_mp3 need xsound)
 -- minimap
 config.useminimapeverytime = false -- FORCE display radarmap all the time? (USE THIS ONLY IF Some of your other script use displayradar(FALSE) , its advisable to disable this config instead remove it on your other script, default GTA show the Minimap everytime)
@@ -102,10 +119,10 @@ config.dangerrpm = 0.92 -- 9200 rpm, above this level temp will rise
 config.addheat = 10 -- additional temp for everytime the dangerrpm is reach
 config.overheatmin = 150 -- engine will explode when the temperature rise to this level
 config.overheatadd = 500 -- additional temperature when engine explodes
-config.reduce_coolant = 10 -- Reduce Coolant  ( This will trigger if vehicle constantly reaching the maximum temperature) Like in Real Vehicle Coolant Reserve handle will reduce a water/coolant to prevent the radiator overflowing due to the Water Temperature is very hot.
+config.reduce_coolant = 1 -- Reduce Coolant  ( This will trigger if vehicle constantly reaching the maximum temperature) Like in Real Vehicle Coolant Reserve handle will reduce a water/coolant to prevent the radiator overflowing due to the Water Temperature is very hot.
 config.reducetemp_onwateradd = 300 -- Reduce Engine Temperature when Coolant/Water is used
 -- Vehicle Mode
-config.boost = 1.5 -- Boost Level when sports mode is activated eg. 1.5 Bar, you can put upt o 3.0 or even 5.0 but pretty sure it will be unrealistic acceleration ( this affect Fuel Consumption )
+config.boost = 1.0 -- Boost Level when sports mode is activated eg. 1.5 Bar, you can put upt o 3.0 or even 5.0 but pretty sure it will be unrealistic acceleration ( this affect Fuel Consumption )
 config.sports_increase_topspeed = true -- do you want the topspeed will be affected? some Fivem Servers Likes a demonic topspeed :D - not good in RP. Boost only affects engine torque and horsepower not the gear ratio and final drive of transmision which affects topspeed
 config.topspeed_multiplier = 1.1 -- if sports_increase_topspeed is enable, multiplier 1.5 = x1.5 eg. normal top speed 200kmh if you put 1.5 the new topspeed is 300kmh
 config.eco = 0.5 -- Eco Level when Eco Mode is activated (this affect the efficiency of fuel)
@@ -136,12 +153,12 @@ config.driving_status_radius = 200 -- driving distance to add status
 config.firing_affect_status = true -- Firing Weapons affects status?
 config.firing_affected_status = 'sanity' -- Affected Status during gunplay
 config.firing_status_mode = 'add' -- Status Function (add,remove) add will add a value to status, remove will remove a status value.
-config.firing_statusaddval = 100000 -- value to add when firing a weapons
+config.firing_statusaddval = 10000 -- value to add when firing a weapons
 config.firing_bullets = 100 -- number of bullets or firing events to trigger the status function.
 config.killing_affect_status = true -- do you want the status to be affected when you kill some player , ped, animals.
 config.killing_affected_status = 'sanity'
 config.killing_status_mode = 'add' -- (add,remove) add will add a value to status, remove will remove a status value.
-config.killing_status_val = 100000 -- status value to add/remove per kill
+config.killing_status_val = 5000 -- status value to add/remove per kill
 config.running_affect_status = true -- if player is running (not sprint) status will affected?
 config.running_affected_status = 'thirst' -- change this to whatever status you wanted to be affected
 config.running_status_mode = 'remove' -- should add or remove? its up to you. affected status if running
@@ -175,13 +192,31 @@ config.status = { -- maximum 4 only for now, and it is preconfigured, (this is n
 config.bodystatus = true -- ENABLE BODY STATUS FUNCTION AND UI?
 config.damageadd = 1 -- HOW MUCH THE VALUE WE WANT TO SAVE TO DATABASE FOR EACH DAMAGE RECEIVE?
 config.weaponsonly = false -- Body Status Damages applies from weapons only? eg. pistol,etc anything with bullets. else it all applies to weapons,bullets, melee combat, falling in high grounds like posts,ram by a car etc..
-config.bodystatuswait = 200 -- how fast (in ms) we need to check if player is already taken a damage?
+config.bodystatuswait = 1000 -- how fast (in ms) we need to check if player is already taken a damage?
 config.headtimecycle = 'RaceTurboLight' -- timecycle effect when player head is injured
-config.legeffectmovement = 0.73 -- movement speed modifier if player leg is injured
+config.legeffectmovement = 0.73 -- movement speed modifier if player leg is injured ( 1.0 = 100%)
+config.legeffect_disabledjump = true -- disable jump while leg is in pain
 config.thirdperson_armrecoil = '0.4' -- recoil effect when player arm is injured (third person)
-config.firstperson_armrecoil = '1.2' -- recoil effect when player arm is injured (first person)
+config.firstperson_armrecoil = '0.5' -- recoil effect when player arm is injured (first person)
 config.chesteffect_healthdegrade = 1 -- reduce player health every 5 sec
 config.chesteffect_minhealth = 140 -- minimum health to maintain during chest injury. 140 points = 40% (some rp server)
+config.disabledregen = true -- disable health regen while chest is in pain
+config.disabledsprint = true -- disable sprint while chest is in pain
+config.bodyinjury_status_affected = true
+config.headbone_status = 'sanity' -- Each time the Player Head Bone is damaged, status should be affected? , Select a status name: eg. stress, sanity, etc. poop!
+config.headbone_status_mode = 'add' -- should we add or remove? (remove/add)
+config.headbone_status_value = 40000 -- value to add or remove
+config.armdamage_invehicle_effect = 5.0 -- If Arm is in injury, Steering lock is reduce? its like the player will be having a hardtime of steering the vehicle wheel.
+config.melee_decrease_damage = true -- decrease damage of melee attacks if arm is injured
+config.melee_damage_decrease = 0.1 -- float value, 1.0 = 100%
+config.enablehealcommand = true -- heal commands (standalone) example: /bodyheal head ( you can put head, chest, leg, arm)
+config.enableitems = true -- FRAMEWORK NEEDED ESX For Now ( Items for such a healing bandage to cure the body injuries )
+config.healtype = {
+    ['chest'] = {"ped_body"},
+    ['leg'] = {"left_leg","right_leg"},
+    ['head'] = {"ped_head"},
+    ['arm'] = {"right_hand","left_hand"}
+}
 config.buto = { -- do not edit (LINK https://gtaforums.com/topic/801074-list-of-entity-bone-index-hashes/) and LINK https://wiki.gtanet.work/index.php?title=Bones
   ["ped_body"] = {
     SKEL_Pelvis1 = 0xD003,
@@ -480,7 +515,7 @@ config.buto = { -- do not edit (LINK https://gtaforums.com/topic/801074-list-of-
     MH_L_Sleeve = 0x933C,
   },
 
-  ["leg_leg"] = {
+  ["left_leg"] = {
     SKEL_L_Thigh = 0xE39F,
     SKEL_L_Calf = 0xF9BB,
 	MH_L_ThighBack = 0x600D,
@@ -561,6 +596,129 @@ config.buto = { -- do not edit (LINK https://gtaforums.com/topic/801074-list-of-
 }
 --changable to status is sanity or energy you can rename it for example: stress, but it works the same way. (changing the status name is for advanced user only, dont change it if you are not sure) you might want to use renzu_status (AKA standalone_status) converted esx_status to standalone framework, using that the status will work 100%.
 
+--WEAPON UI
+config.weaponsui = true -- enable weapon ui
+config.crosshairenable = true -- enable custom crosshair
+config.crosshair = 1 -- index number of custom crosshair ( 1-5 )
+config.ammoupdatedelay = 300 -- delay update for bullets ui
+--WEAPONTABLE do not edit this (only if you will add new weapons)
+config.WeaponTable = { -- do not edit! unless your gonna add new weapons ( HASHES SOURCE LINK https://wiki.rage.mp/index.php?title=Weapons)
+  melee = {
+    dagger = "0x92A27487",
+    bat = "0x958A4A8F",
+    bottle = "0xF9E6AA4B",
+    crowbar = "0x84BD7BFD",
+    unarmed = "0xA2719263",
+    flashlight = "0x8BB05FD7",
+    golfclub = "0x440E4788",
+    hammer = "0x4E875F73",
+    hatchet = "0xF9DCBF2D",
+    knuckle = "0xD8DF3C3C",
+    knife = "0x99B507EA",
+    machete = "0xDD5DF8D9",
+    switchblade = "0xDFE37640",
+    nightstick = "0x678B81B1",
+    wrench = "0x19044EE0",
+    battleaxe = "0xCD274149",
+    poolcue = "0x94117305",
+    stone_hatchet = "0x3813FC08"
+  },
+  handguns = {
+    pistol = "0x1B06D571",
+    pistol_mk2 = "0xBFE256D4",
+    combatpistol = "0x5EF9FEC4",
+    appistol = "0x22D8FE39",
+    stungun = "0x3656C8C1",
+    pistol50 = "0x99AEEB3B",
+    snspistol = "0xBFD21232",
+    snspistol_mk2 = "0x88374054",
+    heavypistol = "0xD205520E",
+    vintagepistol = "0x83839C4",
+    flaregun = "0x47757124",
+    marksmanpistol = "0xDC4DB296",
+    revolver = "0xC1B3C3D1",
+    revolver_mk2 = "0xCB96392F",
+    doubleaction = "0x97EA20B8",
+    raypistol = "0xAF3696A1",
+    ceramicpistol = "0x2B5EF5EC",
+    navyrevolver = "0x917F6C8C"
+  },
+  smg = {
+    microsmg = "0x13532244",
+    smg = "0x2BE6766B",
+    smg_mk2 = "0x78A97CD0",
+    assaultsmg = "0xEFE7E2DF",
+    combatpdw = "0xA3D4D34",
+    machinepistol = "0xDB1AA450",
+    minismg = "0xBD248B55",
+    raycarbine = "0x476BF155"
+  },
+  shotguns = {
+    pumpshotgun = "0x1D073A89",
+    pumpshotgun_mk2 = "0x555AF99A",
+    sawnoffshotgun = "0x7846A318",
+    assaultshotgun = "0xE284C527",
+    bullpupshotgun = "0x9D61E50F",
+    musket = "0xA89CB99E",
+    heavyshotgun = "0x3AABBBAA",
+    dbshotgun = "0xEF951FBB",
+    autoshotgun = "0x12E82D3D"
+  },
+  assault_rifles = {
+    assaultrifle = "0xBFEFFF6D",
+    assaultrifle_mk2 = "0x394F415C",
+    carbinerifle = "0x83BF0278",
+    carbinerifle_mk2 = "0xFAD1F1C9",
+    advancedrifle = "0xAF113F99",
+    specialcarbine = "0xC0A3098D",
+    specialcarbine_mk2 = "0x969C3D67",
+    bullpuprifle = "0x7F229F94",
+    bullpuprifle_mk2 = "0x84D6FAFD",
+    compactrifle = "0x624FE830"
+  },
+  machine_guns = {
+    mg = "0x9D07F764",
+    combatmg = "0x7FD62962",
+    combatmg_mk2 = "0xDBBD7280",
+    gusenberg = "0x61012683"
+  },
+  sniper_rifles = {
+    sniperrifle = "0x5FC3C11",
+    heavysniper = "0xC472FE2",
+    heavysniper_mk2 = "0xA914799",
+    marksmanrifle = "0xC734385A",
+    marksmanrifle_mk2 = "0x6A6C02E0"
+  },
+  heavy_weapons = {
+    rpg = "0xB1CA77B1",
+    grenadelauncher = "0xA284510B",
+    grenadelauncher_smoke = "0x4DD2DC56",
+    minigun = "0x42BF8A85",
+    firework = "0x7F7497E5",
+    railgun = "0x6D544C99",
+    hominglauncher = "0x63AB0442",
+    compactlauncher = "0x781FE4A",
+    rayminigun = "0xB62D1F67"
+  },
+  throwables = {
+    grenade = "0x93E220BD",
+    bzgas = "0xA0973D5E",
+    smokegrenade = "0xFDBC8A50",
+    flare = "0x497FACC3",
+    molotov = "0x24B17070",
+    stickybomb = "0x2C3731D9",
+    proxmine = "0xAB564B93",
+    snowball = "0x787F0BB",
+    pipebomb = "0xBA45E8B8",
+    ball = "0x23C9F95C"
+  },
+  misc = {
+    petrolcan = "0x34A67B97",
+    fireextinguisher = "0x60EC506",
+    parachute = "0xFBAB5776",
+    hazardcan = "0xBA536372"
+  }
+}
 --CUSTOM FUEL SYSTEM (YOU NEED TO DISABLE Your Other Vehicle Fuel management to make this work specially for the ECO Mode)
 config.usecustomfuel = true -- needed if you want to use ECO and Sports Mode Fuel Cost Effect
 config.fueldecor = "_FUEL_LEVEL"
@@ -612,6 +770,54 @@ config.fuelusage = {
 	[0.0] = 0.0,
 }
 
+config.enablecarcontrol = true
+config.allowoutsideofvehicle = true -- allow car control outside of vehicle (nearest vehicle and lastvehicle)
+
+--NITRO
+config.enablenitro = true
+config.nitro_sound = true -- enable sound on nitro | default: true
+config.nitrocost = 0.05 -- value to deduct per frame
+config.nitroboost = 15.0 -- x15 torque
+config.maxnitro = 100 -- maximum value of nitro, greater than 100 might break the nitro bar.
+config.exhaust_bones = {
+	"exhaust",
+	"exhaust_2",
+} 
+
+config.tailights_bone = {
+	"taillight_l",
+	"taillight_r",
+	--"taillight_m",
+}
+config.nitroasset = "core"
+
+config.exhaust_particle_name = "veh_backfire" -- particle name | default: "veh_backfire"
+config.trail_particle_name = "veh_light_red_trail"
+config.exhaust_flame_size = 1.3
+config.trail_size = 1.00
+config.bannedindex = -1
+config.purge_left_bone = "wheel_lf"
+config.purge_right_bone = "wheel_rf"
+config.purge_size = 40.0
+config.purge_paticle_name = "ent_sht_steam" -- particle name | default: "ent_sht_steam"
+
+--WHEELSYSTEM
+config.enabletiresystem = true -- Enable Tire System, Custom Tire Health System, Saved in DB, Sync all to player, using adv_stat table in database
+config.tirebrandnewhealth = 555 -- health of a brand new tires, this is not the vehicle health tires from GTA NATIVE!
+config.tirewear = 1 -- wear value every 100 radius
+config.tirestress = 2 -- wear value everytime you stress your tire, using burnouts, curving with high speed etc...
+config.bursttires = true -- burst any wear tires if health is <=0 ( GTA NATIVE WHEEL HEALTH )
+config.reducetraction = true -- reduce traction during the wear mode (WEAR mode = if tire brandnew health is <= 0)
+config.minrpm_wheelspin_detect = 0.7 -- minimum rpm to detect stress tires
+config.minspeed_curving = 15 -- minimum speed for curving to apply stress tires (speed is in meters not kmh or mph) 15 * 3.6 = kmh
+config.minimum_angle_for_curving = 2 -- minimum angle of vehicle to detect if its drifting, sharp curving a corner. greater than 2 might not detect sharp cornering.
+config.wearspeedmultiplier = true -- Current Speed affect total value of tirewear.
+config.curveloss = 0.7 -- 0.7 = 70%, 1.0 = 100% - Reduce Traction of Wheels Steering Control ( This will affect Cornering )
+config.acceleratetractionloss = 0.5 -- 0.5 = 50%, 1.0 = 100% - Reduce the total traction of accelerating vehicle
+config.repairalltires = true -- repair all tires using the command or item else Repair the tires one by one.
+config.repaircommand = true -- Enable Repair Command for standalone purpose, disable this if repairing via item.
+-- FAQ - GTA WHEEL HEALTH IS GETTING REDUCE if Brand New Health is <= 0, so a total of 2000 health for each tires, combine with brandnewhealth + gta wheel health.
+
 -- HERE YOU CAN CHANGE THE KEYBINDS
 config.keybinds = {
 	--TOGGLE STATUS
@@ -631,7 +837,9 @@ config.keybinds = {
 	--switching differential eg. 4WD,RWD,FWD
 	differential = 'RCONTROL', -- Right CTRL Change Differential eg. 4wd,fwd,rwd
 	cruisecontrol = 'RMENU', -- Right Alt CRUISE CONTROL
-	bodystatus = 'HOME'
+	bodystatus = 'HOME',
+    carcontrol = 'NUMLOCK',
+    enablenitro = 'DELETE'
 }
 
 --COMMANDS FOR KEYBINDS
@@ -650,18 +858,43 @@ config.commands = {
 	mode = 'mode',
 	differential = 'differential',
 	cruisecontrol = 'cruisecontrol',
-	bodystatus = 'bodystatus'
+	bodystatus = 'bodystatus',
+    bodyheal = 'bodyheal',
+    carcontrol = 'carcontrol',
+    weaponui = 'weaponui',
+    crosshair = 'crosshair',
+    enablenitro = 'enablenitro'
 }
 
 --MANUAL TRANNY Gear Ratio ( Do not Edit if you know what you are doing ) This is not the actual Gear Ratio numbers/settings in real life!
 config.gears = {
-	[0] = 0.00,
-	[1] = 0.33,
-	[2] = 0.57,
-	[3] = 0.84,
-	[4] = 1.22,
-	[5] = 1.45,
-	[6] = 1.60
+    [4.0] = {
+        [0] = 0.00,
+        [1] = 0.33,
+        [2] = 0.57,
+        [3] = 0.84,
+        [4] = 1.17,
+        [5] = 1.45,
+        [6] = 1.60
+    },
+    [5.0] = {
+        [0] = 0.00,
+        [1] = 0.33,
+        [2] = 0.57,
+        [3] = 0.84,
+        [4] = 1.08,
+        [5] = 1.45,
+        [6] = 1.60
+    },
+    [6.0] = {
+        [0] = 0.00,
+        [1] = 0.33,
+        [2] = 0.57,
+        [3] = 0.80,
+        [4] = 1.02,
+        [5] = 1.12,
+        [6] = 1.35
+    }
 }
 config.firstgear = 0.33 -- DEFAULT 0.33
 config.secondgear = 0.57 -- DEFAULT 0.57
@@ -678,6 +911,8 @@ config.disallowed_manual = {
 	'21', -- trains
 }
 
+config.enableproximityfunc = true -- if false = will be using Voice UI Only, no Voice Function
+
 --OPTIMIZATION
 -- DONT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING!
 config.uitop_sleep = 2000
@@ -685,7 +920,7 @@ config.gear_sleep = 700
 config.lights_sleep = 1000
 config.direction_sleep = 2500
 config.NuiCarhpandGas_sleep = 1500
-config.car_mainloop_sleep = 2000
+config.car_mainloop_sleep = 500
 config.rpm_speed_loop = 52
 config.idle_rpm_speed_sleep = 151
 config.Rpm_sleep = 151
@@ -740,6 +975,10 @@ end
 
 function RCR(int,pad)
     return Renzu_Hud(0x50F940259D3841E6, int, pad)
+end
+
+function RCR2(int,pad)
+    return Renzu_Hud(0x648EE3E7F38877DD, int, pad)
 end
 
 function RCP(int,pad)

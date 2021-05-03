@@ -2,7 +2,7 @@ ESX = nil
 TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 local adv_table = {}
 Citizen.CreateThread(function()
-	Citizen.Wait(10000)
+	--Citizen.Wait(10000)
 	MySQL.Async.fetchAll("SELECT adv_stats,plate FROM owned_vehicles", {}, function(results)
 		if #results > 0 then
 			for k,v in pairs(results) do
@@ -58,6 +58,7 @@ AddEventHandler('renzu_hud:checkbody', function()
 			print(res[1].bodystatus)
 			print(done)
 		end
+		print(res[1].bodystatus)
 		print(done)
 		TriggerClientEvent('renzu_hud:bodystatus', source, done)
 	end)
@@ -69,4 +70,16 @@ AddEventHandler('renzu_hud:savebody', function(bodystatus)
 	local identifier = xPlayer.identifier
 	bodytable[identifier] = bodystatus
 	MySQL.Async.execute('UPDATE users SET bodystatus=@bodystatus WHERE identifier=@identifier',{['@bodystatus'] = json.encode(bodystatus),['@identifier'] = identifier})
+end)
+
+ESX.RegisterUsableItem('nitro', function(source)
+	print(source)
+	local xPlayer = ESX.GetPlayerFromId(source)
+	TriggerClientEvent('renzu_hud:addnitro', source)
+	xPlayer.removeInventoryItem('nitro', 1)
+end)
+
+RegisterServerEvent("renzu_hud:nitro_flame")
+AddEventHandler("renzu_hud:nitro_flame", function(entity,coords)
+	TriggerClientEvent("renzu_hud:nitro_flame", -1, entity,coords)
 end)
