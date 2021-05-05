@@ -19,6 +19,8 @@
   <link rel="stylesheet" href="css/map.css" type="text/css">
   <!-- <script src="ui.js" type="text/javascript"></script> -->
   <link href="css/default.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="css/simple-notify.css" />
+  <link rel="stylesheet" href="css/slider.css" />
         <style>
             @-webkit-keyframes loader {
               0% {
@@ -1139,6 +1141,22 @@
         top:246px;
         font-size:18px;
       }
+      #airsusinfo {
+        z-index:1005;
+        color:rgb(231, 231, 231);
+        position:absolute;
+        left:18px;
+        top:56px;
+        font-size:11px;
+      }
+      #neoninfo {
+        z-index:1005;
+        color:rgb(231, 231, 231);
+        position:absolute;
+        left:18px;
+        top:96px;
+        font-size:11px;
+      }
       #stats {
         z-index:1001;
         color:rgb(231, 231, 231);
@@ -1200,9 +1218,9 @@
       <img style="z-index:1001;position:absolute;right:84px;top:-5px;opacity:1;height:80px;" src="img/status2.png" />
     </div>
 
-    <div id="carcontrolui" style="display:none;">
+    <div id="carcontrolui" style="display:none;z-index:900;position:absolute;right:-140px;top:-200px;opacity:1.0;height:650px;">
       <div id="carcontrolinfo">Car Control:</div>
-      <!-- <img style="z-index:900;position:absolute;right:440px;top:100px;opacity:0.7;height:650px;" src="img/bodybg.png" /> -->
+      <img style="z-index:900;position:absolute;right:440px;top:200px;opacity:0.4;height:650px;" src="img/bodybg.png" />
       <img id="carcontrol" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.8;height:400px;" src="img/carcontrol.png" />
       <img id="carcontrol2" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:1.0;height:400px;" src="img/carcontrol2.png" />
       <img id="hood" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/hood.png" />
@@ -1227,6 +1245,36 @@
       <span id="" onclick="Carcontrolcallbackui('door','0');" style="z-index:1021;position:absolute;right:840px;top:325px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
       <img id="engine" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/engine_true.png" />
       <span id="" onclick="Carcontrolcallbackui('engine','0');" style="z-index:1021;position:absolute;right:694px;top:390px;opacity:1.0;height:160px; background:#00000000;border-radius:50%;height:160px;width:160px;"></span>
+
+      <div id="morecontrol" style="z-index:1001;position:absolute;right:515px;bottom:-390px;opacity:1.0;height:400px;width:450px;padding:10px;">
+        <div id="airsusinfo">Air Suspension:</div>
+        <div class="range-slider">
+          <input class="range-slider__range" type="range" value="15" min="0" max="30">
+          <span class="range-slider__value">100</span>
+        </div>
+        <div id="neoninfo">Neon Lights:</div>
+        <div class="switch switch-blue" style="position: absolute;top:90px;left:10px;">
+          <input type="radio" class="switch-input" name="neon" value="on" id="week2" checked>
+          <label for="week2" class="switch-label switch-label-off">ON</label>
+          <input type="radio" class="switch-input" name="neon" value="off" id="month2">
+          <label for="month2" class="switch-label switch-label-on">OFF</label>
+          <span class="switch-selection"></span>
+        </div>
+      </div>
+    </div>
+
+    <div id="keyless" style="display:none;">
+        <div id="lockbg" style="background:#1f1717; height:220px;width:80px; position:absolute;bottom:55px;right:122px;z-index:1100;"></div>
+        <div id="foundcar" style="display:none;background:#01f10d; height:30px;width:70px; position:absolute;bottom:225px;right:122px;z-index:1101;"></div>
+        <div id="carlock" style="display:none;background:#0099ff; height:30px;width:70px; position:absolute;bottom:185px;right:132px;z-index:1101;"></div>
+        <div onclick="carlockcallback('lock');" style="display:block;background:#079cff00; height:30px;width:70px; position:absolute;bottom:185px;right:132px;z-index:1111;"></div>
+        <div id="carunlock" style="display:none;background:#fa260a; height:30px;width:70px; position:absolute;bottom:145px;right:132px;z-index:1101;"></div>
+        <div onclick="carlockcallback('unlock');" style="display:block;background:#fa260a00; height:30px;width:70px; position:absolute;bottom:145px;right:132px;z-index:1111;"></div>
+        <div id="allopen" style="display:none;background:#face0a; height:30px;width:70px; position:absolute;bottom:105px;right:132px;z-index:1101;"></div>
+        <div onclick="carlockcallback('openall');" style="display:block;background:rgba(0, 0, 0, 0); height:30px;width:70px; position:absolute;bottom:105px;right:132px;z-index:1111;"></div>
+        <div id="alarm" style="display:none;background:#fa0a46; height:30px;width:70px; position:absolute;bottom:65px;right:132px;z-index:1101;"></div>
+        <div onclick="carlockcallback('alarm');" style="display:block;background:#ec003b00; height:30px;width:70px; position:absolute;bottom:65px;right:132px;z-index:1111;"></div>
+        <img id="keyless_renzu" style="z-index:1101;position:absolute;right:10px;bottom:10px;opacity:1.0;height:300px;" src="img/carlock.png" />
     </div>
 
     <div id="uibar">
@@ -1725,6 +1773,46 @@
       <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
       <script src="js/map.js"></script>
       <script src="js/demo.js"></script>
-      
+      <script src="js/simple-notify.min.js"></script>
+      <!-- <script>
+        const custom = document.querySelector('#custom')
+        const success = document.querySelector('#success')
+        const error = document.querySelector('#error')
+        const warning = document.querySelector('#warning')
+
+        custom.addEventListener('click', () => {
+        new Notify ({
+          status: 'success',
+          title: 'Notify Title',
+          text: 'Notify text lorem ipsum',
+          autoclose: true
+        })
+        })
+
+        success.addEventListener('click', () => {
+        new Notify ({
+          status: 'success',
+          title: 'Notify Title',
+          text: 'Notify text lorem ipsum',
+        })
+        })
+
+        error.addEventListener('click', () => {
+        new Notify ({
+          status: 'error',
+          title: 'Notify Title',
+          text: 'Notify text lorem ipsum',
+        })
+        })
+
+        warning.addEventListener('click', () => {
+        new Notify ({
+          status: 'warning',
+          title: 'Notify Title',
+          text: 'Notify text lorem ipsum',
+        })
+        })
+      </script> -->
+        
     </body>
 </html>

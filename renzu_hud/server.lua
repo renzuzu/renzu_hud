@@ -3,12 +3,13 @@ TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 local adv_table = {}
 Citizen.CreateThread(function()
 	--Citizen.Wait(10000)
-	MySQL.Async.fetchAll("SELECT adv_stats,plate FROM owned_vehicles", {}, function(results)
+	MySQL.Async.fetchAll("SELECT adv_stats,plate,owner FROM owned_vehicles", {}, function(results)
 		if #results > 0 then
 			for k,v in pairs(results) do
 				if v.adv_stats and v.plate ~= nil then
 					local stats = json.decode(v.adv_stats)
 					stats.plate = string.gsub(v.plate, "%s+", "")
+					stats.owner = v.owner
 					adv_table[v.plate] = stats
 				end
 			end
@@ -36,7 +37,7 @@ AddEventHandler("renzu_hud:getmile", function()
 	if adv_table ~= nil then
 	local source = source
 	print("sending mile")
-	TriggerClientEvent('renzu_hud:receivemile', source, adv_table)
+	TriggerClientEvent('renzu_hud:receivemile', source, adv_table, GetPlayerIdentifier(source))
 	end
 end)
 
@@ -82,4 +83,14 @@ end)
 RegisterServerEvent("renzu_hud:nitro_flame")
 AddEventHandler("renzu_hud:nitro_flame", function(entity,coords)
 	TriggerClientEvent("renzu_hud:nitro_flame", -1, entity,coords)
+end)
+
+RegisterServerEvent("renzu_hud:synclock")
+AddEventHandler("renzu_hud:synclock", function(entity,type,coords)
+	TriggerClientEvent("renzu_hud:synclock", -1, entity,type,coords)
+end)
+
+RegisterServerEvent("renzu_hud:airsuspension")
+AddEventHandler("renzu_hud:airsuspension", function(entity,val,coords)
+	TriggerClientEvent("renzu_hud:airsuspension", -1, entity,val,coords)
 end)

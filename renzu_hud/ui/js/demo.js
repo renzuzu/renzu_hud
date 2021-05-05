@@ -996,6 +996,138 @@ function setWheelHealth(table) {
         document.getElementById("wheel"+index+"").style.opacity = ''+val+'';  
 }
 
+function setShowKeyless(bool) {
+    if (bool) {
+        document.getElementById("keyless").style.display = 'block';
+    } else {
+        document.getElementById("keyless").style.display = 'none';
+    }
+}
+
+var currentvehicle = undefined
+var openall = false
+var alarm = false
+function carlockcallback(type) {
+    console.log("callback car keyless system")
+    if (type == 'lock') {
+        post("setvehiclelock",{vehicle:currentvehicle})
+        console.log("locking")
+        document.getElementById("carlock").style.display = 'block';
+        document.getElementById("carunlock").style.display = 'none';
+    }
+    if (type == 'unlock') {
+        post("setvehicleunlock",{vehicle:currentvehicle})
+        console.log("unlocking")
+        document.getElementById("carunlock").style.display = 'block';
+        document.getElementById("carlock").style.display = 'none';
+    }
+    if (type == 'openall') {
+        openall = !openall
+        console.log(openall)
+        post("setvehicleopendoors",{vehicle:currentvehicle, bool:openall})
+        console.log("openall")
+        if (openall) {
+            document.getElementById("allopen").style.display = 'block';
+        } else {
+            document.getElementById("allopen").style.display = 'none';
+        }
+    }
+    if (type == 'alarm') {
+        alarm = !alarm
+        console.log(alarm)
+        post("setvehiclealarm",{vehicle:currentvehicle, bool:alarm})
+        console.log("alarm")
+        if (alarm) {
+            document.getElementById("alarm").style.display = 'block';
+        } else {
+            document.getElementById("alarm").style.display = 'none';
+        }
+    }
+}
+
+function setKeyless(table) {
+    var type = table['type']
+    var bool = table['bool']
+    var vehicle = table['vehicle']
+    var plate = table['plate']
+    var doorstatus = table['state']
+    if (type == 'connect') {
+        currentvehicle = vehicle
+        document.getElementById("foundcar").style.display = 'block';
+        if (doorstatus == 2) {
+            document.getElementById("carlock").style.display = 'block';
+            document.getElementById("carunlock").style.display = 'none';
+        }
+        if (doorstatus == 1) {
+            document.getElementById("carunlock").style.display = 'block';
+            document.getElementById("carlock").style.display = 'none';
+        }
+    }
+}
+
+pressfuck = 0
+document.onkeyup = function (data) {
+	if (data.keyCode == '76' || data.keyCode == '27') { // Escape key 76 = L (Change the 76 to whatever keycodes you want to hide the carlock ui LINK https://css-tricks.com/snippets/javascript/javascript-keycodes/)
+        if (pressfuck == 1) {
+            document.getElementById("foundcar").style.display = 'none';
+            document.getElementById("carunlock").style.display = 'none';
+            document.getElementById("carlock").style.display = 'none';
+            post("hidecarlock",{})
+            pressfuck = 0
+        }
+        pressfuck = 1
+	}
+};
+function playsound(table) {
+    var file = table['file']
+    var volume = table['volume']
+    var audioPlayer = null;
+    if (audioPlayer != null) {
+        audioPlayer.pause();
+    }
+    if (volume == undefined) {
+        volume = 0.8
+    }
+    audioPlayer = new Audio("./sounds/" + file + ".ogg");
+    audioPlayer.volume = volume;
+    audioPlayer.play();
+}
+
+function SetNotify(table) {
+    console.log("notify")
+    new Notify ({status: table['type'],title: table['title'],text: table['message'],autoclose: true})
+}
+
+    // more carcontrols
+    const settings = {
+    fill: '#1abc9c',
+    background: '#d7dcdf' };
+    const sliders = document.querySelectorAll('.range-slider');
+    Array.prototype.forEach.call(sliders, slider => {
+        slider.querySelector('input').addEventListener('input', event => {
+            slider.querySelector('span').innerHTML = event.target.value * 0.01;
+            applyFill(event.target);
+            post("setvehicleheight",{val:event.target.value * 0.01})
+        });
+        applyFill(slider.querySelector('input'));
+    });
+    function applyFill(slider) {
+        const percentage = 100 * (slider.value - slider.min) / (slider.max - slider.min);
+        const bg = `linear-gradient(90deg, ${settings.fill} ${percentage}%, ${settings.background} ${percentage + 0.1}%)`;
+        slider.style.background = bg;
+    }
+
+    $('input[type=radio][name=neon]').change(function() {
+        if (this.value == 'on') {
+            console.log("ON")
+            post("setvehicleneon",{bool:true})
+        } else {
+            console.log("OFF")
+            post("setvehicleneon",{bool:false})
+        }
+    });
+
+
 //FUNCTIONS
 var renzu_hud = {
     setArmor,
@@ -1010,6 +1142,8 @@ var renzu_hud = {
     setWeapon,
     setWeaponUi,
     setCrosshair,
+    playsound,
+    SetNotify,
     //CAR
     setShow,
     setRpm,
@@ -1042,6 +1176,8 @@ var renzu_hud = {
     setCarui,
     setNitro,
     setWheelHealth,
+    setShowKeyless,
+    setKeyless,
 
 };
 setMic(2);

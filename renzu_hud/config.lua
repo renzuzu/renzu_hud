@@ -1,49 +1,8 @@
-config = {
-	-- STREET LOCATION Customization options
-	border = {
-		r = 255;
-		g = 255;
-		b = 255;
-		a = 0.65;
-		size = 2.5;
-	};
-
-	current = {
-		r = 9;
-		g = 222;
-		b = 1;
-		a = 0.9;
-		size = 1.0;
-	};
-
-	crossing = {
-		r = 255;
-		g = 233;
-		b = 233;
-		a = 0.9;
-		size = 1.1;
-	};
-
-	direction = {
-		r = 255;
-		g = 233;
-		b = 233;
-		a = 0.9;
-		size = 2.5;
-	};
-
-	position = {
-		-- 0:100
-		offsetX = 17;
-		offsetY = 1.2;
-	};
-
-	vehicleCheck = true;
-}
-
+config = {}
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- VARIABLES
 -----------------------------------------------------------------------------------------------------------------------------------------
+identifier = nil
 veh_stats = nil
 Renzuzu = Citizen
 entering = false
@@ -143,8 +102,9 @@ config.sanity_stressAdd = 40000 -- value to add
 config.impactdamagetoped = 1.0 -- 0.5 = 50%, 1.0 = 100% ( Calculated based on the Vehicle Speed KMH )
 config.impactdamagetoveh = true -- apply damage to vehicle, burst random tires, remove windshield
 --STATUS ( disabled v2 if you want the optimize version ( FETCH ONLY The Player Status if Toggled ) else v2 is running loop default of 1sec)
-config.statusv2 = true -- enable this if you want the status hud in bottom part , false if toggle mode
+config.statusv2 = true -- enable this if you want the status hud in bottom part , false if toggle mode (TOGGLE VIA INSERT)
 config.statusv2_sleep = 1000 -- 1sec
+config.statusnotify = true
 config.driving_affect_status = true -- should the status will be affected during Driving a vehicle?
 config.driving_affected_status = 'sanity' -- change whatever status you want to be affected during driving
 config.driving_status_mode = 'add' -- (add, remove) add will add a value to status, remove will remove a status value.
@@ -818,6 +778,9 @@ config.repairalltires = true -- repair all tires using the command or item else 
 config.repaircommand = true -- Enable Repair Command for standalone purpose, disable this if repairing via item.
 -- FAQ - GTA WHEEL HEALTH IS GETTING REDUCE if Brand New Health is <= 0, so a total of 2000 health for each tires, combine with brandnewhealth + gta wheel health.
 
+--CARLOCK
+config.carlock = true -- Enable Car Keyless System
+
 -- HERE YOU CAN CHANGE THE KEYBINDS
 config.keybinds = {
 	--TOGGLE STATUS
@@ -839,7 +802,8 @@ config.keybinds = {
 	cruisecontrol = 'RMENU', -- Right Alt CRUISE CONTROL
 	bodystatus = 'HOME',
     carcontrol = 'NUMLOCK',
-    enablenitro = 'DELETE'
+    enablenitro = 'DELETE',
+    carlock = 'L'
 }
 
 --COMMANDS FOR KEYBINDS
@@ -863,8 +827,50 @@ config.commands = {
     carcontrol = 'carcontrol',
     weaponui = 'weaponui',
     crosshair = 'crosshair',
-    enablenitro = 'enablenitro'
+    enablenitro = 'enablenitro',
+    carlock = 'carlock'
 }
+
+-- COMPASS STREET LOCATION Customization options
+config.border = {
+    r = 255;
+    g = 255;
+    b = 255;
+    a = 0.65;
+    size = 2.5;
+};
+
+config.current = {
+    r = 9;
+    g = 222;
+    b = 1;
+    a = 0.9;
+    size = 1.0;
+};
+
+config.crossing = {
+    r = 255;
+    g = 233;
+    b = 233;
+    a = 0.9;
+    size = 1.1;
+};
+
+config.direction = {
+    r = 255;
+    g = 233;
+    b = 233;
+    a = 0.9;
+    size = 2.5;
+};
+
+config.position = {
+    -- 0:100
+    offsetX = 17;
+    offsetY = 1.2;
+};
+
+config.vehicleCheck = true;
 
 --MANUAL TRANNY Gear Ratio ( Do not Edit if you know what you are doing ) This is not the actual Gear Ratio numbers/settings in real life!
 config.gears = {
