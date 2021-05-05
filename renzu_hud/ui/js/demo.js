@@ -335,11 +335,14 @@ function setMileage(value) {
     //color
     var e = document.getElementById("oilpath");
     if (mileage >= 5000 && mileage < 10000) {
-        e.style.stroke = 'yellow'
+        //e.style.stroke = 'yellow'
+        document.getElementById("mileage").style.color = 'yellow'
     } else if(mileage >=10000){
-        e.style.stroke = '#C85A17'
+        //e.style.stroke = '#C85A17'
+        document.getElementById("mileage").style.color = '#C85A17'
     } else {
-        e.style.stroke = 'lime'
+        //e.style.stroke = 'lime'
+        document.getElementById("mileage").style.color = 'rgba(182, 182, 182, 0.582)'
     }
     document.getElementById("mileage").innerHTML = ''+mileage+''
 }
@@ -560,7 +563,7 @@ function setTemp(temp) {
 function setMode(value) {
     if (carui == 'minimal') {
         document.getElementById("mode").innerHTML = value;
-        document.getElementById("modediv").style.right = '64%';
+        document.getElementById("modediv").style.right = '61%';
         document.getElementById("modediv").style.bottom = '49%';
         document.getElementById("modediv").style.fontSize = '0.5vw';
     } else {
@@ -952,8 +955,8 @@ function setCarui(ver) {
         document.getElementById("right").style.bottom = '75%';
         document.getElementById("left").style.right = '69%';
         document.getElementById("left").style.bottom = '75%';
-        document.getElementById("milediv").style.right = '41%';
-        document.getElementById("milediv").style.bottom = '32%';
+        document.getElementById("milediv").style.right = '39.0%';
+        document.getElementById("milediv").style.bottom = '30.5%';
         document.getElementById("milediv").style.margin = '1% 1% 1% 1%';
         document.getElementById("milediv").style.background = '#000000';
         document.getElementById("milediv").style.opacity = '0.6';

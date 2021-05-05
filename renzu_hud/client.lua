@@ -1503,13 +1503,13 @@ function impactdamagetoveh()
 		if not accident then
 			accident = true
 			Citizen.CreateThread(function()
-				local vehicle = GetVehiclePedIsIn(PlayerPedId(-1), false)
-				local tyre = math.random(0, 15)
-				local tankdamage = math.random(150, 300)
-				local enginedamage = math.random(150, 300) 
-				local vehiclebodydamage = math.random(150, 300)
+				local vehicle = vehicle
+				local index = math.random(0, 15)
+				local tankdamage = math.random(1, config.randomdamage)
+				local enginedamage = math.random(1, config.randomdamage) 
+				local vehiclebodydamage = math.random(1, config.randomdamage)
 				SetVehiclePetrolTankHealth(vehicle,GetVehiclePetrolTankHealth(vehicle) - tankdamage )
-				SetVehicleTyreBurst(vehicle,tyre, 0 , 80.0)
+				SetVehicleTyreBurst(vehicle,index, 0 , 80.0)
 				SetVehicleEngineHealth(vehicle ,GetVehicleEngineHealth(vehicle) - enginedamage)
 				SetVehicleBodyHealth(vehicle, GetVehicleBodyHealth(vehicle) - vehiclebodydamage) 
 				SetVehicleOilLevel(vehicle, GetVehicleOilLevel(vehicle) + 5.0 ) -- max is 15?
@@ -2640,13 +2640,11 @@ end)
 
 Creation(function()
 	if config.bodystatus then
-		local tick = 0
 		while receive == 'new' do
 			Citizen.Wait(100)
 		end
 		while config.bodystatus and receive do
 			Citizen.Wait(3500)
-			tick = tick + 1000
 			local ped = ped
 			local pid = PlayerId()
 			if bonecategory["ped_head"] == nil then
@@ -2672,10 +2670,7 @@ Creation(function()
 					Notify('error','Body System',"Chest has been damaged")
 				end
 				body = true
-				if tick % (1000 / (bonecategory["ped_body"] / 10)) == 1 then
-					local plyHealth = GetEntityHealth(ped)
-					SetPlayerHealthRechargeMultiplier(pid, 0.0)
-				end
+				SetPlayerHealthRechargeMultiplier(pid, 0.0)
 			elseif body then
 				body = false
 			else
@@ -2704,14 +2699,14 @@ Creation(function()
 					Notify('error','Body System',"Leg has been damaged")
 				end
 				leg = true
-				SetPedMoveRateOverride(plyPed, 0.6)
-				SetPedMovementClipset(plyPed, "move_m@injured", true)
+				SetPedMoveRateOverride(ped, 0.6)
+				SetPedMovementClipset(ped, "move_m@injured", true)
 			elseif leg then
 				leg = false
 				ResetPedMovementClipset(GetPlayerPed(-1))
 				ResetPedWeaponMovementClipset(GetPlayerPed(-1))
 				ResetPedStrafeClipset(GetPlayerPed(-1))
-				SetPedMoveRateOverride(plyPed, 1.0)
+				SetPedMoveRateOverride(ped, 1.0)
 			else
 				leg = false
 			end
@@ -3554,7 +3549,7 @@ function Carlock()
 		local foundvehicle = {}
 		local min = -1
 		for k,v in pairs(GetGamePool('CVehicle')) do
-			if #(mycoords - GetEntityCoords(v, false)) < 20 then
+			if #(mycoords - GetEntityCoords(v, false)) < config.carlock_distance then
 				local plate = string.gsub(GetVehicleNumberPlateText(v), "%s+", "")
 				plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
 				if veh_stats[plate] ~= nil and veh_stats[plate].owner ~= nil and identifier ~= nil then

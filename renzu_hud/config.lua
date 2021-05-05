@@ -66,7 +66,7 @@ traction2 = nil
 
 config.framework = 'ESX' -- ESX | VRP | QSHIT | STANDALONE
 --CHANGE ACCORDING TO YOUR STATUS ESX STATUS OR ANY STATUS MOD
-config.carui = 'minimal'
+config.carui = 'modern'
 config.centercarhud = 'map' -- Feature of Car hud - MAP , MP3 (IF YOU CHOOSE MP3 you need renzu_mp3 as dependency, and renzu_mp3 need xsound)
 -- minimap
 config.useminimapeverytime = false -- FORCE display radarmap all the time? (USE THIS ONLY IF Some of your other script use displayradar(FALSE) , its advisable to disable this config instead remove it on your other script, default GTA show the Minimap everytime)
@@ -101,6 +101,7 @@ config.addsanity_stress = true -- add sanity or stress status
 config.sanity_stressAdd = 40000 -- value to add
 config.impactdamagetoped = 1.0 -- 0.5 = 50%, 1.0 = 100% ( Calculated based on the Vehicle Speed KMH )
 config.impactdamagetoveh = true -- apply damage to vehicle, burst random tires, remove windshield
+config.randomdamage = 555 -- random damage to vehicle parts, such a body, engine, petrol tank
 --STATUS ( disabled v2 if you want the optimize version ( FETCH ONLY The Player Status if Toggled ) else v2 is running loop default of 1sec)
 config.statusv2 = true -- enable this if you want the status hud in bottom part , false if toggle mode (TOGGLE VIA INSERT)
 config.statusv2_sleep = 1000 -- 1sec
@@ -730,9 +731,10 @@ config.fuelusage = {
 	[0.0] = 0.0,
 }
 
-config.enablecarcontrol = true
+config.enablecarcontrol = true -- car functions
 config.allowoutsideofvehicle = true -- allow car control outside of vehicle (nearest vehicle and lastvehicle)
-
+config.enableairsuspension = true -- adjustable vehicle height
+config.enableneontoggle = true -- toggable neon lights
 --NITRO
 config.enablenitro = true
 config.nitro_sound = true -- enable sound on nitro | default: true
@@ -779,7 +781,8 @@ config.repaircommand = true -- Enable Repair Command for standalone purpose, dis
 -- FAQ - GTA WHEEL HEALTH IS GETTING REDUCE if Brand New Health is <= 0, so a total of 2000 health for each tires, combine with brandnewhealth + gta wheel health.
 
 --CARLOCK
-config.carlock = true -- Enable Car Keyless System
+config.carlock = true -- Enable Car Keyless System -- using owned_vehicles table from mysql, fetch owner as identifier.
+config.carlock_distance = 20 -- max distance to fetch the sorrounding vehicles
 
 -- HERE YOU CAN CHANGE THE KEYBINDS
 config.keybinds = {
