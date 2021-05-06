@@ -302,6 +302,8 @@ end)
 Creation(function()
 	Wait(1000)
 	RenzuSendUI({type = 'setCarui', content = config.carui})
+	RenzuSendUI({type = "setStatusUI",content = config.statusui})
+	RenzuSendUI({type = "setCompass",content = config.enablecompass})
 	--WHEN RESTARTED IN CAR
 	if not uimove then
 		local content = {
@@ -1072,18 +1074,23 @@ function NuiShowMap()
 			Wait(250)
 			while invehicle do
 				--print(GetNuiCursorPosition())
-				local Plyped = PlayerPedId()
 				if start then
-					local myh = GetEntityHeading(Plyped) + GetGameplayCamRelativeHeading()
-					local camheading = GetGameplayCamRelativeHeading()
-					local xz, yz, zz = table.unpack(GetEntityCoords(Plyped))
+					local myh = GetEntityHeading(ped) + GetCamhead()
+					local camheading = GetCamhead()
+					local xz, yz, zz = table.unpack(GetEntityCoords(ped))
 					if oldxz ~= xz or oldcamheading ~= camheading or camheading == nil and xz == nil then
 						oldcamheading = camheading
 						oldxz = xz
-						RenzuSendUI({map = true, type = "updatemapa",myheading = myh,camheading = camheading,x = xz,y = yz,})
+						local table = {
+							myheading = myh,
+							camheading = camheading,
+							x = xz,
+							y = yz
+						}
+						RenzuSendUI({map = true, type = "updatemapa",content = table})
 					end
 				end
-				Wait(200)
+				Wait(250)
 			end
 			--TerminateThisThread()
 		end
@@ -1143,7 +1150,6 @@ function StartSmoke(ent)
 	Notify('error','Engine',"Engine too Hot")
     Creation(function()
 		local ent = ent
-		print(GetVehicleEngineTemperature(ent))
 		while GetVehicleEngineTemperature(ent) > config.overheatmin do
 			local Smoke = 0
 			local part1 = false
@@ -1151,8 +1157,6 @@ function StartSmoke(ent)
 				LoadPTFX('core')
 				Smoke = Renzu_Hud(0xDDE23F30CC5A0F03, 'ent_amb_stoner_vent_smoke', ent, 0.05, 0, 0, 0, 0, 0, 28, 0.4, false, false, false, 0, 0, 0, 0)
 				RemoveNamedPtfxAsset("core")
-				print("start shit")
-				print(Smoke)
 				part1 = true
 			end)
 			while not part1 do
@@ -1162,7 +1166,6 @@ function StartSmoke(ent)
 			table.insert(smokes, {handle = Smoke})
 			removeFCK()
 			Renzuzu.Wait(500)
-			print("waiting for Particles to gone")
 		end
 		refresh = false
 		Renzuzu.Wait(5000)
@@ -1174,18 +1177,11 @@ function removeFCK()
 		for _,parts in pairs(smokes) do
 			print("removing "..parts.handle.."")
 			if parts.handle ~= nil and parts.handle ~= 0 and isparticleexist(parts.handle) then
-				print("deleted "..parts.handle.."")
 				stopparticles(parts.handle, true)
-				-- Wait(0)
-				--RemoveParticleFx(parts.handle, true)
 				smokes[_].handle = nil
 				smokes[_] = nil
 			else
-				print("checking "..parts.handle.."")
-				--Renzu_Hud(0x8F75998877616996, parts.handle, 0)
-				--stopparticles(parts.handle, true)
 				smokes[_] = nil
-				--RemoveParticleFxFromEntity(getveh())
 			end
 		end
 		smokes = {}
@@ -1413,10 +1409,6 @@ Creation(function()
 	while ESX == nil do
 		Renzuzu.Wait(55)
 	end
-    local currSpeed = 0.0
-    local cruiseSpeed = 999.0
-    local cruiseIsOn = false
-    local seatbeltIsOn = false
 	local newdate = nil
 	local newstreet = nil
 	local newmic = nil
@@ -3040,22 +3032,14 @@ AddEventHandler("renzu_hud:airsuspension", function(vehicle,val,coords)
 		if (data.val * 100) < 15 then
 			val = min
 			data.val = data.val - 0.1
-			print(data.val)
-			print(min)
 			local good = false
 			while min > data.val do
-				print((data.val * 0.01))
-				print(data.val)
-				print(min)
 				SetVehicleSuspensionHeight(getveh(),GetVehicleSuspensionHeight(vehicle) - (1.0 * 0.01))
 				min = GetVehicleSuspensionHeight(vehicle)
 				Citizen.Wait(100)
 				good = true
 			end
 			while not good and min < data.val do
-				print((data.val * 0.01))
-				print(data.val)
-				print(min)
 				SetVehicleSuspensionHeight(getveh(),GetVehicleSuspensionHeight(vehicle) + (1.0 * 0.01))
 				min = GetVehicleSuspensionHeight(vehicle)
 				Citizen.Wait(100)
@@ -3064,10 +3048,6 @@ AddEventHandler("renzu_hud:airsuspension", function(vehicle,val,coords)
 			val = min
 			local good = false
 			while min < data.val do
-				print((data.val * 0.01))
-				print(data.val)
-				print(min)
-				print("FUCK")
 				SetVehicleSuspensionHeight(getveh(),GetVehicleSuspensionHeight(vehicle) + (1.0 * 0.01))
 				min = GetVehicleSuspensionHeight(vehicle)
 				Citizen.Wait(100)
@@ -3075,10 +3055,6 @@ AddEventHandler("renzu_hud:airsuspension", function(vehicle,val,coords)
 			end
 
 			while not good and min > data.val do
-				print((data.val * 0.01))
-				print(data.val)
-				print(min)
-				print("FUCK")
 				SetVehicleSuspensionHeight(getveh(),GetVehicleSuspensionHeight(vehicle) - (1.0 * 0.01))
 				min = GetVehicleSuspensionHeight(vehicle)
 				Citizen.Wait(100)

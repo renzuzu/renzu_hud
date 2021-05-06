@@ -1,4 +1,5 @@
 var carui = 'minimal'
+var statusui = 'normal'
 function pedface() {
     console.log("REQUESTING")
     $.post(`https://${GetParentResourceName()}/requestface`, {}, function(data) {
@@ -32,11 +33,19 @@ $("body").on("keyup", function (key) {
 });
 
 function setArmor(s) {
-    document.getElementById("armor").style.width = ''+s+'%'
+    if (statusui == 'simple') {
+        document.getElementById("armorsimple").style.clip = 'rect('+toclip(s)+', 100px, 100px, 0)'
+    } else {
+        document.getElementById("armor").style.width = ''+s+'%'
+    }
 }
 
 function setHp(s) {
-    document.getElementById("health").style.width = ''+s+'%'
+    if (statusui == 'simple') {
+        document.getElementById("healthsimple").style.clip = 'rect('+toclip(s)+', 100px, 100px, 0)'
+    } else {
+        document.getElementById("health").style.width = ''+s+'%'
+    }
 }
 
 function setMic(type) {
@@ -73,12 +82,16 @@ function setFuelLevel(value) {
     if (carui == 'modern') {
         //console.log(carui);
     document.getElementById("gasbar").style.width = ''+gas+'%'
-    } else {
+    } else if (carui == 'minimal') {
         var e = document.getElementById("gasbar");
         let length = e.getTotalLength();
         //console.log(gas)
         let to = length * ((93 - gas) / 100);
         e.style.strokeDashoffset = to;
+    } else if (carui == 'simple') {
+        var opacity = 1.0 - (gas * 0.01)
+        document.getElementById("gasbar").style.clip = 'rect('+toclip(gas)+', 100px, 100px, 0)'
+        document.getElementById("gasbg").style.opacity = ''+opacity+''
     }
 }
 
@@ -90,8 +103,12 @@ function setCarhp(value) {
         console.log(hp)
         let to = length * ((100 - hp) / 100);
         e.style.strokeDashoffset = to;
-    } else {
+    } else if(carui == 'modern') {
         document.getElementById("carhealthbar").style.width = ''+hp+'%'
+    } else if (carui == 'simple') {
+        var opacity = 1.0 - (hp * 0.01)
+        document.getElementById("carhealthbg").style.opacity = ''+opacity+''
+        document.getElementById("carhealthbar").style.clip = 'rect('+toclip(hp)+', 100px, 100px, 0)'
     }
 }
 
@@ -228,7 +245,7 @@ function setSpeed(s) {
         } else {
             document.getElementById("speedmeter").style.right = "47%";
         }
-    } else {
+    } else if (type == 'modern') {
         document.getElementById("speedmeter").style.right = "268px";
         document.getElementById("speedmeter").style.bottom = "85px";
         if (takbo >= 100) {
@@ -238,6 +255,17 @@ function setSpeed(s) {
         } else {
             document.getElementById("speedmeter").style.right = "268px";
         }
+    } else if (type == 'simple') {
+        document.getElementById("speedmeter").style.right = "20%";
+        document.getElementById("speedmeter").style.fontSize  = "1.5vw";
+        document.getElementById("speedmeter").style.bottom = "50%";
+        if (takbo >= 100) {
+            document.getElementById("speedmeter").style.right = "45%";
+        } else if (takbo >= 10) {
+            document.getElementById("speedmeter").style.right = "45.5%";
+        } else {
+            document.getElementById("speedmeter").style.right = "47%";
+        }  
     }
     document.getElementById("speedmeter").innerHTML = ""+takbo+"";
     var e = document.getElementById("speedpath");
@@ -516,25 +544,24 @@ function setBrake(s) {
 
 function CarMap(detalye) {
     var detail = detalye;
+    var table = detail.content
     if (detail.type == "updatemapa") {
-        $(".centermap").css("transform", "rotate(" + detail.myheading + "deg)");
-        $("#carblip").css("transform", "translateX(-50%) translateY(50%) rotate(" + detail.camheading + "deg)");
-        $(":root").css("--Y", detail.y);
-        $(":root").css("--X", detail.x);
+        $(".centermap").css("transform", "rotate(" + table.myheading + "deg)");
+        $("#carblip").css("transform", "translateX(-50%) translateY(50%) rotate(" + table.camheading + "deg)");
+        $(":root").css("--Y", table.y);
+        $(":root").css("--X", table.x);
     } else {
         if (detail.type == "sarado") {
             $(".carhudmap").fadeOut();
-            var lastCssUpdate = (new Date).getTime();
-            var a = 0;
-            for (; a < 1e7 && !((new Date).getTime() - lastCssUpdate > 350); a++) {}
-            $("#gps").fadeOut();
+            setTimeout(function(){
+                $("#gps").fadeOut();
+            }, 333);
         }
         if (detail.type =="bukas") {
             $("#gps").fadeIn();
-            var lastCssUpdate = (new Date).getTime();
-            var a = 0;
-            for (; a < 1e7 && !((new Date).getTime() - lastCssUpdate > 350); a++) {}
-            $(".carhudmap").fadeIn();
+            setTimeout(function(){
+                $(".carhudmap").fadeIn();
+            }, 333);
         }
     }
 }
@@ -560,17 +587,26 @@ function setTemp(temp) {
     }
 }
 
-function setMode(value) {
+function setMode(value,c) {
+    if (carui == undefined) {
+        carui = c
+    }
     if (carui == 'minimal') {
+        document.getElementById("simple").innerHTML = '';
         document.getElementById("mode").innerHTML = value;
         document.getElementById("modediv").style.right = '61%';
         document.getElementById("modediv").style.bottom = '49%';
         document.getElementById("modediv").style.fontSize = '0.5vw';
-    } else {
+    } else if (carui == 'modern') {
         document.getElementById("mode").innerHTML = value;
+    } else if (carui == 'simple') {
+        document.getElementById("minimal").innerHTML = '';
+        document.getElementById("mode").innerHTML = value;
+        document.getElementById("modediv").style.right = '61%';
+        document.getElementById("modediv").style.bottom = '49%';
+        document.getElementById("modediv").style.fontSize = '0.5vw';
     }
 }
-setMode('NORMAL')
 
 function setDifferential(value) {
     if (value == 0.0) {
@@ -937,6 +973,7 @@ function setCarui(ver) {
     carui = ver
     if (ver == 'minimal') {
         document.getElementById("modern").innerHTML = '';
+        document.getElementById("simple").innerHTML = '';
         document.getElementById("minimal").style.display = 'block';
         document.getElementById("rpmtext").style.right = '68%';
         document.getElementById("rpmtext").style.bottom = '55%';
@@ -975,9 +1012,81 @@ function setCarui(ver) {
         document.getElementById("diffdiv").style.background = '#00000000';
         document.getElementById("diffdiv").style.fontSize = '0.4vw';
         setCoolant(100)
-    } else {
+    } else if (ver == 'modern') {
         document.getElementById("modern").style.display = 'block';
         document.getElementById("minimal").innerHTML = '';
+        document.getElementById("simple").innerHTML = ''; 
+    } else if (ver == 'simple') {
+        document.getElementById("simple").style.display = 'block';
+        document.getElementById("modern").innerHTML = '';
+        document.getElementById("minimal").innerHTML = '';
+        document.getElementById("rpmtext").style.right = '68%';
+        document.getElementById("rpmtext").style.bottom = '55%';
+        document.getElementById("rpmtext").style.fontSize = '0.3vw';
+        document.getElementById("mode").style.fontSize = '0.55vw';
+        document.getElementById("tempicon").style.right = '23.5%';
+        document.getElementById("tempicon").style.bottom = '57%';
+        document.getElementById("gasicon").style.right = '21%';
+        document.getElementById("gasicon").style.bottom = '47%';
+        document.getElementById("gasicon").style.opacity = '0.6';
+        document.getElementById("tempicon").style.opacity = '0.6';
+        document.getElementById("geardiv").style.right = '42%';
+        document.getElementById("geardiv").style.bottom = '42%';
+        document.getElementById("geardiv").style.fontSize = '0.4vw';
+        document.getElementById("right").style.right = '37%';
+        document.getElementById("right").style.bottom = '30%';
+        document.getElementById("left").style.right = '79%';
+        document.getElementById("left").style.bottom = '30%';
+        document.getElementById("milediv").style.right = '50.0%';
+        document.getElementById("milediv").style.bottom = '28.5%';
+        document.getElementById("milediv").style.margin = '1% 1% 1% 1%';
+        document.getElementById("milediv").style.background = '#000000';
+        document.getElementById("milediv").style.opacity = '0.6';
+        document.getElementById("milediv").style.fontSize = '0.5vw';
+        document.getElementById("milediv").style.fontSize = '0.5vw';
+        document.getElementById("milediv").style.webkitFilter = "drop-shadow(1px 1px 2px rgb(5, 155, 255))";
+        document.getElementById("timediv").style.right = '42%';
+        document.getElementById("timediv").style.bottom = '72.6%';
+        document.getElementById("timediv").style.fontSize = '0.4vw';
+        document.getElementById("distancediv").style.right = '53%';
+        document.getElementById("distancediv").style.bottom = '73%';
+        document.getElementById("distancediv").style.background = '#00000000';
+        document.getElementById("distancediv").style.fontSize = '0.4vw';
+        document.getElementById("diffdiv").style.right = '33%';
+        document.getElementById("diffdiv").style.bottom = '73%';
+        document.getElementById("diffdiv").style.background = '#00000000';
+        document.getElementById("diffdiv").style.fontSize = '0.4vw';
+    }
+}
+function setCompass(bool) {
+    if (bool) {
+        document.getElementById("location").style.display = 'block';
+    } else {
+        setTimeout(function(){
+            document.getElementById("mic").style.top = '22px';
+            document.getElementById("mic").style.right = '365px';
+        }, 333);
+    }
+}
+
+function setStatusUI(ver) {
+    if (ver == 'simple') {
+        statusui = 'simple'
+        document.getElementById("healthsimple").style.display = 'block';
+        document.getElementById("armorsimple").style.display = 'block';
+        document.getElementById("healthsimplebg").style.display = 'block';
+        document.getElementById("armorsimplebg").style.display = 'block';
+        document.getElementById("uibar").innerHTML = '';
+        $("#statusver").attr("src", "img/simplestatus.png")
+        document.getElementById("statusnormal").style.display = 'none';
+        document.getElementById("logo").innerHTML = '';
+        document.getElementById("location").style.top = '60px';
+        document.getElementById("location").style.right = '60px';
+        document.getElementById("location").style.width = '280px';
+        document.getElementById("mic").style.top = '58px';
+        document.getElementById("mic").style.right = '333px';
+        document.getElementById("mic-color").style.width = '15px';
+        document.getElementById("mic-color").style.height = '27px';
     }
 }
 
@@ -1147,6 +1256,8 @@ var renzu_hud = {
     setCrosshair,
     playsound,
     SetNotify,
+    setStatusUI,
+    setCompass,
     //CAR
     setShow,
     setRpm,
@@ -1187,17 +1298,13 @@ setMic(2);
 
 let gps = true;
 var mapdiv = document.getElementById("mapdiv");
-var zoom = 7;
 var content = "";
 var index = 1;
-var complete = true;
-let status = true;
-let statusA = true;
 
 function startmap() {
-  for (; index < mp(zoom) + 1; index++) {
+  for (; index < mp(7) + 1; index++) {
     var jump = 1;
-    generatedimg(jump,zoom,content,index)
+    generatedimg(jump,7,content,index)
   }
 }
 
@@ -1228,20 +1335,15 @@ window.addEventListener("message", event => {
     }
 });
 
-function downloadcomplete() {
-  complete = true;
-}
-
 function append(div) {
   $('#'+div+'').append(content)
 }
 
-setInterval(() => {
-  if (complete) {$(".fadeout").fadeOut();$(".loading").fadeOut();}
-}, 550);
-
 startmap()
 append('mapdiv')
-setTimeout(downloadcomplete, 4000)
+setTimeout(function(){
+    $(".fadeout").fadeOut();
+    $(".loading").fadeOut();
+    setMode('NORMAL',carui)
+}, 4000);
 pedface()
-setMode('NORMAL',carui)

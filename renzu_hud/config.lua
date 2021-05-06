@@ -66,7 +66,7 @@ traction2 = nil
 
 config.framework = 'ESX' -- ESX | VRP | QSHIT | STANDALONE
 --CHANGE ACCORDING TO YOUR STATUS ESX STATUS OR ANY STATUS MOD
-config.carui = 'modern'
+config.carui = 'simple' -- Choose a Carui Version ( simple, minimal, modern )
 config.centercarhud = 'map' -- Feature of Car hud - MAP , MP3 (IF YOU CHOOSE MP3 you need renzu_mp3 as dependency, and renzu_mp3 need xsound)
 -- minimap
 config.useminimapeverytime = false -- FORCE display radarmap all the time? (USE THIS ONLY IF Some of your other script use displayradar(FALSE) , its advisable to disable this config instead remove it on your other script, default GTA show the Minimap everytime)
@@ -103,6 +103,7 @@ config.impactdamagetoped = 1.0 -- 0.5 = 50%, 1.0 = 100% ( Calculated based on th
 config.impactdamagetoveh = true -- apply damage to vehicle, burst random tires, remove windshield
 config.randomdamage = 555 -- random damage to vehicle parts, such a body, engine, petrol tank
 --STATUS ( disabled v2 if you want the optimize version ( FETCH ONLY The Player Status if Toggled ) else v2 is running loop default of 1sec)
+config.statusui = 'simple' -- UI LOOK ( simple, normal)
 config.statusv2 = true -- enable this if you want the status hud in bottom part , false if toggle mode (TOGGLE VIA INSERT)
 config.statusv2_sleep = 1000 -- 1sec
 config.statusnotify = true
@@ -835,6 +836,7 @@ config.commands = {
 }
 
 -- COMPASS STREET LOCATION Customization options
+config.enablecompass = false
 config.border = {
     r = 255;
     g = 255;
@@ -996,6 +998,10 @@ end
 
 function GetVehStats(veh,field,stat)
     return Renzu_Hud(0x642FC12F, veh, field, stat, ReturnFloat)
+end
+
+function GetCamhead()
+    return Renzu_Hud(0x743607648ADD4587, ReturnFloat)
 end
 
 function SetVehStats(veh,field,stat,float)
