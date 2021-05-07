@@ -36,6 +36,8 @@ function startmanual()
         NuiManualEtcFunc()
         NuiMainmanualLoop()
         print("MANUAL TRUE")
+        DecorSetBool(vehicle, "MANUAL", true)
+        print(DecorGetBool(vehicle, "MANUAL"))
     end)
     if not manual and manualstatus then
         manual = true
@@ -52,6 +54,7 @@ RenzuCommand('manual', function()
             type = "setManual",
             content = false
         })
+        DecorSetBool(vehicle, "MANUAL", false)
         newmanual = false
     elseif not manual then
         startmanual()
@@ -162,7 +165,13 @@ end
 
 function trannyupgradespeed()
     if GetVehicleMod(vehicle,13) > 0 then
-        SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", DecorGetFloat(vehicle,"TOPSPEED") * 1.5)
+        if mode == 'SPORTS' then
+            local bonus = (DecorGetFloat(vehicle,"TOPSPEED") * config.topspeed_multiplier)
+            SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", bonus * 1.5)
+            print("BONUS")
+        else
+            SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", DecorGetFloat(vehicle,"TOPSPEED") * 1.5)
+        end
         SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE") * 1.5)
         vehicletopspeed = GetVehStats(vehicle, "CHandlingData","fInitialDriveMaxFlatVel")
     end
@@ -474,7 +483,13 @@ end
 function gearspeed(sg, wheel)
     if wheel then
         if GetVehicleMod(vehicle,13) > 0 then
-            vehicletopspeed = DecorGetFloat(vehicle,"TOPSPEED") * 1.5
+            if mode == 'SPORTS' then
+                local bonus = (DecorGetFloat(vehicle,"TOPSPEED") * config.topspeed_multiplier)
+                vehicletopspeed = bonus * 1.5
+                print("BONUS2")
+            else
+                vehicletopspeed = DecorGetFloat(vehicle,"TOPSPEED") * 1.5
+            end
         else
             vehicletopspeed = DecorGetFloat(vehicle,"TOPSPEED")
         end
@@ -633,7 +648,6 @@ function speedtable(speed,gear)
     end
 	if vehicletopspeed ~= nil then
         local a = (vehicletopspeed * config.firstgear) * 0.9
-        ShowHelpNotification(""..first..","..a.."", true, 1, 5)
         --ShowHelpNotification((vehicletopspeed * config.secondgear) * 0.9, true, 1, 5)
 		--local vehicletopspeed = GetVehStats(GetVehiclePedIsIn(GetPlayerPed(-1), false), "CHandlingData", "fInitialDriveMaxFlatVel")
 		first = (vehicletopspeed * config.gears[maxgear][1]) * 0.9

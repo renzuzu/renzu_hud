@@ -24,6 +24,7 @@ Creation(function()
 	DecorRegister("TRACTION", 1)
 	DecorRegister("TRACTION2", 1)
 	DecorRegister("TRACTION3", 1)
+	DecorRegister("MANUAL", 1)
 end)
 
 -----------------------------------------------------------------------------------------------------------------------------------------
@@ -572,8 +573,11 @@ function inVehicleFunctions()
 		fuelusagerun()
 		SendNuiSeatBelt()
 		NuiWheelSystem()
-		if not manual and manualstatus then
+		print(DecorGetBool(vehicle, "MANUAL"))
+		if DecorGetBool(vehicle, "MANUAL") then
 			startmanual()
+			manual = not manual
+			manualstatus = true
 		end
 	end)
 end
@@ -2033,16 +2037,24 @@ function vehiclemode()
 			-- DecorSetFloat(vehicle, "INERTIA", olddriveinertia)
 			-- DecorSetFloat(vehicle, "DRIVEFORCE", oldriveforce)
 			-- DecorSetFloat(vehicle, "TOPSPEED", oldtopspeed)
-			globaltopspeed = DecorGetFloat(vehicle,"TOPSPEED") * config.topspeed_multiplier
+			if GetVehicleMod(vehicle,13) > 0 then
+				local bonus = (DecorGetFloat(vehicle,"TOPSPEED") * config.topspeed_multiplier)
+				globaltopspeed = bonus * 1.5
+			else
+				globaltopspeed = DecorGetFloat(vehicle,"TOPSPEED") * config.topspeed_multiplier
+			end
 			local fixedshit = (config.topspeed_multiplier * 1.0)
 			local old = oldtopspeed * 1.0
-			SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", old * fixedshit)
 			local turbosound = 0
 			local oldgear = 0
 			--SetVehStats(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", oldtopspeed * 2.0)
 			local fo = oldtopspeed * 0.64
 			--SetEntityMaxSpeed(vehicle,fo * 2.0)
-			while mode == 'SPORTS' do
+			if config.sports_increase_topspeed then
+				SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", globaltopspeed)
+				--SetVehicleEnginePowerMultiplier(vehicle,boost * config.topspeed_multiplier)
+			end
+			while mode == 'SPORTS' and invehicle do
 				local sleep = 2000
 				--local ply = PlayerPedId()
 				local reset = true
@@ -2077,10 +2089,16 @@ function vehiclemode()
 						end
 						--SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", oldtopspeed*3.500000)
 						while lag < 200 and engineload < turboboost(gear) and IsControlPressed(1, 32) do
-							engineload = (rpm * (gear / 10))
+							engineload = (rpm * (gear / 5))
 							SetVehicleTurboPressure(vehicle, max((rpm * 1) + engineload + (lag * engineload)))
 							Renzuzu.Wait(1)
 							lag = lag + 1
+						end
+						if savegear ~= oldg or oldg == nil then
+							oldg = savegear
+							ShowHelpNotification(rpm, true, 1, 5)
+							Notify('success',"KICK",rpm)
+							gago = true
 						end
 						if config.boost_sound and rpm > 0.65 and rpm < 0.95 and turbosound < 10 and gear == oldgear and engineload > turboboost(gear) then
 							turbosound = turbosound + 1
@@ -2113,9 +2131,6 @@ function vehiclemode()
 						SetVehStats(vehicle, "CHandlingData", "fDriveInertia", boost / 10)
 						SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", engineload)
 						SetVehicleBoost(vehicle, boost)
-						if config.sports_increase_topspeed then
-							SetVehicleEnginePowerMultiplier(vehicle,boost * config.topspeed_multiplier)
-						end
 					end
 				end
 				Renzuzu.Wait(sleep)
@@ -2146,7 +2161,7 @@ function vehiclemode()
 			StopSound(soundofnitro)
 			ReleaseSoundId(soundofnitro)
 		end)
-	elseif mode == 'SPORTS' then
+	elseif mode == 'SPORTS' and invehicle then
 		mode = 'ECO'
 		RenzuSendUI({
 			type = "setMode",

@@ -68,8 +68,8 @@ config.framework = 'ESX' -- ESX | VRP | QSHIT | STANDALONE
 
 --MAIN UI CONFIG START
 config.enablecompass = true -- enable/disable compass
-config.carui = 'modern' -- Choose a Carui Version ( simple, minimal, modern )
-config.statusui = 'normal' -- UI LOOK ( simple, normal)
+config.carui = 'simple' -- Choose a Carui Version ( simple, minimal, modern )
+config.statusui = 'simple' -- UI LOOK ( simple, normal)
 config.statusv2 = true -- enable this if you want the status hud in bottom part , false if toggle mode (TOGGLE VIA INSERT)
 --CHANGE ACCORDING TO YOUR STATUS ESX STATUS OR ANY STATUS MOD
 --UI CONFIG END
