@@ -1061,6 +1061,7 @@ function setCarui(ver) {
 function setCompass(bool) {
     if (bool) {
         document.getElementById("location").style.display = 'block';
+        document.getElementById("compass").style.display = 'block';
     } else {
         setTimeout(function(){
             document.getElementById("mic").style.top = '22px';
@@ -1083,8 +1084,8 @@ function setStatusUI(ver) {
         document.getElementById("location").style.top = '60px';
         document.getElementById("location").style.right = '60px';
         document.getElementById("location").style.width = '280px';
-        document.getElementById("mic").style.top = '58px';
-        document.getElementById("mic").style.right = '333px';
+        document.getElementById("mic").style.top = '24px';
+        document.getElementById("mic").style.right = '363px';
         document.getElementById("mic-color").style.width = '15px';
         document.getElementById("mic-color").style.height = '27px';
     }
@@ -1239,6 +1240,32 @@ function SetNotify(table) {
         }
     });
 
+    function setMapVersion(table) {
+        var type = table['type']
+        var custom = table['custom']
+        if (custom) {
+            $("#mapimg").attr("src", ""+table['link']+"")
+        } else {
+            $("#mapimg").attr("src", "img/"+type+".webp")
+        }
+    }
+
+    function setRadioChannel(channel) {
+        console.log(channel)
+        if (channel !== false && channel !== undefined) {
+            document.getElementById("radio").style.display = 'block';
+            document.getElementById("mic-radio").innerHTML = ''+channel+'';
+            if (statusui == 'simple') {
+                document.getElementById("radio").style.top = '44px';
+                document.getElementById("radio").style.right = '43px';
+                $("#radio").fadeIn();
+            }
+        } else {
+            //document.getElementById("radio").style.display = 'none';
+            $("#radio").fadeOut();
+        }
+    }
+
 
 //FUNCTIONS
 var renzu_hud = {
@@ -1258,6 +1285,7 @@ var renzu_hud = {
     SetNotify,
     setStatusUI,
     setCompass,
+    setRadioChannel,
     //CAR
     setShow,
     setRpm,
@@ -1292,31 +1320,10 @@ var renzu_hud = {
     setWheelHealth,
     setShowKeyless,
     setKeyless,
+    setMapVersion,
 
 };
 setMic(2);
-
-let gps = true;
-var mapdiv = document.getElementById("mapdiv");
-var content = "";
-var index = 1;
-
-function startmap() {
-  for (; index < mp(7) + 1; index++) {
-    var jump = 1;
-    generatedimg(jump,7,content,index)
-  }
-}
-
-function mp(val) {
-  return Math.pow(2, val - 2)
-}
-
-function generatedimg(var1,var2,var3,var4) {
-  for (; var1 < mp(var2) + 1; var1++) {
-    content = content + "<img src='https://raw.githubusercontent.com/renzuzu/carmap/main/carmap/satellite/" + var2 + "_" + var1 + "_" + var4 + ".png' class='map' id='map' />";
-  }
-}
 
 window.addEventListener("message", event => {
     const item = event.data || event.detail;
@@ -1335,12 +1342,6 @@ window.addEventListener("message", event => {
     }
 });
 
-function append(div) {
-  $('#'+div+'').append(content)
-}
-
-startmap()
-append('mapdiv')
 setTimeout(function(){
     $(".fadeout").fadeOut();
     $(".loading").fadeOut();

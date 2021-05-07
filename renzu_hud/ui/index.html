@@ -1375,21 +1375,28 @@
   </div>
 
       <div id="mic" class="mic">
-        <small style="display:none;" id="mic-radio"><i class="fas fa-headphones"></i></small>
         <span id="mic-color" class="azul"></span>
       </div>
 
+      <div id="radio" style="display:none;">
+        <img src="img/radioui.png" style="opacity:0.7;">
+        <small id="mic-radio">AMBULANCE DISPATCH #1</small>
+      </div>
+
+      <div id="compass" style="position:absolute;top:20px;left:10px;display:none;">
+        <img src="img/compassui.png" style="opacity:0.7;">
+      </div>
       
       <div id="location" style="display:none;">
         <div id="container">
           <section>
-            <span id="border" style="font-size:15px !important; color:rgba(255, 233, 233, 0.65) !important">|</span>
-            <h4 id="direction" style="font-size:22px !important; color:rgba(255, 233, 233, 0.9) !important"></h4>
-            <span id="border" style="font-size:15px !important; color:rgba(255, 233, 233, 0.65) !important">|</span>
+            <span id="border" style="font-size:15px !important; color:rgba(255, 233, 233, 0.65) !important;display:none;">|</span>
+            <h4 id="direction" style="font-size:20px !important; color:rgba(255, 233, 233, 0.9) !important;position:fixed;top:40px;left:35px;"></h4>
+            <span id="border" style="font-size:15px !important; color:rgba(255, 233, 233, 0.65) !important;display:none;">|</span>
           </section>
           <div>
-            <p id="zone"></p>
-            <p id="street" style="font-size:8px !important; color:rgba(255, 233, 233, 0.9) !important; padding-top:-10px;"></p>
+            <p style="position:fixed;top:28px;left:90px;width:140px;" id="zone"></p>
+            <p id="street" style="position:fixed;top:48px;left:77px;width:150px;font-size:8px !important; color:rgba(255, 233, 233, 0.9) !important; padding-top:-10px;"></p>
           </div>
         </div>
       </div>
@@ -1976,17 +1983,6 @@
         <img style="display:none;" id="crosshair" src="img/crosshair_1.png" class="crosshair"/>
       </div>
     </div>
-      <!-- <script>
-        console.clear();
-        const meters = document.querySelectorAll('svg[data-value] .meter');
-        meters.forEach( (path) => {
-          let length = path.getTotalLength();
-          let value = parseInt(path.parentNode.getAttribute('data-value'));
-          let to = length * ((100 - value) / 100);
-          path.getBoundingClientRect();
-          path.style.strokeDashoffset = Math.max(0, to);  
-        });
-      </script> -->
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script src="nui://game/ui/jquery.js" type="text/javascript"></script>
@@ -2010,9 +2006,7 @@
               <img src="img/carblip.png" alt="you" id="carblip" />
               <div class="centermap">
                 <div class="maploc">
-                    <div id="maploc">
-                      <div id="mapdiv"></div>
-                    </div>
+                  <img style="width:100%;" id="mapimg" src="img/loading.png">
                 </div>
               </div>
           </div>
@@ -2020,45 +2014,5 @@
       <script src="js/map.js"></script>
       <script src="js/demo.js"></script>
       <script src="js/simple-notify.min.js"></script>
-      <!-- <script>
-        const custom = document.querySelector('#custom')
-        const success = document.querySelector('#success')
-        const error = document.querySelector('#error')
-        const warning = document.querySelector('#warning')
-
-        custom.addEventListener('click', () => {
-        new Notify ({
-          status: 'success',
-          title: 'Notify Title',
-          text: 'Notify text lorem ipsum',
-          autoclose: true
-        })
-        })
-
-        success.addEventListener('click', () => {
-        new Notify ({
-          status: 'success',
-          title: 'Notify Title',
-          text: 'Notify text lorem ipsum',
-        })
-        })
-
-        error.addEventListener('click', () => {
-        new Notify ({
-          status: 'error',
-          title: 'Notify Title',
-          text: 'Notify text lorem ipsum',
-        })
-        })
-
-        warning.addEventListener('click', () => {
-        new Notify ({
-          status: 'warning',
-          title: 'Notify Title',
-          text: 'Notify text lorem ipsum',
-        })
-        })
-      </script> -->
-        
     </body>
 </html>

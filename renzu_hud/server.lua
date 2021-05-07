@@ -94,3 +94,14 @@ RegisterServerEvent("renzu_hud:airsuspension")
 AddEventHandler("renzu_hud:airsuspension", function(entity,val,coords)
 	TriggerClientEvent("renzu_hud:airsuspension", -1, entity,val,coords)
 end)
+
+RegisterServerEvent("mumble:SetVoiceData")
+AddEventHandler("mumble:SetVoiceData", function(mode,prox)
+	local source = source
+	if mode == 'mode' then
+		TriggerClientEvent("renzu_hud:SetVoiceData", source, 'proximity', prox)
+	end
+	if mode == 'radio' then
+		TriggerClientEvent("renzu_hud:SetVoiceData", source, 'radio', prox)
+	end
+end)

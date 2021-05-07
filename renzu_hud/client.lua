@@ -68,28 +68,80 @@ local particleslight = {}
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- VOICE FUNC
 -----------------------------------------------------------------------------------------------------------------------------------------
-RenzuCommand(config.commands['voip'], function()
-    if proximity == 3.0 then
-		voiceDisplay = 1
-		proximity = 10.0
-	elseif proximity == 10.0 then
-		voiceDisplay = 2
-		proximity = 25.0
-	elseif proximity == 25.0 then
-		voiceDisplay = 3
-		proximity = 3.0
-	end
-	if config.enableproximityfunc then
-		setVoice()
-	end
+
+--PMA VOICE LISTENER
+RenzuNetEvent("pma-voice:setTalkingMode")
+RenzuEventHandler("pma-voice:setTalkingMode", function(prox)
+	voiceDisplay = prox + 1
 	RenzuSendUI({
 		type = "setMic",
-		content = voiceDisplay
+		content = prox + 1
 	})
-end, false)
+end)
+
+--MUMBLE VOIP SetVoice Listener
+RenzuNetEvent("renzu_hud:SetVoiceData")
+RenzuEventHandler("renzu_hud:SetVoiceData", function(mode,val)
+	if mode == 'proximity' then
+		voiceDisplay = val
+		RenzuSendUI({
+			type = "setMic",
+			content = val
+		})
+	elseif mode == 'radio' and val > 0 then
+		RenzuSendUI({
+			type = "setRadioChannel",
+			content = config.radiochannels[val]
+		})
+	elseif mode == 'radio' and val <= 0 then
+		RenzuSendUI({
+			type = "setRadioChannel",
+			content = false
+		})
+	end
+end)
+
+-- PMA RADIO CHANNEL LISTENER
+RenzuNetEvent("pma-voice:clSetPlayerRadio")
+RenzuEventHandler("pma-voice:clSetPlayerRadio", function(channel)
+	RenzuSendUI({
+		type = "setRadioChannel",
+		content = config.radiochannels[channel]
+	})
+end)
+
+-- PMA REMOVE PLAYER FROM CHANNEL RADIO
+RenzuNetEvent("pma-voice:removePlayerFromRadio")
+RenzuEventHandler("pma-voice:removePlayerFromRadio", function(channel)
+	RenzuSendUI({
+		type = "setRadioChannel",
+		content = false
+	})
+end)
 
 Creation(function()
-	RenzuKeybinds(config.commands['voip'], 'Voice Proximity', 'keyboard', config.keybinds['voip'])
+	if config.voicecommandandkeybind then
+		RenzuCommand(config.commands['voip'], function()
+			if proximity == 3.0 then
+				voiceDisplay = 1
+				proximity = 10.0
+			elseif proximity == 10.0 then
+				voiceDisplay = 2
+				proximity = 25.0
+			elseif proximity == 25.0 then
+				voiceDisplay = 3
+				proximity = 3.0
+			end
+			if config.enableproximityfunc then
+				setVoice()
+			end
+			RenzuSendUI({
+				type = "setMic",
+				content = voiceDisplay
+			})
+		end, false)
+		RenzuKeybinds(config.commands['voip'], 'Voice Proximity', 'keyboard', config.keybinds['voip'])
+	end
 end)
 
 local newfreq = nil
@@ -412,6 +464,11 @@ Creation(function()
 				RenzuSendUI({
 					type = "setShow",
 					content = content
+				})
+
+				RenzuSendUI({
+					type = "setStart",
+					content = false
 				})
 			end
 			if ismapopen then
@@ -1070,6 +1127,8 @@ function NuiShowMap()
 				Renzuzu.Wait(10)
 			end
 			RenzuSendUI({map = true, type = 'bukas'})
+			local t = {['custom'] = config.usecustomlink,['type'] = config.mapversion,['link'] = config.mapurl}
+			RenzuSendUI({type = "setMapVersion",content = t})
 			ismapopen =  true
 			Wait(250)
 			while invehicle do
@@ -1611,33 +1670,35 @@ Creation(function()
 end)
 
 RenzuCommand(config.commands['car_seatbelt'], function()
-	if haveseatbelt() then
-		if belt then
-			SetTimeout(1000,function()
-				belt = false
-				if newbelt ~= belt or newbelt == nil then
-					newbelt = belt
-					RenzuSendUI({
-					type = "setBelt",
-					content = belt
-					})
-				end
-				Notify('warning','Seatbelt',"Seatbelt has been Detached")
-				SendNuiSeatBelt()
-			end)
-		else
-			SetTimeout(1000,function()
-				belt = true
-				if newbelt ~= belt or newbelt == nil then
-					newbelt = belt
-					RenzuSendUI({
-					type = "setBelt",
-					content = belt
-					})
-					Notify('success','Seatbelt',"Seatbelt has been attached")
-				end
-				SendNuiSeatBelt()
-			end)
+	if vehicle ~= 0 then
+		if haveseatbelt() then
+			if belt then
+				SetTimeout(1000,function()
+					belt = false
+					if newbelt ~= belt or newbelt == nil then
+						newbelt = belt
+						RenzuSendUI({
+						type = "setBelt",
+						content = belt
+						})
+					end
+					Notify('warning','Seatbelt',"Seatbelt has been Detached")
+					SendNuiSeatBelt()
+				end)
+			else
+				SetTimeout(1000,function()
+					belt = true
+					if newbelt ~= belt or newbelt == nil then
+						newbelt = belt
+						RenzuSendUI({
+						type = "setBelt",
+						content = belt
+						})
+						Notify('success','Seatbelt',"Seatbelt has been attached")
+					end
+					SendNuiSeatBelt()
+				end)
+			end
 		end
 	end
 end, false)
@@ -1667,27 +1728,29 @@ end
 RenzuCommand(config.commands['signal_left'], function()
 	local ped = ped
 	local vehicle = vehicle
-	right = false
-	Renzuzu.Wait(100)
-	left = true
-	if GetVehicleIndicatorLights(vehicle) == 0 then
-		SetVehicleIndicatorLights(vehicle,1, true)
-	elseif GetVehicleIndicatorLights(vehicle) == 2 then
-		SetVehicleIndicatorLights(vehicle,0, false)
-		SetVehicleIndicatorLights(vehicle,1, true)
-	end
+	if vehicle ~= 0 then
+		right = false
+		Renzuzu.Wait(100)
+		left = true
+		if GetVehicleIndicatorLights(vehicle) == 0 then
+			SetVehicleIndicatorLights(vehicle,1, true)
+		elseif GetVehicleIndicatorLights(vehicle) == 2 then
+			SetVehicleIndicatorLights(vehicle,0, false)
+			SetVehicleIndicatorLights(vehicle,1, true)
+		end
 
-	state = false
-	if not state and right then
-		state = 'right'
+		state = false
+		if not state and right then
+			state = 'right'
+		end
+		if not state and left then
+			state = 'left'
+		end
+		if hazard then
+			state = 'hazard'
+		end
+		sendsignaltoNUI()
 	end
-	if not state and left then
-		state = 'left'
-	end
-	if hazard then
-		state = 'hazard'
-	end
-	sendsignaltoNUI()
 end, false)
 
 Creation(function()
@@ -1697,27 +1760,29 @@ end)
 RenzuCommand(config.commands['signal_right'], function()
 	local ped = ped
 	local vehicle = vehicle
-	left = false
-	Renzuzu.Wait(100)
-	right = true
-	if GetVehicleIndicatorLights(vehicle) == 0 then
-		SetVehicleIndicatorLights(vehicle,0, true)
-	elseif GetVehicleIndicatorLights(vehicle) == 1 then
-		SetVehicleIndicatorLights(vehicle,1, false)
-		SetVehicleIndicatorLights(vehicle,0, true)
-	end
+	if vehicle ~= 0 then
+		left = false
+		Renzuzu.Wait(100)
+		right = true
+		if GetVehicleIndicatorLights(vehicle) == 0 then
+			SetVehicleIndicatorLights(vehicle,0, true)
+		elseif GetVehicleIndicatorLights(vehicle) == 1 then
+			SetVehicleIndicatorLights(vehicle,1, false)
+			SetVehicleIndicatorLights(vehicle,0, true)
+		end
 
-	state = false
-	if not state and right then
-		state = 'right'
+		state = false
+		if not state and right then
+			state = 'right'
+		end
+		if not state and left then
+			state = 'left'
+		end
+		if hazard then
+			state = 'hazard'
+		end
+		sendsignaltoNUI()
 	end
-	if not state and left then
-		state = 'left'
-	end
-	if hazard then
-		state = 'hazard'
-	end
-	sendsignaltoNUI()
 end, false)
 
 Creation(function()
@@ -1804,29 +1869,31 @@ end)
 RenzuCommand(config.commands['signal_hazard'], function()
 	local ped = ped
 	local vehicle = vehicle
-	if GetVehicleIndicatorLights(vehicle) == 0 then
-		hazard = true
-		SetVehicleIndicatorLights(vehicle,0, true)
-		SetVehicleIndicatorLights(vehicle,1, true)
-	else
-		hazard = false
-		left = false
-		right = false
-		SetVehicleIndicatorLights(vehicle,0, false)
-		SetVehicleIndicatorLights(vehicle,1, false)
-	end
+	if vehicle ~= 0 then
+		if GetVehicleIndicatorLights(vehicle) == 0 then
+			hazard = true
+			SetVehicleIndicatorLights(vehicle,0, true)
+			SetVehicleIndicatorLights(vehicle,1, true)
+		else
+			hazard = false
+			left = false
+			right = false
+			SetVehicleIndicatorLights(vehicle,0, false)
+			SetVehicleIndicatorLights(vehicle,1, false)
+		end
 
-	state = false
-	if not state and right then
-		state = 'right'
+		state = false
+		if not state and right then
+			state = 'right'
+		end
+		if not state and left then
+			state = 'left'
+		end
+		if hazard then
+			state = 'hazard'
+		end
+		sendsignaltoNUI()
 	end
-	if not state and left then
-		state = 'left'
-	end
-	if hazard then
-		state = 'hazard'
-	end
-	sendsignaltoNUI()
 end, false)
 
 Creation(function()
@@ -2136,7 +2203,9 @@ function vehiclemode()
 end
 
 RenzuCommand(config.commands['mode'], function()
-	vehiclemode()
+	if vehicle ~= 0 then
+		vehiclemode()
+	end
 end, false)
 
 Creation(function()
@@ -2198,7 +2267,9 @@ function differential()
 end
 
 RenzuCommand(config.commands['differential'], function()
-	differential()
+	if vehicle ~= 0 then
+		differential()
+	end
 end, false)
 
 Creation(function()
@@ -2473,7 +2544,9 @@ function Cruisecontrol()
 end
 
 RenzuCommand(config.commands['cruisecontrol'], function()
-	Cruisecontrol()
+	if vehicle ~= 0 then
+		Cruisecontrol()
+	end
 end, false)
 
 Creation(function()
@@ -3351,17 +3424,19 @@ end)
 
 spool = false
 RenzuCommand(config.commands['enablenitro'], function()
-	if config.enablenitro then
-		if not nitromode then
-			nitromode = not nitromode
-			spool = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
-			Notify('success','Nitro System',"Nitro has been activated")
-			EnableNitro()
-		else
-			nitromode = not nitromode
-			StopSound(spool)
-			ReleaseSoundId(spool)
-			Notify('warning','Nitro System',"Nitro has been off")
+	if vehicle ~= 0 then
+		if config.enablenitro then
+			if not nitromode then
+				nitromode = not nitromode
+				spool = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
+				Notify('success','Nitro System',"Nitro has been activated")
+				EnableNitro()
+			else
+				nitromode = not nitromode
+				StopSound(spool)
+				ReleaseSoundId(spool)
+				Notify('warning','Nitro System',"Nitro has been off")
+			end
 		end
 	end
 end, false)

@@ -32,6 +32,7 @@ files {
 	'ui/css/*.css',
 	'ui/js/*.js',
 	'ui/img/*.png',
+	'ui/img/*.webp',
 	'ui/img/weapons/*.png',
 	'ui/sounds/*.ogg',
 	'ui/shifter/*.png'

@@ -52,15 +52,20 @@ right:7%;
   }
   
   #mic-radio {
-    width: 100px !important;
+    width:200px;
     display: inline-block;
-    position: relative;
+    position: absolute;
+    top:24px;
+    right:5px;
+    font-size:9px;
+    text-shadow: 2px 1px 2px #1199e7;
+    color: rgb(224, 224, 224);
   }
-  
-  #mic-radio i {
-    font-size: 1.2em;
-    color: orange;
-    margin-right: 5px;
+
+  #radio {
+    position: absolute;
+    top:107px;
+    right:10px;
   }
   
   .mic span {

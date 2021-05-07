@@ -65,9 +65,22 @@ traction = nil
 traction2 = nil
 
 config.framework = 'ESX' -- ESX | VRP | QSHIT | STANDALONE
+
+--MAIN UI CONFIG START
+config.enablecompass = true -- enable/disable compass
+config.carui = 'modern' -- Choose a Carui Version ( simple, minimal, modern )
+config.statusui = 'normal' -- UI LOOK ( simple, normal)
+config.statusv2 = true -- enable this if you want the status hud in bottom part , false if toggle mode (TOGGLE VIA INSERT)
 --CHANGE ACCORDING TO YOUR STATUS ESX STATUS OR ANY STATUS MOD
-config.carui = 'simple' -- Choose a Carui Version ( simple, minimal, modern )
+--UI CONFIG END
+--start car map
 config.centercarhud = 'map' -- Feature of Car hud - MAP , MP3 (IF YOU CHOOSE MP3 you need renzu_mp3 as dependency, and renzu_mp3 need xsound)
+config.mapversion = 'atlas' -- available ( satellite, atlas, oldschool )
+config.usecustomlink = false -- use custom url of image map
+config.mapurl = 'https://github.com/jgardner117/gtav-interactive-map/blob/master/images/gtav.png?raw=true' -- if use custom url define it
+--atlas link https://github.com/jgardner117/gtav-interactive-map/blob/master/images/gtav.png?raw=true
+--satellite link https://github.com/jgardner117/gtav-interactive-map/blob/master/images/GTAV_SATELLITE_8192x8192.png?raw=true
+--credits https://github.com/jgardner117/gtav-interactive-map
 -- minimap
 config.useminimapeverytime = false -- FORCE display radarmap all the time? (USE THIS ONLY IF Some of your other script use displayradar(FALSE) , its advisable to disable this config instead remove it on your other script, default GTA show the Minimap everytime)
 config.usecircleminimap = true -- display oval minimap instead of box radar map?
@@ -103,13 +116,11 @@ config.impactdamagetoped = 1.0 -- 0.5 = 50%, 1.0 = 100% ( Calculated based on th
 config.impactdamagetoveh = true -- apply damage to vehicle, burst random tires, remove windshield
 config.randomdamage = 555 -- random damage to vehicle parts, such a body, engine, petrol tank
 --STATUS ( disabled v2 if you want the optimize version ( FETCH ONLY The Player Status if Toggled ) else v2 is running loop default of 1sec)
-config.statusui = 'simple' -- UI LOOK ( simple, normal)
-config.statusv2 = true -- enable this if you want the status hud in bottom part , false if toggle mode (TOGGLE VIA INSERT)
 config.statusv2_sleep = 1000 -- 1sec
 config.statusnotify = true
 config.driving_affect_status = true -- should the status will be affected during Driving a vehicle?
 config.driving_affected_status = 'sanity' -- change whatever status you want to be affected during driving
-config.driving_status_mode = 'add' -- (add, remove) add will add a value to status, remove will remove a status value.
+config.driving_status_mode = 'remove' -- (add, remove) add will add a value to status, remove will remove a status value.
 config.driving_status_val = 10000 -- status value to add/remove
 config.driving_status_radius = 200 -- driving distance to add status
 config.firing_affect_status = true -- Firing Weapons affects status?
@@ -124,7 +135,7 @@ config.killing_status_val = 5000 -- status value to add/remove per kill
 config.running_affect_status = true -- if player is running (not sprint) status will affected?
 config.running_affected_status = 'thirst' -- change this to whatever status you wanted to be affected
 config.running_status_mode = 'remove' -- should add or remove? its up to you. affected status if running
-config.running_status_val = 10000 -- how much we add / remove to the status?
+config.running_status_val = 1000 -- how much we add / remove to the status?
 config.melee_combat_affect_status = true -- melee attack like punch,kick,pistolwhiping,etc can affect the status?
 config.melee_combat_affected_status = 'sanity' -- type of status
 config.melee_combat_status_mode = 'remove' -- status remove or add?
@@ -836,7 +847,6 @@ config.commands = {
 }
 
 -- COMPASS STREET LOCATION Customization options
-config.enablecompass = false
 config.border = {
     r = 255;
     g = 255;
@@ -922,7 +932,19 @@ config.disallowed_manual = {
 	'21', -- trains
 }
 
-config.enableproximityfunc = true -- if false = will be using Voice UI Only, no Voice Function
+config.enableproximityfunc = false -- if false = will be using Voice UI Only, no Voice Function
+config.voicecommandandkeybind = false -- disable by default!, enabling this will register a keybinds to your fivem client settings. so use this only if you are really going to use this.
+config.radiochanel = true -- Enable Radio UI
+config.radiochannels = { -- this will appear in Radio Channel UI if enable, example in config: chanel 1 = Ambulance Comms
+    [1] = 'Police - Robbery Comms', -- Limit the words or else it may overlap
+    [2] = 'Ambulance - EMS Comms',
+    [3] = 'Mechanic - Oncall Comms'
+}
+config.defaultchannelname = 'Public Channel'
+--if voicecommandandkeybind is disable
+-- the system is listening to the following events of proxymity to change the mic UI in HUD
+--pma-voice:setTalkingMode (from pma-voice)
+--setVoice from MumbleVoip
 
 --OPTIMIZATION
 -- DONT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING!
