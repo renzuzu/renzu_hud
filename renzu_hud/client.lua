@@ -24,7 +24,11 @@ Creation(function()
 	DecorRegister("TRACTION", 1)
 	DecorRegister("TRACTION2", 1)
 	DecorRegister("TRACTION3", 1)
-	DecorRegister("MANUAL", 1)
+	if not DecorIsRegisteredAsType("MANUAL", 1) then
+		DecorRegister("MANUAL", 1)
+	end
+	DecorRegister("PLAYERLOADED", 1)
+	DecorRegister("CHARSLOT", 1)
 end)
 
 -----------------------------------------------------------------------------------------------------------------------------------------
@@ -156,26 +160,65 @@ RenzuEventHandler("radio:freq", function(freq)
 		newfreq = freq
 		end
 end)
+charslot = nil
+RenzuNetEvent('renzu_hud:charslot')
+RenzuEventHandler('renzu_hud:charslot', function(charid)
+	charslot = charid
+	print(charslot)
+	print(charslot)
+	print(charslot)
+	print(charslot)
+	while not playerloaded do
+		Wait(100)
+	end
+	Wait(2000)
+	if DecorExistOn(PlayerPedId(), "CHARSLOT") then
+		DecorRemove(PlayerPedId(), "CHARSLOT")
+	end
+	DecorSetFloat(PlayerPedId(), "CHARSLOT", charslot*1.0) -- fuck bug in int type
+end)
 
 local pedshot = false
-
+local lastped = nil
 Creation(function()
-	Citizen.Wait(3000)
-	TriggerServerEvent("renzu_hud:getmile")
+	if charslot == nil and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0.0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= nil then
+		charslot = round(DecorGetFloat(PlayerPedId(),"CHARSLOT"))
+	else
+		Citizen.Wait(4000)
+	end
+	TriggerServerEvent("renzu_hud:getdata",charslot)
 	if config.framework == 'ESX' then
 		RenzuNetEvent('esx:playerLoaded')
 		RenzuEventHandler('esx:playerLoaded', function(xPlayer)
 			playerloaded = true
 			Renzuzu.Wait(2000)
-			TriggerServerEvent("renzu_hud:getmile")
+			lastped = PlayerPedId()
+			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
+			TriggerServerEvent("renzu_hud:getdata",charslot)
 		end)
 	else
 		RenzuNetEvent('playerSpawned')
 		RenzuEventHandler('playerSpawned', function(spawn)
 			playerloaded = true
 			Renzuzu.Wait(2000)
-			TriggerServerEvent("renzu_hud:getmile")	
+			lastped = PlayerPedId()
+			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
+			TriggerServerEvent("renzu_hud:getdata",charslot)	
 		end)
+	end
+	while not playerloaded do
+		Wait(1000)
+	end
+	while playerloaded do -- dev purpose when restarting script, either you uncomment this or left it , it doesnt matter.
+		Wait(20000)
+		if not DecorExistOn(PlayerPedId(), "PLAYERLOADED") then
+			DecorRemove(lastped,"PLAYERLOADED")
+			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
+			if config.multichar_advanced then
+				DecorRemove(lastped,"CHARSLOT")
+				DecorSetInt(PlayerPedId(), "CHARSLOT", charslot)
+			end
+		end
 	end
 end)
 
@@ -343,15 +386,6 @@ RenzuNuiCallback('getoutvehicle', function(data, cb)
 	TaskLeaveVehicle(ped,vehicle,0)
 end)
 
-RenzuNuiCallback('closecarcontrol', function(data, cb)
-	carcontrol = false
-	RenzuSendUI({
-		type = "setShowCarcontrol",
-		content = carcontrol
-	})
-	SetNuiFocus(false,false)
-end)
-
 Creation(function()
 	Wait(1000)
 	RenzuSendUI({type = 'setCarui', content = config.carui})
@@ -481,6 +515,7 @@ Creation(function()
 					type = "setManual",
 					content = false
 				})
+				manual = false
 			end
 			Renzuzu.Wait(1000)
 			uimove = true
@@ -574,10 +609,9 @@ function inVehicleFunctions()
 		SendNuiSeatBelt()
 		NuiWheelSystem()
 		print(DecorGetBool(vehicle, "MANUAL"))
-		if DecorGetBool(vehicle, "MANUAL") then
+		if not manual and manualstatus and DecorGetBool(vehicle, "MANUAL") then
+			print("Starting manual")
 			startmanual()
-			manual = not manual
-			manualstatus = true
 		end
 	end)
 end
@@ -860,7 +894,7 @@ function NuiMileAge()
 			count = count + 1
 		end
 		if not playerloaded then
-			TriggerServerEvent("renzu_hud:getmile")
+			TriggerServerEvent("renzu_hud:getdata",charslot)
 		end
 		Renzuzu.Wait(1000)
 		while veh_stats == nil and invehicle do
@@ -912,8 +946,10 @@ function NuiMileAge()
 					saveplate = string.gsub(GetVehicleNumberPlateText(vehicle), "%s+", "")
 					saveplate = string.gsub(saveplate, '^%s*(.-)%s*$', '%1')
 					plate = saveplate
+					local lets_save = false
 					if plate ~= nil and veh_stats[plate] == nil then
 						print("CREATING VEHSTATS")
+						lets_save = true
 						veh_stats[plate] = {}
 						veh_stats[plate].plate = plate
 						veh_stats[plate].mileage = 0
@@ -943,6 +979,10 @@ function NuiMileAge()
 							veh_stats[plate][tostring(i)] = {}
 							veh_stats[plate][tostring(i)].tirehealth = config.tirebrandnewhealth
 						end
+					end
+					if lets_save then
+						TriggerServerEvent('renzu_hud:savedata', saveplate, veh_stats[tostring(saveplate)])
+						lets_save = false -- why?
 					end
 					--print(veh_stats[plate].coolant)
 					if plate ~= nil and veh_stats[plate].plate == plate then
@@ -1011,7 +1051,7 @@ function NuiMileAge()
 				end
 			elseif savemile and lastve ~= nil and saveplate ~= nil then
 				savemile = false
-				TriggerServerEvent('renzu_hud:savemile', saveplate, veh_stats[tostring(saveplate)])
+				TriggerServerEvent('renzu_hud:savedata', saveplate, veh_stats[tostring(saveplate)])
 				Wait(1000)
 				lastve = nil
 				saveplate = nil
@@ -1180,14 +1220,11 @@ function getveh()
 	if v == 0 then
 		if #(GetEntityCoords(ped) - GetEntityCoords(GetPlayersLastVehicle())) < 5 then
 			v = GetPlayersLastVehicle()
-			print("last veh")
 		end
 	end
 	if v == 0 then
 		v = GetClosestVehicle(GetEntityCoords(PlayerPedId()), 5.000, 0, 70)
-		print("NEAR VEH")
 	end
-	print(v)
 	return tonumber(v)
 end
 
@@ -1842,6 +1879,7 @@ function entervehicle()
 				type = "setManual",
 				content = false
 			})
+			manual = false
 		end
 		local content = {
 			['bool'] = false,
@@ -2014,7 +2052,7 @@ function vehiclemode()
 		local gear = GetGear(vehicle)
 		Creation(function()
 			local newgear = 0
-			while mode == 'SPORTS' do
+			while mode == 'SPORTS' and invehicle do
 				local sleep = 2000
 				--local ply = PlayerPedId()
 				local vehicle = vehicle
@@ -2031,18 +2069,12 @@ function vehiclemode()
 		local sound = false
 		Creation(function()
 			local newgear = 0
-			olddriveinertia = GetVehStats(vehicle, "CHandlingData","fDriveInertia")
-			oldriveforce = GetVehStats(vehicle, "CHandlingData","fInitialDriveForce")
-			oldtopspeed = GetVehStats(vehicle, "CHandlingData","fInitialDriveMaxFlatVel") -- normalize
+			olddriveinertia = DecorGetFloat(vehicle,"INERTIA")
+			oldriveforce = DecorGetFloat(vehicle,"DRIVEFORCE")
+			oldtopspeed = DecorGetFloat(vehicle,"TOPSPEED")-- normalize
 			-- DecorSetFloat(vehicle, "INERTIA", olddriveinertia)
 			-- DecorSetFloat(vehicle, "DRIVEFORCE", oldriveforce)
 			-- DecorSetFloat(vehicle, "TOPSPEED", oldtopspeed)
-			if GetVehicleMod(vehicle,13) > 0 then
-				local bonus = (DecorGetFloat(vehicle,"TOPSPEED") * config.topspeed_multiplier)
-				globaltopspeed = bonus * 1.5
-			else
-				globaltopspeed = DecorGetFloat(vehicle,"TOPSPEED") * config.topspeed_multiplier
-			end
 			local fixedshit = (config.topspeed_multiplier * 1.0)
 			local old = oldtopspeed * 1.0
 			local turbosound = 0
@@ -2051,6 +2083,12 @@ function vehiclemode()
 			local fo = oldtopspeed * 0.64
 			--SetEntityMaxSpeed(vehicle,fo * 2.0)
 			if config.sports_increase_topspeed then
+				if GetVehicleMod(vehicle,13) > 0 then
+					local bonus = (DecorGetFloat(vehicle,"TOPSPEED") * config.topspeed_multiplier)
+					globaltopspeed = bonus * 1.5
+				else
+					globaltopspeed = DecorGetFloat(vehicle,"TOPSPEED") * config.topspeed_multiplier
+				end
 				SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", globaltopspeed)
 				--SetVehicleEnginePowerMultiplier(vehicle,boost * config.topspeed_multiplier)
 			end
@@ -2139,6 +2177,7 @@ function vehiclemode()
 			topspeedmodifier = 1.0
 			busy = true
 			Renzuzu.Wait(100)
+			vehicle = getveh()
 			if DecorGetFloat(vehicle,"INERTIA") ~= 0.0 and DecorGetFloat(vehicle,"DRIVEFORCE") ~= 0.0 then
 				SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", DecorGetFloat(vehicle,"TOPSPEED"))
 				SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
@@ -2175,9 +2214,9 @@ function vehiclemode()
 		local sound = false
 		Creation(function()
 			local olddriveinertia = 1.0
-			olddriveinertia = GetVehStats(vehicle, "CHandlingData","fDriveInertia")
+			olddriveinertia = DecorGetFloat(vehicle,"INERTIA")
 			SetVehStats(vehicle, "CHandlingData", "fDriveInertia", config.eco)
-			while mode == 'ECO' do
+			while mode == 'ECO' and invehicle do
 				local sleep = 2000
 				--local ply = PlayerPedId()
 				local reset = true
@@ -2189,6 +2228,7 @@ function vehiclemode()
 						if degrade ~= 1.0 then
 							power = power * degrade
 						end
+						SetVehStats(vehicle, "CHandlingData", "fDriveInertia", config.eco)
 						SetVehicleBoost(vehicle, (config.eco+0.4))
 					end
 				end
@@ -2196,6 +2236,7 @@ function vehiclemode()
 			end
 			busy = true
 			Renzuzu.Wait(100)
+			vehicle = getveh()
 			if DecorGetFloat(vehicle,"INERTIA") ~= 0.0 then
 				SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
 				while not GetVehStats(vehicle, "CHandlingData","fDriveInertia") == DecorGetFloat(vehicle,"INERTIA") and invehicle do
@@ -2689,8 +2730,12 @@ end)
 Creation(function()
 	if config.bodystatus then
 		Citizen.Wait(1000)
-		while not playerloaded do
+		while DecorGetBool(PlayerPedId(), "PLAYERLOADED") ~= 1 do
 			Citizen.Wait(500)
+			if playerloaded then
+				DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
+				break
+			end
 		end
 		TriggerServerEvent('renzu_hud:checkbody')
 		while receive == 'new' do
@@ -2981,7 +3026,10 @@ local windowbones = {
 }
 
 local carcontrol = false
+local isbusy = false
 function CarControl()
+	if busy then return end
+	isbusy = true
 	vehicle = getveh()
 	if vehicle ~= 0 and #(GetEntityCoords(ped) - GetEntityCoords(vehicle)) < 15 and GetVehicleDoorLockStatus(vehicle) == 1 then
 		local door = {}
@@ -3006,7 +3054,6 @@ function CarControl()
 			type = "setShowCarcontrol",
 			content = carcontrol
 		})
-		Wait(300)
 		RenzuSendUI({
 			type = "setDoorState",
 			content = door
@@ -3015,7 +3062,16 @@ function CarControl()
 			type = "setWindowState",
 			content = window
 		})
+		Wait(500)
 		SetNuiFocus(carcontrol,carcontrol)
+		SetNuiFocusKeepInput(carcontrol)
+		isbusy = false
+		Creation(function()
+			while carcontrol do
+				whileinput()
+				Wait(5)
+			end
+		end)
 	else
 		if GetVehicleDoorLockStatus(vehicle) ~= 1 then
 			Notify('warning','Carcontrol System',"No Unlock Vehicle Nearby")
@@ -3041,6 +3097,15 @@ Creation(function()
 	end
 end)
 
+RenzuNuiCallback('closecarcontrol', function(data, cb)
+	carcontrol = false
+	RenzuSendUI({
+		type = "setShowCarcontrol",
+		content = carcontrol
+	})
+	SetNuiFocus(false,false)
+end)
+
 RenzuNuiCallback('setVehicleDoor', function(data, cb)
 	vehicle = getveh()
     if data.bool then
@@ -3058,6 +3123,15 @@ function shuffleseat(index)
 			entervehicle()
 		end)
 		TaskEnterVehicle(ped, getveh(), 10.0, index, 2.0, 0)
+	end
+end
+
+function requestcontrol(veh)
+	NetworkRequestControlOfEntity(veh)
+	local count = 0
+	while not NetworkHasControlOfEntity(veh) and count < 10 do
+		count = count + 1
+		Wait(10)
 	end
 end
 
@@ -3164,9 +3238,93 @@ RenzuNuiCallback('setvehicleneon', function(data, cb)
 	if r == 255 and g == 0 and b == 255 then -- lets assume this is the default and not installed neon.. change this if you want a better check if neon is install, use your framework
 	else
 		for i = 0, 3 do
-			SetVehicleNeonLightEnabled(vehicle, i, data.bool)
+			SetVehicleNeonLightEnabled(getveh(), i, data.bool)
 			Citizen.Wait(500)
 		end
+	end
+end)
+
+function getColor(r1, g1, b1, r2, g2, b2)
+
+	return round(math.random(0,255)), round(math.random(0,255)), round(math.random(0,255))
+end
+
+function round(num, numDecimalPlaces)
+	local mult = 10^(numDecimalPlaces or 0)
+	return math.floor(num * mult + 0.5)
+end
+
+local neoneffect1 = false
+local oldneon = nil
+local r,g,b = nil,nil,nil
+local o_r,og,ob = nil,nil,nil
+RenzuNuiCallback('setneoneffect1', function(data, cb)
+	vehicle = getveh()
+	r,g,b = GetVehicleNeonLightsColour(vehicle)
+	if r == 255 and g == 0 and b == 255 then -- lets assume this is the default and not installed neon.. change this if you want a better check if neon is install, use your framework
+	else
+		requestcontrol(vehicle)
+		neoneffect1 = not neoneffect1
+		Wait(100)
+		Creation(function()
+			if neoneffect1 then
+				o_r,og,ob = GetVehicleNeonLightsColour(vehicle)
+			end
+			while neoneffect1 do
+				requestcontrol(getveh())
+				print("effect 1")
+				print(getColor(0,0,0,255,255,255))
+				SetVehicleNeonLightsColour(getveh(),getColor(0,0,0,255,255,255))
+				for i = 0, 3 do
+					print("set")
+					SetVehicleNeonLightEnabled(getveh(), i, true)
+				end
+				Citizen.Wait(222)
+				for i = 0, 3 do
+					SetVehicleNeonLightEnabled(getveh(), i, false)
+				end
+				Citizen.Wait(222)
+			end
+			SetVehicleNeonLightsColour(getveh(),o_r,og,ob)
+		end)
+	end
+end)
+
+local neoneffect2 = false
+RenzuNuiCallback('setneoneffect2', function(data, cb)
+	vehicle = getveh()
+	r,g,b = GetVehicleNeonLightsColour(vehicle)
+	if r == 255 and g == 0 and b == 255 then -- lets assume this is the default and not installed neon.. change this if you want a better check if neon is install, use your framework
+	else
+		neoneffect2 = not neoneffect2
+		requestcontrol(vehicle)
+		Wait(100)
+		Creation(function()
+			while neoneffect2 do
+				requestcontrol(getveh())
+				rand = math.random(1,4) - 1
+				math.randomseed(GetGameTimer())
+				for i = 0, 3 do
+					SetVehicleNeonLightEnabled(getveh(), i, data.bool)
+				end
+				for i = rand, rand do
+					SetVehicleNeonLightEnabled(getveh(), i, data.bool)
+				end
+				Citizen.Wait(55)
+				for i = rand, rand do
+					SetVehicleNeonLightEnabled(getveh(), i, not data.bool)
+				end
+				Citizen.Wait(55)
+				for i = rand, rand do
+					SetVehicleNeonLightEnabled(getveh(), i, data.bool)
+				end
+				Citizen.Wait(55)
+				for i = rand, rand do
+					SetVehicleNeonLightEnabled(getveh(), i, not data.bool)
+				end
+				Citizen.Wait(155)
+			end
+		end)
 	end
 end)
 
@@ -3562,7 +3720,7 @@ function InstallTires(type)
 							content = wheeltable
 						})
 					end
-					TriggerServerEvent('renzu_hud:savemile', plate, veh_stats[tostring(plate)])
+					TriggerServerEvent('renzu_hud:savedata', plate, veh_stats[tostring(plate)])
 					Notify('success','Tire System',"New Tires has been Successfully Install")
 					ClearPedTasks(ped)
 					break
@@ -3573,7 +3731,7 @@ function InstallTires(type)
 					SetVehicleTyreFixed(vehicle, i)
 					SetVehicleWheelHealth(vehicle, i, 1000.0)
 					veh_stats[plate][tostring(i)].tirehealth = 999.0
-					TriggerServerEvent('renzu_hud:savemile', plate, veh_stats[tostring(plate)])
+					TriggerServerEvent('renzu_hud:savedata', plate, veh_stats[tostring(plate)])
 					Notify('success','Tire System',"New Tire #"..i.." has been Successfully Install")
 					ClearPedTasks(ped)
 					local wheeltable = {
@@ -3782,3 +3940,186 @@ RenzuNuiCallback('setvehiclealarm', function(data, cb)
 		ClearPedTasks(ped)
     end
 end)
+
+--clothes
+
+local shouldUpdateSkin = false
+local pedSkin = {}
+local oldclothes = nil
+local clothestate = {}
+
+Creation(function()
+	if config.clothing then
+		while DecorGetBool(PlayerPedId(), "PLAYERLOADED") ~= 1 do
+			Citizen.Wait(100)
+			print(DecorGetBool(PlayerPedId(), "PLAYERLOADED"))
+			if playerloaded then
+				DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
+				break
+			end
+		end
+		SaveCurrentClothes()
+		skinsave = false
+		RenzuCommand(config.commands['clothing'], function()
+			if not skinsave then
+				SaveCurrentClothes()
+				skinsave = true
+			end
+			Clothing()
+		end, false)
+		RenzuKeybinds(config.commands['clothing'], 'Toggle Clothing UI', 'keyboard', config.keybinds['clothing'])
+	end
+end)
+
+function whileinput()
+	DisableControlAction(1, 1, true)
+	DisableControlAction(1, 2, true)
+	DisableControlAction(1, 18, true)
+	DisableControlAction(1, 68, true)
+	DisableControlAction(1, 69, true)
+	DisableControlAction(1, 70, true)
+	DisableControlAction(1, 91, true)
+	DisableControlAction(1, 92, true)
+	DisableControlAction(1, 24, true)
+	DisableControlAction(1, 25, true)
+	DisableControlAction(1, 14, true)
+	DisableControlAction(1, 15, true)
+	DisableControlAction(1, 16, true)
+	DisableControlAction(1, 17, true)
+	DisablePlayerFiring(PlayerId(), true)
+end
+
+function Clothing()
+	clothing = not clothing
+	local table = {
+		['bool'] = clothing,
+		['equipped'] = clothestate
+	}
+	RenzuSendUI({
+		type = "setShowClothing",
+		content = table
+	})
+	SetNuiFocusKeepInput(clothing)
+	SetNuiFocus(clothing,clothing)
+
+	if clothing then
+		Creation(function()
+			while clothing do
+				whileinput()
+				Wait(0)
+			end
+		end)
+	end
+end
+
+RegisterNUICallback('ChangeClothes', function(data)
+	local skin = oldclothes
+	if clothestate[data.variant] then
+		TaskAnimation(config.clothing[data.variant]['taskplay'])
+		local st = nil
+		TriggerEvent('skinchanger:getSkin', function(current)
+			TriggerEvent('skinchanger:loadClothes', current, config.clothing[data.variant].skin)
+		end)
+		PlaySoundFrontend(PlayerId(), 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 1)
+		clothestate[data.variant] = false
+		local table = {
+			['bool'] = clothestate[data.variant],
+			['variant'] = data.variant
+		}
+		RenzuSendUI({
+			type = "setClotheState",
+			content = table
+		})
+	else
+		if oldclothes[data.variant] == config.clothing[data.variant]['default'] then
+			Notify("warning","Clothe System","No Variant for this type")
+		else 
+			TaskAnimation(config.clothing[data.variant]['taskplay'])
+			local Changes = {}
+			Changes[data.variant], Changes[data.variant2] = skin[data.variant], skin[data.variant2]
+			TriggerEvent('skinchanger:getSkin', function(current)
+				TriggerEvent('skinchanger:loadClothes', current, Changes)
+			end)
+			clothestate[data.variant] = true
+			PlaySoundFrontend(PlayerId(), 'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 1)
+			local table = {
+				['bool'] = clothestate[data.variant],
+				['variant'] = data.variant
+			}
+			RenzuSendUI({
+				type = "setClotheState",
+				content = table
+			})
+		end
+	end
+end)
+
+RegisterNUICallback('hideclothing', function(data)
+	clothing = false
+	local table = {
+		['bool'] = clothing,
+		['equipped'] = clothestate
+	}
+	RenzuSendUI({
+		type = "setShowClothing",
+		content = table
+	})
+	SetNuiFocusKeepInput(clothing)
+	SetNuiFocus(clothing,clothing)
+end)
+
+RegisterNUICallback('resetclothing', function()
+	TaskAnimation(config.clothing['reset']['taskplay'])
+	TriggerEvent('skinchanger:loadClothes', oldclothes, oldclothes)
+	Citizen.Wait(100)
+	SaveCurrentClothes()
+	Citizen.Wait(100)
+	ClotheState()
+	RenzuSendUI({type = 'ResetClotheState', content = clothestate})
+end)
+
+function SaveCurrentClothes()
+	TriggerEvent('skinchanger:getSkin', function(current)
+		oldclothes = current
+		while oldclothes == nil do
+			Wait(0)
+		end
+		ClotheState()
+	end)
+end
+
+function ClotheState()
+	if oldclothes == nil then return end
+	for k,v in pairs(oldclothes) do
+		if config.clothing[k] then
+			if oldclothes[k] == config.clothing[k]['default'] then
+				clothestate[k] = false
+			else
+				clothestate[k] = true
+			end
+		end
+	end
+end
+
+local imbusy = true
+
+function TaskAnimation(table)
+	if imbusy then
+		imbusy = false
+		local Ped = ped
+		while not HasAnimDictLoaded(table.dictionary) do
+			RequestAnimDict(table.dictionary)
+			Citizen.Wait(5)
+		end
+		if IsPedInAnyVehicle(Ped) then
+			table.speed = 51
+		end
+		TaskPlayAnim(Ped, table.dictionary, table.name, 3.0, 3.0, table.duration, table.speed, 0, false, false, false)
+		local delay = table.duration-500 
+		if delay < 500 then
+			delay = 500
+		end
+		Citizen.Wait(delay) 
+		imbusy = true
+	end
+end

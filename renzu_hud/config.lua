@@ -64,18 +64,24 @@ manualstatus = false
 traction = nil
 traction2 = nil
 
-config.framework = 'ESX' -- ESX | VRP | QSHIT | STANDALONE
-
+config.framework = 'STANDALONE' -- ESX | VRP | QSHIT | STANDALONE
+config.identifier = 'steam:' -- standalone purpose, ignore if using framework
+config.multichar = false -- KASHACTERS, cd_multicharacter, etc...
+--IMPORTANT PART IF USING Multicharacter
+-- if multichar_advanced is false == using steam: format or the config.identifier
+config.multichar_advanced = true -- Using Permanent Char1,Char2 up to Char5 identifier from database. ( This means the identifier reads by ESX or other framework will have Char1:BLAHBLAHBLAH instead of steam:BLAHBLAHBLAH ( from xPlayer.identifier for example))
+config.characterchosenevent = 'kashactersS:CharacterChosen' -- this event contains charid (IMPORTANT and will read only if using advanced)
+config.charprefix = 'Char' -- dont change unless you know what you are doing
 --MAIN UI CONFIG START
 config.enablecompass = true -- enable/disable compass
-config.carui = 'simple' -- Choose a Carui Version ( simple, minimal, modern )
+config.carui = 'modern' -- Choose a Carui Version ( simple, minimal, modern )
 config.statusui = 'simple' -- UI LOOK ( simple, normal)
 config.statusv2 = true -- enable this if you want the status hud in bottom part , false if toggle mode (TOGGLE VIA INSERT)
 --CHANGE ACCORDING TO YOUR STATUS ESX STATUS OR ANY STATUS MOD
 --UI CONFIG END
 --start car map
 config.centercarhud = 'map' -- Feature of Car hud - MAP , MP3 (IF YOU CHOOSE MP3 you need renzu_mp3 as dependency, and renzu_mp3 need xsound)
-config.mapversion = 'atlas' -- available ( satellite, atlas, oldschool )
+config.mapversion = 'satellite' -- available ( satellite, atlas, oldschool )
 config.usecustomlink = false -- use custom url of image map
 config.mapurl = 'https://github.com/jgardner117/gtav-interactive-map/blob/master/images/gtav.png?raw=true' -- if use custom url define it
 --atlas link https://github.com/jgardner117/gtav-interactive-map/blob/master/images/gtav.png?raw=true
@@ -94,7 +100,7 @@ config.overheatadd = 500 -- additional temperature when engine explodes
 config.reduce_coolant = 1 -- Reduce Coolant  ( This will trigger if vehicle constantly reaching the maximum temperature) Like in Real Vehicle Coolant Reserve handle will reduce a water/coolant to prevent the radiator overflowing due to the Water Temperature is very hot.
 config.reducetemp_onwateradd = 300 -- Reduce Engine Temperature when Coolant/Water is used
 -- Vehicle Mode
-config.boost = 1.0 -- Boost Level when sports mode is activated eg. 1.5 Bar, you can put upt o 3.0 or even 5.0 but pretty sure it will be unrealistic acceleration ( this affect Fuel Consumption )
+config.boost = 2.5 -- Boost Level when sports mode is activated eg. 1.5 Bar, you can put upt o 3.0 or even 5.0 but pretty sure it will be unrealistic acceleration ( this affect Fuel Consumption )
 config.sports_increase_topspeed = true -- do you want the topspeed will be affected? some Fivem Servers Likes a demonic topspeed :D - not good in RP. Boost only affects engine torque and horsepower not the gear ratio and final drive of transmision which affects topspeed
 config.topspeed_multiplier = 1.1 -- if sports_increase_topspeed is enable, multiplier 1.5 = x1.5 eg. normal top speed 200kmh if you put 1.5 the new topspeed is 300kmh
 config.eco = 0.5 -- Eco Level when Eco Mode is activated (this affect the efficiency of fuel)
@@ -796,6 +802,89 @@ config.repaircommand = true -- Enable Repair Command for standalone purpose, dis
 config.carlock = true -- Enable Car Keyless System -- using owned_vehicles table from mysql, fetch owner as identifier.
 config.carlock_distance = 20 -- max distance to fetch the sorrounding vehicles
 
+--clothes
+config.clothing = {
+	--left
+	['helmet_1'] = {
+		['skin'] = {
+			['helmet_1'] = -1, ['helmet_2'] = 0
+		},
+		['default'] = -1,
+		['taskplay'] = {dictionary = "mp_masks@standard_car@ds@", anim = "put_on_mask", speed = 51, duration = 800}
+	},
+	['glasses_1'] = {
+		['skin'] = {
+			['glasses_1'] = 0, ['glasses_2'] = 0
+		},
+		['default'] = 0,
+		['taskplay'] = {dictionary = "mp_masks@standard_car@ds@", name = "put_on_mask", speed = 51, duration = 800}
+	},
+	['chain_1'] = {
+		['skin'] = {
+			['chain_1'] = 0, ['chain_2'] = 0
+		},
+		['default'] = 0,
+		['taskplay'] = {dictionary = "clothingtie", name = "try_tie_positive_a", speed = 51, duration = 2100}
+	},
+	['watches_1'] = {
+		['skin'] = {
+			['watches_1'] = -1, ['watches_2'] = 0
+		},
+		['default'] = -1,
+		['taskplay'] = {dictionary = "nmt_3_rcm-10", name = "cs_nigel_dual-10", speed = 51, duration = 1200}
+	},
+	--right
+	['torso_1'] = {
+		['skin'] = {
+			['torso_1'] = 15, ['torso_2'] = 0,
+			['arms'] = 15, ['arms_2'] = 0
+		},
+		['default'] = 15,
+		['taskplay'] = {dictionary = "missmic4", name = "michael_tux_fidget", speed = 51, duration = 1500}
+	},
+	['tshirt_1'] = {
+		['skin'] = {
+			['tshirt_1'] = 15, ['tshirt_2'] = 0,
+			['arms'] = 15, ['arms_2'] = 0
+		},
+		['default'] = 15,
+		['taskplay'] = {dictionary = "missmic4", name = "michael_tux_fidget", speed = 51, duration = 1500}
+	},
+	['bproof_1'] = {
+		['skin'] = {
+			['bproof_1'] = 0, ['bproof_2'] = 0
+		},
+		['default'] = 0,
+		['taskplay'] = {dictionary = "clothingtie", name = "try_tie_positive_a", speed = 51, duration = 2100}
+	},
+	['pants_1'] = {
+		['skin'] = {
+			['pants_1'] = 14, ['pants_2'] = 0
+		},
+		['default'] = 14,
+		['taskplay'] = {dictionary = "re@construction", name = "out_of_breath", speed = 51, duration = 800}
+	},
+	['shoes_1'] = {
+		['skin'] = {
+			['shoes_1'] = 45, ['shoes_2'] = 0
+		},
+		['default'] = 45,
+		['taskplay'] = {dictionary = "random@domestic", name = "pickup_low", speed = 51, duration = 1200}
+	},
+	--top
+	['mask_1'] = {
+		['skin'] = {
+			['mask_1'] = 0, ['mask_2'] = 0
+		},
+		['default'] = 0,
+		['taskplay'] = {dictionary = "mp_masks@standard_car@ds@", name = "put_on_mask", speed = 51, duration = 800}
+	},
+	--reset 
+	['reset'] = {
+		['taskplay'] = {dictionary = "missmic4", name = "michael_tux_fidget", speed = 51, duration = 1500}
+	}
+}
+
 -- HERE YOU CAN CHANGE THE KEYBINDS
 config.keybinds = {
 	--TOGGLE STATUS
@@ -818,7 +907,8 @@ config.keybinds = {
 	bodystatus = 'HOME',
     carcontrol = 'NUMLOCK',
     enablenitro = 'DELETE',
-    carlock = 'L'
+    carlock = 'L',
+    clothing = 'K'
 }
 
 --COMMANDS FOR KEYBINDS
@@ -843,7 +933,8 @@ config.commands = {
     weaponui = 'weaponui',
     crosshair = 'crosshair',
     enablenitro = 'enablenitro',
-    carlock = 'carlock'
+    carlock = 'carlock',
+    clothing = 'clothing'
 }
 
 -- COMPASS STREET LOCATION Customization options
@@ -915,6 +1006,27 @@ config.gears = {
         [4] = 1.02,
         [5] = 1.12,
         [6] = 1.35
+    },
+    [7.0] = {
+        [0] = 0.00,
+        [1] = 0.33,
+        [2] = 0.57,
+        [3] = 0.73,
+        [4] = 1.02,
+        [5] = 1.12,
+        [6] = 1.35,
+        [7] = 1.52
+    },
+    [8.0] = { -- some cars is 8 gears like jugular
+        [0] = 0.00,
+        [1] = 0.33,
+        [2] = 0.57,
+        [3] = 0.84,
+        [4] = 1.08,
+        [5] = 1.28,
+        [6] = 1.42,
+        [7] = 1.75,
+        [8] = 1.97
     }
 }
 config.firstgear = 0.33 -- DEFAULT 0.33
@@ -953,7 +1065,7 @@ config.gear_sleep = 700
 config.lights_sleep = 1000
 config.direction_sleep = 2500
 config.NuiCarhpandGas_sleep = 1500
-config.car_mainloop_sleep = 500
+config.car_mainloop_sleep = 1500
 config.rpm_speed_loop = 52
 config.idle_rpm_speed_sleep = 151
 config.Rpm_sleep = 151

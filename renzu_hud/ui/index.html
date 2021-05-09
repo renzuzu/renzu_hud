@@ -1198,6 +1198,22 @@
         top:96px;
         font-size:11px;
       }
+      #neoninfo1 {
+        z-index:1005;
+        color:rgb(231, 231, 231);
+        position:absolute;
+        left:148px;
+        top:96px;
+        font-size:11px;
+      }
+      #neoninfo2 {
+        z-index:1005;
+        color:rgb(231, 231, 231);
+        position:absolute;
+        left:278px;
+        top:96px;
+        font-size:11px;
+      }
       #stats {
         z-index:1001;
         color:rgb(231, 231, 231);
@@ -1303,6 +1319,22 @@
           <label for="week2" class="switch-label switch-label-off">ON</label>
           <input type="radio" class="switch-input" name="neon" value="off" id="month2">
           <label for="month2" class="switch-label switch-label-on">OFF</label>
+          <span class="switch-selection"></span>
+        </div>
+        <div id="neoninfo1">Neon Effect 1:</div>
+        <div class="switch switch-blue" style="position: absolute;top:90px;left:140px;">
+          <input type="radio" class="switch-input" name="neoneffect1" value="on" id="neoneffect1">
+          <label for="neoneffect1" class="switch-label switch-label-off">ON</label>
+          <input type="radio" class="switch-input" name="neoneffect1" value="off" id="neoneffect1off" checked>
+          <label for="neoneffect1off" class="switch-label switch-label-on">OFF</label>
+          <span class="switch-selection"></span>
+        </div>
+        <div id="neoninfo2">Neon Effect 2:</div>
+        <div class="switch switch-blue" style="position: absolute;top:90px;left:270px;">
+          <input type="radio" class="switch-input" name="neoneffect2" value="on" id="neoneffect2">
+          <label for="neoneffect2" class="switch-label switch-label-off">ON</label>
+          <input type="radio" class="switch-input" name="neoneffect2" value="off" id="neoneffect2off" checked>
+          <label for="neoneffect2off" class="switch-label switch-label-on">OFF</label>
           <span class="switch-selection"></span>
         </div>
       </div>
@@ -1541,51 +1573,60 @@
         <div id="geardiv"><span id="gear">P</span> <span id="geartext">Gear</span></div>
         
         <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:22%;bottom:20%;color:rgba(144, 144, 144, 0.876); display:none;'>
-          <i class="fas fa-circle fa-stack-2x" style='font-size:0.9vw;color:rgba(235, 235, 235, 0.397)'></i>
+          <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+          <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
           <img style="display:block; height:80%;width:60%;position:absolute;top:11%;left:20%;" id="handbrakeopen" src="img/handbrakeopen.png" />
           <img style="display:block; height:80%;width:60%;position:absolute;top:11%;left:20%;opacity:0.6" id="handbrakeclose" src="img/handbrakeclose.png" />
         </span>
 
         <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:40%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
-          <i class="fas fa-circle fa-stack-2x" style='font-size:0.9vw;color:rgba(233, 233, 233, 0.424)'></i>
+          <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+          <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
           <i id="gasbar" class="fad fa-gas-pump fa-stack-1x" style='font-size:1.0vw;color:rgb(231, 231, 231);z-index:1131;opacity:1.0;'></i>
           <i id="gasbg" class="fad fa-gas-pump fa-stack-1x" style='font-size:1.0vw;color:rgba(253, 0, 0, 0.856);z-index:1130;opacity:0.1;'></i>
         </span>
 
         <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:48%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
-          <i class="fas fa-circle fa-stack-2x" style='font-size:0.9vw;color:rgba(235, 235, 235, 0.397)'></i>
+          <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+          <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
           <i id="carhealthbar" class="fad fa-car-mechanic fa-stack-1x" style='font-size:1.1vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;'></i>
           <i id="carhealthbg" class="fad fa-car-mechanic fa-stack-1x" style='font-size:1.1vw;color:rgba(235, 5, 5, 0.89);z-index:1130;opacity:0.1;'></i>
         </span>
 
         <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:56%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
-          <i class="fas fa-circle fa-stack-2x" style='font-size:0.9vw;color:rgba(235, 235, 235, 0.397)'></i>
+          <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+          <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
           <img style="display:block; height:75%; width:65%;position:absolute;top:10%;left:18%;opacity:0.6" id="doorclose" src="img/doorclose.png" />
           <img style="display:none; height:75%;width:65%;position:absolute;top:10%;left:18%;opacity:0.7" id="dooropen" src="img/dooropen.png" />
         </span>
 
         <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:64%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
-          <i class="fas fa-circle fa-stack-2x" style='font-size:0.9vw;color:rgba(235, 235, 235, 0.397)'></i>
+          <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+          <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
           <img style="display:block; height:70%;position:absolute;top:14%;left:22%;" id="seatbelt" src="img/seatbeltoff.png" />
           <img style="display:none;height:70%;position:absolute;top:14%;left:22%;" id="onseatbelt" src="img/seatbelton.png" />
         </span>
 
         <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:72%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
-          <i class="fas fa-circle fa-stack-2x" style='font-size:0.9vw;color:rgba(235, 235, 235, 0.397)'></i>
+          <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+          <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
           <img style="display:block; height:70%;position:absolute;top:14%;left:22%;opacity:0.5;" id="offlight" src="img/lightoff.png" />
           <img style="display:none;height:70%;position:absolute;top:14%;left:22%;" id="onlight" src="img/lighton.png" />
           <img style="display:none;height:70%;position:absolute;top:14%;left:22%;" id="highlight" src="img/lighthigh.png" />
         </span>
         <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:5%;bottom:53%;color:rgba(144, 144, 144, 0.876)'>
-          <i class="fas fa-circle fa-stack-2x" style='font-size:0.9vw;color:rgba(12, 12, 12, 0.329)'></i>
+          <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+          <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
           <i class="fas fa-tint fa-stack-1x" style='font-size:1.1vw;color:rgb(2, 116, 192);z-index:1130;opacity:1.0;'></i>
         </span>
         <span class="fa-stack fa-2x" style='font-size:0.5vw;position:absolute;right:67%;bottom:40%;color:rgba(144, 144, 144, 0.294)'>
-          <i class="fas fa-circle fa-stack-2x" style='font-size:0.5vw;color:rgba(235, 235, 235, 0.034)'></i>
-          <i class="fas fa-oil-can fa-stack-1x" style='font-size:0.7vw;color:rgba(182, 182, 182, 0.582);z-index:1130;opacity:1.0;padding-left:1px;'></i>
+          <i class="fas fa-octagon fa-stack-2x" style='font-size:0.7vw;color:rgba(11, 39, 63, 0.055)'></i>
+          <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.023)"></i>
+          <i class="fas fa-oil-can fa-stack-1x" style='font-size:0.9vw;color:rgba(93, 93, 93, 0.782);z-index:1130;opacity:1.0;padding-left:7px;'></i>
         </span>
         <span class="fa-stack fa-2x" style='font-size:0.5vw;position:absolute;right:9.9%;bottom:44.5%;color:rgba(144, 144, 144, 0.294)'>
-          <i class="fas fa-circle fa-stack-2x" style='font-size:0.9vw;color:rgba(12, 12, 12, 0.329)'></i>
+          <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+          <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
           <i class="fad fa-car-mechanic fa-stack-1x"  style='font-size:0.9vw;color:rgba(182, 182, 182, 0.685);z-index:1130;opacity:1.0;margin-left:45%;'></i>
         </span>
 
@@ -1738,51 +1779,60 @@
       <div id="geardiv"><span id="gear">P</span> <span id="geartext">Gear</span></div>
 
       <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:22%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
-        <i class="fas fa-circle fa-stack-2x" style='font-size:0.9vw;color:rgba(235, 235, 235, 0.397)'></i>
+        <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+        <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
         <img style="display:block; height:80%;width:60%;position:absolute;top:11%;left:20%;" id="handbrakeopen" src="img/handbrakeopen.png" />
         <img style="display:block; height:80%;width:60%;position:absolute;top:11%;left:20%;opacity:0.6" id="handbrakeclose" src="img/handbrakeclose.png" />
       </span>
 
       <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:30%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
-        <i class="fas fa-circle fa-stack-2x" style='font-size:0.9vw;color:rgba(233, 233, 233, 0.424)'></i>
+        <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+        <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
         <img id="hoodopen" style="display:block; height:90%;width:70%;position:absolute;top:5%;left:18%;" src="img/hoodopen.png" />
         <img id="hoodclose" style="display:none; height:90%;width:70%;position:absolute;top:5%;left:18%;;opacity:0.6" src="img/hoodclose.png" />
       </span>
 
       <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:38%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
-        <i class="fas fa-circle fa-stack-2x" style='font-size:0.9vw;color:rgba(235, 235, 235, 0.397)'></i>
+        <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+        <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
         <img id="trunkopen" style="display:block; height:90%;width:70%;position:absolute;top:5%;left:18%;" src="img/trunkopen.png" />
         <img id="trunkclose" style="display:block; height:90%;width:70%;position:absolute;top:5%;left:18%;;opacity:0.6" src="img/trunkclose.png" />
       </span>
 
       <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:46%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
-        <i class="fas fa-circle fa-stack-2x" style='font-size:0.9vw;color:rgba(235, 235, 235, 0.397)'></i>
+        <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+        <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
         <img style="display:block; height:75%; width:65%;position:absolute;top:10%;left:18%;opacity:0.6" id="doorclose" src="img/doorclose.png" />
         <img style="display:none; height:75%;width:65%;position:absolute;top:10%;left:18%;opacity:0.7" id="dooropen" src="img/dooropen.png" />
       </span>
 
       <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:54%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
-        <i class="fas fa-circle fa-stack-2x" style='font-size:0.9vw;color:rgba(235, 235, 235, 0.397)'></i>
+        <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+        <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
         <img style="display:block; height:70%;position:absolute;top:14%;left:22%;" id="seatbelt" src="img/seatbeltoff.png" />
         <img style="display:none;height:70%;position:absolute;top:14%;left:22%;" id="onseatbelt" src="img/seatbelton.png" />
       </span>
 
       <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:62%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
-        <i class="fas fa-circle fa-stack-2x" style='font-size:0.9vw;color:rgba(235, 235, 235, 0.397)'></i>
+        <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+        <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
         <img style="display:block; height:70%;position:absolute;top:14%;left:22%;opacity:0.5;" id="offlight" src="img/lightoff.png" />
         <img style="display:none;height:70%;position:absolute;top:14%;left:22%;" id="onlight" src="img/lighton.png" />
         <img style="display:none;height:70%;position:absolute;top:14%;left:22%;" id="highlight" src="img/lighthigh.png" />
       </span>
       <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:5%;bottom:53%;color:rgba(144, 144, 144, 0.876)'>
-        <i class="fas fa-circle fa-stack-2x" style='font-size:0.9vw;color:rgba(12, 12, 12, 0.329)'></i>
+        <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+        <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
         <i class="fas fa-tint fa-stack-1x" style='font-size:1.1vw;color:rgb(2, 116, 192);z-index:1130;opacity:1.0;'></i>
       </span>
       <span class="fa-stack fa-2x" style='font-size:0.5vw;position:absolute;right:67%;bottom:40%;color:rgba(144, 144, 144, 0.294)'>
-        <i class="fas fa-circle fa-stack-2x" style='font-size:0.5vw;color:rgba(235, 235, 235, 0.034)'></i>
-        <i class="fas fa-oil-can fa-stack-1x" style='font-size:0.7vw;color:rgba(182, 182, 182, 0.582);z-index:1130;opacity:1.0;padding-left:1px;'></i>
+        <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.20)'></i>
+        <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.01)"></i>
+        <i class="fas fa-oil-can fa-stack-1x" style='font-size:1.14vw;color:rgba(144, 144, 144, 0.849);z-index:1130;opacity:1.0;padding-left:12px;'></i>
       </span>
       <span class="fa-stack fa-2x" style='font-size:0.5vw;position:absolute;right:9.9%;bottom:44.5%;color:rgba(144, 144, 144, 0.294)'>
-        <i class="fas fa-circle fa-stack-2x" style='font-size:0.9vw;color:rgba(12, 12, 12, 0.329)'></i>
+        <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+        <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
         <i class="fad fa-car-mechanic fa-stack-1x"  style='font-size:0.9vw;color:rgba(182, 182, 182, 0.685);z-index:1130;opacity:1.0;margin-left:45%;'></i>
       </span>
 
@@ -1972,7 +2022,7 @@
         }
     </style>
     <div id="weaponui" style="display:block;">
-      <img style="z-index:900;position:absolute;right:10px;bottom:100px;opacity:1.0;height:200px;" src="img/weaponui.png" />
+      <img style="z-index:900;position:absolute;right:10px;bottom:100px;opacity:0.7;height:200px;" src="img/weaponui.png" />
       <img id="weaponimg" style="z-index:901;position:absolute;right:70px;bottom:180px;opacity:0.9;max-height:40px;max-width:100px;;align-content:center;align:center;display: block;margin-left: auto;margin-right: auto;" src="img/weapons/weapon_advancedrifle.png" />
       <svg id="weapon" style="z-index:889;position:absolute;right:-39px;bottom:90px;opacity:0.65;height:212px;transform: rotate(-270deg) scaleX(-1);" xmlns="http://www.w3.org/2000/svg" height="250" width="250" viewBox="0 0 250 250" data-value="1">
         <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
@@ -1996,6 +2046,10 @@
               height:60px;
               width:60px;
             }
+            .fa-square g g path {
+            stroke: black !important;
+            stroke-width: 10 !important;
+            }
           </style>
           <a id="start"></a>
           <div id="shift" style="bottom:140px;position:absolute;right:-46px;background-repeat: no-repeat !important;">
@@ -2009,6 +2063,72 @@
                   <img style="width:100%;" id="mapimg" src="img/loading.png">
                 </div>
               </div>
+          </div>
+
+          <div id="clothe" style="position:absolute;top:30%;left:30%;bottom:50%;z-index:99999;height:700px;width:700px;display:none;">
+            <li style="position:absolute;left:0;top:0;" id="variants_helmet_1" onclick="CallbackCLothing('helmet_1','helmet_2');">
+              <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+                <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707);-webkit-text-stroke:4px rgb(190, 53, 48)'></i>
+                <i class="fad fa-helmet-battle" style="position:relative;margin-left:100%;;font-size:2.2vw;color:#ffffff"></i>
+              </span>
+            </li>
+            <li style="position:absolute;left:0;top:20%;" id="variants_glasses_1" onclick="CallbackCLothing('glasses_1','glasses_2');">
+              <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+                <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+                <i class="fal fa-sunglasses" style="position:relative;margin-left:109%;;font-size:2.0vw;color:#ffffff"></i>
+              </span>
+            </li>
+            <li style="position:absolute;left:0;top:40%;" id="variants_chain_1" onclick="CallbackCLothing('chain_1','chain_2');">
+              <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+                <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+                <i class="fad fa-scarf" style="position:relative;margin-left:115%;;font-size:2.0vw;color:#ffffff"></i>
+              </span>
+            </li>
+            <li style="position:absolute;left:0;top:60%;" id="variants_watches_1" onclick="CallbackCLothing('watches_1','watches_2');">
+              <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+                <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+                <i class="fad fa-watch" style="position:relative;margin-left:120%;;font-size:2.0vw;color:#ffffff"></i>
+              </span>
+            </li>
+            <li style="position:absolute;left:0;top:80%;" id="variants_reset" onclick="ResetClothes();">
+              <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+                <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+                <i class="fas fa-redo-alt" style="position:relative;margin-left:120%;;font-size:2.0vw;color:#ffffff"></i>
+              </span>
+            </li>
+
+            <li style="position:absolute;left:60%;top:0;" id="variants_torso_1" onclick="CallbackCLothing('torso_1','torso_2');">
+              <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+                <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+                <i class="fad fa-user-tie" style="position:relative;margin-left:120%;;font-size:2.0vw;color:#ffffff"></i>
+              </span>
+            </li>
+            <li style="position:absolute;left:60%;top:20%;" id="variants_tshirt_1" onclick="CallbackCLothing('tshirt_1','tshirt_2');">
+              <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+                <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+                <i class="fad fa-tshirt" style="position:relative;margin-left:107%;;font-size:2.0vw;color:#ffffff"></i>
+              </span>
+            </li>
+            <li style="position:absolute;left:60%;top:40%;" id="variants_bproof_1" onclick="CallbackCLothing('bproof_1','bproof_2');">
+              <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+                <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+                <i class="fad fa-user-shield" style="position:relative;margin-left:108%;;font-size:2.0vw;color:#ffffff"></i>
+              </span>
+            </li>
+            <li style="position:absolute;left:60%;top:60%;" id="variants_pants_1" onclick="CallbackCLothing('pants_1','pants_2');">
+              <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+                <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+                <i style="position:relative;margin-left:110%;">
+                  <svg viewBox="-120 0 448 448" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" stroke="grey" d="m0 448h72.59375l23.40625-304.617188c.324219-4.164062 3.796875-7.378906 7.976562-7.378906 4.175782 0 7.652344 3.214844 7.976563 7.378906l23.453125 304.617188h72.59375v-368.640625c-24.527344-3.566406-43.792969-22.832031-47.359375-47.359375h-16.640625v40c0 13.253906-10.746094 24-24 24h-16c-4.417969 0-8-3.582031-8-8v-56h-48.640625c-3.566406 24.527344-22.832031 43.792969-47.359375 47.359375zm0 0"/><path d="m0 0h96v16h-96zm0 0"/><path d="m0 63.199219c15.699219-3.234375 27.964844-15.5 31.199219-31.199219h-31.199219zm0 0"/><path d="m144 0h64v16h-64zm0 0"/><path d="m208 32h-31.199219c3.234375 15.699219 15.5 27.964844 31.199219 31.199219zm0 0"/><path d="m112 0h16v16h-16zm0 0"/><path d="m128 72v-40h-16v48h8c4.417969 0 8-3.582031 8-8zm0 0"/></svg>
+                </i>
+              </span>
+            </li>
+            <li style="position:absolute;left:60%;top:80%;" id="variants_shoes_1" onclick="CallbackCLothing('shoes_1','shoes_2');">
+              <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+                <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+                <i class="fad fa-boot" style="position:relative;margin-left:115%;;font-size:2.0vw;color:#ffffff"></i>
+              </span>
+            </li>
           </div>
       <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
       <script src="js/map.js"></script>

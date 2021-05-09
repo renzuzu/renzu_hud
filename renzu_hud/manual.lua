@@ -60,7 +60,7 @@ RenzuCommand('manual', function()
         startmanual()
 	end
     manual = not manual
-    manualstatus = manual
+    manualstatus = not manualstatus
 end)
 
 --NUI MANUAL TRANSMISSION
@@ -597,7 +597,11 @@ function antistall(speed, speedreduce, savegear, gearname, rpm, vehicle, current
             drivechange = true
             SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", acceleration * 1.5)
             local invertrpm = 1.0 - rpm
-            local invertgear = maxgear - savegear
+            local mg = maxgear
+            if mg > 6 then
+                mg = 6
+            end
+            local invertgear = mg - savegear
             engineload = driveforce + ((invertrpm * saferpm) * (savegear / driveforce))
             if mode == 'SPORTS' then
                 SetVehicleClutch(vehicle,0.8)
@@ -608,10 +612,10 @@ function antistall(speed, speedreduce, savegear, gearname, rpm, vehicle, current
                 -- SetVehicleBoost(vehicle, boost * maxgear + (torque / currentgear))
                 ModifyVehicleTopSpeed(vehicle, 0.5)
                 torque = GetVehicleCheatPowerIncrease(vehicle)
-                torque = torque * ( savegear / maxgear )
-                local formulafuck = (saferpm / maxgear) + (torque * currentgear)
+                torque = torque * ( savegear / mg )
+                local formulafuck = (saferpm / mg) + (torque * currentgear)
                 -- print(engineload / (maxgear - (maxgear-savegear)) * formulafuck * saferpm)
-                local finalboost = boost + (engineload / (maxgear - (maxgear-savegear)) * (invertrpm + saferpm)) / maxgear * savegear + engineload
+                local finalboost = boost + (engineload / (mg - (mg-savegear)) * (invertrpm + saferpm)) / mg * savegear + engineload
                 SetVehicleBoost(vehicle, finalboost)
             else
                 SetVehicleClutch(vehicle,0.9)
@@ -620,10 +624,10 @@ function antistall(speed, speedreduce, savegear, gearname, rpm, vehicle, current
                 SetVehicleReduceTraction(vehicle, true)
                 ModifyVehicleTopSpeed(vehicle, 0.5)
                 torque = GetVehicleCheatPowerIncrease(vehicle)
-                torque = torque * ( savegear / maxgear )
-                local formulafuck = (saferpm / maxgear) + (torque * currentgear)
+                torque = torque * ( savegear / mg )
+                local formulafuck = (saferpm / mg) + (torque * currentgear)
                 -- print(engineload / (maxgear - (maxgear-savegear)) * formulafuck * saferpm)
-                local finalboost = (engineload / (maxgear - (maxgear-savegear)) * (invertrpm + saferpm)) / maxgear * savegear + engineload
+                local finalboost = (engineload / (mg - (mg-savegear)) * (invertrpm + saferpm)) / mg * savegear + engineload
                 SetVehicleBoost(vehicle, finalboost)
             end
         end
@@ -639,7 +643,11 @@ function speedtable(speed,gear)
     oldtopspeed = maxspeed * olddriveinertia -- normalize
     local engineload = oldriveforce + ((rpm * olddriveinertia) * (gear / oldriveforce))
     local speedreduce = (oldtopspeed) * (config.gears[maxgear][gear] * olddriveinertia) / gear * oldriveforce * engineload
-    speedreduce = (speedreduce / maxgear) * oldriveforce + (gear / rpm) / maxgear
+    local mg = maxgear
+    if mg > 6 then
+        mg = 6
+    end
+    speedreduce = (speedreduce / mg) * oldriveforce + (gear / rpm) / mg
     --SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", 250*1.000000)
     --local drive = GetVehStats(vehicle, "CHandlingData", "fDriveInertia")
     --local force = GetVehStats(vehicle ,"CHandlingData", "fInitialDriveForce")
@@ -656,6 +664,10 @@ function speedtable(speed,gear)
 		fourth = (vehicletopspeed * config.gears[maxgear][4]) * 0.9
 		fifth = (vehicletopspeed * config.gears[maxgear][5]) * 0.9
 		sixth = (vehicletopspeed * config.gears[maxgear][6]) * 0.9
+        if maxgear > 6 then
+        seventh = (vehicletopspeed * config.gears[maxgear][7]) * 0.9
+        eight = (vehicletopspeed * config.gears[maxgear][8]) * 0.9
+        end
 		local currentgear = savegear
 		if currentgear == 1 and speed <= first then
             if mycurrentvehicle ~= vehicle and maxgear == 6 then -- anti 1st gear glitch for upgraded trannys
@@ -686,10 +698,18 @@ function speedtable(speed,gear)
 		    return	percentage(speed,fifth)
 		elseif currentgear == 6 and speed <= sixth then
             saferpm = olddriveinertia
-		    --if speed <= (fifth - (fifth * 0.11525)) then
             antistall(speed, speedreduce, savegear, fifth, rpm, vehicle, currentgear, saferpm, oldriveforce, engineload, fifth)
             LockSpeed(vehicle, sixth)
-		    --end
+		    return	percentage(speed,sixth)
+        elseif currentgear == 7 and speed <= seventh then
+            saferpm = olddriveinertia
+            antistall(speed, speedreduce, savegear, sixth, rpm, vehicle, currentgear, saferpm, oldriveforce, engineload, sixth)
+            LockSpeed(vehicle, sixth)
+		    return	percentage(speed,sixth)
+        elseif currentgear == 8 and speed <= eight then
+            saferpm = olddriveinertia
+            antistall(speed, speedreduce, savegear, seventh, rpm, vehicle, currentgear, saferpm, oldriveforce, engineload, seventh)
+            LockSpeed(vehicle, sixth)
 		    return	percentage(speed,sixth)
 		elseif currentgear > 0 then
 			return 1.1

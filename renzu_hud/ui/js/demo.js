@@ -23,14 +23,7 @@ $(document).on('click','#start',function(){
     $.post(`https://${GetParentResourceName()}/pushtostart`, {}, function(data) {}); 
 });
 
-$("body").on("keyup", function (key) {
-    if (key.which == '70') {
-        $.post(`https://${GetParentResourceName()}/getoutvehicle`, {}, function(data) {});
-    }
-    if (key.which == '27' || key.which == '8') {
-        $.post(`https://${GetParentResourceName()}/closecarcontrol`, {}, function(data) {});
-    }
-});
+var pressedkey = 0
 
 function setArmor(s) {
     if (statusui == 'simple') {
@@ -100,7 +93,7 @@ function setCarhp(value) {
     if (carui == 'minimal') {
         var e = document.getElementById("carhealthbar");
         let length = e.getTotalLength();
-        console.log(hp)
+        //console.log(hp)
         let to = length * ((100 - hp) / 100);
         e.style.strokeDashoffset = to;
     } else if(carui == 'modern') {
@@ -350,7 +343,7 @@ function playsoundSeatbelt(bool) {
 }
 
 function setMileage(value) {
-    console.log(value)
+    //console.log(value)
     mileage = value.toFixed(0);
     if (mileage >= 1000) {
         document.getElementById("mileage").style.margin = '0 2px 0 0'
@@ -721,7 +714,7 @@ function post(name,data){
 	var data = data;
 	$.post("https://hud/"+name,JSON.stringify(data),function(datab){
 		if (datab != "ok"){
-			console.log(datab);
+			//console.log(datab);
 		}
 	});
 }
@@ -907,7 +900,7 @@ function Carcontrolcallbackui(type,index) {
 }
 
 function setWeapon(weapon) {
-    console.log(""+weapon+".png")
+    //console.log(""+weapon+".png")
     var url = "img/weapons/"+weapon+".png"
     $("#weaponimg").attr("src", url)
     setTimeout(function(){
@@ -928,7 +921,7 @@ function setAmmo(table) {
     var max = table['max'];
     var ammo = table['clip'];
     var percent = ammo / max * 100;
-    console.log(percent)
+    //console.log(percent)
     var bullets = percent;
     //rpm2 = bullets.toFixed(0) * 100
     var e = document.getElementById("weaponpath");
@@ -1095,7 +1088,6 @@ function setNitro(nitro) {
     var e = document.getElementById("nitropath");
     let length = e.getTotalLength();
     let value = nitro;
-    console.log(nitro)
     let to = length * ((100 - value) / 100);
     val = to / 1000
     e.style.strokeDashoffset = to;
@@ -1104,8 +1096,6 @@ function setNitro(nitro) {
 function setWheelHealth(table) {
         var index = table[['index']]
         var val = 1 - table[['tirehealth']] / 1000
-        console.log(index)
-        console.log(val)
         document.getElementById("wheel"+index+"").style.opacity = ''+val+'';  
 }
 
@@ -1179,6 +1169,9 @@ function setKeyless(table) {
 }
 
 pressfuck = 0
+var pressedkey1 = 0
+var pressedkey2 = false
+var pressedkey3 = false
 document.onkeyup = function (data) {
 	if (data.keyCode == '76' || data.keyCode == '27') { // Escape key 76 = L (Change the 76 to whatever keycodes you want to hide the carlock ui LINK https://css-tricks.com/snippets/javascript/javascript-keycodes/)
         if (pressfuck == 1) {
@@ -1190,6 +1183,26 @@ document.onkeyup = function (data) {
         }
         pressfuck = 1
 	}
+    if (data.keyCode == '70') {
+        $.post(`https://${GetParentResourceName()}/getoutvehicle`, {}, function(data) {});
+        pressedkey1 = 0
+    }
+    if (data.keyCode == '144' || data.keyCode == '27') {
+        if (pressedkey2) {
+            pressedkey2 = false
+            console.log('pressed')
+            $.post(`https://${GetParentResourceName()}/closecarcontrol`, {}, function(data) {});
+        }
+        if (!pressedkey2) {
+            pressedkey2 = true
+        }
+    }
+    if (data.keyCode == '75' || data.keyCode == '76') {
+        if (pressedkey3) {
+            pressedkey3 = false
+            $.post(`https://${GetParentResourceName()}/hideclothing`, {}, function(data) {});
+        }
+    }
 };
 function playsound(table) {
     var file = table['file']
@@ -1240,6 +1253,26 @@ function SetNotify(table) {
         }
     });
 
+    $('input[type=radio][name=neoneffect1]').change(function() {
+        if (this.value == 'on') {
+            console.log("ON")
+            post("setneoneffect1",{bool:true})
+        } else {
+            console.log("OFF")
+            post("setneoneffect1",{bool:false})
+        }
+    });
+
+    $('input[type=radio][name=neoneffect2]').change(function() {
+        if (this.value == 'on') {
+            console.log("ON")
+            post("setneoneffect2",{bool:true})
+        } else {
+            console.log("OFF")
+            post("setneoneffect2",{bool:false})
+        }
+    });
+
     function setMapVersion(table) {
         var type = table['type']
         var custom = table['custom']
@@ -1266,6 +1299,41 @@ function SetNotify(table) {
         }
     }
 
+    var state = {}
+
+    function setShowClothing(table) {
+        if (table['bool']) {
+            state = table['equipped']
+            document.getElementById("clothe").style.display = 'block';
+        } else {
+            document.getElementById("clothe").style.display = 'none';
+        }
+    }
+
+    function setClotheState(table) {
+        if (!table['bool']) {
+            $("#variants_"+table['variant']+"").css("--fa-secondary-color", 'rgb(255, 0, 0)');
+        } else {
+            $("#variants_"+table['variant']+"").css("--fa-secondary-color", 'unset');   
+        }
+    }
+
+    function ResetClotheState(table) {
+        for (const key in table) {
+            $("#variants_"+key+"").css("--fa-secondary-color", 'unset'); 
+        }
+    }
+
+    function CallbackCLothing(variant,variant2) {
+        $.post('http://hud/ChangeClothes', JSON.stringify({
+            variant : variant, variant2: variant2, state: state[variant]
+        }))
+    }
+
+    function ResetClothes() {
+        $.post('http://hud/resetclothing', JSON.stringify({}))
+    }
+
 
 //FUNCTIONS
 var renzu_hud = {
@@ -1286,6 +1354,9 @@ var renzu_hud = {
     setStatusUI,
     setCompass,
     setRadioChannel,
+    setShowClothing,
+    setClotheState,
+    ResetClotheState,
     //CAR
     setShow,
     setRpm,
