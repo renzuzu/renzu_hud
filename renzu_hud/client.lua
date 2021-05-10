@@ -24,6 +24,8 @@ Creation(function()
 	DecorRegister("TRACTION", 1)
 	DecorRegister("TRACTION2", 1)
 	DecorRegister("TRACTION3", 1)
+	DecorRegister("TRACTION4", 1)
+	DecorRegister("TRACTION5", 1)
 	if not DecorIsRegisteredAsType("MANUAL", 1) then
 		DecorRegister("MANUAL", 1)
 	end
@@ -186,15 +188,18 @@ Creation(function()
 	else
 		Citizen.Wait(4000)
 	end
-	TriggerServerEvent("renzu_hud:getdata",charslot)
+	if DecorExistOn(PlayerPedId(), "PLAYERLOADED") then
+		TriggerServerEvent("renzu_hud:getdata",charslot)
+	end
 	if config.framework == 'ESX' then
 		RenzuNetEvent('esx:playerLoaded')
 		RenzuEventHandler('esx:playerLoaded', function(xPlayer)
 			playerloaded = true
 			Renzuzu.Wait(2000)
+			print("ESX")
 			lastped = PlayerPedId()
-			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 			TriggerServerEvent("renzu_hud:getdata",charslot)
+			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 		end)
 	else
 		RenzuNetEvent('playerSpawned')
@@ -554,7 +559,7 @@ function SavevehicleHandling()
 		maxgear = GetVehStats(vehicle, "CHandlingData","nInitialDriveGears")
 		DecorSetFloat(vehicle, "MAXGEAR", maxgear)
 	else
-		SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveMin", DecorGetFloat(vehicle,"MAXGEAR"))
+		SetVehicleHandlingField(vehicle, "CHandlingData", "nInitialDriveGears", DecorGetFloat(vehicle,"MAXGEAR"))
 		maxgear = DecorGetFloat(vehicle,"MAXGEAR")
 		print(maxgear)
 	end
@@ -581,6 +586,22 @@ function SavevehicleHandling()
 	else
 		SetVehicleHandlingField(vehicle, "CHandlingData", "fLowSpeedTractionLossMult", DecorGetFloat(vehicle,"TRACTION3"))
 		traction3 = DecorGetFloat(vehicle,"TRACTION3")
+	end
+
+	if not DecorExistOn(vehicle, "TRACTION4") then
+		traction4 = GetVehStats(vehicle, "CHandlingData","fTractionLossMult")
+		DecorSetFloat(vehicle, "TRACTION4", traction4)
+	else
+		SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionLossMult", DecorGetFloat(vehicle,"TRACTION4"))
+		traction4 = DecorGetFloat(vehicle,"TRACTION4")
+	end
+
+	if not DecorExistOn(vehicle, "TRACTION5") then
+		traction5 = GetVehStats(vehicle, "CHandlingData","fTractionCurveMax")
+		DecorSetFloat(vehicle, "TRACTION5", traction5)
+	else
+		SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveMax", DecorGetFloat(vehicle,"TRACTION5"))
+		traction5 = DecorGetFloat(vehicle,"TRACTION5")
 	end
 end
 
@@ -930,6 +951,7 @@ function NuiMileAge()
 				Renzuzu.Wait(wait)
 			end
 		end)
+		print("NUI DATA")
 		while invehicle do
 			Renzuzu.Wait(config.mileage_update)
 			local ped = ped
@@ -942,6 +964,7 @@ function NuiMileAge()
 				savemile = true
 				lastve = GetVehiclePedIsIn(ped, false)
 				if plate ~= nil then
+					print(plate)
 					--saveplate = string.match(GetVehicleNumberPlateText(vehicle), '%f[%d]%d[,.%d]*%f[%D]')
 					saveplate = string.gsub(GetVehicleNumberPlateText(vehicle), "%s+", "")
 					saveplate = string.gsub(saveplate, '^%s*(.-)%s*$', '%1')
@@ -972,6 +995,25 @@ function NuiMileAge()
 					end
 					if veh_stats[plate].nitro == nil then
 						veh_stats[plate].nitro = 100
+					end
+					if veh_stats[plate].turbo == nil then
+						veh_stats[plate].turbo = 'default'
+					end
+					if veh_stats[plate].manual == nil then
+						veh_stats[plate].manual = false
+					end
+					if veh_stats[plate].tires == nil then
+						veh_stats[plate].tires = 'default'
+					end
+					if veh_stats[plate].tires ~= nil and veh_stats[plate].tires ~= 'default' then
+						TireFunction(veh_stats[plate].tires)
+					end
+					if veh_stats[plate].manual and not manual then
+						TriggerEvent('renzu_hud:manual', veh_stats[plate].manual)
+					end
+					if veh_stats[plate].turbo ~= nil and veh_stats[plate].turbo ~= 'default' and not alreadyturbo then
+						TriggerEvent('renzu_hud:hasturbo', veh_stats[plate].turbo)
+						alreadyturbo = true
 					end
 					local numwheel = GetVehicleNumberOfWheels(vehicle)
 					for i = 0, numwheel - 1 do
@@ -2035,6 +2077,180 @@ function turboboost(gear)
 end
 
 local busy = false
+local turbosound = 0
+local oldgear = 0
+local newgear = 0
+local rpm2 = 0
+RenzuNetEvent('renzu_hud:hasturbo')
+RenzuEventHandler('renzu_hud:hasturbo', function(type)
+	alreadyturbo = true
+	Wait(1000)
+	print("TURBO ACTIVATE")
+	plate = string.gsub(GetVehicleNumberPlateText(vehicle), "%s+", "")
+	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+	Creation(function()
+		Boost(true)
+	end)
+end)
+
+function Boost(hasturbo)
+	local newgear = 0
+	local rpm = VehicleRpm(vehicle)
+	local gear = GetGear(vehicle)
+	Creation(function()
+		while invehicle do
+			local sleep = 2000
+			local vehicle = vehicle
+			if vehicle ~= 0 then
+				sleep = 10
+				rpm = VehicleRpm(vehicle)
+				gear = GetGear(vehicle)
+			end
+			Renzuzu.Wait(sleep)
+		end
+	end)
+	if hasturbo and config.turbo_boost[veh_stats[plate].turbo] > config.boost then
+		turbo = config.turbo_boost[veh_stats[plate].turbo]
+		ToggleVehicleMod(vehicle, 18, true)
+	else
+		turbo = config.boost
+	end
+	local torque = 0
+	while mode == 'SPORTS' and invehicle or hasturbo and invehicle do
+		local sleep = 2000
+		--local ply = PlayerPedId()
+		local reset = true
+		local vehicle = vehicle
+		if vehicle ~= 0 then
+			sleep = 7
+			-- if newgear ~= gear then -- emulation CLUTCH delay
+			-- 	SetVehicleClutch(vehicle,0.5)
+			-- 	Renzuzu.Wait(1)
+			-- 	SetVehicleClutch(vehicle,0.0)
+			-- end
+			newgear = gear
+			local vehicleSpeed = 0
+			local rpm2 = rpm
+			local engineload = (rpm / (gear / 10)) / 100
+			if rpm > 1.15 then
+			else
+				rpm = rpm * turbo
+			end
+			print(rpm)
+			local vehicleSpeed = GetVehicleTurboPressure(vehicle)
+			--local speed = VehicleSpeed(vehicle) * 3.6
+			if sound and IsControlJustReleased(1, 32) then
+				StopSound(soundofnitro)
+				ReleaseSoundId(soundofnitro)
+				sound = false
+			end
+
+			local lag = 0
+			if IsControlPressed(1, 32) then
+				if not sound then
+					soundofnitro = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
+					sound = true
+				end
+				print(engineload,"ENGINELOAD")
+				--SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", oldtopspeed*3.500000)
+				local turbolag = 7 + config.turbo_boost[tostring(veh_stats[plate].turbo)]
+				while lag < (config.lagamount * config.turbo_boost[tostring(veh_stats[plate].turbo)]) and engineload < turboboost(gear) and IsControlPressed(1, 32) do
+					engineload = (rpm * (gear / turbolag))
+					SetVehicleTurboPressure(vehicle, max((rpm2 * config.turbo_boost[tostring(veh_stats[plate].turbo)])))
+					Renzuzu.Wait(1)
+					print(engineload,"ENGINELOAD")
+					lag = lag + 1
+				end
+				if savegear ~= oldg or oldg == nil then
+					oldg = savegear
+					--ShowHelpNotification(rpm, true, 1, 5)
+					Notify('success',"KICK",rpm2)
+					gago = true
+				end
+				if config.boost_sound and rpm2 > 0.65 and rpm2 < 0.95 and turbosound < 10 and gear == oldgear and engineload > turboboost(gear) then
+					turbosound = turbosound + 1
+					SetVehicleBoostActive(vehicle, 1, 0)
+					SetVehicleBoostActive(vehicle, 0, 0)
+				else
+					turbosound = 0
+				end
+				oldgear = gear
+			else
+				if sound then
+					StopSound(soundofnitro)
+					ReleaseSoundId(soundofnitro)
+					sound = false
+				end
+				Renzuzu.Wait(500) -- TURBO LAG
+			end
+			if reset and not IsControlPressed(1, 32) then
+				SetVehicleTurboPressure(vehicle, 0.0)
+			end
+			vehicleSpeed = GetVehicleTurboPressure(vehicle)
+			if gear == 0 then
+				gear = 1
+			end
+			boost = (vehicleSpeed * 7)
+			if config.turbo_boost[tostring(veh_stats[plate].turbo)] > config.boost then
+				boostlevel = config.turbo_boost[veh_stats[plate].turbo]
+			else
+				boostlevel = config.boost
+			end
+			if degrade ~= 1.0 then -- config.turbo_boost[veh_stats[plate].turbo]
+				boost = boost * (degrade / boostlevel)
+			end
+			--ShowHelpNotification(boost, true, 1, 5)
+			if IsControlPressed(1, 32) and VehicleRpm(vehicle) > 0.4 then
+				if not hasturbo then
+					SetVehStats(vehicle, "CHandlingData", "fDriveInertia", boost / 10)
+					SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", engineload)
+				end
+				--Notify('success',"BOOST",boost)
+				--Notify('success',"PRESSURE",vehicleSpeed)
+				print(boost,"BOOSTFUCK")
+				print(vehicleSpeed,"PRESSURE")
+				SetVehicleBoost(vehicle, boost)
+			end
+		end
+		Renzuzu.Wait(sleep)
+	end
+	alreadyturbo = false
+	globaltopspeed = nil
+	topspeedmodifier = 1.0
+	busy = true
+	Renzuzu.Wait(100)
+	vehicle = getveh()
+	if DecorGetFloat(vehicle,"INERTIA") ~= 0.0 and DecorGetFloat(vehicle,"DRIVEFORCE") ~= 0.0 then
+		SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", DecorGetFloat(vehicle,"TOPSPEED"))
+		SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
+		SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
+		while not GetVehStats(vehicle, "CHandlingData","fDriveInertia") == DecorGetFloat(vehicle,"INERTIA") and invehicle do
+			if DecorGetFloat(vehicle,"INERTIA") ~= nil then
+				SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
+			end
+			Renzuzu.Wait(0)
+		end
+		while not GetVehStats(vehicle, "CHandlingData","fInitialDriveForce") == DecorGetFloat(vehicle,"DRIVEFORCE") and invehicle do
+			if DecorGetFloat(vehicle,"DRIVEFORCE") ~= nil then
+				SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
+			end
+			Renzuzu.Wait(0)
+		end
+	end
+	SetVehicleEnginePowerMultiplier(vehicle, 1.0) -- just incase
+	busy = false
+	StopSound(soundofnitro)
+	ReleaseSoundId(soundofnitro)
+end
+
+RenzuNetEvent('renzu_hud:install_turbo')
+RenzuEventHandler('renzu_hud:install_turbo', function(type)
+	local plate = string.gsub(GetVehicleNumberPlateText(getveh()), "%s+", "")
+	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+	veh_stats[plate].turbo = type
+	TriggerServerEvent('renzu_hud:savedata', plate, veh_stats[tostring(plate)])
+end)
+
 function vehiclemode()
 	PlaySoundFrontend(PlayerId(), 'NAV_UP_DOWN', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 1)
 	if mode == 'NORMAL' then
@@ -2092,113 +2308,12 @@ function vehiclemode()
 				SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", globaltopspeed)
 				--SetVehicleEnginePowerMultiplier(vehicle,boost * config.topspeed_multiplier)
 			end
-			while mode == 'SPORTS' and invehicle do
-				local sleep = 2000
-				--local ply = PlayerPedId()
-				local reset = true
-				local vehicle = vehicle
-				if vehicle ~= 0 then
-					sleep = 7
-					-- if newgear ~= gear then -- emulation CLUTCH delay
-					-- 	SetVehicleClutch(vehicle,0.5)
-					-- 	Renzuzu.Wait(1)
-					-- 	SetVehicleClutch(vehicle,0.0)
-					-- end
-					newgear = gear
-					local vehicleSpeed = 0
-					local engineload = (rpm * (gear / 10))
-					if rpm > 1.15 then
-					else
-						rpm = rpm * turbo
-					end
-					local vehicleSpeed = GetVehicleTurboPressure(vehicle)
-					--local speed = VehicleSpeed(vehicle) * 3.6
-					if sound and IsControlJustReleased(1, 32) then
-						StopSound(soundofnitro)
-						ReleaseSoundId(soundofnitro)
-						sound = false
-					end
-
-					local lag = 0
-					if IsControlPressed(1, 32) then
-						if not sound then
-							soundofnitro = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
-							sound = true
-						end
-						--SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", oldtopspeed*3.500000)
-						while lag < 200 and engineload < turboboost(gear) and IsControlPressed(1, 32) do
-							engineload = (rpm * (gear / 5))
-							SetVehicleTurboPressure(vehicle, max((rpm * 1) + engineload + (lag * engineload)))
-							Renzuzu.Wait(1)
-							lag = lag + 1
-						end
-						if savegear ~= oldg or oldg == nil then
-							oldg = savegear
-							ShowHelpNotification(rpm, true, 1, 5)
-							Notify('success',"KICK",rpm)
-							gago = true
-						end
-						if config.boost_sound and rpm > 0.65 and rpm < 0.95 and turbosound < 10 and gear == oldgear and engineload > turboboost(gear) then
-							turbosound = turbosound + 1
-							SetVehicleBoostActive(vehicle, 1, 0)
-							SetVehicleBoostActive(vehicle, 0, 0)
-						else
-							turbosound = 0
-						end
-						oldgear = gear
-					else
-						if sound then
-							StopSound(soundofnitro)
-							ReleaseSoundId(soundofnitro)
-							sound = false
-						end
-						Renzuzu.Wait(500) -- TURBO LAG
-					end
-					if reset and not IsControlPressed(1, 32) then
-						SetVehicleTurboPressure(vehicle, 0)
-					end
-					vehicleSpeed = GetVehicleTurboPressure(vehicle)
-					if gear == 0 then
-						gear = 1
-					end
-					boost = (vehicleSpeed * 7)
-					if degrade ~= 1.0 then
-						boost = boost * (degrade / config.boost)
-					end
-					if IsControlPressed(1, 32) and VehicleRpm(vehicle) > 0.4 and vehicleSpeed > (turbo / 2) then
-						SetVehStats(vehicle, "CHandlingData", "fDriveInertia", boost / 10)
-						SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", engineload)
-						SetVehicleBoost(vehicle, boost)
-					end
-				end
-				Renzuzu.Wait(sleep)
+			local plate = string.gsub(GetVehicleNumberPlateText(vehicle), "%s+", "")
+			plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+			while mode == 'SPORTS' and config.turbo_boost[veh_stats[plate].turbo] > config.boost and invehicle do
+				Citizen.Wait(1000) -- do nothing turbo torque is more higher
 			end
-			globaltopspeed = nil
-			topspeedmodifier = 1.0
-			busy = true
-			Renzuzu.Wait(100)
-			vehicle = getveh()
-			if DecorGetFloat(vehicle,"INERTIA") ~= 0.0 and DecorGetFloat(vehicle,"DRIVEFORCE") ~= 0.0 then
-				SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", DecorGetFloat(vehicle,"TOPSPEED"))
-				SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
-				SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
-				while not GetVehStats(vehicle, "CHandlingData","fDriveInertia") == DecorGetFloat(vehicle,"INERTIA") and invehicle do
-					if DecorGetFloat(vehicle,"INERTIA") ~= nil then
-						SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
-					end
-					Renzuzu.Wait(0)
-				end
-				while not GetVehStats(vehicle, "CHandlingData","fInitialDriveForce") == DecorGetFloat(vehicle,"DRIVEFORCE") and invehicle do
-					if DecorGetFloat(vehicle,"DRIVEFORCE") ~= nil then
-						SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
-					end
-					Renzuzu.Wait(0)
-				end
-			end
-			SetVehicleEnginePowerMultiplier(vehicle, 1.0) -- just incase
-			busy = false
-			StopSound(soundofnitro)
-			ReleaseSoundId(soundofnitro)
+			Boost()
 		end)
 	elseif mode == 'SPORTS' and invehicle then
 		mode = 'ECO'
@@ -2414,7 +2529,8 @@ function playanimation(animDict,name)
 	-- end
 end
 
-function putwater()
+RegisterNetEvent('renzu_hud:coolant')
+AddEventHandler('renzu_hud:coolant', function()
 	local ped = PlayerPedId()
 	--local targetRotation = vec3(180.0, 180.0, 180.0)
 	local bone = GetEntityBoneIndexByName(getveh(),'overheat')
@@ -2486,9 +2602,10 @@ function putwater()
 	Notify('success','Vehicle System',"Coolant has been restore")
 	Renzuzu.Wait(100)
 	print(plate)
-end
+end)
 
-function changeoil()
+RegisterNetEvent('renzu_hud:oil')
+AddEventHandler('renzu_hud:oil', function()
 	local ped = PlayerPedId()
 	--local targetRotation = vec3(180.0, 180.0, 180.0)
 	local bone = GetEntityBoneIndexByName(getveh(),'overheat')
@@ -2562,14 +2679,14 @@ function changeoil()
 	Notify('success','Vehicle System',"Oil has been changed")
 	Renzuzu.Wait(100)
 	print(plate)
-end
+end)
 
 RenzuCommand('putwater', function(source, args, raw)
-	putwater()
+	TriggerEvent("renzu_hud:coolant")
 end)
 
 RenzuCommand('changeoil', function(source, args, raw)
-	changeoil()
+	TriggerEvent("renzu_hud:oil")
 end)
 
 local cruising = false
@@ -2973,7 +3090,8 @@ function BodyMain()
 	oldlife = GetEntityHealth(ped)
 end
 
-function HealBody(bodypart)
+RegisterNetEvent('renzu_hud:healbody')
+AddEventHandler('renzu_hud:healbody', function(bodypart)
 	-- Preparing
 	TaskStartScenarioInPlace(ped, 'CODE_HUMAN_MEDIC_TEND_TO_DEAD', -1, true)
 	Makeloading('Applying Item',10000)
@@ -2994,7 +3112,7 @@ function HealBody(bodypart)
 		content = bonecategory
 	})
 	Notify('success','Body System',"You have been healed")
-end
+end)
 
 function Makeloading(msg,ms)
 	BusyspinnerOff()
@@ -3012,7 +3130,7 @@ Creation(function()
 	if config.enablehealcommand then
 		RenzuCommand(config.commands['bodyheal'], function(source,args)
 			if args[1] ~= nil then
-				HealBody(args[1])
+				TriggerEvent("renzu_hud:healbody", args[1])
 			end
 		end, false)
 	end
@@ -3536,8 +3654,8 @@ AddEventHandler("renzu_hud:addnitro", function(amount)
         local playerPed = PlayerPedId()
 		ESX.Streaming.RequestAnimDict(lib, function()
             TaskPlayAnim(playerPed, lib, anim, 8.0, -8.0, 5555, 0, 0, false, false, false)
-			exports['progressBars']:startUI(5555, 'Reloading Nitro')
             Citizen.Wait(500)
+			Makeloading('Installing Nitro',5000)
             while IsEntityPlayingAnim(playerPed, lib, anim, 3) do
                 Citizen.Wait(0)
                 DisableAllControlActions(0)
@@ -3671,7 +3789,18 @@ function NuiWheelSystem()
 	end)
 end
 
-function InstallTires(type)
+function TireFunction(type)
+	if type ~= 'default' then
+		SetVehicleHandlingFloat(vehicle, "CHandlingData", "fLowSpeedTractionLossMult", DecorGetFloat(vehicle,"TRACTION3") * config.wheeltype[type].fLowSpeedTractionLossMult) -- start burnout less = traction
+		SetVehicleHandlingFloat(vehicle, "CHandlingData", "fTractionLossMult", DecorGetFloat(vehicle,"TRACTION4") * config.wheeltype[type].fTractionLossMult)  -- asphalt mud less = traction
+		SetVehicleHandlingFloat(vehicle, "CHandlingData", "fTractionCurveMin", DecorGetFloat(vehicle,"TRACTION") * config.wheeltype[type].fTractionCurveMin) -- accelaration grip
+		SetVehicleHandlingFloat(vehicle, "CHandlingData", "fTractionCurveMax", DecorGetFloat(vehicle,"TRACTION5") * config.wheeltype[type].fTractionCurveMax) -- cornering grip
+		SetVehicleHandlingFloat(vehicle, "CHandlingData", "fTractionCurveLateral", DecorGetFloat(vehicle,"TRACTION2") * config.wheeltype[type].fTractionCurveLateral) -- curve lateral grip
+	end
+end
+
+RegisterNetEvent("renzu_hud:installtire")
+AddEventHandler("renzu_hud:installtire", function(type)
 	local bones = {"wheel_lf", "wheel_rf", "wheel_lm1", "wheel_rm1", "wheel_lm2", "wheel_rm2", "wheel_lm3", "wheel_rm3", "wheel_lr", "wheel_rr"}
 	local index = {["wheel_lf"] = 0, ["wheel_rf"] = 1, ["wheel_lm1"] = 2, ["wheel_rm1"] = 3, ["wheel_lm2"] = 45,["wheel_rm2"] = 47, ["wheel_lm3"] = 46, ["wheel_rm3"] = 48, ["wheel_lr"] = 4, ["wheel_rr"] = 5,}
 	local coords = GetEntityCoords(ped, false)
@@ -3720,9 +3849,17 @@ function InstallTires(type)
 							content = wheeltable
 						})
 					end
-					TriggerServerEvent('renzu_hud:savedata', plate, veh_stats[tostring(plate)])
 					Notify('success','Tire System',"New Tires has been Successfully Install")
 					ClearPedTasks(ped)
+					if type ~= 'default' then
+						SetVehicleHandlingFloat(vehicle, "CHandlingData", "fLowSpeedTractionLossMult", DecorGetFloat(vehicle,"TRACTION3") * config.wheeltype[type].fLowSpeedTractionLossMult) -- start burnout less = traction
+						SetVehicleHandlingFloat(vehicle, "CHandlingData", "fTractionLossMult", DecorGetFloat(vehicle,"TRACTION4") * config.wheeltype[type].fTractionLossMult)  -- asphalt mud less = traction
+						SetVehicleHandlingFloat(vehicle, "CHandlingData", "fTractionCurveMin", DecorGetFloat(vehicle,"TRACTION") * config.wheeltype[type].fTractionCurveMin) -- accelaration grip
+						SetVehicleHandlingFloat(vehicle, "CHandlingData", "fTractionCurveMax", DecorGetFloat(vehicle,"TRACTION5") * config.wheeltype[type].fTractionCurveMax) -- cornering grip
+						SetVehicleHandlingFloat(vehicle, "CHandlingData", "fTractionCurveLateral", DecorGetFloat(vehicle,"TRACTION2") * config.wheeltype[type].fTractionCurveLateral) -- curve lateral grip
+						veh_stats[plate].tires = type
+					end
+					TriggerServerEvent('renzu_hud:savedata', plate, veh_stats[tostring(plate)])
 					break
 				else
 					playanimation('anim@amb@clubhouse@tutorial@bkr_tut_ig3@','machinic_loop_mechandplayer')
@@ -3748,12 +3885,12 @@ function InstallTires(type)
 			end
 		end
 	end
-end
+end)
 
 Creation(function()
 	if config.repaircommand then
 		RenzuCommand('repairtire', function()
-			InstallTires(type)
+			TriggerEvent("renzu_hud:installtire")
 		end, false)
 	end
 end)

@@ -1,10 +1,12 @@
-ESX = nil
-TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 local adv_table = {}
 Renzu = {}
 charslot = {}
+ESX = nil
 Citizen.CreateThread(function()
-	--Citizen.Wait(10000)
+	Citizen.Wait(500)
+	if config.framework == 'ESX' then
+		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+	end
 	MySQL.Async.fetchAll("SELECT adv_stats,plate,owner FROM owned_vehicles", {}, function(results)
 		if #results > 0 then
 			for k,v in pairs(results) do
@@ -18,6 +20,97 @@ Citizen.CreateThread(function()
 		end
 	end)
 	print("^g RENZU HUD STARTED!")
+	if config.framework == 'ESX' then
+		ESX.RegisterUsableItem('nitro', function(source)
+			local xPlayer = GetPlayerFromId(source)
+			TriggerClientEvent('renzu_hud:addnitro', source)
+			xPlayer.removeInventoryItem('nitro', 1)
+		end)
+	
+		ESX.RegisterUsableItem('coolant', function(source)
+			local xPlayer = GetPlayerFromId(source)
+			TriggerClientEvent("renzu_hud:coolant", source)
+			xPlayer.removeInventoryItem('coolant', 1)
+		end)
+	
+		ESX.RegisterUsableItem('engineoil', function(source)
+			local xPlayer = GetPlayerFromId(source)
+			TriggerClientEvent("renzu_hud:oil", source)
+			xPlayer.removeInventoryItem('engineoil', 1)
+		end)
+	
+		ESX.RegisterUsableItem('turbo_street', function(source)
+			local xPlayer = GetPlayerFromId(source)
+			TriggerClientEvent("renzu_hud:install_turbo", source, 'default')
+			xPlayer.removeInventoryItem('turbo_street', 1)
+		end)
+	
+		ESX.RegisterUsableItem('turbo_sports', function(source)
+			local xPlayer = GetPlayerFromId(source)
+			TriggerClientEvent("renzu_hud:install_turbo", source, 'sports')
+			xPlayer.removeInventoryItem('turbo_sports', 1)
+		end)
+	
+		ESX.RegisterUsableItem('turbo_racing', function(source)
+			local xPlayer = GetPlayerFromId(source)
+			TriggerClientEvent("renzu_hud:install_turbo", source, 'racing')
+			xPlayer.removeInventoryItem('turbo_racing', 1)
+		end)
+	
+		ESX.RegisterUsableItem('head_brace', function(source)
+			local xPlayer = GetPlayerFromId(source)
+			TriggerClientEvent("renzu_hud:healbody", source, 'head')
+			xPlayer.removeInventoryItem('head_brace', 1)
+		end)
+	
+		ESX.RegisterUsableItem('leg_bandage', function(source)
+			local xPlayer = GetPlayerFromId(source)
+			TriggerClientEvent("renzu_hud:healbody", source, 'leg')
+			xPlayer.removeInventoryItem('leg_bandage', 1)
+		end)
+	
+		ESX.RegisterUsableItem('arm_bandage', function(source)
+			local xPlayer = GetPlayerFromId(source)
+			TriggerClientEvent("renzu_hud:healbody", source, 'arm')
+			xPlayer.removeInventoryItem('arm_bandage', 1)
+		end)
+	
+		ESX.RegisterUsableItem('body_bandage', function(source)
+			local xPlayer = GetPlayerFromId(source)
+			TriggerClientEvent("renzu_hud:healbody", source, 'chest')
+			xPlayer.removeInventoryItem('body_bandage', 1)
+		end)
+	
+		ESX.RegisterUsableItem('street_tirekit', function(source)
+			local xPlayer = GetPlayerFromId(source)
+			TriggerClientEvent("renzu_hud:installtire", source, 'default')
+			xPlayer.removeInventoryItem('street_tirekit', 1)
+		end)
+	
+		ESX.RegisterUsableItem('sports_tirekit', function(source)
+			local xPlayer = GetPlayerFromId(source)
+			TriggerClientEvent("renzu_hud:installtire", source, 'sports')
+			xPlayer.removeInventoryItem('sports_tirekit', 1)
+		end)
+	
+		ESX.RegisterUsableItem('racing_tirekit', function(source)
+			local xPlayer = GetPlayerFromId(source)
+			TriggerClientEvent("renzu_hud:installtire", source, 'racing')
+			xPlayer.removeInventoryItem('racing_tirekit', 1)
+		end)
+	
+		ESX.RegisterUsableItem('drag_tirekit', function(source)
+			local xPlayer = GetPlayerFromId(source)
+			TriggerClientEvent("renzu_hud:installtire", source, 'drag')
+			xPlayer.removeInventoryItem('drag_tirekit', 1)
+		end)
+	
+		ESX.RegisterUsableItem('manual_tranny', function(source)
+			local xPlayer = GetPlayerFromId(source)
+			TriggerClientEvent("renzu_hud:manual", source, true)
+			xPlayer.removeInventoryItem('manual_tranny', 1)
+		end)
+	end
 end)
 
 RegisterServerEvent("renzu_hud:savedata")
@@ -46,9 +139,7 @@ AddEventHandler("renzu_hud:getdata", function(slot)
 	end
 	if config.multichar and adv_table ~= nil and config.multichar_advanced and charslot[source] ~= nil or not config.multichar and not config.multichar_advanced and adv_table ~= nil or config.multichar and not config.multichar_advanced and adv_table ~= nil or not config.multichar and adv_table ~= nil then
 		if Renzu[tonumber(source)] == nil then
-			local xPlayer = Standalone(source, GetSteam(source), GetPlayerName(source), charslot[source] or 1)
-			Renzu[tonumber(source)] = xPlayer
-			print("Creating New Data")
+			CreatePlayer(source)
 		end
 		TriggerClientEvent('renzu_hud:receivemile', source, adv_table, GetPlayerIdentifier(source))
 	end
@@ -68,9 +159,12 @@ AddEventHandler('renzu_hud:checkbody', function()
 	local xPlayer = GetPlayerFromId(source)
 	local done = false
 	while xPlayer == nil do
+		CreatePlayer(source)
 		Citizen.Wait(500)
 		xPlayer = GetPlayerFromId(source)
 		print("nil")
+		print(source)
+		print(charslot[source])
 	end
 	MySQL.Async.fetchAll("SELECT bodystatus FROM users WHERE identifier=@identifier",{['@identifier'] = xPlayer.identifier},	function(res)
 		if res[1].bodystatus and json.decode(res[1].bodystatus) ~= nil then 
@@ -87,14 +181,6 @@ AddEventHandler('renzu_hud:savebody', function(bodystatus)
 	bodytable[identifier] = bodystatus
 	MySQL.Async.execute('UPDATE users SET bodystatus=@bodystatus WHERE identifier=@identifier',{['@bodystatus'] = json.encode(bodystatus),['@identifier'] = identifier})
 end)
-if config.framework == 'ESX' then
-	ESX.RegisterUsableItem('nitro', function(source)
-		print(source)
-		local xPlayer = GetPlayerFromId(source)
-		TriggerClientEvent('renzu_hud:addnitro', source)
-		xPlayer.removeInventoryItem('nitro', 1)
-	end)
-end
 
 RegisterServerEvent("renzu_hud:nitro_flame")
 AddEventHandler("renzu_hud:nitro_flame", function(entity,coords)
@@ -145,9 +231,15 @@ function Standalone(playerId, identifier, name, slot)
 	return self
 end
 
+function CreatePlayer(source)
+	local xPlayer = Standalone(source, GetSteam(source), GetPlayerName(source), charslot[source] or 1)
+	Renzu[tonumber(source)] = xPlayer
+	print("Creating New Data")
+end
+
 function GetPlayerFromId(source)
 	if config.framework == 'ESX' then
-		return ESX.Players[tonumber(source)]
+		return ESX.GetPlayerFromId(tonumber(source))
 	end
 	return Renzu[tonumber(source)]
 end
