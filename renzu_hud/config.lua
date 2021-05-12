@@ -6,17 +6,22 @@ identifier=nil;veh_stats=nil;Renzuzu=Citizen;entering=false;mode='NORMAL'ismapop
 
 config.framework = 'ESX' -- ESX | VRP | QSHIT | STANDALONE
 config.identifier = 'steam:' -- standalone purpose, ignore if using framework
+--MULTI CHARACTER START -- set config.multichar = false if you are not using any multi character
 config.multichar = true -- KASHACTERS, cd_multicharacter, etc...
 --IMPORTANT PART IF USING Multicharacter
 -- if multichar_advanced is false == using steam: format or the config.identifier
 config.multichar_advanced = true -- Using Permanent Char1,Char2 up to Char5 identifier from database. ( This means the identifier reads by ESX or other framework will have Char1:BLAHBLAHBLAH instead of steam:BLAHBLAHBLAH ( from xPlayer.identifier for example))
 config.characterchosenevent = 'kashactersS:CharacterChosen' -- this event contains charid (IMPORTANT and will read only if using advanced)
 config.charprefix = 'Char' -- dont change unless you know what you are doing
+--loadedasmp will use the charslot from user_lastcharacter, kashacters and other multicharacter have this.
+config.loadedasmp = true -- if player model is mp player, pass the loaded event to server ( naturally if player model is PLAYER_ZERO its mean you are on the loading screen or in the character select page of your multicharacter script. )
+--MULTI CHAR END
 --MAIN UI CONFIG START
 config.enablecompass = true -- enable/disable compass
-config.carui = 'modern' -- Choose a Carui Version ( simple, minimal, modern )
-config.statusui = 'simple' -- UI LOOK ( simple, normal)
-config.statusv2 = true -- enable this if you want the status hud in bottom part , false if toggle mode (TOGGLE VIA INSERT)
+config.carui = 'minimal' -- Choose a Carui Version ( simple, minimal, modern )
+config.statusui = 'normal' -- UI LOOK ( simple, normal)
+config.statusv2 = true -- enable this if you want the status toggle mode (TOGGLE VIA INSERT) (THIS INCLUDE RP PURPOSE HUD like job,money,etc.)
+config.statusplace = 'top-right' -- available option top-right,top-left,bottom-right,bottom-left,top-center,bottom-center
 --CHANGE ACCORDING TO YOUR STATUS ESX STATUS OR ANY STATUS MOD
 --UI CONFIG END
 --start car map
@@ -45,15 +50,16 @@ config.sports_increase_topspeed = true -- do you want the topspeed will be affec
 config.topspeed_multiplier = 1.1 -- if sports_increase_topspeed is enable, multiplier 1.5 = x1.5 eg. normal top speed 200kmh if you put 1.5 the new topspeed is 300kmh
 config.eco = 0.5 -- Eco Level when Eco Mode is activated (this affect the efficiency of fuel)
 config.boost_sound = false
---TURBO if using turbo the sports vehicle mode will not add torque anymore.
-config.useturboitem = true
-config.lagamount = 100
-config.turbo_boost = {
+--TURBO if using turbo the sports vehicle mode will not add torque anymore if the current turbo power is greater than the config.boost .
+config.useturboitem = true -- this is ESX only for now
+config.lagamount = 100 --- affect turbo lag more numbers mean more lag but more power produced, smaller turbo should be lower lag like 100 is good start.
+config.turbo_boost = { -- turbo boost
     ['default'] = 0.0,
     ['street'] = 0.5,
     ['sports'] = 1.0,
     ['racing'] = 2.0,
 }
+config.turbo_health = 1000 -- turbo health, power will be reduce greatly if this numbers become 0
 --MILEAGE
 config.mileage_update = 1000 -- This will Affect the Mileage update speed
 config.mileage_speed = 2.0 -- ( Lesser Number value eg . 0.5 = Less Mile age for the car) greater number like 1.5 2.0 = x1.5, x2 output, You Can Change this so you can have a RP for Changing Vehicle Oil Etc.. sooner than later.
@@ -259,7 +265,7 @@ config.acceleratetractionloss = 0.5 -- 0.5 = 50%, 1.0 = 100% - Reduce the total 
 config.repairalltires = true -- repair all tires using the command or item else Repair the tires one by one.
 config.repaircommand = true -- Enable Repair Command for standalone purpose, disable this if repairing via item.
 -- FAQ - GTA WHEEL HEALTH IS GETTING REDUCE if Brand New Health is <= 0, so a total of 2000 health for each tires, combine with brandnewhealth + gta wheel health.
-config.wheeltype = { -- edit this only if you are familiar with handling.meta , 1.0 = 100%
+config.wheeltype = { -- edit this only if you are familiar with handling.meta , 1.0 = 100% - (THIS IS NOT 100% PERFECT you can tuned it)
     ['sports'] = {fLowSpeedTractionLossMult = 0.9,fTractionLossMult = 0.9,fTractionCurveMin = 1.1, fTractionCurveMax = 1.1, fTractionCurveLateral = 1.1},
     ['racing'] = {fLowSpeedTractionLossMult = 0.7,fTractionLossMult = 0.7,fTractionCurveMin = 1.25, fTractionCurveMax = 1.3, fTractionCurveLateral = 1.2},
     ['drag'] = {fLowSpeedTractionLossMult = 0.1,fTractionLossMult = 0.1,fTractionCurveMin = 2.2, fTractionCurveMax = 0.1, fTractionCurveLateral = 1.1},
@@ -559,7 +565,7 @@ function Renzu_SetGear(vehicle, gear)
 end
 
 function LockSpeed(veh,speed)
-    Renzu_Hud(0xBAA045B4E42F3C06, veh, speed)
+    Renzu_Hud(0x0E46A3FCBDE2A1B1, veh, speed)
 end
 
 function VehicleSpeed(veh)

@@ -131,11 +131,27 @@ AddEventHandler("renzu_hud:savedata", function(plate,table)
 	end
 end)
 
+function getlastcharslot(source)
+	MySQL.Async.fetchAll("SELECT charid FROM user_lastcharacter WHERE steamid=@steamid", {['@steamid'] = GetPlayerIdentifiers(source)[1]}, function(results)
+		if #results > 0 then
+			print("OK")
+			return results[1].charid
+		end
+		return false
+	end)
+end
+
 RegisterServerEvent("renzu_hud:getdata")
-AddEventHandler("renzu_hud:getdata", function(slot)
+AddEventHandler("renzu_hud:getdata", function(slot, fetchslot)
+	print(slot)
+	print("SLOT")
+	print(fetchslot)
 	local source = source
 	if slot ~= nil and charslot[source] == nil then
 		charslot[source] = slot
+	end
+	if charslot[source] == nil and fetchslot then
+		charslot[source] = getlastcharslot(source)
 	end
 	if config.multichar and adv_table ~= nil and config.multichar_advanced and charslot[source] ~= nil or not config.multichar and not config.multichar_advanced and adv_table ~= nil or config.multichar and not config.multichar_advanced and adv_table ~= nil or not config.multichar and adv_table ~= nil then
 		if Renzu[tonumber(source)] == nil then

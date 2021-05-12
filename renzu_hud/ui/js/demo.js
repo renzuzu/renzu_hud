@@ -1066,9 +1066,9 @@ function setCompass(bool) {
 function setStatusUI(ver) {
     if (ver == 'simple') {
         statusui = 'simple'
-        document.getElementById("healthsimple").style.display = 'block';
+        document.getElementById("uisimplehp").style.display = 'block';
         document.getElementById("armorsimple").style.display = 'block';
-        document.getElementById("healthsimplebg").style.display = 'block';
+        document.getElementById("uisimplearmor").style.display = 'block';
         document.getElementById("armorsimplebg").style.display = 'block';
         document.getElementById("uibar").innerHTML = '';
         $("#statusver").attr("src", "img/simplestatus.png")
@@ -1081,6 +1081,35 @@ function setStatusUI(ver) {
         document.getElementById("mic").style.right = '363px';
         document.getElementById("mic-color").style.width = '15px';
         document.getElementById("mic-color").style.height = '27px';
+    }
+}
+
+function setStatusUILocation(table) {
+    console.log("MOVE UI")
+    if (table['top']) {
+        console.log(table['top'])
+        document.getElementById("statusv3").style.top = ''+table['top']+'';
+    }
+    if (table['right']) {
+        console.log(table['right'])
+        document.getElementById("statusv3").style.right = ''+table['right']+'';
+    }
+    if (table['bottom']) {
+        console.log(table['bottom'])
+        document.getElementById("statusv3").style.bottom = ''+table['bottom']+'';
+    }
+    if (table['left']) {
+        console.log(table['left'])
+        document.getElementById("statusv3").style.left = ''+table['left']+'';
+    }
+}
+
+function setMoveStatusUi(bool) {
+    console.log("MOVE UI")
+    if (bool) {
+        document.getElementById("statusv3").style.right = '18%';
+    } else {
+        document.getElementById("statusv3").style.right = '25px';
     }
 }
 
@@ -1357,6 +1386,8 @@ var renzu_hud = {
     setShowClothing,
     setClotheState,
     ResetClotheState,
+    setStatusUILocation,
+    setMoveStatusUi,
     //CAR
     setShow,
     setRpm,

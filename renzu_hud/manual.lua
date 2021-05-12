@@ -140,7 +140,7 @@ function NuiClutchloop()
             local sleep = 2000
             clutch = false
             --if manual else sleep
-            if manual and vehicle ~= nil then
+            if manual and vehicle ~= nil and invehicle then
                 sleep = 5
                 --savegear = GetGear(vehicle)
                 --if RCR(0, 20) or RCP(0, 20) or RCP(0, 20) and RCP(0, 32) or RCR(2, 193) or RCP(2, 193) then
@@ -169,6 +169,11 @@ function NuiClutchloop()
             end
             Renzuzu.Wait(sleep)
         end
+        RenzuSendUI({
+            type = "setManual",
+            content = false
+        })
+        manual = false
     end)
 end
 
@@ -223,7 +228,6 @@ function NuiManualEtcFunc()
                 acceleration = DecorGetFloat(vehicle,"DRIVEFORCE")
                 vehicletopspeed = trannyupgradespeed('speed')
                 maxgear = trannyupgradegear('gear')
-                print("topspeed",vehicletopspeed)
             end
             Renzuzu.Wait(sleep)
         end
@@ -231,9 +235,8 @@ function NuiManualEtcFunc()
 end
 
 function ShowHelpNotification(msg, thisFrame, beep, duration)
-	AddTextEntry('notishit', msg)
-    DisplayHelpTextThisFrame('notishit', false)
-
+	AddTextEntry('notishit2', msg)
+    DisplayHelpTextThisFrame('notishit2', true)
 end
 
 local notraction = false
@@ -349,9 +352,15 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                         SetRpm(vehicle, speedtable(speed,savegear))
                         --SetVehicleReduceGrip(vehicle,true)
                         SetRpm(vehicle, rpm + 0.1)
-                        SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveMin", DecorGetFloat(vehicle,"TRACTION") * 0.5)
-                        SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveLateral", DecorGetFloat(vehicle,"TRACTION2") * 0.5)
-                        SetVehicleHandlingField(vehicle, "CHandlingData", "fLowSpeedTractionLossMult", DecorGetFloat(vehicle,"TRACTION3") * 1.9)
+                        if veh_stats[plate].tirespec ~= nil then
+                            SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveMin", veh_stats[plate].tirespec['fTractionCurveMin'] * 0.5)
+                            SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveLateral", veh_stats[plate].tirespec['fTractionCurveLateral'] * 0.5)
+                            SetVehicleHandlingField(vehicle, "CHandlingData", "fLowSpeedTractionLossMult", veh_stats[plate].tirespec['fLowSpeedTractionLossMult'] * 1.9)
+                        else
+                            SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveMin", DecorGetFloat(vehicle,"TRACTION") * 0.5)
+                            SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveLateral", DecorGetFloat(vehicle,"TRACTION2") * 0.5)
+                            SetVehicleHandlingField(vehicle, "CHandlingData", "fLowSpeedTractionLossMult", DecorGetFloat(vehicle,"TRACTION3") * 1.9)
+                        end
                         notraction = true
                         Wait(0)
                     end
@@ -366,12 +375,24 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                             if notraction then
                                 --SetVehicleBurnout(vehicle, false)
                                 --SetVehicleReduceGrip(vehicle,false)
-                                SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveMin", DecorGetFloat(vehicle,"TRACTION") * 1.0)
-                                SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveLateral", DecorGetFloat(vehicle,"TRACTION2") * 1.0)
-                                SetVehicleHandlingField(vehicle, "CHandlingData", "fLowSpeedTractionLossMult", DecorGetFloat(vehicle,"TRACTION3") * 1.0)
+                                if veh_stats[plate].tirespec ~= nil then
+                                    SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveMin", veh_stats[plate].tirespec['fTractionCurveMin'] * 1.0)
+                                    SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveLateral", veh_stats[plate].tirespec['fTractionCurveLateral'] * 1.0)
+                                    SetVehicleHandlingField(vehicle, "CHandlingData", "fLowSpeedTractionLossMult", veh_stats[plate].tirespec['fLowSpeedTractionLossMult'] * 1.0)
+                                else
+                                    SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveMin", DecorGetFloat(vehicle,"TRACTION") * 1.0)
+                                    SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveLateral", DecorGetFloat(vehicle,"TRACTION2") * 1.0)
+                                    SetVehicleHandlingField(vehicle, "CHandlingData", "fLowSpeedTractionLossMult", DecorGetFloat(vehicle,"TRACTION3") * 1.0)
+                                end
                                 notraction = false
                             end
                         elseif rpm > 0.5 then
+                            local numwheel = GetVehicleNumberOfWheels(vehicle)
+                            sleep = 300
+                            -- for i = 0, numwheel - 1 do
+                            --     SetVehicleWheelRotationSpeed(vehicle,i,speed*1.45)
+                            -- end
+                            --Notify('warning','TRACTION',"TCS Active")
                             local r = 1.1
                             if r > 1.1 then
                                 r = 1.1
@@ -382,11 +403,11 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                                 SetRpm(vehicle, r)
                             end
                             --SetVehicleBurnout(vehicle, true)
-                            --SetVehicleWheelieState(vehicle, 65)
+                            SetVehicleWheelieState(vehicle, 65)
                             --Wait(1)
                             SetLaunchControlEnabled(true)
                             SetVehicleWheelieState(vehicle, 129)
-                            LockSpeed(vehicle,speed)
+                            --LockSpeed(vehicle,oldspeed)
                             --Wait(11)
                             SetVehicleWheelieState(vehicle, 65)
                             --Wait(11)
@@ -524,7 +545,6 @@ function gearspeed(sg, wheel)
             if mode == 'SPORTS' then
                 local bonus = (DecorGetFloat(vehicle,"TOPSPEED") * config.topspeed_multiplier)
                 vehicletopspeed = bonus * 1.5
-                print("BONUS2")
             else
                 vehicletopspeed = DecorGetFloat(vehicle,"TOPSPEED") * 1.5
             end
@@ -624,7 +644,6 @@ function antistall(speed, speedreduce, savegear, gearname, rpm, vehicle, current
         Renzu_SetGear(vehicle,currentgear - 1)
         local startkick = gearname - (lastgear / 1.5)
         if RCP(1, 32) and speed > startkick and speed <= gearname then
-            print("KICKING")
             if not alreadyturbo then
                 SetVehicleBoost(vehicle, 1.0)
             end
@@ -679,11 +698,12 @@ function antistall(speed, speedreduce, savegear, gearname, rpm, vehicle, current
 end
 
 -- MAIN MANUAL SYSTEM LOOP ( EDIT THIS if you know the system )
+local currentlimit = 100
 function speedtable(speed,gear)
     --SetVehicleReduceTraction(vehicle, true)
     if clutchpressed then return end
-    olddriveinertia = GetVehStats(vehicle, "CHandlingData","fDriveInertia")
-    oldriveforce = GetVehStats(vehicle, "CHandlingData","fInitialDriveForce")
+    olddriveinertia = DecorGetFloat(vehicle,"INERTIA")
+    oldriveforce = DecorGetFloat(vehicle,"DRIVEFORCE")
     oldtopspeed = maxspeed * olddriveinertia -- normalize
     local engineload = oldriveforce + ((rpm * olddriveinertia) * (gear / oldriveforce))
     local speedreduce = (oldtopspeed) * (config.gears[maxgear][gear] * olddriveinertia) / gear * oldriveforce * engineload
@@ -699,7 +719,7 @@ function speedtable(speed,gear)
         vehicletopspeed = globaltopspeed
     end
 	if vehicletopspeed ~= nil then
-        local a = (vehicletopspeed * config.firstgear) * 0.9
+        local initial_speed = (vehicletopspeed * 1.3) / 3.6
         --ShowHelpNotification((vehicletopspeed * config.secondgear) * 0.9, true, 1, 5)
 		--local vehicletopspeed = GetVehStats(GetVehiclePedIsIn(GetPlayerPed(-1), false), "CHandlingData", "fInitialDriveMaxFlatVel")
 		first = (vehicletopspeed * config.gears[maxgear][1]) * 0.9
@@ -713,47 +733,58 @@ function speedtable(speed,gear)
         eight = (vehicletopspeed * config.gears[maxgear][8]) * 0.9
         end
 		local currentgear = savegear
+        -- print("loopspeed")
+        -- print(currentgear == 1 and speed <= first)
+        -- print(currentgear)
+        -- print(first)
+        -- print(speed)
+        -- print(currentlimit)
+        SetEntityMaxSpeed(vehicle,currentlimit / 3.6)
 		if currentgear == 1 and speed <= first then
+            currentlimit = first
             if mycurrentvehicle ~= vehicle and maxgear == 6 then -- anti 1st gear glitch for upgraded trannys
                 SetVehicleReduceTraction(vehicle, true)
                 ModifyVehicleTopSpeed(vehicle, 0.5)
             end
-		    LockSpeed(vehicle, first)
+            --SetEntityMaxSpeed(getveh(),first)
+		    LockSpeed(vehicle, first / 3.6)
             return	percentage(speed,first)
 		elseif currentgear == 2 and speed <= second then
+            currentlimit = second
             saferpm = olddriveinertia
             antistall(speed, speedreduce, savegear, first, rpm, vehicle, currentgear, saferpm, oldriveforce, engineload, first)
-		    LockSpeed(vehicle, second)
+		    LockSpeed(vehicle, second / 3.6)
 		    return	percentage(speed,second)
 		elseif currentgear == 3 and speed <= third then
+            currentlimit = third
             saferpm = olddriveinertia
             antistall(speed, speedreduce, savegear, second, rpm, vehicle, currentgear, saferpm, oldriveforce, engineload, second)
-		    LockSpeed(vehicle, third)
+		    LockSpeed(vehicle, third / 3.6)
 		    return	percentage(speed,third)
 		elseif currentgear == 4 and speed <= fourth then
             saferpm = olddriveinertia
             antistall(speed, speedreduce, savegear, third, rpm, vehicle, currentgear, saferpm, oldriveforce, engineload, third)
-		    LockSpeed(vehicle, fourth)
+		    LockSpeed(vehicle, fourth / 3.6)
 		    return	percentage(speed,fourth)
 		elseif currentgear == 5 and speed <= fifth then
             saferpm = olddriveinertia
             antistall(speed, speedreduce, savegear, fourth, rpm, vehicle, currentgear, saferpm, oldriveforce, engineload, fourth)
-		    LockSpeed(vehicle, fifth)
+		    LockSpeed(vehicle, fifth / 3.6)
 		    return	percentage(speed,fifth)
 		elseif currentgear == 6 and speed <= sixth then
             saferpm = olddriveinertia
             antistall(speed, speedreduce, savegear, fifth, rpm, vehicle, currentgear, saferpm, oldriveforce, engineload, fifth)
-            LockSpeed(vehicle, sixth)
+            LockSpeed(vehicle, sixth / 3.6)
 		    return	percentage(speed,sixth)
         elseif currentgear == 7 and speed <= seventh then
             saferpm = olddriveinertia
             antistall(speed, speedreduce, savegear, sixth, rpm, vehicle, currentgear, saferpm, oldriveforce, engineload, sixth)
             LockSpeed(vehicle, sixth)
-		    return	percentage(speed,sixth)
+		    return	percentage(speed,sixth / 3.6)
         elseif currentgear == 8 and speed <= eight then
             saferpm = olddriveinertia
             antistall(speed, speedreduce, savegear, seventh, rpm, vehicle, currentgear, saferpm, oldriveforce, engineload, seventh)
-            LockSpeed(vehicle, sixth)
+            LockSpeed(vehicle, sixth / 3.6)
 		    return	percentage(speed,sixth)
 		elseif currentgear > 0 then
 			return 1.1

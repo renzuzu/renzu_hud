@@ -533,148 +533,6 @@
         bottom:23px;
         font-size:21px;
       }
-
-      #healthsimple {
-        /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
-        z-index:1003;
-        color:rgb(255, 37, 37);
-        position:absolute;
-        right:331px;
-        top:24px;
-        font-size:20px;
-      }
-
-      #healthsimplebg {
-        background: transparent;
-        border:0px;
-        z-index:1002;
-        color:rgba(243, 0, 53, 0.349);
-        position:absolute;
-        right:331px;
-        top:24px;
-        font-size:20px;
-      }
-
-      #armorsimple {
-        /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
-        z-index:1003;
-        color:rgb(0, 110, 255);
-        position:absolute;
-        right:299px;
-        top:24px;
-        font-size:20px;
-      }
-
-      #armorsimplebg {
-        /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
-        z-index:1002;
-        color:rgb(6, 56, 122);
-        position:absolute;
-        right:299px;
-        top:24px;
-        font-size:20px;
-      }
-
-      #food2 {
-        #clip: rect(10px, 100px, 100px, 0);
-        /* clip: shape(top, right, bottom, left); NB 'rect' is the only available option */
-        z-index:1003;
-        color:orange;
-        position:absolute;
-        right:266px;
-        top:23px;
-        font-size:21px;
-      }
-      #food2bg {
-        background: transparent;
-        border:0px;
-        z-index:1002;
-        color:rgba(255, 179, 0, 0.349);
-        position:absolute;
-        right:266px;
-        top:23px;
-        font-size:21px;
-      }
-      #water2 {
-        z-index:1003;
-        color:rgb(19, 101, 255);
-        position:absolute;
-        right:237px;
-        top:25px;
-        font-size:19px;
-      }
-      #water2bg {
-        z-index:1002;
-        color:rgba(29, 82, 173, 0.87);
-        position:absolute;
-        right:237px;
-        top:25px;
-        font-size:19px;
-      }
-      #stress2 {
-        z-index:1003;
-        color:rgb(255, 16, 68);
-        position:absolute;
-        right:199px;
-        top:25px;
-        font-size:19px;
-      }
-      #stress2bg {
-        z-index:1002;
-        color:rgba(35, 255, 101, 0.842);
-        position:absolute;
-        right:199px;
-        top:25px;
-        font-size:19px;
-      }
-      #stamina2 {
-        z-index:1003;
-        color:rgb(16, 255, 136);
-        position:absolute;
-        right:168px;
-        top:25px;
-        font-size:21px;
-      }
-      #stamina2bg {
-        z-index:1002;
-        color:rgba(0, 119, 57, 0.945);
-        position:absolute;
-        right:168px;
-        top:25px;
-        font-size:21px;
-      }
-      #oxygen2 {
-        z-index:1003;
-        color:rgb(15, 227, 255);
-        position:absolute;
-        right:132px;
-        top:25px;
-        font-size:17px;
-      }
-      #oxygen2bg {
-        z-index:1002;
-        color:rgba(8, 76, 85, 0.788);
-        position:absolute;
-        right:132px;
-        top:25px;
-        font-size:18px;
-      }
-      #energy2 {
-        z-index:1003;
-        color:rgb(233, 233, 233);
-        position:absolute;
-        right:101px;
-        top:26px;
-        font-size:17px;
-      }
-      #energy2bg {
-        z-index:1002;
-        color:rgb(243, 57, 0);
-        position:absolute;
-        right:101px;
-        top:26px;
-        font-size:17px;
-      }
     </style>
 
     <style>
@@ -1259,11 +1117,11 @@
       <i class="fal fa-hexagon fa-stack-2x" style="color:ffffff;font-size:20px;z-index: 1004;">
         <span style="display: block; position: absolute; left: 50%; bottom: 0; transform: translate(-50%,0); width: 100%; height: 100%; background: linear-gradient(180deg, #ff8000 0%, #cd6700 100%);"></span>
       </i> -->
-      <i style="display:none;" id="healthsimple" class="fas fa-heartbeat"></i>
+      <!-- <i style="display:none;" id="healthsimple" class="fas fa-heartbeat"></i>
       <i style="display:none;" id="armorsimple" class="far fa-shield-alt"></i>
       <i style="display:none;" id="healthsimplebg" class="fas fa-heartbeat"></i>
-      <i style="display:none;" id="armorsimplebg" class="far fa-shield-alt"></i>
-      <i id="food2" class="fad fa-cheeseburger"></i>
+      <i style="display:none;" id="armorsimplebg" class="far fa-shield-alt"></i> -->
+      <!-- <i id="food2" class="fad fa-cheeseburger"></i>
       <i id="water2" class="fad fa-glass"></i>
       <i id="stress2" class="fad fa-head-side-brain"></i>
       <i id="stamina2" class="fad fa-running"></i>
@@ -1274,10 +1132,70 @@
       <i id="stress2bg" class="fad fa-head-side-brain"></i>
       <i id="stamina2bg" class="fad fa-running"></i>
       <i id="oxygen2bg" class="fad fa-lungs"></i>
-      <i id="energy2bg" class="fad fa-snooze"></i>
+      <i id="energy2bg" class="fad fa-snooze"></i> -->
       <!-- <img style="z-index:1001;position:absolute;right:123px;top:-5px;opacity:1;height:80px;" src="img/status2.png" /> -->
-      <img id="statusver" style="z-index:1001;position:absolute;right:84px;top:-5px;opacity:1;height:80px;" src="img/status2.png" />
+      <!-- <img id="statusver" style="z-index:1001;position:absolute;right:84px;top:-5px;opacity:1;height:80px;" src="img/status2.png" /> -->
     </div>
+
+    <div id="statusv3" style="display:block;position:absolute;width:300px;">
+
+      <span class="fa-stack fa-2x" style='font-size:17px;position:absolute;right:30px;top:-28px;color:rgba(144, 144, 144, 0.876)'>
+        <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
+        <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
+        <i id="energy2" class="fas fa-snooze fa-stack-1x" style='font-size:19px;color:rgb(233, 233, 233);z-index:1131;opacity:1.0;'></i>
+        <i id="energy2bg" class="fas fa-snooze fa-stack-1x" style='font-size:19px;color:rgb(243, 57, 0);z-index:1130;opacity:1.0;'></i>
+      </span>
+
+      <span class="fa-stack fa-2x" style='font-size:17px;position:absolute;right:65px;top:-28px;color:rgba(144, 144, 144, 0.876)'>
+        <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
+        <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
+        <i id="oxygen2" class="fad fa-lungs fa-stack-1x" style='font-size:19px;color:rgb(15, 227, 255);z-index:1131;opacity:1.0;'></i>
+        <i id="oxygen2bg" class="fad fa-lungs fa-stack-1x" style='font-size:19px;color:rgba(8, 76, 85, 0.788);z-index:1130;opacity:1.0;'></i>
+      </span>
+
+  <span class="fa-stack fa-2x" style='font-size:17px;position:absolute;right:100px;top:-28px;color:rgba(144, 144, 144, 0.876)'>
+    <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
+    <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
+    <i id="stamina2" class="fad fa-running fa-stack-1x" style='font-size:19px;color:rgb(16, 255, 136);z-index:1131;opacity:1.0;'></i>
+    <i id="stamina2bg" class="fad fa-running fa-stack-1x" style='font-size:19px;color:rgba(0, 119, 57, 0.945);z-index:1130;opacity:1.0;'></i>
+  </span>
+
+  <span class="fa-stack fa-2x" style='font-size:17px;position:absolute;right:135px;top:-28px;color:rgba(144, 144, 144, 0.876)'>
+    <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
+    <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
+    <i id="stress2"  class="fad fa-head-side-brain fa-stack-1x" style='font-size:19px;color:rgb(255, 16, 68);z-index:1131;opacity:1.0;'></i>
+    <i id="stress2bg" class="fad fa-head-side-brain fa-stack-1x" style='font-size:19px;color:rgba(35, 255, 101, 0.842);z-index:1130;opacity:1.0;'></i>
+  </span>
+
+  <span class="fa-stack fa-2x" style='font-size:17px;position:absolute;right:170px;top:-28px;color:rgba(144, 144, 144, 0.876)'>
+    <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
+    <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
+    <i id="water2" class="fad fa-glass fa-stack-1x" style='font-size:19px;color:rgb(36, 113, 255);z-index:1131;opacity:1.0;'></i>
+    <i id="water2bg" class="fad fa-glass fa-stack-1x" style='font-size:19px;color:rgb(0, 11, 112);z-index:1130;opacity:1.0;'></i>
+  </span>
+
+  <span class="fa-stack fa-2x" style='font-size:17px;position:absolute;right:205px;top:-28px;color:rgba(144, 144, 144, 0.876)'>
+    <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
+    <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
+    <i id="food2" class="fad fa-cheeseburger fa-stack-1x" style='font-size:19px;color:rgb(221, 144, 0);z-index:1131;opacity:1.0;'></i>
+    <i id="food2bg" class="fad fa-cheeseburger fa-stack-1x" style='font-size:19px;color:rgb(114, 68, 0);z-index:1130;opacity:1.0;'></i>
+  </span>
+
+  <span id="uisimplearmor" class="fa-stack fa-2x" style='font-size:17px;position:absolute;right:240px;top:-28px;color:rgba(144, 144, 144, 0.876);display:none;'>
+    <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
+    <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
+    <i id="armorsimple"  class="far fa-shield-alt fa-stack-1x" style='font-size:19px;color:rgb(1, 103, 255);z-index:1131;opacity:1.0;'></i>
+    <i id="armorsimplebg" class="far fa-shield-alt fa-stack-1x" style='font-size:19px;color:rgb(0, 41, 129);z-index:1130;opacity:1.0;'></i>
+  </span>
+
+  <span id="uisimplehp" class="fa-stack fa-2x" style='font-size:17px;position:absolute;right:275px;top:-28px;color:rgba(144, 144, 144, 0.876);display:none;'>
+    <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
+    <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
+    <i id="healthsimple" class="fas fa-heartbeat fa-stack-1x" style='font-size:19px;color:rgb(251, 29, 9);z-index:1131;opacity:1.0;'></i>
+    <i id="healthsimplebg" class="fas fa-heartbeat fa-stack-1x" style='font-size:19px;color:rgb(83, 0, 0);z-index:1130;opacity:1.0;'></i>
+  </span>
+
+  </div>
 
     <div id="carcontrolui" style="display:none;z-index:900;position:absolute;right:-140px;top:-200px;opacity:1.0;height:650px;">
       <div id="carcontrolinfo">Car Control:</div>
