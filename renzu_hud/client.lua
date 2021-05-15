@@ -3918,17 +3918,18 @@ function turboanimation(type)
 	local ped = PlayerPedId()
 	local prop = 'smallturbo'
 	local offset = -0.75
-	local offsetz = -0.135
+	local offsetz = 0.245
 	if type == 'racing' then
 		prop = 'bigturbo'
 		offset = -1.85
-		offsetz = 0.05
+		offsetz = 0.45
 	elseif type == 'sports' then
 		prop = 'mediumturbo'
-		offset = -1.35
+		offset = -1.15
+		offsetz = 0.285
 	elseif type == 'street' then
 		prop = 'smallturbo'
-		offset = -0.75
+		offset = -0.80
 	end
 	RequestModel(GetHashKey(prop))
 	while not HasModelLoaded(GetHashKey(prop)) do
@@ -3940,7 +3941,7 @@ function turboanimation(type)
 	-- SetEntityCompletelyDisableCollision(propturbo,false,true)
 	-- SetEntityNoCollisionEntity(getveh(),propturbo,false)
 	--SetEntityAlpha(propturbo,255,false)
-	AttachEntityToEntity(propturbo,getveh(),GetEntityBoneIndexByName(getveh(),'overheat'),0.0,offset,offsetz,0.0,0.0,0.0,false,true,false,false,70,true)
+	AttachEntityToEntity(propturbo,getveh(),GetEntityBoneIndexByName(getveh(),'neon_f'),0.3,offset,offsetz,0.0,0.0,90.0,true,false,false,false,70,true)
 	Citizen.InvokeNative(0xAD738C3085FE7E11,propturbo,true,true)
 end
 

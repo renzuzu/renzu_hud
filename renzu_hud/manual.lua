@@ -343,9 +343,16 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                     Renzu_Hud(GetHashKey('SET_VEHICLE_NEXT_GEAR') & 0xFFFFFFFF, vehicle, 0)
                 else
                     Citizen.InvokeNative(0x8923dd42, vehicle, savegear)
-                    Renzu_Hud(GetHashKey('SET_VEHICLE_CURRENT_GEAR') & 0xFFFFFFFF, vehicle, savegear)
-                    Renzu_Hud(GetHashKey('SET_VEHICLE_NEXT_GEAR') & 0xFFFFFFFF, vehicle, savegear)
+                    Renzu_Hud(GetHashKey('SET_VEHICLE_CURRENT_GEAR') & 0xFFFFFFFF, vehicle, round(savegear))
+                    Renzu_Hud(GetHashKey('SET_VEHICLE_NEXT_GEAR') & 0xFFFFFFFF, vehicle, round(savegear))
                 end
+                if GetVehicleHighGear(vehicle) ~= maxgear then
+                    SetVehicleHighGear(vehicle,round(maxgear))
+                    print("Highgear become 1, stupid bug")
+                end
+                print(maxgear,"MAXGEAR")
+                print(GetVehicleHighGear(vehicle),"highgear")
+                print(GetVehicleNextGear(vehicle),"nextgear")
                 --SetVehicleHighGear(vehicle, savegear)
                 --speedtable(speed,savegear)
                 if savegear == 1 and speed < 25 and rpm > 0.8 and rpm < 1.1 and (VehicleRpm(vehicle) * 100.0) > (tractioncontrol(WheelSpeed(vehicle,1) * 3.6,savegear) * 95.0) and not clutchpressed then
@@ -682,7 +689,7 @@ function antistall(speed, speedreduce, savegear, gearname, rpm, vehicle, current
                 --SetVehicleReduceGrip(vehicle,true)
                 -- torque = GetVehicleCheatPowerIncrease(vehicle) * topspeedmodifier
                 -- SetVehicleBoost(vehicle, boost * maxgear + (torque / currentgear))
-                --ModifyVehicleTopSpeed(vehicle, 0.5)
+                ModifyVehicleTopSpeed(vehicle, 0.9)
                 torque = GetVehicleCheatPowerIncrease(vehicle)
                 torque = torque * ( savegear / mg )
                 local formulafuck = (saferpm / mg) + (torque * currentgear)
@@ -696,7 +703,7 @@ function antistall(speed, speedreduce, savegear, gearname, rpm, vehicle, current
                 print("ANTI STALL")
                 --SetVehicleReduceGrip(vehicle,true)
                 SetVehicleReduceTraction(vehicle, true)
-                --ModifyVehicleTopSpeed(vehicle, 0.5)
+                ModifyVehicleTopSpeed(vehicle, 0.9)
                 torque = GetVehicleCheatPowerIncrease(vehicle)
                 torque = torque * ( savegear / mg )
                 local formulafuck = (saferpm / mg) + (torque * currentgear)
@@ -737,7 +744,8 @@ function speedtable(speed,gear)
         --ShowHelpNotification((vehicletopspeed * config.secondgear) * 0.9, true, 1, 5)
 		--local vehicletopspeed = GetVehStats(GetVehiclePedIsIn(GetPlayerPed(-1), false), "CHandlingData", "fInitialDriveMaxFlatVel")
         local speedlimit = (vehicletopspeed * config.gears[maxgear][gear]) * 0.9
-        print(speedlimit)
+        print(speedlimit,"Speedlimit")
+        print(GetGear(vehicle),"GEAR")
 		-- first = (vehicletopspeed * config.gears[maxgear][1]) * 0.9
 		-- second = (vehicletopspeed * config.gears[maxgear][2]) * 0.9
 		-- third = (vehicletopspeed * config.gears[maxgear][3]) * 0.9
@@ -828,8 +836,8 @@ end
 -- FORCE GTA NATIVE TO STOP SWITCHING GEARS AUTOMATICALLY
 function ForceVehicleGear (vehicle, gear)
     ----print(GetVehicleThrottleOffset(vehicle))
-    SetVehicleCurrentGear(vehicle, gear)
-    SetVehicleNextGear(vehicle, gear)
+    SetVehicleCurrentGear(vehicle, round(gear))
+    SetVehicleNextGear(vehicle, round(gear))
     --savegear = gear
     --SetVehicleHighGear(vehicle, gear)
     --SetVehicleHighGear(vehicle, gear)
