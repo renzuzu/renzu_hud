@@ -1,4 +1,4 @@
-fx_version 'adamant'
+fx_version 'bodacious'
 -- Renzu HUD
 -- YOU ARE NOT ALLOWED TO SELL THIS
 -- MADE BY Renzuzu
@@ -36,5 +36,9 @@ files {
 	'ui/img/*.webp',
 	'ui/img/weapons/*.png',
 	'ui/sounds/*.ogg',
-	'ui/shifter/*.png'
+	'ui/shifter/*.png',
+	'stream/*.ydr',
+	"turbo.ytyp"
 }
+
+data_file 'DLC_ITYP_REQUEST' 'turbo.ytyp'

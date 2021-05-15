@@ -290,85 +290,67 @@ function ClearPedHeadshots()
 end
 
 local show = false
-local notifycd = {
-	['hunger'] = 0,
-	['thirst'] = 0,
-	['sanity'] = 0,
-	['energy'] = 0,
-	['oxygen'] = 0
-}
+local notifycd = {}
+for k,v in pairs(config.statusordering) do
+	notifycd[v.status] = 0
+end
+
+local statuses = {}
 function updateStatus(pressed)
 	if not config.statusv2 or pressed then
 		Myinfo()
 	end
 	local fetch = false
-	sanity = 0
-	thirst = 0
-	hunger = 0
-	oxygen = GetPlayerUnderwaterTimeRemaining(PlayerId()) * 10
-	energy = 0
-	stamina = 100 - GetPlayerSprintStaminaRemaining(PlayerId())
-	local status = exports['standalone_status']:GetStatus(config.status)--, function(status)
-	for k,v in pairs(status) do
-		--print(k)
-		Wait(1)
-		--print(v)
-		if k == 'thirst' then
-			thirst = v / 10000
+	local status = exports['standalone_status']:GetStatus(statuses)--, function(status)
+	for k1,v1 in pairs(config.statusordering) do
+		if v1.status == 'stamina' then
+			v1.value = (100 - GetPlayerSprintStaminaRemaining(PlayerId()))
 		end
-		if k == 'sanity' then
-			sanity = v / 10000
+		if v1.status == 'oxygen' then
+			v1.value = GetPlayerUnderwaterTimeRemaining(PlayerId()) * 10
 		end
-		if k == 'energy' then
-			energy = v / 10000
+		if v1.custom then
+			if status[v1.status] ~= nil and status[v1.status] then
+				v1.value = status[v1.status] / 10000
+			end
 		end
-		if k == 'hunger' then
-			hunger = v / 10000
+
+		if config.statusnotify then
+			if not v1.notify_lessthan and v1.rpuidiv ~= 'null' then
+				if notifycd[v1.status] ~= nil and v1.value < v1.notify_value and notifycd[v1.status] < 1 then
+					notifycd[v1.status] = 120
+					Notify('error',v1.status,v1.notify_message)
+				end
+			elseif v1.rpuidiv ~= 'null' then
+				if notifycd[v1.status] ~= nil and v1.value > v1.notify_value and notifycd[v1.status] < 1 then
+					notifycd[v1.status] = 120
+					Notify('error',v1.status,v1.notify_message)
+				end
+			end
+			for k,v in pairs(notifycd) do
+				if v > 1 then
+					v = v - 1
+				end
+			end
 		end
 	end
 	fetch = true
 	while not fetch do
 		Renzuzu.Wait(1)
 	end
-	status = {
-		stress = tonumber(sanity),
-		oxygen = oxygen,
-		thirst = tonumber(thirst),
-		hunger = hunger,
-		energy = energy,
-		stamina = stamina
-	}
 	RenzuSendUI({
 		type = "setStatus",
-		content = status
+		content = config.statusordering
 	})
-	if config.statusnotify then
-		if hunger < 20 and notifycd['hunger'] < 1 then
-			notifycd['hunger'] = 120
-			Notify('error','Hunger',"i am very hungry")
-		elseif thirst < 20 and notifycd['thirst'] < 1 then
-			notifycd['thirst'] = 120
-			Notify('error','Thirst',"i am very thirsty")
-		elseif sanity > 80 and notifycd['sanity'] < 1 then
-			notifycd['sanity'] = 120
-			Notify('error','Sanity',"i see some dragons")
-		elseif energy < 20 and notifycd['energy'] < 1 then
-			notifycd['energy'] = 120
-			Notify('error','Energy',"i am very tired")
-		elseif oxygen < 10 and notifycd['oxygen'] < 1 then
-			notifycd['oxygen'] = 120
-			Notify('error','Oxygen',"my air almost done")
-		end
-		for k,v in pairs(status) do
-			if v > 1 then
-				v = v - 1
-			end
-		end
-	end
 end
 
 	Creation(function()
-		Renzuzu.Wait(1000)
+		Renzuzu.Wait(2000)
+		for k,v in pairs(config.statusordering) do
+			if v.custom then
+				statuses[k] = v.status
+			end
+		end
 		RenzuSendUI({
 			type = "setShowstatusv2",
 			content = config.statusv2
@@ -413,9 +395,12 @@ end)
 
 Creation(function()
 	Wait(1000)
+	RenzuSendUI({type = "SetStatusOrder",content = config.statusordering})
 	RenzuSendUI({type = 'setCarui', content = config.carui})
+	Wait(100)
 	RenzuSendUI({type = "setStatusUI",content = config.statusui})
 	RenzuSendUI({type = "setCompass",content = config.enablecompass})
+	RenzuSendUI({type = "changeallclass",content = config.uidesign})
 	statusplace()
 	--WHEN RESTARTED IN CAR
 	if not uimove then
@@ -515,6 +500,7 @@ Creation(function()
 			start = false
 			invehicle = false
 			speed = 0
+			alreadyturbo = false
 			rpm = 0
 			marcha = 0
 			VehIndicatorLight = 0
@@ -800,6 +786,7 @@ function NuiCarhpandGas()
 					})
 					newcarhealth = hp
 				end
+				--SetVehicleHighGear(vehicle,maxgear)
 			end
 			Renzuzu.Wait(wait)
 		end
@@ -1023,7 +1010,7 @@ function NuiMileAge()
 						veh_stats[plate].nitro = 100
 					end
 					if veh_stats[plate].turbo == nil then
-						veh_stats[plate].turbo = 'racing'
+						veh_stats[plate].turbo = 'default'
 					end
 					if veh_stats[plate].manual == nil then
 						veh_stats[plate].manual = false
@@ -2098,17 +2085,17 @@ end
 function turboboost(gear)
 	local engineload = 0.05
 	if gear == 1 then
-		engineload = 0.05
+		engineload = 0.11
 	elseif gear == 2 then
-		engineload = 0.15
+		engineload = 0.25
 	elseif gear == 3 then
-		engineload = 0.22
+		engineload = 0.35
 	elseif gear == 4 then
-		engineload = 0.275
+		engineload = 0.45
 	elseif gear == 5 then
-		engineload = 0.3
+		engineload = 0.55
 	elseif gear == 6 then
-		engineload = 0.5
+		engineload = 0.65
 	end
 	return engineload 
 end
@@ -2134,6 +2121,7 @@ function Boost(hasturbo)
 	local newgear = 0
 	local rpm = VehicleRpm(vehicle)
 	local gear = GetGear(vehicle)
+	local boost = 1.0
 	Creation(function()
 		while invehicle do
 			local sleep = 2000
@@ -2153,6 +2141,31 @@ function Boost(hasturbo)
 		turbo = config.boost
 	end
 	local torque = 0
+	Creation(function()
+		while invehicle do
+			if IsControlPressed(1, 32) and VehicleRpm(vehicle) > 0.4 then
+				if boost < 1.0 then
+					boost = 1.0
+				end
+				--if not hasturbo then
+					--SetVehStats(vehicle, "CHandlingData", "fDriveInertia", maxforce(engineload * vehicleSpeed,DecorGetFloat(vehicle,"INERTIA")))
+					--SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", maxforce(engineload / maxgear,DecorGetFloat(vehicle,"DRIVEFORCE")))
+				--end
+				--Notify('success',"BOOST",boost)
+				--Notify('success',"PRESSURE",vehicleSpeed)
+				--print(engineload * vehicleSpeed,"inertia")
+				--print(engineload / maxgear,"driveforce")
+				if boost < 0.0 or boost > 45.0 then
+					boost = 1.0
+				end
+				--SetVehicleCheatPowerIncrease(vehicle, (boost * rpm) * rpm)
+				SetVehicleBoost(vehicle, boost*1.01)
+			end
+			Citizen.Wait(7)
+		end
+		alreadyturbo = false
+	end)
+
 	while mode == 'SPORTS' and invehicle or hasturbo and invehicle do
 		local sleep = 2000
 		--local ply = PlayerPedId()
@@ -2172,8 +2185,8 @@ function Boost(hasturbo)
 			local rpm2 = rpm
 			local engineload = (rpm / (gear / 10)) / 100
 			if rpm > 1.15 then
-			elseif rpm > 0.0 then
-				rpm = rpm * turbo
+			elseif rpm > 0.1 then
+				rpm = (rpm * turbo)
 			elseif rpm < 0.0 then
 				rpm = 0.2
 			end
@@ -2181,88 +2194,82 @@ function Boost(hasturbo)
 				rpm2 = 0.2
 			end
 			print(rpm)
-			local vehicleSpeed = GetVehicleTurboPressure(vehicle)
-			--local speed = VehicleSpeed(vehicle) * 3.6
-			if sound and IsControlJustReleased(1, 32) then
-				StopSound(soundofnitro)
-				ReleaseSoundId(soundofnitro)
-				sound = false
-			end
-
-			local lag = 0
-			if IsControlPressed(1, 32) and plate ~= nil and veh_stats[plate] ~= nil then
-				if not sound then
-					soundofnitro = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
-					sound = true
-				end
-				print(engineload,"ENGINELOAD")
-				--SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", oldtopspeed*3.500000)
-				local turbolag = 7 + config.turbo_boost[tostring(veh_stats[plate].turbo)]
-				while lag < (config.lagamount * config.turbo_boost[tostring(veh_stats[plate].turbo)]) and engineload < turboboost(gear) and IsControlPressed(1, 32) do
-					engineload = tonumber((rpm2 * (gear / turbolag)))
-					ShowHelpNotification(tostring(engineload), true, 1, 5)
-					if tonumber(engineload) then
-					engineload =  tonumber(maxnum(((rpm2 + 0.1) * config.turbo_boost[tostring(veh_stats[plate].turbo)])) * (1 + engineload))
-					if engineload > 0.0 and tonumber(engineload) then
-						SetVehicleTurboPressure(vehicle, engineload)
-					end
-					lag = lag + 1
-					end
-					Renzuzu.Wait(1)
-				end
-				print("FUCK")
-				if savegear ~= oldg or oldg == nil then
-					oldg = savegear
-					--ShowHelpNotification(rpm, true, 1, 5)
-					Notify('success',"KICK",rpm2)
-					gago = true
-				end
-				if config.boost_sound and rpm2 > 0.65 and rpm2 < 0.95 and turbosound < 10 and gear == oldgear and engineload > turboboost(gear) then
-					turbosound = turbosound + 1
-					SetVehicleBoostActive(vehicle, 1, 0)
-					SetVehicleBoostActive(vehicle, 0, 0)
-				else
-					turbosound = 0
-				end
-				oldgear = gear
-			else
-				if sound then
+			if tonumber(rpm) then
+				local vehicleSpeed = GetVehicleTurboPressure(vehicle)
+				--local speed = VehicleSpeed(vehicle) * 3.6
+				if sound and IsControlJustReleased(1, 32) then
 					StopSound(soundofnitro)
 					ReleaseSoundId(soundofnitro)
 					sound = false
 				end
-				Renzuzu.Wait(500) -- TURBO LAG
-			end
-			if reset and not IsControlPressed(1, 32) then
-				SetVehicleTurboPressure(vehicle, 0.0)
-			end
-			vehicleSpeed = GetVehicleTurboPressure(vehicle)
-			if gear == 0 then
-				gear = 1
-			end
-			boost = (vehicleSpeed * 7)
-			if plate ~= nil and veh_stats[plate] and config.turbo_boost[tostring(veh_stats[plate].turbo)] > config.boost then
-				boostlevel = config.turbo_boost[veh_stats[plate].turbo]
-			else
-				boostlevel = config.boost
-			end
-			if degrade ~= 1.0 then -- config.turbo_boost[veh_stats[plate].turbo]
-				boost = boost * (degrade / boostlevel)
-			end
-			--ShowHelpNotification(boost, true, 1, 5)
-			if IsControlPressed(1, 32) and VehicleRpm(vehicle) > 0.4 then
-				--if not hasturbo then
-					SetVehStats(vehicle, "CHandlingData", "fDriveInertia", maxforce(engineload * vehicleSpeed,DecorGetFloat(vehicle,"INERTIA")))
-					SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", maxforce(engineload / maxgear,DecorGetFloat(vehicle,"DRIVEFORCE")))
-				--end
-				--Notify('success',"BOOST",boost)
-				--Notify('success',"PRESSURE",vehicleSpeed)
-				print(engineload * vehicleSpeed,"inertia")
-				print(engineload / maxgear,"driveforce")
-				if boost < 0.0 then
-					boost = 1.0
+
+				local lag = 1
+				local pressure = 0.5
+				if IsControlPressed(1, 32) and plate ~= nil and veh_stats[plate] ~= nil then
+					local turbo_type = tostring(veh_stats[plate].turbo or 'default')
+					if not sound then
+						soundofnitro = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
+						sound = true
+					end
+					print(engineload,"ENGINELOAD")
+					--SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", oldtopspeed*3.500000)
+					local turbolag = 5 + config.turbo_boost[turbo_type]
+					local maxspeed = maxspeed
+					if maxspeed > 200 then
+						maxspeed = 200
+					end
+					while veh_stats[plate] ~= nil and lag < (config.lagamount[turbo_type] * config.turbo_boost[turbo_type]) and (engineload / ((maxspeed) / (config.lagamount[turbo_type] * lag))) < turboboost(gear) and IsControlPressed(1, 32) do
+						engineload = tonumber((rpm * (gear / turbolag)))
+						ShowHelpNotification(tostring(engineload), true, 1, 5)
+						if tonumber(engineload) then
+						--engineload =  tonumber(maxnum(((rpm2 + 0.1) * config.turbo_boost[tostring(veh_stats[plate].turbo)])) * (1 + engineload))
+						if engineload > 0.0 and engineload < 10.0 and tonumber(engineload) then
+							pressure = (tonumber(rpm * config.turbo_boost[turbo_type]) + (engineload))
+						end
+						lag = lag + 0.1
+						end
+						Renzuzu.Wait(1)
+						--Notify('success',"PRESSURE",lag)
+						drawTxt("BOOST lag:  "..(config.lagamount[turbo_type] * lag).."",4,0.5,0.93,0.50,255,255,255,180)
+						drawTxt("BOOST engineload:  "..(engineload / (DecorGetFloat(vehicle,"TOPSPEED") / (config.lagamount[turbo_type] * lag))).."",4,0.5,0.83,0.50,255,255,255,180)
+					end
+					drawTxt("BOOST pressure:  "..pressure.."",4,0.5,0.79,0.50,255,255,255,180)
+					if config.boost_sound and rpm2 > 0.65 and rpm2 < 0.95 and turbosound < 5 and gear == oldgear and engineload > turboboost(gear) then
+						turbosound = turbosound + 1
+						SetVehicleBoostActive(vehicle, 1, 0)
+						SetVehicleBoostActive(vehicle, 0, 0)
+					else
+						turbosound = 0
+					end
+					oldgear = gear
+				else
+					if sound then
+						StopSound(soundofnitro)
+						ReleaseSoundId(soundofnitro)
+						sound = false
+					end
+					Renzuzu.Wait(500) -- TURBO LAG
 				end
-				SetVehicleBoost(vehicle, boost)
+				if reset and not IsControlPressed(1, 32) then
+					SetVehicleTurboPressure(vehicle, 0.0)
+				end
+				SetVehicleTurboPressure(vehicle, pressure)
+				vehicleSpeed = GetVehicleTurboPressure(vehicle)
+				if gear == 0 then
+					gear = 1
+				end
+				boost = (vehicleSpeed * 7)
+				if degrade ~= 1.0 then -- config.turbo_boost[veh_stats[plate].turbo]
+					if plate ~= nil and veh_stats[plate] and config.turbo_boost[turbo_type] > config.boost then
+						boostlevel = config.turbo_boost[turbo_type]
+					else
+						boostlevel = config.boost
+					end
+					boost = boost * (degrade / boostlevel)
+				end
+				--ShowHelpNotification(boost, true, 1, 5)
+			else
+				rpm = VehicleRpm(vehicle)
 			end
 		end
 		Renzuzu.Wait(sleep)
@@ -2299,6 +2306,8 @@ end
 RenzuNetEvent('renzu_hud:install_turbo')
 RenzuEventHandler('renzu_hud:install_turbo', function(type)
 	local type = type
+	turboanimation(type)
+	Citizen.Wait(2000)
 	playanimation('creatures@rottweiler@tricks@','petting_franklin')
 	--ExecuteCommand("e petting")
 	Renzuzu.Wait(2500)
@@ -2894,7 +2903,11 @@ function statusplace()
 			table = {['top'] = '100px', ['left'] = '1px'}
 		end
 	elseif placing == 'bottom-left' then
-		table = {['bottom'] = '20px', ['left'] = '-35px'}
+		if config.statusui == 'simple' then
+			table = {['bottom'] = '30px', ['left'] = '14vh'}
+		else
+			table = {['bottom'] = '20px', ['left'] = '-35px'}
+		end
 	elseif placing == 'bottom-right' then
 		table = {['bottom'] = '20px', ['right'] = '25px'}
 	elseif placing == 'bottom-center' then
@@ -3197,6 +3210,7 @@ AddEventHandler('renzu_hud:healbody', function(bodypart)
 		type = "setUpdateBodyStatus",
 		content = bonecategory
 	})
+	--lastdamage = nil
 	Notify('success','Body System',"You have been healed")
 end)
 
@@ -3896,6 +3910,38 @@ function tireanimation()
 	SetEntityCollision(proptire,false,false)
 	AttachEntityToEntity(proptire,ped,GetPedBoneIndex(ped,28422),0.0,0.0,0.0,0.0,0.0,0.0,false,false,false,false,2,true)
 	Citizen.InvokeNative(0xAD738C3085FE7E11,proptire,true,true)
+end
+
+local propturbo = nil
+function turboanimation(type)
+	--CarregarObjeto("anim@heists@box_carry@","idle","hei_prop_heist_box",50,28422)
+	local ped = PlayerPedId()
+	local prop = 'smallturbo'
+	local offset = -0.75
+	local offsetz = -0.135
+	if type == 'racing' then
+		prop = 'bigturbo'
+		offset = -1.85
+		offsetz = 0.05
+	elseif type == 'sports' then
+		prop = 'mediumturbo'
+		offset = -1.35
+	elseif type == 'street' then
+		prop = 'smallturbo'
+		offset = -0.75
+	end
+	RequestModel(GetHashKey(prop))
+	while not HasModelLoaded(GetHashKey(prop)) do
+		Citizen.Wait(10)
+	end
+	local coords = GetOffsetFromEntityInWorldCoords(ped,0.0,0.0,-5.0)
+	propturbo = CreateObjectNoOffset(GetHashKey(prop),coords.x,coords.y,coords.z,false,true,false)
+	SetEntityCollision(propturbo,true,true)
+	-- SetEntityCompletelyDisableCollision(propturbo,false,true)
+	-- SetEntityNoCollisionEntity(getveh(),propturbo,false)
+	--SetEntityAlpha(propturbo,255,false)
+	AttachEntityToEntity(propturbo,getveh(),GetEntityBoneIndexByName(getveh(),'overheat'),0.0,offset,offsetz,0.0,0.0,0.0,false,true,false,false,70,true)
+	Citizen.InvokeNative(0xAD738C3085FE7E11,propturbo,true,true)
 end
 
 function TireFunction(type)

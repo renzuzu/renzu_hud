@@ -41,7 +41,7 @@ Citizen.CreateThread(function()
 	
 		ESX.RegisterUsableItem('turbo_street', function(source)
 			local xPlayer = GetPlayerFromId(source)
-			TriggerClientEvent("renzu_hud:install_turbo", source, 'default')
+			TriggerClientEvent("renzu_hud:install_turbo", source, 'street')
 			xPlayer.removeInventoryItem('turbo_street', 1)
 		end)
 	

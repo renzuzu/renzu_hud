@@ -42,27 +42,27 @@ function setHp(s) {
 }
 
 function setMic(type) {
-    $("#mic-color").removeClass("amarelo");
-    $("#mic-color").removeClass("verde");
-    $("#mic-color").removeClass("azul");
-    $("#mic-color").removeClass("vermelho");
+    // $("#mic-color").removeClass("amarelo");
+    // $("#mic-color").removeClass("verde");
+    // $("#mic-color").removeClass("azul");
+    // $("#mic-color").removeClass("vermelho");
 
     switch (type) {
         case 1:
-        $("#mic-text").html("Whisper");
-        $("#mic-color").addClass("amarelo");
+        new Notify ({status: 'success',title: 'Voice System',text: 'VOIP : Whisper Mode',autoclose: true})
+        $("#microphone").css("color", 'rgb(227, 250, 22)');
         break;
         case 2:
-        $("#mic-text").html("Normal");
-        $("#mic-color").addClass("verde");
+        new Notify ({status: 'success',title: 'Voice System',text: 'VOIP : Normal Mode',autoclose: true})
+        $("#microphone").css("color", 'rgb(23, 255, 15)');
         break;    
         case 3:
-        $("#mic-text").html("Shout");
-        $("#mic-color").addClass("vermelho");
+        new Notify ({status: 'success',title: 'Voice System',text: 'VOIP : Shout Mode',autoclose: true})
+        $("#microphone").css("color", 'rgb(255, 35, 6)');
         break;
         default:
-        $("#mic-text").html("Normal");
-        $("#mic-color").addClass("verde");
+        new Notify ({status: 'success',title: 'Voice System',text: 'VOIP : Normal Mode',autoclose: true})
+        $("#microphone").css("color", 'rgb(23, 255, 15)');
         break;
     }
 }
@@ -159,18 +159,24 @@ function toclip(val) {
 }
 
 function setStatus(table) {
-    document.getElementById("hunger").style.width = ''+table.hunger+'%'
-    document.getElementById("thirst").style.width = ''+table.thirst+'%'
-    document.getElementById("stressbar").style.width = ''+table.stress+'%'
-    document.getElementById("staminabar").style.width = ''+table.stamina+'%'
-    document.getElementById("oxygenbar").style.width = ''+table.oxygen+'%'
-    document.getElementById("energybar").style.width = ''+table.energy+'%'
-    document.getElementById("food2").style.clip = 'rect('+toclip(table.hunger)+', 100px, 100px, 0)'
-    document.getElementById("water2").style.clip = 'rect('+toclip(table.thirst)+', 100px, 100px, 0)'
-    document.getElementById("stress2").style.clip = 'rect('+toclip(table.stress)+', 100px, 100px, 0)'
-    document.getElementById("stamina2").style.clip = 'rect('+toclip(table.stamina)+', 100px, 100px, 0)'
-    document.getElementById("oxygen2").style.clip = 'rect('+toclip(table.oxygen)+', 100px, 100px, 0)'
-    document.getElementById("energy2").style.clip = 'rect('+toclip(table.energy)+', 100px, 100px, 0)'
+    for (const i in table) {
+        if (table[i].rpuidiv !== 'null') {
+            document.getElementById(table[i].rpuidiv).style.width = ''+table[i].value+'%'
+            document.getElementById(table[i].i_id_1).style.clip = 'rect('+toclip(table[i].value)+', 100px, 100px, 0)'
+        }
+    }
+    // document.getElementById("hunger").style.width = ''+table.hunger+'%'
+    // document.getElementById("thirst").style.width = ''+table.thirst+'%'
+    // document.getElementById("stressbar").style.width = ''+table.stress+'%'
+    // document.getElementById("staminabar").style.width = ''+table.stamina+'%'
+    // document.getElementById("oxygenbar").style.width = ''+table.oxygen+'%'
+    // document.getElementById("energybar").style.width = ''+table.energy+'%'
+    // document.getElementById("food2").style.clip = 'rect('+toclip(table.hunger)+', 100px, 100px, 0)'
+    // document.getElementById("water2").style.clip = 'rect('+toclip(table.thirst)+', 100px, 100px, 0)'
+    // document.getElementById("stress2").style.clip = 'rect('+toclip(table.stress)+', 100px, 100px, 0)'
+    // document.getElementById("stamina2").style.clip = 'rect('+toclip(table.stamina)+', 100px, 100px, 0)'
+    // document.getElementById("oxygen2").style.clip = 'rect('+toclip(table.oxygen)+', 100px, 100px, 0)'
+    // document.getElementById("energy2").style.clip = 'rect('+toclip(table.energy)+', 100px, 100px, 0)'
 }
 
 function setShowstatus(bool) {
@@ -1077,10 +1083,12 @@ function setStatusUI(ver) {
         document.getElementById("location").style.top = '60px';
         document.getElementById("location").style.right = '60px';
         document.getElementById("location").style.width = '280px';
-        document.getElementById("mic").style.top = '24px';
-        document.getElementById("mic").style.right = '363px';
-        document.getElementById("mic-color").style.width = '15px';
-        document.getElementById("mic-color").style.height = '27px';
+        document.getElementById("voip_1").innerHTML = '';
+        //document.getElementById("mic").style.right = '363px';
+        //document.getElementById("mic-color").style.width = '15px';
+        //document.getElementById("mic-color").style.height = '27px';
+    } else {
+        document.getElementById("voip_2").innerHTML = '';
     }
 }
 
@@ -1363,6 +1371,36 @@ function SetNotify(table) {
         $.post('http://hud/resetclothing', JSON.stringify({}))
     }
 
+    function hasClass(element, className) {
+        return (' ' + element.className + ' ').indexOf(' ' + className+ ' ') > -1;
+    }
+
+    function changeallclass(setting) {
+        var all = document.getElementsByClassName('fa-octagon');
+        for (var i = 0; i < all.length; i++) {
+            all[i].classList.toggle("fa-"+setting+"");
+        }
+    }
+
+    function SetStatusOrder(statuses) {
+        var offsetplus = -35
+        for (const i in statuses) {
+            console.log(statuses[i].status)
+            var offset = statuses[0].offset
+            offsetplus = offsetplus + 35
+            offset = (+offset - +offsetplus)
+            console.log(offset)
+            var class1 = statuses[i].i_id_1_class
+            var class2 = statuses[i].i_id_2_class
+            var color1 = statuses[i].i_id_1_color
+            var color2 = statuses[i].i_id_2_color
+            var divid = statuses[i].id
+            var i_id_1 = statuses[i].i_id_1
+            var i_id_2 = statuses[i].i_id_2
+            $("#statusv3").append('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:17px;position:absolute;right:'+offset+'px;top:-28px;color:rgba(144, 144, 144, 0.876)"> <i class="fas fa-octagon fa-stack-2x" style="font-size:17px;color:rgba(11, 39, 63, 0.707)"></i> <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+class1+'" style="font-size:19px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+class2+'" style="font-size:19px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
+        }
+    }
+
 
 //FUNCTIONS
 var renzu_hud = {
@@ -1388,6 +1426,8 @@ var renzu_hud = {
     ResetClotheState,
     setStatusUILocation,
     setMoveStatusUi,
+    changeallclass,
+    SetStatusOrder,
     //CAR
     setShow,
     setRpm,
@@ -1425,7 +1465,6 @@ var renzu_hud = {
     setMapVersion,
 
 };
-setMic(2);
 
 window.addEventListener("message", event => {
     const item = event.data || event.detail;
@@ -1448,5 +1487,6 @@ setTimeout(function(){
     $(".fadeout").fadeOut();
     $(".loading").fadeOut();
     setMode('NORMAL',carui)
+    setMic(2)
 }, 4000);
 pedface()

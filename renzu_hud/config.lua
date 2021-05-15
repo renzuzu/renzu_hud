@@ -1,7 +1,7 @@
 config = {}
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- VARIABLES
-identifier=nil;veh_stats=nil;Renzuzu=Citizen;entering=false;mode='NORMAL'ismapopen=false;date="00:00"plate=nil;degrade=1.0;playerloaded=false;manual=false;vehicletopspeed=nil;uimove=false;reverse=false;savegear=0;rpm=0.2;hour=0;vali=false;minute=0;globaltopspeed=nil;segundos=0;month=""dayOfMonth=0;voice=2;voiceDisplay=2;proximity=25.0;belt=false;ExNoCarro=false;sBuffer={}vBuffer={}displayValue=true;gasolina=0;street=nil;vehicle=nil;hp=0;shifter=false;hasNitro=true;k_nitro=70;n_boost=15.0;boost=1.0;nitro_state=100;isBlack="false"invehicle=false;topspeedmodifier=1.0;switch=false;life=100;receive='new'bodystatus={}bonecategory={}parts={}bodyui=false;body=false;arm=false;armbone=0;armbone2=0;leg=false;head=false;shooting=false;manualstatus=false;traction=nil;traction2=nil;alreadyturbo=false
+identifier=nil;maxgear=5;veh_stats=nil;Renzuzu=Citizen;entering=false;mode='NORMAL'ismapopen=false;date="00:00"plate=nil;degrade=1.0;playerloaded=false;manual=false;vehicletopspeed=nil;uimove=false;reverse=false;savegear=0;rpm=0.2;hour=0;vali=false;minute=0;globaltopspeed=nil;segundos=0;month=""dayOfMonth=0;voice=2;voiceDisplay=2;proximity=25.0;belt=false;ExNoCarro=false;sBuffer={}vBuffer={}displayValue=true;gasolina=0;street=nil;vehicle=nil;hp=0;shifter=false;hasNitro=true;k_nitro=70;n_boost=15.0;boost=1.0;nitro_state=100;isBlack="false"invehicle=false;topspeedmodifier=1.0;switch=false;life=100;receive='new'bodystatus={}bonecategory={}parts={}bodyui=false;body=false;arm=false;armbone=0;armbone2=0;leg=false;head=false;shooting=false;manualstatus=false;traction=nil;traction2=nil;alreadyturbo=false;Creation=Renzuzu.CreateThread;Renzu_Hud=Renzuzu.InvokeNative;ClientEvent=TriggerEvent;RenzuNetEvent=RegisterNetEvent;RenzuEventHandler=AddEventHandler;RenzuCommand=RegisterCommand;RenzuSendUI=SendNUIMessage;RenzuKeybinds=RegisterKeyMapping;RenzuNuiCallback=RegisterNUICallback;ReturnFloat=Renzuzu.ResultAsFloat()ReturnInt=Renzuzu.ResultAsInteger()
 -----------------------------------------------------------------------------------------------------------------------------------------
 
 config.framework = 'ESX' -- ESX | VRP | QSHIT | STANDALONE
@@ -18,10 +18,11 @@ config.loadedasmp = true -- if player model is mp player, pass the loaded event 
 --MULTI CHAR END
 --MAIN UI CONFIG START
 config.enablecompass = true -- enable/disable compass
-config.carui = 'minimal' -- Choose a Carui Version ( simple, minimal, modern )
+config.carui = 'simple' -- Choose a Carui Version ( simple, minimal, modern )
 config.statusui = 'normal' -- UI LOOK ( simple, normal)
 config.statusv2 = true -- enable this if you want the status toggle mode (TOGGLE VIA INSERT) (THIS INCLUDE RP PURPOSE HUD like job,money,etc.)
 config.statusplace = 'top-right' -- available option top-right,top-left,bottom-right,bottom-left,top-center,bottom-center
+config.uidesign = 'octagon' -- octagon (default), circle, square
 --CHANGE ACCORDING TO YOUR STATUS ESX STATUS OR ANY STATUS MOD
 --UI CONFIG END
 --start car map
@@ -49,12 +50,17 @@ config.boost = 0.2 -- Boost Level when sports mode is activated eg. 1.5 Bar, you
 config.sports_increase_topspeed = true -- do you want the topspeed will be affected? some Fivem Servers Likes a demonic topspeed :D - not good in RP. Boost only affects engine torque and horsepower not the gear ratio and final drive of transmision which affects topspeed
 config.topspeed_multiplier = 1.1 -- if sports_increase_topspeed is enable, multiplier 1.5 = x1.5 eg. normal top speed 200kmh if you put 1.5 the new topspeed is 300kmh
 config.eco = 0.5 -- Eco Level when Eco Mode is activated (this affect the efficiency of fuel)
-config.boost_sound = false
+config.boost_sound = true
 --TURBO if using turbo the sports vehicle mode will not add torque anymore if the current turbo power is greater than the config.boost .
 config.useturboitem = true -- this is ESX only for now
-config.lagamount = 100 --- affect turbo lag more numbers mean more lag but more power produced, smaller turbo should be lower lag like 100 is good start.
+config.lagamount = {
+	['default'] = 20,
+	['street'] = 50,
+    ['sports'] = 100,
+    ['racing'] = 150,
+} --- affect turbo lag more numbers mean more lag but more power produced, smaller turbo should be lower lag like 100 is good start.
 config.turbo_boost = { -- turbo boost
-    ['default'] = 0.0,
+    ['default'] = config.boost,
     ['street'] = 0.5,
     ['sports'] = 1.0,
     ['racing'] = 2.0,
@@ -121,6 +127,18 @@ config.status = { -- maximum 4 only for now, and it is preconfigured, (this is n
 	'thirst',
 	'sanity',
 	'hunger'
+}
+--advanced usage if you want to add more status and reorder it.
+--the config have the div id's, offsets, colors, classes per status.
+config.statusordering = { -- offset is additional 35px per status, 275 default is the starting from health status.
+	[0] = {status = 'health', rpuidiv = 'null', custom = false, value = 0, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'none', id = 'uisimplehp', offset = '275', i_id_1 = 'healthsimple', i_id_1_color = 'rgb(251, 29, 9)', i_id_1_class = 'fas fa-heartbeat fa-stack-1x', i_id_2 = 'healthsimplebg', i_id_2_color = 'rgb(251, 29, 9)', i_id_2_class = 'fas fa-heartbeat fa-stack-1x'},
+	[1] = {status = 'armor', rpuidiv = 'null', custom = false, value = 0, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'none', id = 'uisimplearmor', offset = '275', i_id_1 = 'armorsimple', i_id_1_color = 'rgb(1, 103, 255)', i_id_1_class = 'far fa-shield-alt fa-stack-1x', i_id_2 = 'armorsimplebg', i_id_2_color = 'rgb(0, 41, 129)', i_id_2_class = 'far fa-shield-alt fa-stack-1x'},
+	[2] = {status = 'hunger', rpuidiv = 'hunger', custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'block', id = 'uisimplehunger', offset = '275', i_id_1 = 'food2', i_id_1_color = 'rgb(221, 144, 0)', i_id_1_class = 'fad fa-cheeseburger fa-stack-1x', i_id_2 = 'food2bg', i_id_2_color = 'rgb(114, 68, 0)', i_id_2_class = 'fad fa-cheeseburger fa-stack-1x'},
+	[3] = {status = 'thirst', rpuidiv = 'thirst', custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very thirsty', notify_value = 20, display = 'block', id = 'uisimplethirst', offset = '275', i_id_1 = 'water2', i_id_1_color = 'rgb(36, 113, 255)', i_id_1_class = 'fad fa-glass fa-stack-1x', i_id_2 = 'water2bg', i_id_2_color = 'rgb(0, 11, 112)', i_id_2_class = 'fad fa-glass fa-stack-1x'},
+	[4] = {status = 'sanity', rpuidiv = 'stressbar', custom = true, value = 0, notify_lessthan = true, notify_message = 'i see some dragons', notify_value = 80, display = 'block', id = 'uisimplesanity', offset = '275', i_id_1 = 'stress2', i_id_1_color = 'rgb(255, 16, 68)', i_id_1_class = 'fad fa-head-side-brain fa-stack-1x', i_id_2 = 'stress2bg', i_id_2_color = 'rgba(35, 255, 101, 0.842)', i_id_2_class = 'fad fa-head-side-brain fa-stack-1x'},
+	[5] = {status = 'stamina', rpuidiv = 'staminabar', custom = false, value = 0, notify_lessthan = false, notify_message = 'running makes me thirsty', notify_value = 20, display = 'block', id = 'uisimplestamina', offset = '275', i_id_1 = 'stamina2', i_id_1_color = 'rgb(16, 255, 136)', i_id_1_class = 'fad fa-running fa-stack-1x', i_id_2 = 'stamina2bg', i_id_2_color = 'rgba(0, 119, 57, 0.945)', i_id_2_class = 'fad fa-running fa-stack-1x'},
+	[6] = {status = 'oxygen', rpuidiv = 'oxygenbar', custom = false, value = 0, notify_lessthan = false, notify_message = 'my oxygen is almost gone', notify_value = 20, display = 'block', id = 'uisimpleoxygen', offset = '275', i_id_1 = 'oxygen2', i_id_1_color = 'rgb(15, 227, 255)', i_id_1_class = 'fad fa-lungs fa-stack-1x', i_id_2 = 'oxygen2bg', i_id_2_color = 'rgba(8, 76, 85, 0.788)', i_id_2_class = 'fad fa-lungs fa-stack-1x'},
+	[7] = {status = 'energy', rpuidiv = 'energybar', custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very tired', notify_value = 20, display = 'block', id = 'uisimpleenergy', offset = '275', i_id_1 = 'energy2', i_id_1_color = 'rgb(233, 233, 233)', i_id_1_class = 'fas fa-snooze fa-stack-1x', i_id_2 = 'energy2bg', i_id_2_color = 'color:rgb(243, 57, 0)', i_id_2_class = 'fas fa-snooze fa-stack-1x'},
 }
 -- BODY STATUS
 config.bodystatus = true -- ENABLE BODY STATUS FUNCTION AND UI?
@@ -544,8 +562,6 @@ config.Rpm_sleep = 151
 config.Rpm_sleep_2 = 52
 config.Speed_sleep = 151
 config.Speed_sleep_2 = 52
-Creation=Renzuzu.CreateThread;Renzu_Hud=Renzuzu.InvokeNative;ClientEvent=TriggerEvent;RenzuNetEvent=RegisterNetEvent;RenzuEventHandler=AddEventHandler;RenzuCommand=RegisterCommand;RenzuSendUI=SendNUIMessage;RenzuKeybinds=RegisterKeyMapping;RenzuNuiCallback=RegisterNUICallback;ReturnFloat=Renzuzu.ResultAsFloat()ReturnInt=Renzuzu.ResultAsInteger()
-
 -- GEAR FUNCTION
 function SetRpm(veh, val)
     Renzu_Hud(0x2A01A8FC, veh, val)
