@@ -110,24 +110,42 @@ Citizen.CreateThread(function()
 			TriggerClientEvent("renzu_hud:manual", source, true)
 			xPlayer.removeInventoryItem('manual_tranny', 1)
 		end)
+		if config.use_esx_accesories then
+			-- COPYRIGHT TO ESX ACCESOSRIES LINK https://github.com/esx-framework/esx_accessories/blob/e812dde63bcb746e9b49bad704a9c9174d6329fa/server/main.lua#L31
+			ESX.RegisterServerCallback('esx_accessories:get', function(source, cb, accessory)
+				print("SKINS")
+				local xPlayer = GetPlayerFromId(source)
+				TriggerEvent('esx_datastore:getDataStore', 'user_' .. string.lower(accessory), xPlayer.identifier, function(store)
+				local hasAccessory = (store.get('has' .. accessory) and store.get('has' .. accessory) or false)
+				local skin = (store.get('skin') and store.get('skin') or {})
+
+					cb(hasAccessory, skin)
+				end)
+			end)
+		end
 	end
 end)
 
 RegisterServerEvent("renzu_hud:savedata")
 AddEventHandler("renzu_hud:savedata", function(plate,table)
 	local plate = plate
+	local foundplate = false
 	if plate ~= nil then
 		print("SAVING")
 		adv_table[tostring(plate)] = table
-		TriggerClientEvent('renzu_hud:receivemile', -1, adv_table)
 		MySQL.Async.fetchAll("SELECT adv_stats,plate,owner FROM owned_vehicles WHERE plate=@plate", {['@plate'] = plate}, function(results)
 			if #results > 0 then
+				foundplate = true
 				MySQL.Sync.execute("UPDATE owned_vehicles SET adv_stats = @adv_stats WHERE plate = @plate", {
 					['@adv_stats'] = json.encode(adv_table[tostring(plate)]),
 					['@plate'] = plate
 				})
 			end
 		end)
+		if not foundplate then
+			adv_table[tostring(plate)].owner = nil
+		end
+		TriggerClientEvent('renzu_hud:receivemile', -1, adv_table)
 	end
 end)
 
@@ -171,6 +189,11 @@ end)
 bodytable = {}
 RegisterServerEvent('renzu_hud:checkbody')
 AddEventHandler('renzu_hud:checkbody', function()
+	if config.framework == 'ESX' then
+		while ESX == nil do
+			Wait(10)
+		end
+	end
 	local source = source
 	local xPlayer = GetPlayerFromId(source)
 	local done = false

@@ -151,25 +151,25 @@ Creation(function()
 	end
 end)
 
-local newfreq = nil
-RenzuNetEvent("radio:freq")
-RenzuEventHandler("radio:freq", function(freq)
-		if newfreq ~= freq or newfreq == nil then
-		RenzuSendUI({
-		type = "setRadio",
-		content = freq
-		})
-		newfreq = freq
-		end
-end)
+-- local newfreq = nil
+-- RenzuNetEvent("radio:freq")
+-- RenzuEventHandler("radio:freq", function(freq)
+-- 		if newfreq ~= freq or newfreq == nil then
+-- 		RenzuSendUI({
+-- 		type = "setRadio",
+-- 		content = freq
+-- 		})
+-- 		newfreq = freq
+-- 		end
+-- end)
 charslot = nil
 RenzuNetEvent('renzu_hud:charslot')
 RenzuEventHandler('renzu_hud:charslot', function(charid)
 	charslot = charid
-	print(charslot)
-	print(charslot)
-	print(charslot)
-	print(charslot)
+	--print(charslot)
+	--print(charslot)
+	--print(charslot)
+	--print(charslot)
 	while not playerloaded do
 		Wait(100)
 	end
@@ -199,15 +199,15 @@ end
 Creation(function()
 	if charslot == nil and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0.0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= nil then
 		charslot = round(DecorGetFloat(PlayerPedId(),"CHARSLOT"))
-		print("CHARSLOT")
+		--print("CHARSLOT")
 	else
 		Citizen.Wait(4000)
 	end
 	if DecorExistOn(PlayerPedId(), "PLAYERLOADED") and charslot ~= nil then
-		print("PLAYERLOADED")
+		--print("PLAYERLOADED")
 		TriggerServerEvent("renzu_hud:getdata",charslot)
 	elseif config.loadedasmp and isplayer() then
-		print("ISMP")
+		--print("ISMP")
 		TriggerServerEvent("renzu_hud:getdata",0, true)
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 	end
@@ -216,7 +216,7 @@ Creation(function()
 		RenzuEventHandler('esx:playerLoaded', function(xPlayer)
 			playerloaded = true
 			Renzuzu.Wait(2000)
-			print("ESX")
+			--print("ESX")
 			lastped = PlayerPedId()
 			TriggerServerEvent("renzu_hud:getdata",charslot)
 			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
@@ -296,26 +296,34 @@ for k,v in pairs(config.statusordering) do
 end
 
 local statuses = {}
+local vitals = {}
+local statusloop = -1
 function updateStatus(pressed)
+	local sleep = 0
 	if not config.statusv2 or pressed then
 		Myinfo()
 	end
-	local fetch = false
-	local status = exports['standalone_status']:GetStatus(statuses)--, function(status)
+	if statusloop == -1 or statusloop > 50 or pressed then
+		vitals = exports['standalone_status']:GetStatus(statuses)
+		statusloop = 0
+	else
+		sleep = 100
+	end
+
 	for k1,v1 in pairs(config.statusordering) do
 		if v1.status == 'stamina' then
-			v1.value = (100 - GetPlayerSprintStaminaRemaining(PlayerId()))
+			v1.value = (100 - GetPlayerSprintStaminaRemaining(pid))
 		end
 		if v1.status == 'oxygen' then
-			v1.value = GetPlayerUnderwaterTimeRemaining(PlayerId()) * 10
+			v1.value = GetPlayerUnderwaterTimeRemaining(pid) * 10
 		end
-		if v1.custom then
-			if status[v1.status] ~= nil and status[v1.status] then
-				v1.value = status[v1.status] / 10000
+		if v1.custom and statusloop <= 1  then
+			if vitals[v1.status] ~= nil and vitals[v1.status] then
+				v1.value = vitals[v1.status] / 10000
 			end
 		end
 
-		if config.statusnotify then
+		if config.statusnotify and statusloop <= 1 then
 			if not v1.notify_lessthan and v1.rpuidiv ~= 'null' then
 				if notifycd[v1.status] ~= nil and v1.value < v1.notify_value and notifycd[v1.status] < 1 then
 					notifycd[v1.status] = 120
@@ -333,11 +341,9 @@ function updateStatus(pressed)
 				end
 			end
 		end
+		Wait(sleep)
 	end
-	fetch = true
-	while not fetch do
-		Renzuzu.Wait(1)
-	end
+	statusloop = statusloop + 1
 	RenzuSendUI({
 		type = "setStatus",
 		content = config.statusordering
@@ -395,7 +401,8 @@ end)
 
 Creation(function()
 	Wait(1000)
-	RenzuSendUI({type = "SetStatusOrder",content = config.statusordering})
+	local tbl = config.statusordering
+	RenzuSendUI({type = "SetStatusOrder",content = tbl})
 	RenzuSendUI({type = 'setCarui', content = config.carui})
 	Wait(100)
 	RenzuSendUI({type = "setStatusUI",content = config.statusui})
@@ -429,8 +436,8 @@ Creation(function()
 		ped = PlayerPedId()
 		vehicle = GetVehiclePedIsIn(ped)
 		if vehicle ~= nil and vehicle ~= 0 then
-			plate = tostring(GetVehicleNumberPlateText(vehicle))
-			plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+			-- plate = tostring(GetVehicleNumberPlateText(vehicle))
+			-- plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
 			hp = GetVehicleEngineHealth(vehicle)
 			gasolina = GetVehicleFuelLevel(vehicle)
 			if uimove then
@@ -465,9 +472,9 @@ Creation(function()
 					SetNuiFocus(false,false)
 					Renzuzu.Wait(100)
 					SetVehicleEngineOn(vehicle,true,false,true)
-					print("starting engine")
+					--print("starting engine")
 					while not GetIsVehicleEngineRunning do
-						print("starting")
+						--print("starting")
 						SetVehicleEngineOn(vehicle,true,false,true)
 						Renzuzu.Wait(0)
 					end
@@ -500,13 +507,18 @@ Creation(function()
 			start = false
 			invehicle = false
 			speed = 0
-			alreadyturbo = false
 			rpm = 0
 			marcha = 0
 			VehIndicatorLight = 0
 			--DisplayRadar(false)
 			if config.statusplace == 'bottom-right' then
 				RenzuSendUI({type = "setMoveStatusUi",content = false})
+			end
+			if alreadyturbo then
+				RenzuSendUI({
+					type = "setShowTurboBoost",
+					content = false
+				})
 			end
 			if not uimove then
 				Renzuzu.Wait(500)
@@ -535,6 +547,7 @@ Creation(function()
 				})
 				manual = false
 			end
+			alreadyturbo = false
 			Renzuzu.Wait(1000)
 			uimove = true
 		end
@@ -574,7 +587,7 @@ function SavevehicleHandling()
 	else
 		SetVehicleHandlingField(vehicle, "CHandlingData", "nInitialDriveGears", DecorGetFloat(vehicle,"MAXGEAR"))
 		maxgear = DecorGetFloat(vehicle,"MAXGEAR")
-		print(maxgear)
+		--print(maxgear)
 	end
 
 	if not DecorExistOn(vehicle, "TRACTION") then
@@ -630,21 +643,24 @@ function inVehicleFunctions()
 		NuiRpm()
 		NuiSpeed()
 		NuiCarhpandGas()
+		while not loadedplate do
+			Wait(100)
+		end
 		NuiDistancetoWaypoint()
-		NuiHeadlights()
-		NuiGear()
+		--NuiHeadlights()
+		--NuiGear()
 		NuiMileAge()
-		NuiVehicleClock()
-		NuiVehicledoorstatus()
-		NuiVehicleHandbrake()
+		--NuiVehicleClock()
+		--NuiVehicledoorstatus()
+		--NuiVehicleHandbrake()
 		NuiShowMap()
 		NuiEngineTemp()
 		fuelusagerun()
 		SendNuiSeatBelt()
 		NuiWheelSystem()
-		print(DecorGetBool(vehicle, "MANUAL"))
+		--print(DecorGetBool(vehicle, "MANUAL"))
 		if not manual and manualstatus and DecorGetBool(vehicle, "MANUAL") then
-			print("Starting manual")
+			--print("Starting manual")
 			startmanual()
 		end
 	end)
@@ -769,7 +785,9 @@ function NuiCarhpandGas()
 		local vehealth = nil
 		local belt= nil
 		local wait = 2500
+		loadedplate = true
 		while invehicle do
+			plate = string.gsub(tostring(GetVehicleNumberPlateText(vehicle)), '^%s*(.-)%s*$', '%1')
 			if vehicle ~= nil and vehicle ~= 0 then
 				wait = config.NuiCarhpandGas_sleep
 				if gasolina ~= newgas or newgas == nil then
@@ -786,6 +804,85 @@ function NuiCarhpandGas()
 					})
 					newcarhealth = hp
 				end
+				local off,low,high = GetVehicleLightsState(vehicle)
+				if low == 1 and high == 0 then
+					light = 1
+				elseif high == 1 then
+					light = 2
+				else
+					light = 0
+				end
+				if newlight ~= light or newlight == nil then
+					newlight = light
+					RenzuSendUI({
+					type = "setHeadlights",
+					content = light
+					})
+				end
+				if manual then
+					gear = savegear
+				else
+					gear = GetGear(vehicle)
+				end
+				if newgear ~= gear or newgear == nil then
+					newgear = gear
+					RenzuSendUI({
+						type = "setGear",
+						content = gear
+					})
+				end
+				CalculateTimeToDisplay()
+				timeformat()
+				local sleep = 2000
+			local ped = ped
+			local vehicle = vehicle
+			local door = true
+			local hood = 0
+			local trunk = 0
+			if vehicle ~= nil and vehicle ~= 0 then
+				----print(GetVehicleDoorStatus(vehicle))
+				for i = 0, 6 do
+					Wait(100)
+					if GetVehicleDoorAngleRatio(vehicle,i) ~= 0.0 then
+						door = false
+						break
+					end
+				end
+				if door then
+					doorstatus = 0
+				else
+					doorstatus = 2
+				end
+				if newdoorstatus ~= doorstatus or newdoorstatus == nil then
+					newdoorstatus = doorstatus
+					RenzuSendUI({
+					type = "setDoor",
+					content = doorstatus
+					})
+				end
+				if GetVehicleDoorAngleRatio(vehicle,4) ~= 0.0 then
+					hood = 2
+				end
+
+				if newhood ~= hood or newhood == nil then
+					newhood = hood
+					RenzuSendUI({
+					type = "setHood",
+					content = hood
+					})
+				end
+
+				if GetVehicleDoorAngleRatio(vehicle,5) ~= 0.0 then
+					trunk = 2
+				end
+				if newtrunk ~= trunk or newtrunk == nil then
+					newtrunk = trunk
+					RenzuSendUI({
+					type = "setTrunk",
+					content = trunk
+					})
+				end
+			end
 				--SetVehicleHighGear(vehicle,maxgear)
 			end
 			Renzuzu.Wait(wait)
@@ -797,6 +894,7 @@ end
 function NuiDistancetoWaypoint()
 	--NUI DISTANCE to Waypoint
 	Creation(function()
+		local hided = false
 		while invehicle do
 			local sleep = config.direction_sleep
 			local ped = ped
@@ -806,6 +904,7 @@ function NuiDistancetoWaypoint()
 				local coord = GetEntityCoords(ped, true)
 				local dis = #(coord - GetBlipCoords(waypoint))
 				if newdis ~= dis or newdis == nil then
+					hided = false
 					newdis = dis
 					RenzuSendUI({
 					type = "setWaydistance",
@@ -814,12 +913,14 @@ function NuiDistancetoWaypoint()
 				end
 			elseif vehicle ~=0 and not DoesBlipExist(waypoint) then
 				--if newdis ~= dis or newdis == nil then
+				if not hided then
+					hided = true
 					newdis = 0
 					RenzuSendUI({
 					type = "setWaydistance",
 					content = 0
 					})
-				--end
+				end
 				Renzuzu.Wait(config.direction_sleep)
 			end
 			Renzuzu.Wait(sleep)
@@ -852,62 +953,63 @@ function NuiDistancetoWaypoint()
 	end)
 end
 
-function NuiHeadlights()
-	--NUI HEAD LIGHTS
-	Creation(function()
-		while invehicle do
-			local sleep = 2500
-			local ped = ped
-			local vehicle = vehicle
-			if vehicle ~= nil and vehicle ~= 0 then
-				sleep = config.lights_sleep
-				local off,low,high = GetVehicleLightsState(vehicle)
-				if low == 1 and high == 0 then
-					light = 1
-				elseif high == 1 then
-					light = 2
-				else
-					light = 0
-				end
-				if newlight ~= light or newlight == nil then
-					newlight = light
-					RenzuSendUI({
-					type = "setHeadlights",
-					content = light
-					})
-				end
-			end
-			Renzuzu.Wait(sleep)
-		end
-		--TerminateThisThread()
-	end)
-end
+-- function NuiHeadlights()
+-- 	--NUI HEAD LIGHTS
+-- 	Creation(function()
+-- 		while invehicle do
+-- 			local sleep = 2500
+-- 			local ped = ped
+-- 			local vehicle = vehicle
+-- 			if vehicle ~= nil and vehicle ~= 0 then
+-- 				sleep = config.lights_sleep
+-- 				local off,low,high = GetVehicleLightsState(vehicle)
+-- 				if low == 1 and high == 0 then
+-- 					light = 1
+-- 				elseif high == 1 then
+-- 					light = 2
+-- 				else
+-- 					light = 0
+-- 				end
+-- 				if newlight ~= light or newlight == nil then
+-- 					newlight = light
+-- 					RenzuSendUI({
+-- 					type = "setHeadlights",
+-- 					content = light
+-- 					})
+-- 				end
+-- 			end
+-- 			Renzuzu.Wait(sleep)
+-- 		end
+-- 		--TerminateThisThread()
+-- 	end)
+-- end
 
-function NuiGear()
-	--NUI GEAR STATUS
-	Creation(function()
-		while invehicle do
-			local sleep = 2500
-			local ped = ped
-			local vehicle = vehicle
-			if vehicle ~= nil and vehicle ~= 0 then
-				sleep = config.gear_sleep
-				local gear = GetGear(vehicle)
-				if newgear ~= gear or newgear == nil then
-					newgear = gear
-					RenzuSendUI({
-					type = "setGear",
-					content = gear
-					})
-				end
-			end
-			Renzuzu.Wait(sleep)
-		end
-		--TerminateThisThread()
-		print("GEAR LOOP ENDED")
-	end)
-end
+-- function NuiGear()
+-- 	--NUI GEAR STATUS
+-- 	Creation(function()
+-- 		while invehicle do
+-- 			local sleep = 2500
+-- 			local ped = ped
+-- 			local vehicle = vehicle
+-- 			if vehicle ~= nil and vehicle ~= 0 then
+-- 				sleep = config.gear_sleep
+-- 				local gear = GetGear(vehicle)
+-- 				if newgear ~= gear or newgear == nil then
+-- 					newgear = gear
+-- 					RenzuSendUI({
+-- 					type = "setGear",
+-- 					content = gear
+-- 					})
+-- 				end
+-- 			end
+-- 			Renzuzu.Wait(sleep)
+-- 		end
+-- 		--TerminateThisThread()
+-- 		--print("GEAR LOOP ENDED")
+-- 	end)
+-- end
 
+local veh_stats_loaded = false
 RegisterNetEvent("renzu_hud:receivemile")
 AddEventHandler("renzu_hud:receivemile", function(data,i)
 	veh_stats = nil
@@ -916,7 +1018,71 @@ AddEventHandler("renzu_hud:receivemile", function(data,i)
 	veh_stats = {}
 	veh_stats = data
 	identifier = i
+	veh_stats_loaded = true
 end)
+
+function get_veh_stats()
+	-- saveplate = string.gsub(GetVehicleNumberPlateText(vehicle), "%s+", "")
+	-- saveplate = string.gsub(saveplate, '^%s*(.-)%s*$', '%1')
+	-- plate = saveplate
+	local lets_save = false
+	if plate ~= nil and veh_stats[plate] == nil then
+		print("CREATING VEHSTATS")
+		lets_save = true
+		veh_stats[plate] = {}
+		veh_stats[plate].plate = plate
+		veh_stats[plate].mileage = 0
+		veh_stats[plate].oil = 100
+		veh_stats[plate].coolant = 100
+		veh_stats[plate].nitro = 100
+		local numwheel = GetVehicleNumberOfWheels(vehicle)
+		for i = 0, numwheel - 1 do
+			if veh_stats[plate][tostring(i)] == nil then
+				veh_stats[plate][tostring(i)] = {}
+			end
+			veh_stats[plate][tostring(i)].tirehealth = config.tirebrandnewhealth
+		end
+	end
+	if veh_stats[plate].coolant == nil then
+		veh_stats[plate].coolant = 100
+	end
+	if veh_stats[plate].oil == nil then
+		veh_stats[plate].oil = 100
+	end
+	if veh_stats[plate].nitro == nil then
+		veh_stats[plate].nitro = 100
+	end
+	if veh_stats[plate].turbo == nil then
+		veh_stats[plate].turbo = 'default'
+	end
+	if veh_stats[plate].manual == nil then
+		veh_stats[plate].manual = false
+	end
+	if veh_stats[plate].tires == nil then
+		veh_stats[plate].tires = 'default'
+	end
+	if veh_stats[plate].tires ~= nil and veh_stats[plate].tires ~= 'default' then
+		TireFunction(veh_stats[plate].tires)
+	end
+	if veh_stats[plate].manual and not manual then
+		TriggerEvent('renzu_hud:manual', veh_stats[plate].manual)
+	end
+	if veh_stats[plate].turbo ~= nil and veh_stats[plate].turbo ~= 'default' and not alreadyturbo then
+		TriggerEvent('renzu_hud:hasturbo', veh_stats[plate].turbo)
+		alreadyturbo = true
+	end
+	local numwheel = GetVehicleNumberOfWheels(vehicle)
+	for i = 0, numwheel - 1 do
+		if veh_stats[plate][tostring(i)] == nil then
+			veh_stats[plate][tostring(i)] = {}
+			veh_stats[plate][tostring(i)].tirehealth = config.tirebrandnewhealth
+		end
+	end
+	if lets_save then
+		TriggerServerEvent('renzu_hud:savedata', saveplate, veh_stats[tostring(saveplate)])
+		lets_save = false -- why?
+	end
+end
 
 function NuiMileAge()
 	local lastve = nil
@@ -938,6 +1104,7 @@ function NuiMileAge()
 		Creation(function()
 			while invehicle do
 				local wait = 10000
+				--local plate = tostring(GetVehicleNumberPlateText(vehicle))
 				while veh_stats[plate] == nil and invehicle do
 					Renzuzu.Wait(1000)
 				end
@@ -972,73 +1139,14 @@ function NuiMileAge()
 			local vehicle = vehicle
 			local driver = GetPedInVehicleSeat(vehicle, -1)
 			if vehicle ~= nil and vehicle ~= 0 and IsPedInAnyVehicle(ped, false) and driver == ped then
-				local plate = tostring(GetVehicleNumberPlateText(vehicle))
-				plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+				-- local plate = tostring(GetVehicleNumberPlateText(vehicle))
+				-- plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
 				local newPos = GetEntityCoords(ped)
 				savemile = true
 				lastve = GetVehiclePedIsIn(ped, false)
 				if plate ~= nil then
 					--saveplate = string.match(GetVehicleNumberPlateText(vehicle), '%f[%d]%d[,.%d]*%f[%D]')
-					saveplate = string.gsub(GetVehicleNumberPlateText(vehicle), "%s+", "")
-					saveplate = string.gsub(saveplate, '^%s*(.-)%s*$', '%1')
-					plate = saveplate
-					local lets_save = false
-					if plate ~= nil and veh_stats[plate] == nil then
-						print("CREATING VEHSTATS")
-						lets_save = true
-						veh_stats[plate] = {}
-						veh_stats[plate].plate = plate
-						veh_stats[plate].mileage = 0
-						veh_stats[plate].oil = 100
-						veh_stats[plate].coolant = 100
-						veh_stats[plate].nitro = 100
-						local numwheel = GetVehicleNumberOfWheels(vehicle)
-						for i = 0, numwheel - 1 do
-							if veh_stats[plate][tostring(i)] == nil then
-								veh_stats[plate][tostring(i)] = {}
-							end
-							veh_stats[plate][tostring(i)].tirehealth = config.tirebrandnewhealth
-						end
-					end
-					if veh_stats[plate].coolant == nil then
-						veh_stats[plate].coolant = 100
-					end
-					if veh_stats[plate].oil == nil then
-						veh_stats[plate].oil = 100
-					end
-					if veh_stats[plate].nitro == nil then
-						veh_stats[plate].nitro = 100
-					end
-					if veh_stats[plate].turbo == nil then
-						veh_stats[plate].turbo = 'default'
-					end
-					if veh_stats[plate].manual == nil then
-						veh_stats[plate].manual = false
-					end
-					if veh_stats[plate].tires == nil then
-						veh_stats[plate].tires = 'default'
-					end
-					if veh_stats[plate].tires ~= nil and veh_stats[plate].tires ~= 'default' then
-						TireFunction(veh_stats[plate].tires)
-					end
-					if veh_stats[plate].manual and not manual then
-						TriggerEvent('renzu_hud:manual', veh_stats[plate].manual)
-					end
-					if veh_stats[plate].turbo ~= nil and veh_stats[plate].turbo ~= 'default' and not alreadyturbo then
-						TriggerEvent('renzu_hud:hasturbo', veh_stats[plate].turbo)
-						alreadyturbo = true
-					end
-					local numwheel = GetVehicleNumberOfWheels(vehicle)
-					for i = 0, numwheel - 1 do
-						if veh_stats[plate][tostring(i)] == nil then
-							veh_stats[plate][tostring(i)] = {}
-							veh_stats[plate][tostring(i)].tirehealth = config.tirebrandnewhealth
-						end
-					end
-					if lets_save then
-						TriggerServerEvent('renzu_hud:savedata', saveplate, veh_stats[tostring(saveplate)])
-						lets_save = false -- why?
-					end
+					get_veh_stats()
 					--print(veh_stats[plate].coolant)
 					if plate ~= nil and veh_stats[plate].plate == plate then
 						if oldPos == nil then
@@ -1078,7 +1186,7 @@ function NuiMileAge()
 											SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveLateral", DecorGetFloat(vehicle,"TRACTION2") * config.acceleratetractionloss)
 										end
 									end
-									print("reduct tires")
+									--print("reduct tires")
 									--Notify("Tire Wear: Wheel #"..i.." - "..veh_stats[plate][tostring(i)].tirehealth.."")
 									local wheeltable = {
 										['index'] = i,
@@ -1121,105 +1229,115 @@ function NuiMileAge()
 	end)
 end
 
-function NuiVehicleClock()
-	Creation(function()
-		while invehicle do
-			local sleep = 2000
-			if vehicle ~= nil and vehicle ~= 0 then
-				sleep = 1000
-				CalculateTimeToDisplay()
-				timeformat()
-			end
-			Renzuzu.Wait(sleep)
-		end
-		--TerminateThisThread()
-	end)
-end
+-- function NuiVehicleClock()
+-- 	Creation(function()
+-- 		while invehicle do
+-- 			local sleep = 2000
+-- 			if vehicle ~= nil and vehicle ~= 0 then
+-- 				sleep = 1000
+-- 				CalculateTimeToDisplay()
+-- 				timeformat()
+-- 			end
+-- 			Renzuzu.Wait(sleep)
+-- 		end
+-- 		--TerminateThisThread()
+-- 	end)
+-- end
 
-function NuiVehicledoorstatus()
-	--NUI DOOR OPEN STATUS
-	Creation(function()
-		Renzuzu.Wait(1000)
-		while invehicle do
-			local sleep = 2000
-			local ped = ped
-			local vehicle = vehicle
-			local door = true
-			local hood = 0
-			local trunk = 0
-			if vehicle ~= nil and vehicle ~= 0 then
-				----print(GetVehicleDoorStatus(vehicle))
-				for i = 0, 6 do
-					Wait(10)
-					if GetVehicleDoorAngleRatio(vehicle,i) ~= 0.0 then
-						door = false
-						break
-					end
-				end
-				if door then
-					doorstatus = 0
-				else
-					doorstatus = 2
-				end
-				if newdoorstatus ~= doorstatus or newdoorstatus == nil then
-					newdoorstatus = doorstatus
-					RenzuSendUI({
-					type = "setDoor",
-					content = doorstatus
-					})
-				end
-				if GetVehicleDoorAngleRatio(vehicle,4) ~= 0.0 then
-					hood = 2
-				end
+-- function NuiVehicledoorstatus()
+-- 	--NUI DOOR OPEN STATUS
+-- 	Creation(function()
+-- 		Renzuzu.Wait(1000)
+-- 		while invehicle do
+-- 			local sleep = 2000
+-- 			local ped = ped
+-- 			local vehicle = vehicle
+-- 			local door = true
+-- 			local hood = 0
+-- 			local trunk = 0
+-- 			if vehicle ~= nil and vehicle ~= 0 then
+-- 				----print(GetVehicleDoorStatus(vehicle))
+-- 				for i = 0, 6 do
+-- 					Wait(10)
+-- 					if GetVehicleDoorAngleRatio(vehicle,i) ~= 0.0 then
+-- 						door = false
+-- 						break
+-- 					end
+-- 				end
+-- 				if door then
+-- 					doorstatus = 0
+-- 				else
+-- 					doorstatus = 2
+-- 				end
+-- 				if newdoorstatus ~= doorstatus or newdoorstatus == nil then
+-- 					newdoorstatus = doorstatus
+-- 					RenzuSendUI({
+-- 					type = "setDoor",
+-- 					content = doorstatus
+-- 					})
+-- 				end
+-- 				if GetVehicleDoorAngleRatio(vehicle,4) ~= 0.0 then
+-- 					hood = 2
+-- 				end
 
-				if newhood ~= hood or newhood == nil then
-					newhood = hood
-					RenzuSendUI({
-					type = "setHood",
-					content = hood
-					})
-				end
+-- 				if newhood ~= hood or newhood == nil then
+-- 					newhood = hood
+-- 					RenzuSendUI({
+-- 					type = "setHood",
+-- 					content = hood
+-- 					})
+-- 				end
 
-				if GetVehicleDoorAngleRatio(vehicle,5) ~= 0.0 then
-					trunk = 2
-				end
-				if newtrunk ~= trunk or newtrunk == nil then
-					newtrunk = trunk
-					RenzuSendUI({
-					type = "setTrunk",
-					content = trunk
-					})
-				end
-			end
-			Renzuzu.Wait(sleep)
-		end
-		--TerminateThisThread()
-	end)
-end
+-- 				if GetVehicleDoorAngleRatio(vehicle,5) ~= 0.0 then
+-- 					trunk = 2
+-- 				end
+-- 				if newtrunk ~= trunk or newtrunk == nil then
+-- 					newtrunk = trunk
+-- 					RenzuSendUI({
+-- 					type = "setTrunk",
+-- 					content = trunk
+-- 					})
+-- 				end
+-- 			end
+-- 			Renzuzu.Wait(sleep)
+-- 		end
+-- 		--TerminateThisThread()
+-- 	end)
+-- end
 
 function NuiVehicleHandbrake()
 	--NUI HANDBRAKE
-	Creation(function()
-		while invehicle do
-			local sleep = 2500
-			local ped = ped
-			local vehicle = vehicle
-			if vehicle ~= nil and vehicle ~= 0 then
-				sleep = 500
-				local brake = GetVehicleHandbrake(vehicle)
-				if newbrake ~= brake or newbrake == nil then
-					newbrake = brake
-					RenzuSendUI({
-					type = "setBrake",
-					content = brake
-					})
-				end
-			end
-			Renzuzu.Wait(sleep)
+	print("HANDBRAKE")
+	local ped = ped
+	local vehicle = vehicle
+	if vehicle ~= nil and vehicle ~= 0 then
+		RenzuSendUI({
+		type = "setBrake",
+		content = true
+		})
+		while RCP(0, 22) do
+			Wait(100)
 		end
-		--TerminateThisThread()
-	end)
+		RenzuSendUI({
+			type = "setBrake",
+			content = false
+		})
+	end
+	--TerminateThisThread()
 end
+
+Creation(function() -- lets use space as a signal to handbrake NUI more effective and optimize. disable it if you are using it on other scripts.
+	Wait(100)
+	RenzuSendUI({
+		type = "setBrake",
+		content = false
+	})
+	RenzuKeybinds(config.commands['car_handbrake'], 'Car Emergency Brake', 'keyboard', config.keybinds['car_handbrake'])
+end)
+
+RenzuCommand(config.commands['car_handbrake'], function()
+	NuiVehicleHandbrake()
+end)
 
 function NuiShowMap()
 	CreateThread(function()
@@ -1234,8 +1352,13 @@ function NuiShowMap()
 			ismapopen =  true
 			Wait(250)
 			while invehicle do
+				local sleep = 2000
 				--print(GetNuiCursorPosition())
-				if start then
+				if config.carui ~= 'modern' then
+					break
+				end
+				if start and config.carui == 'modern' then
+					sleep = 250
 					local myh = GetEntityHeading(ped) + GetCamhead()
 					local camheading = GetCamhead()
 					local xz, yz, zz = table.unpack(GetEntityCoords(ped))
@@ -1251,7 +1374,7 @@ function NuiShowMap()
 						RenzuSendUI({map = true, type = "updatemapa",content = table})
 					end
 				end
-				Wait(250)
+				Wait(sleep)
 			end
 			--TerminateThisThread()
 		end
@@ -1333,7 +1456,7 @@ end
 function removeFCK()
 	Creation(function()
 		for _,parts in pairs(smokes) do
-			print("removing "..parts.handle.."")
+			--print("removing "..parts.handle.."")
 			if parts.handle ~= nil and parts.handle ~= 0 and isparticleexist(parts.handle) then
 				stopparticles(parts.handle, true)
 				smokes[_].handle = nil
@@ -1393,6 +1516,7 @@ function NuiEngineTemp()
 		end)
 		Renzuzu.Wait(1000)
 		--triggered = false
+		local vehiclemodel = GetEntityModel(vehicle)
 		while invehicle and not toohot do
 			local sleep = 2000
 			local ped = ped
@@ -1402,10 +1526,10 @@ function NuiEngineTemp()
 				sleep = 1000
 				local temp = GetVehicleEngineTemperature(vehicle)
 				local overheat = false
-				while rpm > config.dangerrpm and config.engineoverheat do
-					rpm = VehicleRpm(vehicle)
+				while rpm > config.dangerrpm and config.engineoverheat and not config.driftcars[vehiclemodel] do
+					--rpm = VehicleRpm(vehicle)
 					Renzuzu.Wait(1000)
-					print("Overheat")
+					--print("Overheat")
 					SetVehicleEngineCanDegrade(vehicle, true)
 					SetVehicleEngineTemperature(vehicle, GetVehicleEngineTemperature(vehicle) + config.addheat)
 					if newtemp ~= GetVehicleEngineTemperature(vehicle) or newtemp == nil then
@@ -1493,7 +1617,7 @@ function NuiEngineTemp()
 					Renzuzu.Wait(111)
 				end
 				vehicle = GetVehiclePedIsIn(ped,true)
-				print("SMOKING")
+				--print("SMOKING")
 				local done = false
 				Renzuzu.Wait(5000)
 				Notify('warning','Engine System',"Engine Temp: "..GetVehicleEngineTemperature(GetVehiclePedIsIn(ped,true)).."")
@@ -1578,9 +1702,11 @@ Creation(function()
 	end
 	while true do
 		local sleep = config.uitop_sleep
-		ped = PlayerPedId()
+		--ped = PlayerPedId()
 		health = (GetEntityHealth(ped)-100)
 		armor = GetPedArmour(ped)
+		config.statusordering[1].value = armor
+		pid = PlayerId()
 		if newarmor ~= armor or newarmor == nil then
 			RenzuSendUI({
 				hud = "setArmor",
@@ -1599,8 +1725,8 @@ Creation(function()
 	end
 end)
 
-function haveseatbelt(veh)
-	local vc = GetVehicleClass(veh)
+function haveseatbelt()
+	local vc = GetVehicleClass(vehicle)
 	return (vc >= 0 and vc <= 7) or (vc >= 9 and vc <= 12) or (vc >= 17 and vc <= 20)
 end	
 
@@ -1892,7 +2018,7 @@ function entervehicle()
 	v = GetVehiclePedIsEntering(p)
 	local mycoords = GetEntityCoords(p)
 	if not IsPedInAnyVehicle(p) and IsAnyVehicleNearPoint(mycoords.x,mycoords.y,mycoords.z,10.0) then
-		print("ENTERING")
+		--print("ENTERING")
 		while GetVehiclePedIsTryingToEnter(p) == 0 do
 			v = GetVehiclePedIsTryingToEnter(p)
 			Renzuzu.Wait(0)
@@ -1910,12 +2036,12 @@ function entervehicle()
 		end
 		if GetPedInVehicleSeat(v, -1) == p and not GetIsVehicleEngineRunning(v) and config.carui == 'modern' then
 			entering = true
-			print("Disable auto start")
+			--print("Disable auto start")
 			SetVehicleEngineOn(v,false,true,true)
 			while not start and IsPedInAnyVehicle(p) do
 				if not start and IsVehicleEngineStarting(v) then
 					SetVehicleEngineOn(v,false,true,true)
-					print("not started yet")
+					--print("not started yet")
 				end
 				Renzuzu.Wait(0)
 			end
@@ -2046,10 +2172,10 @@ end
 
 function Fuel(vehicle)
 	if IsVehicleEngineOn(vehicle) then
-		local rpm = VehicleRpm(vehicle)
+		local rpm = rpm
 		local gear = GetGear(vehicle)
 		local engineload = (rpm * (gear / 10))
-		local result = (config.fuelusage[Round(VehicleRpm(vehicle),1)] * (config.classes[GetVehicleClass(vehicle)] or 1.0) / 15)
+		local result = (config.fuelusage[Round(rpm,1)] * (config.classes[GetVehicleClass(vehicle)] or 1.0) / 15)
 		local advformula = result + (result * engineload)
 		if mode == 'SPORTS' then
 			advformula = advformula * config.boost
@@ -2110,9 +2236,16 @@ RenzuEventHandler('renzu_hud:hasturbo', function(type)
 	alreadyturbo = true
 	Wait(1000)
 	print("TURBO ACTIVATE")
+	if config.turbogauge then
+		RenzuSendUI({
+			type = "setShowTurboBoost",
+			content = true
+		})
+	end
 	plate = string.gsub(GetVehicleNumberPlateText(vehicle), "%s+", "")
 	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
 	Creation(function()
+		turboanimation(type)
 		Boost(true)
 	end)
 end)
@@ -2122,13 +2255,14 @@ function Boost(hasturbo)
 	local rpm = VehicleRpm(vehicle)
 	local gear = GetGear(vehicle)
 	local boost = 1.0
+	local boost_pressure = 0.0
 	Creation(function()
 		while invehicle do
 			local sleep = 2000
 			local vehicle = vehicle
 			if vehicle ~= 0 then
 				sleep = 10
-				rpm = VehicleRpm(vehicle)
+				rpm = rpm
 				gear = GetGear(vehicle)
 			end
 			Renzuzu.Wait(sleep)
@@ -2142,8 +2276,120 @@ function Boost(hasturbo)
 	end
 	local torque = 0
 	Creation(function()
+		while mode == 'SPORTS' and invehicle or hasturbo and invehicle do
+			local sleep = 2000
+			--local ply = PlayerPedId()
+			local reset = true
+			local vehicle = vehicle
+			if vehicle ~= 0 then
+				sleep = 7
+				-- SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
+				-- SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
+				-- if newgear ~= gear then -- emulation CLUTCH delay
+				-- 	SetVehicleClutch(vehicle,0.5)
+				-- 	Renzuzu.Wait(1)
+				-- 	SetVehicleClutch(vehicle,0.0)
+				-- end
+				newgear = gear
+				local vehicleSpeed = 0
+				local rpm2 = rpm
+				local engineload = (rpm / (gear / 10)) / 100
+				if rpm > 1.15 then
+				elseif rpm > 0.1 then
+					rpm = (rpm * turbo)
+				elseif rpm < 0.0 then
+					rpm = 0.2
+				end
+				if rpm2 < 0.0 then
+					rpm2 = 0.2
+				end
+				--print(rpm)
+				if tonumber(rpm) then
+					--local speed = VehicleSpeed(vehicle) * 3.6
+					if sound and IsControlJustReleased(1, 32) then
+						StopSound(soundofnitro)
+						ReleaseSoundId(soundofnitro)
+						sound = false
+					end
+
+					local lag = 1
+					local pressure = 0.5
+					if IsControlPressed(1, 32) and plate ~= nil and veh_stats[plate] ~= nil then
+						local turbo_type = tostring(veh_stats[plate].turbo or 'default')
+						if not sound then
+							soundofnitro = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
+							sound = true
+						end
+						--print(engineload,"ENGINELOAD")
+						--SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", oldtopspeed*3.500000)
+						local turbolag = 5 + config.turbo_boost[turbo_type]
+						local maxspeed = maxspeed
+						if maxspeed > 200 then
+							maxspeed = 200
+						end
+						while veh_stats[plate] ~= nil and lag < (config.lagamount[turbo_type] * config.turbo_boost[turbo_type]) and (engineload / ((maxspeed) / (config.lagamount[turbo_type] * lag))) < turboboost(gear) and IsControlPressed(1, 32) do
+							engineload = tonumber((rpm * (gear / turbolag)))
+							--ShowHelpNotification(tostring(engineload), true, 1, 5)
+							if tonumber(engineload) then
+							--engineload =  tonumber(maxnum(((rpm2 + 0.1) * config.turbo_boost[tostring(veh_stats[plate].turbo)])) * (1 + engineload))
+							if engineload > 0.0 and engineload < 10.0 and tonumber(engineload) then
+								pressure = (tonumber(rpm * config.turbo_boost[turbo_type]) + (engineload))
+								if turbo_type == 'sports' then -- temporary to correct sports value
+									pressure = pressure * 1.4
+								end
+							end
+							lag = lag + 0.1
+							end
+							Renzuzu.Wait(1)
+							--Notify('success',"PRESSURE",lag)
+							--drawTxt("BOOST lag:  "..(config.lagamount[turbo_type] * lag).."",4,0.5,0.93,0.50,255,255,255,180)
+							--drawTxt("BOOST engineload:  "..(engineload / (DecorGetFloat(vehicle,"TOPSPEED") / (config.lagamount[turbo_type] * lag))).."",4,0.5,0.83,0.50,255,255,255,180)
+						end
+						--drawTxt("BOOST pressure:  "..pressure.."",4,0.5,0.79,0.50,255,255,255,180)
+						if config.boost_sound and rpm2 > 0.65 and rpm2 < 0.95 and turbosound < 5 and gear == oldgear and engineload > turboboost(gear) then
+							turbosound = turbosound + 1
+							SetVehicleBoostActive(vehicle, 1, 0)
+							SetVehicleBoostActive(vehicle, 0, 0)
+						else
+							turbosound = 0
+						end
+						oldgear = gear
+					else
+						if sound then
+							StopSound(soundofnitro)
+							ReleaseSoundId(soundofnitro)
+							sound = false
+						end
+						Renzuzu.Wait(500) -- TURBO LAG
+					end
+					if reset and not IsControlPressed(1, 32) then
+						SetVehicleTurboPressure(vehicle, 0.0)
+					end
+					SetVehicleTurboPressure(vehicle, pressure)
+					boost_pressure = GetVehicleTurboPressure(vehicle)
+					if gear == 0 then
+						gear = 1
+					end
+					boost = (boost_pressure * 7)
+					if degrade ~= 1.0 then -- config.turbo_boost[veh_stats[plate].turbo]
+						if plate ~= nil and veh_stats[plate] and config.turbo_boost[turbo_type] > config.boost then
+							boostlevel = config.turbo_boost[turbo_type]
+						else
+							boostlevel = config.boost
+						end
+						boost = boost * (degrade / boostlevel)
+					end
+					--ShowHelpNotification(boost, true, 1, 5)
+				else
+					rpm = VehicleRpm(vehicle)
+				end
+			end
+			Renzuzu.Wait(sleep)
+		end
+	end)
+	Creation(function()
 		while invehicle do
-			if IsControlPressed(1, 32) and VehicleRpm(vehicle) > 0.4 then
+			if IsControlPressed(1, 32) and rpm > 0.4 then
 				if boost < 1.0 then
 					boost = 1.0
 				end
@@ -2160,147 +2406,63 @@ function Boost(hasturbo)
 				end
 				--SetVehicleCheatPowerIncrease(vehicle, (boost * rpm) * rpm)
 				SetVehicleBoost(vehicle, boost*1.01)
+				if config.turbogauge then
+					local table = {
+						['speed'] = boost_pressure / 2.65,
+						['max'] = turbo
+					}
+					RenzuSendUI({
+						type = "setTurboBoost",
+						content = table
+					})
+					end
+					if RCR(1, 32) then
+						local t = {
+							['speed'] = 0.0,
+							['max'] = turbo
+						}
+						RenzuSendUI({
+							type = "setTurboBoost",
+							content = t
+						})
+						Wait(10)
+					end
+				end
 			end
 			Citizen.Wait(7)
 		end
 		alreadyturbo = false
+		globaltopspeed = nil
+		topspeedmodifier = 1.0
+		busy = true
+		Renzuzu.Wait(100)
+		vehicle = getveh()
+		if DecorGetFloat(vehicle,"INERTIA") ~= 0.0 and DecorGetFloat(vehicle,"DRIVEFORCE") ~= 0.0 then
+			SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", DecorGetFloat(vehicle,"TOPSPEED"))
+			SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
+			SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
+			while not GetVehStats(vehicle, "CHandlingData","fDriveInertia") == DecorGetFloat(vehicle,"INERTIA") and invehicle do
+				if DecorGetFloat(vehicle,"INERTIA") ~= nil then
+					SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
+				end
+				Renzuzu.Wait(0)
+			end
+			while not GetVehStats(vehicle, "CHandlingData","fInitialDriveForce") == DecorGetFloat(vehicle,"DRIVEFORCE") and invehicle do
+				if DecorGetFloat(vehicle,"DRIVEFORCE") ~= nil then
+					SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
+				end
+				Renzuzu.Wait(0)
+			end
+		end
+		SetVehicleEnginePowerMultiplier(vehicle, 1.0) -- just incase
+		busy = false
+		StopSound(soundofnitro)
+		ReleaseSoundId(soundofnitro)
+		if propturbo ~= nil then
+			DeleteEntity(propturbo)
+			propturbo = nil
+		end
 	end)
-
-	while mode == 'SPORTS' and invehicle or hasturbo and invehicle do
-		local sleep = 2000
-		--local ply = PlayerPedId()
-		local reset = true
-		local vehicle = vehicle
-		if vehicle ~= 0 then
-			sleep = 7
-			-- SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
-			-- SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
-			-- if newgear ~= gear then -- emulation CLUTCH delay
-			-- 	SetVehicleClutch(vehicle,0.5)
-			-- 	Renzuzu.Wait(1)
-			-- 	SetVehicleClutch(vehicle,0.0)
-			-- end
-			newgear = gear
-			local vehicleSpeed = 0
-			local rpm2 = rpm
-			local engineload = (rpm / (gear / 10)) / 100
-			if rpm > 1.15 then
-			elseif rpm > 0.1 then
-				rpm = (rpm * turbo)
-			elseif rpm < 0.0 then
-				rpm = 0.2
-			end
-			if rpm2 < 0.0 then
-				rpm2 = 0.2
-			end
-			print(rpm)
-			if tonumber(rpm) then
-				local vehicleSpeed = GetVehicleTurboPressure(vehicle)
-				--local speed = VehicleSpeed(vehicle) * 3.6
-				if sound and IsControlJustReleased(1, 32) then
-					StopSound(soundofnitro)
-					ReleaseSoundId(soundofnitro)
-					sound = false
-				end
-
-				local lag = 1
-				local pressure = 0.5
-				if IsControlPressed(1, 32) and plate ~= nil and veh_stats[plate] ~= nil then
-					local turbo_type = tostring(veh_stats[plate].turbo or 'default')
-					if not sound then
-						soundofnitro = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
-						sound = true
-					end
-					print(engineload,"ENGINELOAD")
-					--SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", oldtopspeed*3.500000)
-					local turbolag = 5 + config.turbo_boost[turbo_type]
-					local maxspeed = maxspeed
-					if maxspeed > 200 then
-						maxspeed = 200
-					end
-					while veh_stats[plate] ~= nil and lag < (config.lagamount[turbo_type] * config.turbo_boost[turbo_type]) and (engineload / ((maxspeed) / (config.lagamount[turbo_type] * lag))) < turboboost(gear) and IsControlPressed(1, 32) do
-						engineload = tonumber((rpm * (gear / turbolag)))
-						ShowHelpNotification(tostring(engineload), true, 1, 5)
-						if tonumber(engineload) then
-						--engineload =  tonumber(maxnum(((rpm2 + 0.1) * config.turbo_boost[tostring(veh_stats[plate].turbo)])) * (1 + engineload))
-						if engineload > 0.0 and engineload < 10.0 and tonumber(engineload) then
-							pressure = (tonumber(rpm * config.turbo_boost[turbo_type]) + (engineload))
-						end
-						lag = lag + 0.1
-						end
-						Renzuzu.Wait(1)
-						--Notify('success',"PRESSURE",lag)
-						drawTxt("BOOST lag:  "..(config.lagamount[turbo_type] * lag).."",4,0.5,0.93,0.50,255,255,255,180)
-						drawTxt("BOOST engineload:  "..(engineload / (DecorGetFloat(vehicle,"TOPSPEED") / (config.lagamount[turbo_type] * lag))).."",4,0.5,0.83,0.50,255,255,255,180)
-					end
-					drawTxt("BOOST pressure:  "..pressure.."",4,0.5,0.79,0.50,255,255,255,180)
-					if config.boost_sound and rpm2 > 0.65 and rpm2 < 0.95 and turbosound < 5 and gear == oldgear and engineload > turboboost(gear) then
-						turbosound = turbosound + 1
-						SetVehicleBoostActive(vehicle, 1, 0)
-						SetVehicleBoostActive(vehicle, 0, 0)
-					else
-						turbosound = 0
-					end
-					oldgear = gear
-				else
-					if sound then
-						StopSound(soundofnitro)
-						ReleaseSoundId(soundofnitro)
-						sound = false
-					end
-					Renzuzu.Wait(500) -- TURBO LAG
-				end
-				if reset and not IsControlPressed(1, 32) then
-					SetVehicleTurboPressure(vehicle, 0.0)
-				end
-				SetVehicleTurboPressure(vehicle, pressure)
-				vehicleSpeed = GetVehicleTurboPressure(vehicle)
-				if gear == 0 then
-					gear = 1
-				end
-				boost = (vehicleSpeed * 7)
-				if degrade ~= 1.0 then -- config.turbo_boost[veh_stats[plate].turbo]
-					if plate ~= nil and veh_stats[plate] and config.turbo_boost[turbo_type] > config.boost then
-						boostlevel = config.turbo_boost[turbo_type]
-					else
-						boostlevel = config.boost
-					end
-					boost = boost * (degrade / boostlevel)
-				end
-				--ShowHelpNotification(boost, true, 1, 5)
-			else
-				rpm = VehicleRpm(vehicle)
-			end
-		end
-		Renzuzu.Wait(sleep)
-	end
-	alreadyturbo = false
-	globaltopspeed = nil
-	topspeedmodifier = 1.0
-	busy = true
-	Renzuzu.Wait(100)
-	vehicle = getveh()
-	if DecorGetFloat(vehicle,"INERTIA") ~= 0.0 and DecorGetFloat(vehicle,"DRIVEFORCE") ~= 0.0 then
-		SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", DecorGetFloat(vehicle,"TOPSPEED"))
-		SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
-		SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
-		while not GetVehStats(vehicle, "CHandlingData","fDriveInertia") == DecorGetFloat(vehicle,"INERTIA") and invehicle do
-			if DecorGetFloat(vehicle,"INERTIA") ~= nil then
-				SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
-			end
-			Renzuzu.Wait(0)
-		end
-		while not GetVehStats(vehicle, "CHandlingData","fInitialDriveForce") == DecorGetFloat(vehicle,"DRIVEFORCE") and invehicle do
-			if DecorGetFloat(vehicle,"DRIVEFORCE") ~= nil then
-				SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
-			end
-			Renzuzu.Wait(0)
-		end
-	end
-	SetVehicleEnginePowerMultiplier(vehicle, 1.0) -- just incase
-	busy = false
-	StopSound(soundofnitro)
-	ReleaseSoundId(soundofnitro)
 end
 
 RenzuNetEvent('renzu_hud:install_turbo')
@@ -2471,7 +2633,7 @@ end)
 local old_diff = nil
 local togglediff = false
 function differential()
-	print("pressed")
+	--print("pressed")
 	local diff = GetVehStats(vehicle, "CHandlingData","fDriveBiasFront")
 	if diff > 0.01 and diff < 0.9 and old_diff == nil and not togglediff then -- default 4wd
 		old_diff = diff -- save old
@@ -2485,7 +2647,7 @@ function differential()
 		old_diff = nil
 		Notify('success','Vehicle Differential',"Default Differential Activated")
 	elseif diff == 1.0 and not togglediff and old_diff == nil then -- Front Wheel Drive
-		print("FWD")
+		--print("FWD")
 		diff =  0.5
 		old_diff = 1.0
 		togglediff = true
@@ -2806,18 +2968,18 @@ Creation(function()
 		local killed = {}
 		while true do
 			local lastent = nil
-			local pid = PlayerId()
+			local pid = pid
 			shooting = false
 			while IsPlayerFreeAiming(pid) do
 				shooting = false
 				if IsPedShooting(ped) then
 					if config.killing_affect_status then
 						val, ent = GetEntityPlayerIsFreeAimingAt(pid)
-						--print("shooting")
+						----print("shooting")
 						if lastent ~= nil and lastent ~= 0 then
 							if not killed[lastent] and IsEntityDead(lastent) and GetPedSourceOfDeath(lastent) == ped then
 								killed[lastent] = true
-								print("LAST ENTITY IS DEAD "..lastent.."")
+								--print("LAST ENTITY IS DEAD "..lastent.."")
 								lastent = nil
 								TriggerEvent('esx_status:'..config.killing_status_mode..'', config.killing_affected_status, config.killing_status_val)
 								Citizen.Wait(100)
@@ -2830,10 +2992,10 @@ Creation(function()
 					if count > config.firing_bullets then
 						count = 0
 						TriggerEvent('esx_status:'..config.firing_status_mode..'', config.firing_affected_status, config.firing_statusaddval)
-						--print("STATUS ADDED")
+						----print("STATUS ADDED")
 					end
 					count = count + 1
-					--print(count)
+					----print(count)
 					lastent = ent
 					shooting = true
 					if config.bodystatus then
@@ -2845,7 +3007,7 @@ Creation(function()
 					end
 					Citizen.Wait(5)
 				end
-				--print("aiming")
+				----print("aiming")
 				Citizen.Wait(5)
 			end
 			
@@ -2880,13 +3042,13 @@ Creation(function()
 				for k,v in pairs(config.status_animation) do
 					Wait(0)
 					if IsEntityPlayingAnim(ped, v.dict, v.name, 3) then
-						print("LOADED")
+						--print("LOADED")
 						TriggerEvent('esx_status:'..v.mode..'', v.status, v.val)
 						Citizen.Wait(1000)
 					end
 				end
 			end
-			Citizen.Wait(2000)
+			Citizen.Wait(2500)
 		end
 	end
 end)
@@ -2895,16 +3057,16 @@ function statusplace()
 	local placing = config.statusplace
 	local table = {}
 	if placing == 'top-right' then
-		table = {['top'] = '45px', ['right'] = '65px'}
+		table = {['top'] = '45px', ['right'] = '90px'}
 	elseif placing == 'top-left' then
 		if config.statusui == 'simple' then
-			table = {['top'] = '100px', ['left'] = '75px'}
+			table = {['top'] = '100px', ['left'] = '45px'}
 		else
-			table = {['top'] = '100px', ['left'] = '1px'}
+			table = {['top'] = '100px', ['left'] = '-55px'}
 		end
 	elseif placing == 'bottom-left' then
 		if config.statusui == 'simple' then
-			table = {['bottom'] = '30px', ['left'] = '14vh'}
+			table = {['bottom'] = '30px', ['left'] = '1vh'}
 		else
 			table = {['bottom'] = '20px', ['left'] = '-35px'}
 		end
@@ -2989,7 +3151,7 @@ Creation(function()
 		while config.bodystatus and receive do
 			Citizen.Wait(3500)
 			local ped = ped
-			local pid = PlayerId()
+			local pid = pid
 			if bonecategory["ped_head"] == nil then
 				bonecategory["ped_head"] = 0
 			end
@@ -3062,17 +3224,17 @@ function bodydamage()
 		while body do
 			Citizen.Wait(5000)
 			if config.disabledsprint then
-				SetPlayerSprint(PlayerId(), false)
+				SetPlayerSprint(pid, false)
 			end
 			if config.disabledregen then
-				SetPlayerHealthRechargeMultiplier(PlayerId(), 0.0)
+				SetPlayerHealthRechargeMultiplier(pid, 0.0)
 			end
-			if GetEntityHealth(PlayerPedId()) > config.chesteffect_minhealth then
-				SetEntityHealth(PlayerPedId(),GetEntityHealth(PlayerPedId()) - config.chesteffect_healthdegrade)
+			if health > config.chesteffect_minhealth then
+				SetEntityHealth(PlayerPedId(),health - config.chesteffect_healthdegrade)
 			end
 		end
-		SetPlayerHealthRechargeMultiplier(PlayerId(), 1.0)
-		SetPlayerSprint(PlayerId(), true)
+		SetPlayerHealthRechargeMultiplier(pid, 1.0)
+		SetPlayerSprint(pid, true)
 	end)
 end
 
@@ -3107,7 +3269,7 @@ function armdamage() -- vehicle
 			if config.melee_decrease_damage then
 				while IsPedInMeleeCombat(ped) do
 					Citizen.Wait(5)
-					SetPlayerMeleeWeaponDamageModifier(PlayerId(), config.melee_damage_decrease)
+					SetPlayerMeleeWeaponDamageModifier(pid, config.melee_damage_decrease)
 				end
 			end
 			while invehicle do
@@ -3115,7 +3277,7 @@ function armdamage() -- vehicle
 					if oldveh ~= vehicle then
 						steeringlock = GetVehStats(vehicle, "CHandlingData","fSteeringLock")
 						DecorSetFloat(vehicle, "STEERINGLOCK", steeringlock)
-						print("SAVED")
+						--print("SAVED")
 						SetVehStats(vehicle, "CHandlingData", "fSteeringLock", config.armdamage_invehicle_effect)
 					end
 				end
@@ -3124,7 +3286,7 @@ function armdamage() -- vehicle
 			end
 			if oldveh ~= nil then
 				oldveh = nil
-				print("Load Default Steering lock")
+				--print("Load Default Steering lock")
 				SetVehStats(getveh(), "CHandlingData", "fSteeringLock", DecorGetFloat(getveh(),"STEERINGLOCK")) -- the back the original stats
 			end
 			Citizen.Wait(3000) -- Wait until ped goes off to vehicle or until arm is in pain.
@@ -3163,7 +3325,7 @@ end
 
 local oldlife = GetEntityHealth(PlayerPedId())
 function BodyMain()
-	local life = GetEntityHealth(ped)
+	local life = health
 	if life < oldlife then
 		local index,bodytype = CheckBody()
 		if not config.weaponsonly or not HasEntityBeenDamagedByWeapon(ped, 0 , 1) and HasEntityBeenDamagedByWeapon(ped, 0 , 2) and config.weaponsonly then
@@ -3172,7 +3334,7 @@ function BodyMain()
 			if index ~= nil and parts[bodytype] ~= nil and parts[bodytype][index] ~= nil and bonecategory ~= nil and bonecategory[bodytype] ~= nil then
 				parts[bodytype][index] = parts[bodytype][index] + config.damageadd
 				bonecategory[bodytype] = bonecategory[bodytype] + config.damageadd
-				print("saving")
+				--print("saving")
 				RenzuSendUI({
 					type = "setUpdateBodyStatus",
 					content = bonecategory
@@ -3256,7 +3418,7 @@ function CarControl()
 			Wait(10)
 			door[i] = false
 			if GetVehicleDoorAngleRatio(vehicle,i) ~= 0.0 then
-				--print("Door",GetVehicleDoorAngleRatio(vehicle,i))
+				----print("Door",GetVehicleDoorAngleRatio(vehicle,i))
 				door[i] = true
 			end
 		end
@@ -3492,7 +3654,7 @@ RenzuNuiCallback('setneoneffect1', function(data, cb)
 				requestcontrol(getveh())
 				SetVehicleNeonLightsColour(getveh(),getColor(0,0,0,255,255,255))
 				for i = 0, 3 do
-					print("set")
+					--print("set")
 					SetVehicleNeonLightEnabled(getveh(), i, true)
 				end
 				Citizen.Wait(222)
@@ -3585,6 +3747,7 @@ Creation(function()
 				local status = {}
 				local weapon = nil
 				sleep = 1000
+				--print("WEAPON")
 				if IsPedArmed(ped, 7) and not invehicle then
 					sleep = config.ammoupdatedelay
 					weapon = GetSelectedPedWeapon(ped)
@@ -3593,7 +3756,7 @@ Creation(function()
 					local ammoRemaining = math.floor(ammoTotal - ammoClip)
 					local maxammo = GetMaxAmmoInClip(ped, weapon, 1)
 					status['armed'] = true
-					--print(ammoRemaining)
+					----print(ammoRemaining)
 					if oldweapon ~= weapon then
 						for key,value in pairs(config.WeaponTable) do
 							for name,v in pairs(config.WeaponTable[key]) do
@@ -3859,9 +4022,10 @@ function NuiWheelSystem()
 		end
 		while invehicle and config.enabletiresystem do
 			local numwheel = GetVehicleNumberOfWheels(vehicle)
-			sleep = 300
+			sleep = 500
 			for i = 0, numwheel - 1 do
-				if rpm > config.minrpm_wheelspin_detect and speed > 1 and (VehicleRpm(vehicle) * 100.0) < (tractioncontrol(WheelSpeed(vehicle,i) * 3.6,GetGear(vehicle), true) * 85.0) then
+				--Wait(1)
+				if rpm > config.minrpm_wheelspin_detect and speed > 1 and (rpm * 100.0) < (tractioncontrol(WheelSpeed(vehicle,i) * 3.6,GetGear(vehicle), true) * 85.0) then
 					if veh_stats[plate][tostring(i)] ~= nil and veh_stats[plate][tostring(i)].tirehealth > 0 then
 						veh_stats[plate][tostring(i)].tirehealth = veh_stats[plate][tostring(i)].tirehealth - config.tirestress
 					end
@@ -4071,13 +4235,16 @@ end)
 
 local keyless = false
 function Carlock()
+	if not veh_stats_loaded then
+		get_veh_stats()
+	end
 	keyless = not keyless
 	RenzuSendUI({
 		type = "setShowKeyless",
 		content = keyless
 	})
 	if keyless then
-		print("inside loop")
+		----print("inside loop")
 		local vehicles = {}
 		local checkindentifier, myidentifier = nil, nil
 		local mycoords = GetEntityCoords(ped, false)
@@ -4085,45 +4252,62 @@ function Carlock()
 		local min = -1
 		for k,v in pairs(GetGamePool('CVehicle')) do
 			if #(mycoords - GetEntityCoords(v, false)) < config.carlock_distance then
+				----print("dis loop")
 				local plate = string.gsub(GetVehicleNumberPlateText(v), "%s+", "")
 				plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
-				if veh_stats[plate] ~= nil and veh_stats[plate].owner ~= nil and identifier ~= nil then
+				if veh_stats[tostring(plate)] ~= nil and veh_stats[tostring(plate)].owner ~= nil and identifier ~= nil then
+					----print("identifier loop")
 					checkindentifier = string.gsub(veh_stats[plate].owner, 'Char5', '')
 					checkindentifier = string.gsub(checkindentifier, 'Char4', '')
 					checkindentifier = string.gsub(checkindentifier, 'Char3', '')
 					checkindentifier = string.gsub(checkindentifier, 'Char2', '')
 					checkindentifier = string.gsub(checkindentifier, 'Char1', '')
 					myidentifier = string.gsub(identifier, 'steam', '')
-				end
-				if veh_stats[plate] ~= nil and checkindentifier == myidentifier then
-					if min == -1 or #(mycoords - GetEntityCoords(v, false)) < min then
-						foundvehicle = {}
+					if veh_stats[plate] ~= nil and checkindentifier == myidentifier then
+						----print("saving loop")
 						foundvehicle[plate] = {}
 						foundvehicle[plate].entity = v
 						foundvehicle[plate].plate = plate
+						if checkindentifier ~= nil then
+							foundvehicle[plate].owner = myidentifier
+						end
 						foundvehicle[plate].distance = #(mycoords - GetEntityCoords(v, false))
-						min = #(mycoords - GetEntityCoords(v, false))
+						--min = #(mycoords - GetEntityCoords(v, false))
 					end
 				end
 			end
 		end
+
+		local near = -1
+		local nearestveh = nil
+		local nearestplate = nil
 		for k,v in pairs(foundvehicle) do
-			if v.distance <= 20 then
-				local table = {
-					['type'] = 'connect',
-					['bool'] = true,
-					['vehicle'] = v.entity,
-					['plate'] = v.plate,
-					['state'] = GetVehicleDoorLockStatus(v.entity)
-				}
-				RenzuSendUI({
-					type = "setKeyless",
-					content = table
-				})
-				Notify('success','Vehicle Lock System','Owned Vehicle Found with Plate # '..v.plate..'')
-				Wait(200)
-				SetNuiFocus(true,true)
+			----print(near)
+			----print(v.distance,v.plate)
+			if near == -1 or near > v.distance then
+				near = v.distance
+				nearestveh = v.entity
+				nearestplate = v.plate
+				if v.owner ~= nil then
+					nearestowner = v.owner
+				end
 			end
+		end
+		if near <= 20 and nearestowner ~= nil and myidentifier ~= nil and nearestowner == myidentifier then
+			local table = {
+				['type'] = 'connect',
+				['bool'] = true,
+				['vehicle'] = nearestveh,
+				['plate'] = nearestplate,
+				['state'] = GetVehicleDoorLockStatus(nearestveh)
+			}
+			RenzuSendUI({
+				type = "setKeyless",
+				content = table
+			})
+			Notify('success','Vehicle Lock System','Owned Vehicle Found with Plate # '..nearestplate..'')
+			Wait(200)
+			SetNuiFocus(true,true)
 		end
 	else
 		SetNuiFocus(false,false)
@@ -4164,14 +4348,14 @@ AddEventHandler("renzu_hud:synclock", function(vehicle, type, coords)
 		Citizen.Wait(100)
 		SetVehicleLights(vehicle, 0)	
 		if type == 'lock' then
-			print("locking shit")
+			--print("locking shit")
 			playsound(coords,20,'lock',1.0)
 			SetVehicleDoorsLocked(vehicle,2)
 			Wait(500)
 			ClearPedTasks(ped)
 		end
 		if type == 'unlock' then
-			print("unlocking shit")
+			--print("unlocking shit")
 			playsound(coords,20,'unlock',1.0)
 			SetVehicleDoorsLocked(vehicle,1)
 			Wait(500)
@@ -4208,14 +4392,14 @@ RenzuNuiCallback('setvehicleunlock', function(data, cb)
 end)
 
 RenzuNuiCallback('setvehicleopendoors', function(data, cb)
-	print("openall")
+	--print("openall")
     if data.vehicle ~= nil and data.vehicle ~= 0 then
 		playanimation('anim@mp_player_intmenu@key_fob@','fob_click')
 		--Makeloading('Opening All Doors # '..GetVehicleNumberPlateText(data.vehicle)..'',1000)
 		playsound(GetEntityCoords(data.vehicle),20,'openall',1.0)
 		for i = 0, 3 do
 			if data.bool then
-				print(i)
+				--print(i)
 				SetVehicleDoorOpen(data.vehicle,i,false,false)
 			else     
 				SetVehicleDoorShut(data.vehicle,i,false,false)
@@ -4232,7 +4416,7 @@ RenzuNuiCallback('setvehicleopendoors', function(data, cb)
 end)
 
 RenzuNuiCallback('setvehiclealarm', function(data, cb)
-	print("vehicle alarm")
+	--print("vehicle alarm")
     if data.vehicle ~= nil and data.vehicle ~= 0 then
 		playanimation('anim@mp_player_intmenu@key_fob@','fob_click')
 		Makeloading('Vehicle Alarm Mode # '..GetVehicleNumberPlateText(data.vehicle)..'',1000)
@@ -4258,20 +4442,21 @@ local oldclothes = nil
 local clothestate = {}
 
 Creation(function()
+	Wait(500)
 	if config.clothing then
 		while DecorGetBool(PlayerPedId(), "PLAYERLOADED") ~= 1 do
 			Citizen.Wait(100)
-			print(DecorGetBool(PlayerPedId(), "PLAYERLOADED"))
+			--print(DecorGetBool(PlayerPedId(), "PLAYERLOADED"))
 			if playerloaded then
 				DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 				break
 			end
 		end
-		SaveCurrentClothes()
+		SaveCurrentClothes(true)
 		skinsave = false
 		RenzuCommand(config.commands['clothing'], function()
 			if not skinsave then
-				SaveCurrentClothes()
+				--SaveCurrentClothes(false)
 				skinsave = true
 			end
 			Clothing()
@@ -4295,7 +4480,7 @@ function whileinput()
 	DisableControlAction(1, 15, true)
 	DisableControlAction(1, 16, true)
 	DisableControlAction(1, 17, true)
-	DisablePlayerFiring(PlayerId(), true)
+	DisablePlayerFiring(pid, true)
 end
 
 function Clothing()
@@ -4321,10 +4506,57 @@ function Clothing()
 	end
 end
 
+function checkaccesories(accessory, changes) -- being used if ESX ACCESORIES IS enable - (mask,helmet from datastore instead of skinchangers Characters) copyright to LINK https://github.com/esx-framework/esx_accessories/blob/e812dde63bcb746e9b49bad704a9c9174d6329fa/client/main.lua#L30
+	local state = false
+	local load = false
+	while ESX == nil do
+		Wait(100)
+	end
+	ESX.TriggerServerCallback('esx_accessories:get', function(hasAccessory, accessorySkin)
+		local _accessory = string.lower(accessory)
+
+		if hasAccessory then
+			local skin = changes
+			local mAccessory = -1
+			local mColor = 0
+
+			if _accessory == "mask" then
+				mAccessory = 0
+			end
+
+			if skin[_accessory .. '_1'] == mAccessory then
+				--print(accessorySkin[_accessory .. '_1'])
+				--print(accessorySkin[_accessory .. '_1'])
+				mAccessory = accessorySkin[_accessory .. '_1']
+				mColor = accessorySkin[_accessory .. '_2']
+			end
+
+			oldclothes[_accessory .. '_1'] = mAccessory
+			oldclothes[_accessory .. '_2'] = mColor
+			--print(oldclothes[_accessory .. '_1'])
+			--print(oldclothes[_accessory .. '_1'])
+			--TriggerEvent('skinchanger:loadClothes', skin, accessorySkin)
+			state = true
+			--print("has mask or has helmet")
+			Notify("success","Clothe System","Variant Loaded "..accessory.."")
+		else
+			state = false
+			Notify("warning","Clothe System","No Variant for this type "..accessory.."")
+		end
+		load = true
+	end, accessory)
+
+	while not load do
+		Wait(100)
+	end
+	return state
+end
+
 RegisterNUICallback('ChangeClothes', function(data)
 	local skin = oldclothes
 	if clothestate[data.variant] then
 		TaskAnimation(config.clothing[data.variant]['taskplay'])
+		Notify("success","Clothe System",""..data.variant.." is put on")
 		local st = nil
 		TriggerEvent('skinchanger:getSkin', function(current)
 			TriggerEvent('skinchanger:loadClothes', current, config.clothing[data.variant].skin)
@@ -4344,7 +4576,11 @@ RegisterNUICallback('ChangeClothes', function(data)
 			Notify("warning","Clothe System","No Variant for this type")
 		else 
 			TaskAnimation(config.clothing[data.variant]['taskplay'])
+			Notify("success","Clothe System",""..data.variant.." is put off")
 			local Changes = {}
+			if data.variant == 'torso_1' then
+				Changes['arms'], Changes['arms_2'] = skin['arms'], skin['arms_2']
+			end
 			Changes[data.variant], Changes[data.variant2] = skin[data.variant], skin[data.variant2]
 			TriggerEvent('skinchanger:getSkin', function(current)
 				TriggerEvent('skinchanger:loadClothes', current, Changes)
@@ -4381,15 +4617,30 @@ RegisterNUICallback('resetclothing', function()
 	TaskAnimation(config.clothing['reset']['taskplay'])
 	TriggerEvent('skinchanger:loadClothes', oldclothes, oldclothes)
 	Citizen.Wait(100)
-	SaveCurrentClothes()
+	SaveCurrentClothes(true)
 	Citizen.Wait(100)
 	ClotheState()
 	RenzuSendUI({type = 'ResetClotheState', content = clothestate})
 end)
 
-function SaveCurrentClothes()
+local hasmask, hashelmet = false, false
+function SaveCurrentClothes(firstload)
 	TriggerEvent('skinchanger:getSkin', function(current)
 		oldclothes = current
+		if config.use_esx_accesories and firstload then
+			if oldclothes['mask_1'] == -1 or oldclothes['mask_1'] == 0 then
+				--check if there is a mask from datastore
+				if checkaccesories('Mask', oldclothes) then
+					hasmask = true
+				end
+			end
+			if oldclothes['helmet_1'] == -1 then
+				--check if there is a helmet from datastore
+				if checkaccesories('Helmet', oldclothes) then
+					hashelmet = true
+				end
+			end
+		end
 		while oldclothes == nil do
 			Wait(0)
 		end
@@ -4405,6 +4656,12 @@ function ClotheState()
 				clothestate[k] = false
 			else
 				clothestate[k] = true
+			end
+			if k == 'mask_1' and hasmask and oldclothes['mask_1'] ~= config.clothing['mask_1']['default'] then
+				clothestate[k] = false
+			end
+			if k == 'helmet_1' and  hashelmet and oldclothes['helmet_1'] ~= config.clothing['helmet_1']['default'] then
+				clothestate[k] = false
 			end
 		end
 	end

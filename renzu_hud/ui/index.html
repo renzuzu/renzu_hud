@@ -21,6 +21,143 @@
   <link href="css/default.css" rel="stylesheet" type="text/css" />
   <link rel="stylesheet" href="css/simple-notify.css" />
   <link rel="stylesheet" href="css/slider.css" />
+
+        <style>
+          .turbo_boost {
+          position: absolute;
+          right: -11px;
+          bottom: 10vw;
+          height: 50px;
+          width: 410px;
+          display: inline-flex;
+          zoom: .95;
+          }
+
+          .turbo_hud .test1 {
+          transform: rotate(-112deg);
+
+          -webkit-transform-origin: 50% 50%;
+          -ms-transform-origin: 50% 50%;
+          transform-origin: 50% 52%;
+          }
+
+          .turbo_hud .test2 {
+          position: relative;
+
+          transform: rotate(-146.3deg);
+
+          -webkit-transform-origin: 50% 50%;
+          -ms-transform-origin: 50% 50%;
+          /*                       */
+          transform-origin: 53.8% 50.8%;
+          }
+
+          .turbo_hud .test3 {
+          transform: rotate(-221deg);
+
+          -webkit-transform-origin: 50% 50%;
+          -ms-transform-origin: 50% 50%;
+          transform-origin: 60.4% 48.8%;
+          }
+
+          .turbo_hud .test4 {
+          position: relative;
+
+          transform: rotate(-43.8deg);
+
+          -webkit-transform-origin: 50% 50%;
+          -ms-transform-origin: 50% 50%;
+          transform-origin: 30% 58.5%;
+          }
+
+          .turbo_hud .progress1 {
+          transform: rotate(-112deg);
+
+          -webkit-transform-origin: 50% 50%;
+          -ms-transform-origin: 50% 50%;
+          transform-origin: 50% 52%;
+          }
+
+          .turbo_hud .progress2 {
+          position: relative;
+
+          transform: rotate(-39deg);
+
+          -webkit-transform-origin: 50% 50%;
+          -ms-transform-origin: 50% 50%;
+          transform-origin: 30% 58%;
+          }
+
+          .turbo_hud .progress3 {
+          transform: rotate(-221deg);
+
+          -webkit-transform-origin: 50% 50%;
+          -ms-transform-origin: 50% 50%;
+          transform-origin: 60.4% 48.8%;
+          }
+
+          .turbo_hud .progress4 {
+          position: relative;
+
+          transform: rotate(-146.3deg);
+
+          -webkit-transform-origin: 50% 50%;
+          -ms-transform-origin: 50% 50%;
+          /*                       */
+          transform-origin: 53.8% 50.8%;
+          }
+
+          .boost_div-bg {
+          position: absolute;
+          top: -19.8px;
+          left: -5px;
+          width: 73px;
+          height: 75px;
+          border-radius: 100%;
+          border: 1px #fff dashed ;
+          background-color: rgba(3, 16, 73, 0.711);
+          }
+
+          .turbo_hud {
+          display: none;
+          position: absolute;
+          right: -250px;
+          top: -120px;
+          width: 90%;
+          height: 80px;
+          }
+
+          .turbo_hud .boost_div {
+          position: relative;
+          height: 50%;
+          width: 30%;
+          color: #fff;
+          margin-left: 19px;
+          }
+
+          .turbo_hud .boost_div .boost_text p {
+          margin: 0;
+          padding: 0;
+          font-weight: 50;
+          margin-bottom: -7px;
+          letter-spacing: 1px;
+          }
+
+          .turbo_hud .boost_div .boost_text {
+          position: absolute;
+          top: 44%;
+          left: 0px;
+          font-size: 17px;
+          text-align: center;
+          text-transform: uppercase;
+          transform: translate(0, -50%);
+          }
+
+          .turbo_hud .boost_div .boost_text small {
+          font-size: 9px;
+          font-weight: lighter;
+          }
+        </style>
         <style>
             @-webkit-keyframes loader {
               0% {
@@ -1200,7 +1337,7 @@
     <i id="healthsimplebg" class="fas fa-heartbeat fa-stack-1x" style='font-size:19px;color:rgb(83, 0, 0);z-index:1130;opacity:1.0;'></i>
   </span> -->
 
-  <span id="voip_2" class="fa-stack fa-2x" style='font-size:17px;position:absolute;right:310px;top:-28px;color:rgba(144, 144, 144, 0.876)'>
+  <span id="voip_2" class="fa-stack fa-2x" style='font-size:17px;position:relative;float:right; margin-top:-25px;margin-left:-7px;color:rgba(144, 144, 144, 0.876)'>
     <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
     <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
     <i id="microphone" class="fas fa-microphone fa-stack-1x" style='font-size:19px;z-index:1131;opacity:1.0;'></i>
@@ -1994,7 +2131,7 @@
               </div>
           </div>
 
-          <div id="clothe" style="position:absolute;top:30%;left:30%;bottom:50%;z-index:99999;height:700px;width:700px;display:none;">
+          <div id="clothe" style="position:absolute;top:30%;left:30%;bottom:50%;z-index:99999;height:70vh;width:700px;display:none;">
             <li style="position:absolute;left:0;top:0;" id="variants_helmet_1" onclick="CallbackCLothing('helmet_1','helmet_2');">
               <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
                 <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707);-webkit-text-stroke:4px rgb(190, 53, 48)'></i>
@@ -2019,7 +2156,15 @@
                 <i class="fad fa-watch" style="position:relative;margin-left:120%;;font-size:2.0vw;color:#ffffff"></i>
               </span>
             </li>
-            <li style="position:absolute;left:0;top:80%;" id="variants_reset" onclick="ResetClothes();">
+            
+            <li style="position:absolute;left:0;top:80%;" id="variants_mask_1" onclick="CallbackCLothing('mask_1','mask_2');">
+              <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+                <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+                <i class="fad fa-hockey-mask" style="position:relative;margin-left:120%;;font-size:2.0vw;color:#ffffff"></i>
+              </span>
+            </li>
+
+            <li style="position:absolute;left:30%;top:80%;" id="variants_reset" onclick="ResetClothes();">
               <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
                 <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
                 <i class="fas fa-redo-alt" style="position:relative;margin-left:120%;;font-size:2.0vw;color:#ffffff"></i>
@@ -2059,6 +2204,36 @@
               </span>
             </li>
           </div>
+
+          <div class="turbo_boost" stype>
+            <div class="turbo_hud">
+                <div class="boost_div-bg"></div>
+                <div class="boost_div">
+                    <svg class="circle" width="50" height="50" style="transform: rotate(-75deg) scale(2.5);">
+                        <circle class="test1" stroke="#FFFFFF" stroke-width="3" style="stroke-opacity: 0.2;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="20 100" stroke-dashoffset="0"/>
+                        <circle class="test2" stroke="#FFFFFF" stroke-width="3" style="stroke-opacity: 0.2;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="10 100" stroke-dashoffset="0"/>
+                        <circle class="test3" stroke="#FFFFFF" stroke-width="3" style="stroke-opacity: 0.2;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="20 100" stroke-dashoffset="0"/>
+                        <circle class="test4" stroke="#FFFFFF" stroke-width="3" style="stroke-opacity: 0.2;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="17 100" stroke-dashoffset="0"/>
+
+                        <circle class="progress1" stroke="rgb(52, 147, 255)" stroke-width="3" style="stroke-opacity: 1;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="0 100" stroke-dashoffset="0"/>
+                        <circle class="progress2" stroke="rgb(52, 147, 255)" stroke-width="3" style="stroke-opacity: 1;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="0 100" stroke-dashoffset="0"/>
+                        <circle class="progress4" stroke="rgb(52, 147, 255)" stroke-width="3" style="stroke-opacity: 1;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="0 100" stroke-dashoffset="0"/>
+                        <circle class="progress3" stroke="rgb(52, 147, 255)" stroke-width="1.8" style="stroke-opacity: 1;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="0 180" stroke-dashoffset="0"/>
+                        <defs>
+                          <linearGradient id="gradient">
+                            <stop offset="30%" stop-color="#FF0245" />
+                            <stop offset="100%" stop-color="#BBFFFE" />
+                          </linearGradient>
+                        </defs>
+                    </svg>
+                    <div class="boost_text">
+                        <p>0</p>
+                        <small>BOOST</small>
+                    </div>
+                    <div class="section-conex"></div>
+                </div>
+            </div>
+        </div>
       <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
       <script src="js/map.js"></script>
       <script src="js/demo.js"></script>

@@ -1,7 +1,7 @@
 config = {}
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- VARIABLES
-identifier=nil;maxgear=5;veh_stats=nil;Renzuzu=Citizen;entering=false;mode='NORMAL'ismapopen=false;date="00:00"plate=nil;degrade=1.0;playerloaded=false;manual=false;vehicletopspeed=nil;uimove=false;reverse=false;savegear=0;rpm=0.2;hour=0;vali=false;minute=0;globaltopspeed=nil;segundos=0;month=""dayOfMonth=0;voice=2;voiceDisplay=2;proximity=25.0;belt=false;ExNoCarro=false;sBuffer={}vBuffer={}displayValue=true;gasolina=0;street=nil;vehicle=nil;hp=0;shifter=false;hasNitro=true;k_nitro=70;n_boost=15.0;boost=1.0;nitro_state=100;isBlack="false"invehicle=false;topspeedmodifier=1.0;switch=false;life=100;receive='new'bodystatus={}bonecategory={}parts={}bodyui=false;body=false;arm=false;armbone=0;armbone2=0;leg=false;head=false;shooting=false;manualstatus=false;traction=nil;traction2=nil;alreadyturbo=false;Creation=Renzuzu.CreateThread;Renzu_Hud=Renzuzu.InvokeNative;ClientEvent=TriggerEvent;RenzuNetEvent=RegisterNetEvent;RenzuEventHandler=AddEventHandler;RenzuCommand=RegisterCommand;RenzuSendUI=SendNUIMessage;RenzuKeybinds=RegisterKeyMapping;RenzuNuiCallback=RegisterNUICallback;ReturnFloat=Renzuzu.ResultAsFloat()ReturnInt=Renzuzu.ResultAsInteger()
+identifier=nil;correctgears=1;gear=1;plate=nil;loadedplate=false;maxgear=5;pid=nil;veh_stats=nil;Renzuzu=Citizen;entering=false;mode='NORMAL'ismapopen=false;date="00:00"plate=nil;degrade=1.0;playerloaded=false;manual=false;vehicletopspeed=nil;uimove=false;reverse=false;savegear=0;rpm=0.2;hour=0;vali=false;minute=0;globaltopspeed=nil;segundos=0;month=""dayOfMonth=0;voice=2;voiceDisplay=2;proximity=25.0;belt=false;ExNoCarro=false;sBuffer={}vBuffer={}displayValue=true;gasolina=0;street=nil;vehicle=nil;hp=0;shifter=false;hasNitro=true;k_nitro=70;n_boost=15.0;boost=1.0;nitro_state=100;isBlack="false"invehicle=false;topspeedmodifier=1.0;switch=false;life=100;receive='new'bodystatus={}bonecategory={}parts={}bodyui=false;body=false;arm=false;armbone=0;armbone2=0;leg=false;head=false;shooting=false;manualstatus=false;traction=nil;traction2=nil;alreadyturbo=false;Creation=Renzuzu.CreateThread;Renzu_Hud=Renzuzu.InvokeNative;ClientEvent=TriggerEvent;RenzuNetEvent=RegisterNetEvent;RenzuEventHandler=AddEventHandler;RenzuCommand=RegisterCommand;RenzuSendUI=SendNUIMessage;RenzuKeybinds=RegisterKeyMapping;RenzuNuiCallback=RegisterNUICallback;ReturnFloat=Renzuzu.ResultAsFloat()ReturnInt=Renzuzu.ResultAsInteger()
 -----------------------------------------------------------------------------------------------------------------------------------------
 
 config.framework = 'ESX' -- ESX | VRP | QSHIT | STANDALONE
@@ -18,10 +18,10 @@ config.loadedasmp = true -- if player model is mp player, pass the loaded event 
 --MULTI CHAR END
 --MAIN UI CONFIG START
 config.enablecompass = true -- enable/disable compass
-config.carui = 'simple' -- Choose a Carui Version ( simple, minimal, modern )
-config.statusui = 'normal' -- UI LOOK ( simple, normal)
+config.carui = 'minimal' -- Choose a Carui Version ( simple, minimal, modern )
+config.statusui = 'simple' -- UI LOOK ( simple, normal)
 config.statusv2 = true -- enable this if you want the status toggle mode (TOGGLE VIA INSERT) (THIS INCLUDE RP PURPOSE HUD like job,money,etc.)
-config.statusplace = 'top-right' -- available option top-right,top-left,bottom-right,bottom-left,top-center,bottom-center
+config.statusplace = 'bottom-right' -- available option top-right,top-left,bottom-right,bottom-left,top-center,bottom-center
 config.uidesign = 'octagon' -- octagon (default), circle, square
 --CHANGE ACCORDING TO YOUR STATUS ESX STATUS OR ANY STATUS MOD
 --UI CONFIG END
@@ -45,6 +45,10 @@ config.overheatmin = 150 -- engine will explode when the temperature rise to thi
 config.overheatadd = 500 -- additional temperature when engine explodes
 config.reduce_coolant = 1 -- Reduce Coolant  ( This will trigger if vehicle constantly reaching the maximum temperature) Like in Real Vehicle Coolant Reserve handle will reduce a water/coolant to prevent the radiator overflowing due to the Water Temperature is very hot.
 config.reducetemp_onwateradd = 300 -- Reduce Engine Temperature when Coolant/Water is used
+config.driftcars = { -- whitelist the driftcars to engine blown ( why? drift cars or drift handling tends to rev higher )
+	[`ae866`] = true, -- backtick to get hashkey insert vehicle model here
+	[`fc3s`] = true,
+}
 -- Vehicle Mode
 config.boost = 0.2 -- Boost Level when sports mode is activated eg. 1.5 Bar, you can put upt o 3.0 or even 5.0 but pretty sure it will be unrealistic acceleration ( this affect Fuel Consumption )
 config.sports_increase_topspeed = true -- do you want the topspeed will be affected? some Fivem Servers Likes a demonic topspeed :D - not good in RP. Boost only affects engine torque and horsepower not the gear ratio and final drive of transmision which affects topspeed
@@ -53,6 +57,7 @@ config.eco = 0.5 -- Eco Level when Eco Mode is activated (this affect the effici
 config.boost_sound = true
 --TURBO if using turbo the sports vehicle mode will not add torque anymore if the current turbo power is greater than the config.boost .
 config.useturboitem = true -- this is ESX only for now
+config.turbogauge = true -- show turbo gauge UI (only shows if turbo boost is installed)
 config.lagamount = {
 	['default'] = 20,
 	['street'] = 50,
@@ -131,14 +136,14 @@ config.status = { -- maximum 4 only for now, and it is preconfigured, (this is n
 --advanced usage if you want to add more status and reorder it.
 --the config have the div id's, offsets, colors, classes per status.
 config.statusordering = { -- offset is additional 35px per status, 275 default is the starting from health status.
-	[0] = {status = 'health', rpuidiv = 'null', custom = false, value = 0, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'none', id = 'uisimplehp', offset = '275', i_id_1 = 'healthsimple', i_id_1_color = 'rgb(251, 29, 9)', i_id_1_class = 'fas fa-heartbeat fa-stack-1x', i_id_2 = 'healthsimplebg', i_id_2_color = 'rgb(251, 29, 9)', i_id_2_class = 'fas fa-heartbeat fa-stack-1x'},
-	[1] = {status = 'armor', rpuidiv = 'null', custom = false, value = 0, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'none', id = 'uisimplearmor', offset = '275', i_id_1 = 'armorsimple', i_id_1_color = 'rgb(1, 103, 255)', i_id_1_class = 'far fa-shield-alt fa-stack-1x', i_id_2 = 'armorsimplebg', i_id_2_color = 'rgb(0, 41, 129)', i_id_2_class = 'far fa-shield-alt fa-stack-1x'},
-	[2] = {status = 'hunger', rpuidiv = 'hunger', custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'block', id = 'uisimplehunger', offset = '275', i_id_1 = 'food2', i_id_1_color = 'rgb(221, 144, 0)', i_id_1_class = 'fad fa-cheeseburger fa-stack-1x', i_id_2 = 'food2bg', i_id_2_color = 'rgb(114, 68, 0)', i_id_2_class = 'fad fa-cheeseburger fa-stack-1x'},
-	[3] = {status = 'thirst', rpuidiv = 'thirst', custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very thirsty', notify_value = 20, display = 'block', id = 'uisimplethirst', offset = '275', i_id_1 = 'water2', i_id_1_color = 'rgb(36, 113, 255)', i_id_1_class = 'fad fa-glass fa-stack-1x', i_id_2 = 'water2bg', i_id_2_color = 'rgb(0, 11, 112)', i_id_2_class = 'fad fa-glass fa-stack-1x'},
-	[4] = {status = 'sanity', rpuidiv = 'stressbar', custom = true, value = 0, notify_lessthan = true, notify_message = 'i see some dragons', notify_value = 80, display = 'block', id = 'uisimplesanity', offset = '275', i_id_1 = 'stress2', i_id_1_color = 'rgb(255, 16, 68)', i_id_1_class = 'fad fa-head-side-brain fa-stack-1x', i_id_2 = 'stress2bg', i_id_2_color = 'rgba(35, 255, 101, 0.842)', i_id_2_class = 'fad fa-head-side-brain fa-stack-1x'},
-	[5] = {status = 'stamina', rpuidiv = 'staminabar', custom = false, value = 0, notify_lessthan = false, notify_message = 'running makes me thirsty', notify_value = 20, display = 'block', id = 'uisimplestamina', offset = '275', i_id_1 = 'stamina2', i_id_1_color = 'rgb(16, 255, 136)', i_id_1_class = 'fad fa-running fa-stack-1x', i_id_2 = 'stamina2bg', i_id_2_color = 'rgba(0, 119, 57, 0.945)', i_id_2_class = 'fad fa-running fa-stack-1x'},
-	[6] = {status = 'oxygen', rpuidiv = 'oxygenbar', custom = false, value = 0, notify_lessthan = false, notify_message = 'my oxygen is almost gone', notify_value = 20, display = 'block', id = 'uisimpleoxygen', offset = '275', i_id_1 = 'oxygen2', i_id_1_color = 'rgb(15, 227, 255)', i_id_1_class = 'fad fa-lungs fa-stack-1x', i_id_2 = 'oxygen2bg', i_id_2_color = 'rgba(8, 76, 85, 0.788)', i_id_2_class = 'fad fa-lungs fa-stack-1x'},
-	[7] = {status = 'energy', rpuidiv = 'energybar', custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very tired', notify_value = 20, display = 'block', id = 'uisimpleenergy', offset = '275', i_id_1 = 'energy2', i_id_1_color = 'rgb(233, 233, 233)', i_id_1_class = 'fas fa-snooze fa-stack-1x', i_id_2 = 'energy2bg', i_id_2_color = 'color:rgb(243, 57, 0)', i_id_2_class = 'fas fa-snooze fa-stack-1x'},
+	[0] = {status = 'health', rpuidiv = 'null', hideifmax = false, custom = false, value = 0, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'none', id = 'uisimplehp', offset = '275', i_id_1 = 'healthsimple', i_id_1_color = 'rgb(251, 29, 9)', i_id_1_class = 'fas fa-heartbeat fa-stack-1x', i_id_2 = 'healthsimplebg', i_id_2_color = 'rgb(251, 29, 9)', i_id_2_class = 'fas fa-heartbeat fa-stack-1x'},
+	[1] = {status = 'armor', rpuidiv = 'null', hideifmax = true, custom = false, value = 0, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'none', id = 'uisimplearmor', offset = '275', i_id_1 = 'armorsimple', i_id_1_color = 'rgb(1, 103, 255)', i_id_1_class = 'far fa-shield-alt fa-stack-1x', i_id_2 = 'armorsimplebg', i_id_2_color = 'rgb(0, 41, 129)', i_id_2_class = 'far fa-shield-alt fa-stack-1x'},
+	[2] = {status = 'hunger', rpuidiv = 'hunger', hideifmax = false, custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'block', id = 'uisimplehunger', offset = '275', i_id_1 = 'food2', i_id_1_color = 'rgb(221, 144, 0)', i_id_1_class = 'fad fa-cheeseburger fa-stack-1x', i_id_2 = 'food2bg', i_id_2_color = 'rgb(114, 68, 0)', i_id_2_class = 'fad fa-cheeseburger fa-stack-1x'},
+	[3] = {status = 'thirst', rpuidiv = 'thirst', hideifmax = false, custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very thirsty', notify_value = 20, display = 'block', id = 'uisimplethirst', offset = '275', i_id_1 = 'water2', i_id_1_color = 'rgb(36, 113, 255)', i_id_1_class = 'fad fa-glass fa-stack-1x', i_id_2 = 'water2bg', i_id_2_color = 'rgb(0, 11, 112)', i_id_2_class = 'fad fa-glass fa-stack-1x'},
+	[4] = {status = 'sanity', rpuidiv = 'stressbar', hideifmax = false, custom = true, value = 0, notify_lessthan = true, notify_message = 'i see some dragons', notify_value = 80, display = 'block', id = 'uisimplesanity', offset = '275', i_id_1 = 'stress2', i_id_1_color = 'rgb(255, 16, 68)', i_id_1_class = 'fad fa-head-side-brain fa-stack-1x', i_id_2 = 'stress2bg', i_id_2_color = 'rgba(35, 255, 101, 0.842)', i_id_2_class = 'fad fa-head-side-brain fa-stack-1x'},
+	[5] = {status = 'stamina', rpuidiv = 'staminabar', hideifmax = true, custom = false, value = 0, notify_lessthan = false, notify_message = 'running makes me thirsty', notify_value = 20, display = 'block', id = 'uisimplestamina', offset = '275', i_id_1 = 'stamina2', i_id_1_color = 'rgb(16, 255, 136)', i_id_1_class = 'fad fa-running fa-stack-1x', i_id_2 = 'stamina2bg', i_id_2_color = 'rgba(0, 119, 57, 0.945)', i_id_2_class = 'fad fa-running fa-stack-1x'},
+	[6] = {status = 'oxygen', rpuidiv = 'oxygenbar', hideifmax = true, custom = false, value = 0, notify_lessthan = false, notify_message = 'my oxygen is almost gone', notify_value = 20, display = 'block', id = 'uisimpleoxygen', offset = '275', i_id_1 = 'oxygen2', i_id_1_color = 'rgb(15, 227, 255)', i_id_1_class = 'fad fa-lungs fa-stack-1x', i_id_2 = 'oxygen2bg', i_id_2_color = 'rgba(8, 76, 85, 0.788)', i_id_2_class = 'fad fa-lungs fa-stack-1x'},
+	[7] = {status = 'energy', rpuidiv = 'energybar', hideifmax = false, custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very tired', notify_value = 20, display = 'block', id = 'uisimpleenergy', offset = '275', i_id_1 = 'energy2', i_id_1_color = 'rgb(233, 233, 233)', i_id_1_class = 'fas fa-snooze fa-stack-1x', i_id_2 = 'energy2bg', i_id_2_color = 'color:rgb(243, 57, 0)', i_id_2_class = 'fas fa-snooze fa-stack-1x'},
 }
 -- BODY STATUS
 config.bodystatus = true -- ENABLE BODY STATUS FUNCTION AND UI?
@@ -293,6 +298,7 @@ config.carlock = true -- Enable Car Keyless System -- using owned_vehicles table
 config.carlock_distance = 20 -- max distance to fetch the sorrounding vehicles
 
 --clothes
+config.use_esx_accesories = true -- use esx accesories for mask,helmet. (ESX FRAMEWORK)
 config.clothing = {
 	--left
 	['helmet_1'] = {
@@ -300,7 +306,7 @@ config.clothing = {
 			['helmet_1'] = -1, ['helmet_2'] = 0
 		},
 		['default'] = -1,
-		['taskplay'] = {dictionary = "mp_masks@standard_car@ds@", anim = "put_on_mask", speed = 51, duration = 800}
+		['taskplay'] = {dictionary = "mp_masks@standard_car@ds@", name = "put_on_mask", speed = 51, duration = 800}
 	},
 	['glasses_1'] = {
 		['skin'] = {
@@ -334,8 +340,8 @@ config.clothing = {
 	},
 	['tshirt_1'] = {
 		['skin'] = {
-			['tshirt_1'] = 15, ['tshirt_2'] = 0,
-			['arms'] = 15, ['arms_2'] = 0
+			['tshirt_1'] = 15, ['tshirt_2'] = 0
+			--['arms'] = 15, ['arms_2'] = 0
 		},
 		['default'] = 15,
 		['taskplay'] = {dictionary = "missmic4", name = "michael_tux_fidget", speed = 51, duration = 1500}
@@ -356,9 +362,9 @@ config.clothing = {
 	},
 	['shoes_1'] = {
 		['skin'] = {
-			['shoes_1'] = 45, ['shoes_2'] = 0
+			['shoes_1'] = 49, ['shoes_2'] = 0
 		},
-		['default'] = 45,
+		['default'] = 49,
 		['taskplay'] = {dictionary = "random@domestic", name = "pickup_low", speed = 51, duration = 1200}
 	},
 	--top
@@ -398,7 +404,8 @@ config.keybinds = {
     carcontrol = 'NUMLOCK',
     enablenitro = 'DELETE',
     carlock = 'L',
-    clothing = 'K'
+    clothing = 'K',
+	car_handbrake = 'SPACE'
 }
 
 --COMMANDS FOR KEYBINDS
@@ -424,7 +431,8 @@ config.commands = {
     crosshair = 'crosshair',
     enablenitro = 'enablenitro',
     carlock = 'carlock',
-    clothing = 'clothing'
+    clothing = 'clothing',
+	car_handbrake = 'handbrake',
 }
 
 -- COMPASS STREET LOCATION Customization options
@@ -554,7 +562,7 @@ config.uitop_sleep = 2000
 config.gear_sleep = 700
 config.lights_sleep = 1000
 config.direction_sleep = 2500
-config.NuiCarhpandGas_sleep = 1500
+config.NuiCarhpandGas_sleep = 2500
 config.car_mainloop_sleep = 1500
 config.rpm_speed_loop = 52
 config.idle_rpm_speed_sleep = 151
@@ -563,14 +571,16 @@ config.Rpm_sleep_2 = 52
 config.Speed_sleep = 151
 config.Speed_sleep_2 = 52
 -- GEAR FUNCTION
+nextgearhash = `SET_VEHICLE_NEXT_GEAR`
+setcurrentgearhash = `SET_VEHICLE_CURRENT_GEAR`
 function SetRpm(veh, val)
     Renzu_Hud(0x2A01A8FC, veh, val)
 end
 function SetVehicleNextGear(veh, gear)
-    Renzu_Hud(GetHashKey('SET_VEHICLE_NEXT_GEAR') & 0xFFFFFFFF, veh, gear)
+    Renzu_Hud(nextgearhash & 0xFFFFFFFF, veh, gear)
 end
 function SetVehicleCurrentGear(veh, gear)
-    Renzu_Hud(GetHashKey('SET_VEHICLE_CURRENT_GEAR') & 0xFFFFFFFF, veh, gear)
+    Renzu_Hud(setcurrentgearhash & 0xFFFFFFFF, veh, gear)
 end
 
 function Renzu_SetGear(vehicle, gear)

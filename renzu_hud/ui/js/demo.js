@@ -158,11 +158,26 @@ function toclip(val) {
     return 20 - (val / 5)
 }
 
+var status_move = []
+var move_count = []
 function setStatus(table) {
     for (const i in table) {
+        move_count[i] = i
         if (table[i].rpuidiv !== 'null') {
             document.getElementById(table[i].rpuidiv).style.width = ''+table[i].value+'%'
             document.getElementById(table[i].i_id_1).style.clip = 'rect('+toclip(table[i].value)+', 100px, 100px, 0)'
+        }
+        if (table[i].hideifmax) {
+            if (table[i].value == 100 && table[i].status !== 'armor') {
+                document.getElementById(table[i].id).style.display = 'none'
+            } else {
+                document.getElementById(table[i].id).style.display = 'block'
+                if (table[i].status == 'armor' && statusui !== 'simple' || table[i].status == 'armor' && statusui == 'simple' && table[i].value == 0) {
+                    document.getElementById(table[i].id).style.display = 'none'
+                } else if (table[i].status == 'armor' && statusui == 'simple' && table[i].value > 0) {
+                    document.getElementById(table[i].id).style.display = 'block'
+                }
+            }
         }
     }
     // document.getElementById("hunger").style.width = ''+table.hunger+'%'
@@ -1115,7 +1130,7 @@ function setStatusUILocation(table) {
 function setMoveStatusUi(bool) {
     console.log("MOVE UI")
     if (bool) {
-        document.getElementById("statusv3").style.right = '18%';
+        document.getElementById("statusv3").style.right = '22%';
     } else {
         document.getElementById("statusv3").style.right = '25px';
     }
@@ -1382,8 +1397,14 @@ function SetNotify(table) {
         }
     }
 
-    function SetStatusOrder(statuses) {
+    function reverseArrayInPlace(array) {
+    for (let i = 0, j = array.length - 1; i < j; i++, j--) 
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+
+    function SetStatusOrder(s) {
         var offsetplus = -35
+        var statuses = s
         for (const i in statuses) {
             console.log(statuses[i].status)
             var offset = statuses[0].offset
@@ -1397,7 +1418,47 @@ function SetNotify(table) {
             var divid = statuses[i].id
             var i_id_1 = statuses[i].i_id_1
             var i_id_2 = statuses[i].i_id_2
-            $("#statusv3").append('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:17px;position:absolute;right:'+offset+'px;top:-28px;color:rgba(144, 144, 144, 0.876)"> <i class="fas fa-octagon fa-stack-2x" style="font-size:17px;color:rgba(11, 39, 63, 0.707)"></i> <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+class1+'" style="font-size:19px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+class2+'" style="font-size:19px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
+            $("#statusv3").prepend('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:17px;position:relative;color:rgba(144, 144, 144, 0.876);float:right; margin-top:-25px;margin-left:-7px;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:17px;color:rgba(11, 39, 63, 0.707)"></i> <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+class1+'" style="font-size:19px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+class2+'" style="font-size:19px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
+        }
+    }
+
+    function setShowTurboBoost(bool) {
+        console.log("show turbo")
+        if (bool) {
+            console.log(bool)
+            $('.turbo_hud').fadeIn('fast');
+        } else {
+            $('.turbo_hud').fadeOut('fast');
+        }
+    }
+
+    function setTurboBoost(table) {
+        let data = table
+        //$('.turbo_hud').fadeIn('fast');
+        if (data['speed']) {
+            if (data['speed'] < 0) {
+                data['speed'] = 0
+            }
+            if (String(parseInt(data['speed'])).length == 0x2) {
+                $('.turbo_hud .boost_div .boost_text').css('left', '1px');
+            } else if (String(parseInt(data['speed'])).length == 0x3) {
+                $('.turbo_hud .boost_div .boost_text').css('left', '-0.1px');
+            } else {
+                $('.turbo_hud .boost_div .boost_text').css('left', '0px');
+            }
+            if (data['speed'] < 0) {
+                data['speed'] = 0
+            }
+            $('div.boost_text > p').html((data['speed']).toFixed(1));
+        } else if (!data['speed']) {
+            $('div.boost_text > p').html(0x0);
+        }
+        if (data['max']) {
+            if (data['speed'] < 0) {
+                data['speed'] = 0
+            }
+            var kupal = (0x48 * (data['speed'] / data['max']) * ' 180').toFixed(1);
+            $('div.boost_div > svg > circle.progress3').attr('stroke-dasharray', ''+(data['speed'] / 2.8) * 100 +' 180');
         }
     }
 
@@ -1463,6 +1524,8 @@ var renzu_hud = {
     setShowKeyless,
     setKeyless,
     setMapVersion,
+    setTurboBoost,
+    setShowTurboBoost,
 
 };
 
