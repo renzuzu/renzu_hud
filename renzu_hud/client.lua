@@ -2415,7 +2415,6 @@ function Boost(hasturbo)
 						type = "setTurboBoost",
 						content = table
 					})
-					end
 					if RCR(1, 32) then
 						local t = {
 							['speed'] = 0.0,
