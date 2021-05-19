@@ -1435,6 +1435,7 @@ function SetNotify(table) {
     function setTurboBoost(table) {
         let data = table
         //$('.turbo_hud').fadeIn('fast');
+        console.log(data['speed'])
         if (data['speed']) {
             if (data['speed'] < 0) {
                 data['speed'] = 0
@@ -1459,6 +1460,50 @@ function SetNotify(table) {
             }
             var kupal = (0x48 * (data['speed'] / data['max']) * ' 180').toFixed(1);
             $('div.boost_div > svg > circle.progress3').attr('stroke-dasharray', ''+(data['speed'] / 2.8) * 100 +' 180');
+        }
+    }
+
+    function setShowCarStatus(table) {
+        for (const i in table) {
+            console.log(i,table[i])
+            if (i == 'brake') {
+                $('#brakelevel').html("LVL "+(+table[i]+1))
+            }
+            if (i == 'tranny') {
+                $('#trannylevel').html("LVL "+(+table[i]+1))
+            }
+            if (i == 'turbo') {
+                if (table[i] == 'NOTURBO') {
+                    table[i] = 'NONE'
+                }
+                $('#turbolevel').html("LVL "+(+table[i]+1))
+            }
+            if (i == 'engine') {
+                $('#enginelevel').html("LVL "+(+table[i]+1))
+            }
+            if (i == 'suspension') {
+                $('#suspensionlevel').html("LVL "+(+table[i]+1))
+            }
+            if (i == 'tire') {
+                $('#tirelevel').html("LVL "+(+table[i]+1))
+            }
+            if (i == 'coolant') {
+                $('#coolanttext').html((+table[i]).toFixed(0)+"%")
+            }
+            if (i == 'oil') {
+                $('#oiltext').html((+table[i]).toFixed(0)+"%")
+            }
+            if (i == 'tires_health') {
+                $('#tiretext').html((+table[i]).toFixed(0)+"%")
+            }
+            if (i == 'mileage') {
+                $('#mileagetext').html((+table[i]).toFixed(0)+" Km")
+            }
+        }
+        if (table['bool']) {
+            $('#carstatusui').fadeIn('fast');
+        } else {
+            $('#carstatusui').fadeOut('fast');
         }
     }
 
@@ -1526,6 +1571,7 @@ var renzu_hud = {
     setMapVersion,
     setTurboBoost,
     setShowTurboBoost,
+    setShowCarStatus
 
 };
 
@@ -1552,4 +1598,5 @@ setTimeout(function(){
     setMode('NORMAL',carui)
     setMic(2)
 }, 4000);
+setShowCarStatus(false)
 pedface()

@@ -669,16 +669,6 @@ function antistall(speed, speedreduce, savegear, gearname, rpm, vehicle, current
         correctgears = correctgears - 1
         local startkick = gearname - (lastgear / 1.5)
         if RCP(1, 32) and speed > startkick and speed <= gearname then
-            -- SetVehicleBoost(vehicle, 0.9)
-            -- if not alreadyturbo then
-            --     SetVehicleBoost(vehicle, 1.0)
-            -- end
-            -- Wait(1)
-            -- SetDisableVehicleUnk(vehicle,true)
-            -- SetDisableVehicleUnk_2(vehicle,true)
-            -- SetVehicleHasStrongAxles(vehicle,true)
-            -- N_0x0a436b8643716d14()
-            -- N_0x4419966c9936071a(vehicle)
             drivechange = true
             --SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", flywheel * 1.5)
             local invertrpm = 1.0 - rpm
@@ -689,12 +679,6 @@ function antistall(speed, speedreduce, savegear, gearname, rpm, vehicle, current
             local invertgear = mg - savegear
             engineload = driveforce + ((invertrpm * saferpm) * (savegear / driveforce)) * (rpm / speedreduce) * (1 + maxgear - savegear)
             if mode == 'SPORTS' then
-                --SetVehicleClutch(vehicle,0.8)
-                --Wait(10)
-                --print("ANTI STALL")
-                --SetVehicleReduceGrip(vehicle,true)
-                -- torque = GetVehicleCheatPowerIncrease(vehicle) * topspeedmodifier
-                -- SetVehicleBoost(vehicle, boost * maxgear + (torque / currentgear))
                 ModifyVehicleTopSpeed(vehicle, 0.9)
                 torque = GetVehicleCheatPowerIncrease(vehicle)
                 torque = torque * ( savegear / mg )
@@ -705,10 +689,6 @@ function antistall(speed, speedreduce, savegear, gearname, rpm, vehicle, current
                     SetVehicleBoost(vehicle, finalboost)
                 end
             else
-                --SetVehicleClutch(vehicle,0.9)
-                print("ANTI STALL")
-                --SetVehicleReduceGrip(vehicle,true)
-                --SetVehicleReduceTraction(vehicle, true)
                 ModifyVehicleTopSpeed(vehicle, 1.0)
                 torque = GetVehicleCheatPowerIncrease(vehicle)
                 torque = torque * ( savegear / mg )

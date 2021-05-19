@@ -21,7 +21,7 @@ config.enablecompass = true -- enable/disable compass
 config.carui = 'minimal' -- Choose a Carui Version ( simple, minimal, modern )
 config.statusui = 'simple' -- UI LOOK ( simple, normal)
 config.statusv2 = true -- enable this if you want the status toggle mode (TOGGLE VIA INSERT) (THIS INCLUDE RP PURPOSE HUD like job,money,etc.)
-config.statusplace = 'bottom-right' -- available option top-right,top-left,bottom-right,bottom-left,top-center,bottom-center
+config.statusplace = 'top-left' -- available option top-right,top-left,bottom-right,bottom-left,top-center,bottom-center
 config.uidesign = 'octagon' -- octagon (default), circle, square
 --CHANGE ACCORDING TO YOUR STATUS ESX STATUS OR ANY STATUS MOD
 --UI CONFIG END
@@ -274,7 +274,7 @@ config.purge_paticle_name = "ent_sht_steam" -- particle name | default: "ent_sht
 
 --WHEELSYSTEM
 config.enabletiresystem = true -- Enable Tire System, Custom Tire Health System, Saved in DB, Sync all to player, using adv_stat table in database
-config.tirebrandnewhealth = 555 -- health of a brand new tires, this is not the vehicle health tires from GTA NATIVE!
+config.tirebrandnewhealth = 1000 -- health of a brand new tires, this is not the vehicle health tires from GTA NATIVE!
 config.tirewear = 1 -- wear value every 100 radius
 config.tirestress = 2 -- wear value everytime you stress your tire, using burnouts, curving with high speed etc...
 config.bursttires = true -- burst any wear tires if health is <=0 ( GTA NATIVE WHEEL HEALTH )
@@ -381,6 +381,9 @@ config.clothing = {
 	}
 }
 
+--carstatus
+config.carstatus = true -- use car status system, shows vehicle infos etc..
+
 -- HERE YOU CAN CHANGE THE KEYBINDS
 config.keybinds = {
 	--TOGGLE STATUS
@@ -405,7 +408,8 @@ config.keybinds = {
     enablenitro = 'DELETE',
     carlock = 'L',
     clothing = 'K',
-	car_handbrake = 'SPACE'
+	car_handbrake = 'SPACE',
+	vehicle_status = 'U',
 }
 
 --COMMANDS FOR KEYBINDS
@@ -433,6 +437,7 @@ config.commands = {
     carlock = 'carlock',
     clothing = 'clothing',
 	car_handbrake = 'handbrake',
+	vehicle_status = 'vehiclestatus',
 }
 
 -- COMPASS STREET LOCATION Customization options

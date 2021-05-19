@@ -1021,7 +1021,11 @@ AddEventHandler("renzu_hud:receivemile", function(data,i)
 	veh_stats_loaded = true
 end)
 
-function get_veh_stats()
+function get_veh_stats(v,p)
+	if v ~= nil and p ~= nil then
+		vehicle = v
+		plate = p
+	end
 	-- saveplate = string.gsub(GetVehicleNumberPlateText(vehicle), "%s+", "")
 	-- saveplate = string.gsub(saveplate, '^%s*(.-)%s*$', '%1')
 	-- plate = saveplate
@@ -1053,7 +1057,7 @@ function get_veh_stats()
 		veh_stats[plate].nitro = 100
 	end
 	if veh_stats[plate].turbo == nil then
-		veh_stats[plate].turbo = 'default'
+		veh_stats[plate].turbo = 'racing'
 	end
 	if veh_stats[plate].manual == nil then
 		veh_stats[plate].manual = false
@@ -2262,7 +2266,7 @@ function Boost(hasturbo)
 			local vehicle = vehicle
 			if vehicle ~= 0 then
 				sleep = 10
-				rpm = rpm
+				rpm = VehicleRpm(vehicle)
 				gear = GetGear(vehicle)
 			end
 			Renzuzu.Wait(sleep)
@@ -2276,12 +2280,14 @@ function Boost(hasturbo)
 	end
 	local torque = 0
 	Creation(function()
+		print("starting boost func")
 		while mode == 'SPORTS' and invehicle or hasturbo and invehicle do
 			local sleep = 2000
 			--local ply = PlayerPedId()
 			local reset = true
 			local vehicle = vehicle
 			if vehicle ~= 0 then
+				print("turbo",plate,veh_stats[plate])
 				sleep = 7
 				-- SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
 				-- SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
@@ -2389,6 +2395,7 @@ function Boost(hasturbo)
 	end)
 	Creation(function()
 		while invehicle do
+			--print("boost")
 			if IsControlPressed(1, 32) and rpm > 0.4 then
 				if boost < 1.0 then
 					boost = 1.0
@@ -2407,6 +2414,8 @@ function Boost(hasturbo)
 				--SetVehicleCheatPowerIncrease(vehicle, (boost * rpm) * rpm)
 				SetVehicleBoost(vehicle, boost*1.01)
 				if config.turbogauge then
+					print("gauge")
+					print(boost_pressure)
 					local table = {
 						['speed'] = boost_pressure / 2.65,
 						['max'] = turbo
@@ -2415,18 +2424,18 @@ function Boost(hasturbo)
 						type = "setTurboBoost",
 						content = table
 					})
-					if RCR(1, 32) then
-						local t = {
-							['speed'] = 0.0,
-							['max'] = turbo
-						}
-						RenzuSendUI({
-							type = "setTurboBoost",
-							content = t
-						})
-						Wait(10)
-					end
 				end
+			end
+			if RCR(1, 32) then
+				local t = {
+					['speed'] = 0.0,
+					['max'] = turbo
+				}
+				RenzuSendUI({
+					type = "setTurboBoost",
+					content = t
+				})
+				Wait(10)
 			end
 			Citizen.Wait(7)
 		end
@@ -4688,3 +4697,73 @@ function TaskAnimation(table)
 		imbusy = true
 	end
 end
+
+local carstatus = false
+function CarStatus()
+	vehicle = getveh()
+	local dis = #(GetEntityCoords(ped) - GetEntityCoords(vehicle))
+	if dis > 10 then return end
+	plate = tostring(GetVehicleNumberPlateText(vehicle))
+	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+	get_veh_stats(vehicle, plate)
+	carstatus = not carstatus
+	local turbolevel = veh_stats[plate].turbo
+	if turbolevel == 'default' then
+		if GetVehicleMod(vehicle, 18) then
+			turbolevel = 0
+		else
+			turbolevel = 'NOTURBO'
+		end
+	elseif turbolevel == 'street' then
+		turbolevel = 1
+	elseif turbolevel == 'sports' then
+		turbolevel = 2
+	elseif turbolevel == 'racing' then
+		turbolevel = 3
+	end
+	local tirelevel = veh_stats[plate].tires
+	if tirelevel == 'street' then
+		tirelevel = 1
+	elseif tirelevel == 'sports' then
+		tirelevel = 2
+	elseif tirelevel == 'racing' then
+		tirelevel = 3
+	else
+		tirelevel = -1
+	end
+	local numwheel = GetVehicleNumberOfWheels(vehicle)
+	local tirehealth = 0
+	for i = 0, numwheel - 1 do
+		tirehealth = tirehealth + veh_stats[plate][tostring(i)].tirehealth
+	end
+	print(tirehealth)
+	local total_tirehealth = tirehealth / (config.tirebrandnewhealth * numwheel) * 100
+	print(total_tirehealth)
+	local table = {
+		['bool'] = carstatus,
+		['engine'] = GetVehicleMod(vehicle, 11) + 1,
+		['tranny'] = GetVehicleMod(vehicle, 13) + 1,
+		['turbo'] = turbolevel,
+		['brake'] = GetVehicleMod(vehicle, 12) + 1,
+		['suspension'] = GetVehicleMod(vehicle, 15) + 1,
+		['tire'] = tirelevel,
+		['coolant'] = veh_stats[plate].coolant,
+		['oil'] = veh_stats[plate].oil,
+		['tires_health'] = total_tirehealth,
+		['mileage'] = veh_stats[plate].mileage,
+	}
+	RenzuSendUI({
+		type = "setShowCarStatus",
+		content = table
+	})
+end
+
+Creation(function()
+	Wait(500)
+	if config.carstatus then
+		RenzuCommand(config.commands['vehicle_status'], function()
+			CarStatus()
+		end, false)
+		RenzuKeybinds(config.commands['vehicle_status'], 'Toggle Vehicle Status', 'keyboard', config.keybinds['vehicle_status'])
+	end
+end)
