@@ -1,27 +1,71 @@
 # renzu_hud
 Fivem HUD 
 # Main UI preview
-![alt text](https://i.imgur.com/1qX9xaP.png)
-# Status UI preview
-Status V1 (with rp UI) (TOGGLE Version - Default Key is Insert ) (can be disabled in config and use v2 only)
-![alt text](https://i.imgur.com/0LRJb7w.png)
-Status V2 Display in screen all the time (can be disabled in config)
 ![alt text](https://i.imgur.com/G1alCmX.png)
-
+# Status UI with RP UI preview
+Status V1 (with rp UI) (TOGGLE Version - Default Key is Insert ) (can be disabled in config and use v2 only)
+![alt text](https://i.imgur.com/pwWiGF6.png)
+# Status V2 PREVIEWS
+# Normal UI
+![alt text](https://i.imgur.com/nddxuL8.png)
+# Normal UI All status is showed
+![alt text](https://i.imgur.com/bXtGhy2.png)
+# Simple UI
+![alt text](https://i.imgur.com/sJKmZ9P.png)
+# Simple UI hide max status in config
+![alt text](https://i.imgur.com/3apTU7O.png)
 # STATUS HOTKEY (SHOW / HIDE)
 INSERT (show or hide HUD STATS)
 # CAR HOTKEY ( Signal Lights and Hazard )
 Arrow right & Arrow Left
 Hazard = Backspace
 
-# CAR HUD Feature
-![alt text](https://i.imgur.com/l4CVZiO.png)
+# CAR HUD VERSION PREVIEWS
+# CAR HUD SIMPLE
+![alt text](https://i.imgur.com/kJdCIqT.png)
+# CAR HUD MINIMAL (RACING)
+![alt text](https://i.imgur.com/3Ck9njA.png)
+# CAR HUD MODERN
+![alt text](https://i.imgur.com/8MlJG4H.png)
+
+# CAR STATUS UI
+![alt text](https://i.imgur.com/1VaJs0f.png)
+
+# Clothes Change UI
+![alt text](https://i.imgur.com/Cu3VLjT.png)
+
+# Body Status UI
+![alt text](https://i.imgur.com/MPE6zBC.png)
+
+# Alarm or Vehicle Keyless System
+![alt text](https://i.imgur.com/KjyLPMb.png)
+
+# Vehicle Control System 
+![alt text](https://i.imgur.com/eniMcyR.png)
+
+# Compass System (STREET NAME AND LABEL)
+![alt text](https://i.imgur.com/ucC1bw5.png)
+
+# ROUND MINIMAP
+![alt text](https://i.imgur.com/7c0jN4i.png)
 
 Engine Overheat System
+Engine Swap System (Performance and sound)
+Car Status
+Car Control
+Clothing System
+Vehicle Keyless System
+Body Status System
+AirSuspension
+Neon Color Control
+Neon Color Multiple Effects
 Seatbelt System
 Drive Mode - Sports or Eco or Normal
 Built in Car GPS
 Mileage System
+Nitro System
+Advanced Tire System with items
+Advanced Turbo System with items
 Water and Engine Oil System (WIP)
 Manual Transmission
 Waypoint Large Marker
@@ -32,6 +76,8 @@ RPM Text and Radial Bar
 Speedometer Text and Radialbar
 Fuel tank meter
 Vehicle Health Meter
+
+much more not included yet..
 
 #Maximum Optimization
 Client Side Lua and Javascript Side
