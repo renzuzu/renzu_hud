@@ -18,6 +18,7 @@ server_scripts {
 }
 client_scripts {
 	"config.lua",
+	'handling.lua',
 	"client.lua",
 	"street.lua",
 	"manual.lua",
@@ -31,6 +32,7 @@ files {
 	'ui/fonts/Azonix.otf',
 	'ui/assets/icons.svg',
 	'ui/css/*.css',
+	'ui/css/fontawsome/*.css',
 	'ui/js/*.js',
 	'ui/img/*.png',
 	'ui/img/*.webp',
@@ -38,7 +40,12 @@ files {
 	'ui/sounds/*.ogg',
 	'ui/shifter/*.png',
 	'stream/*.ydr',
+	'handling.min.json',
+	'popgroups.ymt',
 	"turbo.ytyp"
 }
 
 data_file 'DLC_ITYP_REQUEST' 'turbo.ytyp'
+data_file 'FIVEM_LOVES_YOU_341B23A2F0E0F131' 'popgroups'
+data_file 'FIVEM_LOVES_YOU_341B23A2F0E0F131' 'popgroups.ymt'
+data_file 'DLC_POP_GROUPS' 'popgroups.ymt'

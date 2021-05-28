@@ -10,15 +10,133 @@ RenzuCommand('getstat', function()
     max = GetVehStats(vehicle, "CHandlingData","fInitialDriveMaxFlatVel")
     t = GetVehStats(vehicle, "CHandlingData","fTractionCurveMin")
     t2 = GetVehStats(vehicle, "CHandlingData","fTractionCurveLateral")
-    print(finaldrive,flywheel,max,t,t2)
-    print(GetVehicleAcceleration(vehicle))
-    print(GetVehicleModelAcceleration(GetEntityModel(vehicle)))
+    mg = GetVehicleHandlingInt(vehicle, "CHandlingData","nInitialDriveGears")
+    print(finaldrive,flywheel,max,t,t2,mg)
+    print("GetVehicleAcceleration",GetVehicleAcceleration(vehicle))
+    print("GetVehicleModelAcceleration",GetVehicleModelAcceleration(GetEntityModel(vehicle)))
+    print("GetVehicleModelEstimatedMaxSpeed",GetVehicleModelEstimatedMaxSpeed(GetEntityModel(vehicle)) * 3.6)
+    print("flatvel",(max))
+    print("GetVehicleModelEstimatedAgility",GetVehicleModelEstimatedAgility(GetEntityModel(vehicle)) * 1.818)
     print(DecorGetFloat(vehicle, "DRIVEFORCE"))
     print(GetVehicleMod(vehicle,13))
+    print(GetVehicleHighGear(vehicle))
     -- SetVehStats(vehicle, "CHandlingData", "fDriveInertia", olddriveinertia)
     -- SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", oldriveforce * 2.5)
     -- SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", oldtopspeed)
 end)
+
+RenzuCommand('handling', function(source, args, raw)
+    SetEngineSpecs(GetHashKey(args[1]))
+    -- for k,v in pairs(vehiclehandling['Item']) do
+    --     --print(k)
+    --     --print(v.handlingName)
+    --     if v.handlingName == 'BLISTA' then
+    --         print(GetHashKey(v.handlingName),GetHashKey("blista"))
+    --         print(v.fDriveInertia['_value'])
+    --     end
+    -- end
+end)
+
+RenzuCommand('drivetocoord', function(source, args, raw)
+    local waypoint = GetFirstBlipInfoId(8)
+    if vehicle ~= 0 and DoesBlipExist(waypoint) then
+        local x,y,z = table.unpack(GetBlipCoords(waypoint))
+        print("driving",x,y,z,vehicle)
+        TaskVehicleDriveToCoordLongrange(GetPlayerPed(-1), getveh(), x, y, z, 400.0, 787260, 10.0)
+        -- SetVehicleHighGear(getveh(),2)
+        -- SetVehicleMaxSpeed(getveh(),200.0)
+        SetVehicleHandlingField(getveh(), "CHandlingData", "fDriveInertia", GetVehicleHandlingFloat(getveh(), "CHandlingData","fDriveInertia") * 4.5)
+        SetVehicleHandlingField(getveh(), "CHandlingData", "fInitialDriveForce", GetVehicleHandlingFloat(getveh(), "CHandlingData","fInitialDriveForce") * 4.5)
+        SetVehicleHandlingField(getveh(), "CHandlingData", "fInitialDriveMaxFlatVel", GetVehicleHandlingFloat(getveh(), "CHandlingData","fInitialDriveMaxFlatVel") * 4.0)
+        SetVehicleHandlingFloat(getveh(), "CHandlingData", "fLowSpeedTractionLossMult", GetVehicleHandlingFloat(getveh(), "CHandlingData","fLowSpeedTractionLossMult") * 0.5) -- start burnout less = traction
+        SetVehicleHandlingFloat(getveh(), "CHandlingData", "fTractionCurveMin", GetVehicleHandlingFloat(getveh(), "CHandlingData","fTractionCurveMin") * 1.5) -- accelaration grip
+        Creation(function()
+            while true do
+                local autogear = GetGear(vehicle)
+                if autogear > 0 then
+                    -- Citizen.InvokeNative(0x8923dd42, vehicle, autogear)
+                    -- Renzu_Hud(setcurrentgearhash & 0xFFFFFFFF, vehicle, autogear)
+                    -- Renzu_Hud(nextgearhash & 0xFFFFFFFF, vehicle, autogear)
+                    --SetRpm(vehicle, speedtable(speed,autogear))
+                    SetDriveTaskCruiseSpeed(PlayerPedId(),300.0)
+                    SetDriveTaskMaxCruiseSpeed(true,300.0)
+                    ModifyVehicleTopSpeed(vehicle,10.0)
+                    print(GetVehicleThrottleOffset(vehicle))
+                    if GetEntitySpeed(vehicle) * 3.6 > 155 then
+                        SetEntityMaxSpeed(PlayerPedId(),300.0)
+                        SetEntityMaxSpeed(vehicle,300.0)
+                        SetPlaybackSpeed(vehicle,300.0)
+                        SetRpm(vehicle, 1.0)
+                    end
+                end
+                Wait(0)
+            end
+        end)
+        Creation(function()
+            local model = GetHashKey("gtr")
+            --requestmodel(model)
+            while true do
+                --AddModelToCreatorBudget(model)
+                for k,v in pairs(GetGamePool('CVehicle')) do
+                    local xv,yv,zv = table.unpack(GetEntityCoords(v))
+                    if v ~= vehicle then
+                        SetEntityAlpha(v,151,false)
+                        SetEntityCollision(v,true,true)
+                        --CreateModelSwap(xv,yv,zv,50.0,GetEntityModel(v),model,true)
+                        if #(GetEntityCoords(vehicle) - GetEntityCoords(v)) < 30 then
+                            SetEntityNoCollisionEntity(vehicle,v,false)
+                        else
+                            SetControlNormal(0,31,1.0)
+                            --TaskVehicleDriveToCoordLongrange(GetPlayerPed(-1), getveh(), x, y, z, 400.0, 787260, 10.0)
+                        end
+                    end
+                end
+                SetDriveTaskDrivingStyle(GetPlayerPed(-1), 787260)
+                SetDriveTaskCruiseSpeed(GetPlayerPed(-1),400.0)
+                SetDriverRacingModifier(GetPlayerPed(-1),1.0)
+                SetDriverAbility(GetPlayerPed(-1), 1.0)        -- values between 0.0 and 1.0 are allowed.
+                SetDriverAggressiveness(GetPlayerPed(-1), 1.0) -- values between 0.0 and 1.0 are allowed.
+                SetDriveTaskMaxCruiseSpeed(GetPlayerPed(-1),400.0)
+                SetPedKeepTask(GetPlayerPed(-1), true)
+                --TaskVehicleTempAction(GetPlayerPed(-1),vehicle,32,10.0)
+                --TaskVehicleDriveToCoordLongrange(GetPlayerPed(-1), getveh(), x, y, z, 400.0, 787260, 10.0)
+                Wait(1)
+            end
+        end)
+
+        Creation(function()
+            while true do
+                local currentzone = GetZoneAtCoords(GetEntityCoords(GetPlayerPed(-1)))
+                local popzone = GetZonePopschedule(currentzone)
+                local model = GetHashKey("gtr")
+                requestmodel(model)
+                AddModelToCreatorBudget(model)
+                OverridePopscheduleVehicleModel(popzone,model)
+                Wait(1000)
+            end
+        end)
+    end
+end)
+
+-- Creation(function()
+--     while true do
+--         local currentzone = GetZoneAtCoords(GetEntityCoords(GetPlayerPed(-1)))
+--         local popzone = GetZonePopschedule(currentzone)
+--         local model = GetHashKey("gtr")
+--         requestmodel(model)
+--         AddModelToCreatorBudget(model)
+--         OverridePopscheduleVehicleModel(popzone,model)
+--         Wait(1000)
+--     end
+-- end)
+
+function requestmodel(model)
+	RequestModel(model)
+	while not HasModelLoaded(model) do 
+		Renzuzu.Wait(1)
+		RequestModel(model)
+	end
+end
 
 function startmanual(entity)
     Citizen.Wait(1000)
@@ -26,8 +144,8 @@ function startmanual(entity)
         if entity ~= nil then
             vehicle = entity
         end
-        --maxgear = GetVehStats(vehicle, "CHandlingData","nInitialDriveGears")
-        vehicletopspeed = DecorGetFloat(vehicle,"TOPSPEED")
+        maxgear = tonumber(GetHandling(GetPlate(vehicle)).maxgear)
+        vehicletopspeed = GetHandling(GetPlate(vehicle)).maxspeed
         --print(maxgear)
         savegear = GetGear(vehicle)
         while not manual do -- ASYNC WAITING FOR MANUAL BOOL = TRUE
@@ -37,8 +155,10 @@ function startmanual(entity)
         Nuimanualtranny()
         NuiClutchloop()
         NuiManualEtcFunc()
+        Wait(500)
         NuiMainmanualLoop()
         print("MANUAL TRUE")
+        manualstatus = not manualstatus
         DecorSetBool(vehicle, "MANUAL", true)
         --print(DecorGetBool(vehicle, "MANUAL"))
     end)
@@ -55,7 +175,7 @@ RenzuEventHandler('renzu_hud:manual', function(bool)
 		DecorRemove(getveh(), "MANUAL")
 	end
     if not bool then
-	    local topspeed = GetVehStats(getveh(), "CHandlingData", "fInitialDriveMaxFlatVel") * 1.3
+	    local topspeed = GetHandling(GetPlate(vehicle)).maxspeed * 1.3
 	    LockSpeed(getveh(),topspeed / 3.6)
 	    ForceVehicleGear(getveh(), 1)
 	    SetVehicleHandbrake(getveh(),bool)
@@ -71,6 +191,7 @@ RenzuEventHandler('renzu_hud:manual', function(bool)
             veh_stats[plate].manual = true
             DecorSetBool(getveh(), "MANUAL", bool)
             TriggerServerEvent('renzu_hud:savedata', plate, veh_stats[tostring(plate)])
+            manual = true
         end
         startmanual(getveh())
 	end
@@ -80,7 +201,7 @@ end)
 
 RenzuCommand('manual', function()
 	if manual then
-	    local topspeed = GetVehStats(GetVehiclePedIsIn(GetPlayerPed(-1), false), "CHandlingData", "fInitialDriveMaxFlatVel") * 1.3
+	    local topspeed = GetHandling(GetPlate(vehicle)).maxspeed * 1.3
 	    LockSpeed(vehicle,topspeed / 3.6)
 	    ForceVehicleGear(vehicle, 1)
 	    SetVehicleHandbrake(vehicle,false)
@@ -94,7 +215,7 @@ RenzuCommand('manual', function()
         startmanual()
 	end
     manual = not manual
-    manualstatus = not manualstatus
+    --manualstatus = not manualstatus
 end)
 
 --NUI MANUAL TRANSMISSION
@@ -200,21 +321,21 @@ end
 -- end)
 
 function trannyupgradegear()
-    local mg = maxgear
-    if GetVehicleMod(vehicle,13) > 0 and mg < 6 then
+    local mg = tonumber(GetHandling(GetPlate(vehicle)).maxgear)
+    if tonumber(GetVehicleMod(vehicle,13)) > 0 and tonumber(mg) < 6 then
         mg = mg + 1
     end
-    return mg
+    return tonumber(mg)
 end
 
 function trannyupgradespeed()
-    if GetVehicleMod(vehicle,13) > 0 then
+    if tonumber(GetVehicleMod(vehicle,13)) > 0 then
         if mode == 'SPORTS' then
-            local bonus = (DecorGetFloat(vehicle,"TOPSPEED") * config.topspeed_multiplier)
+            local bonus = (GetHandling(GetPlate(vehicle)).maxspeed * config.topspeed_multiplier)
             SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", bonus * 1.5)
             --print("BONUS")
         else
-            SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", DecorGetFloat(vehicle,"TOPSPEED") * 1.5)
+            SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", GetHandling(GetPlate(vehicle)).maxspeed * 1.5)
         end
         --SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE") * 1.5)
     end
@@ -223,6 +344,7 @@ function trannyupgradespeed()
     return r
 end
 
+local highgear = 5
 function NuiManualEtcFunc()
     Creation(function()
         while manual and invehicle do
@@ -231,9 +353,12 @@ function NuiManualEtcFunc()
                 enginerunning = GetIsVehicleEngineRunning(vehicle)
                 handbrake = GetVehicleHandbrake(vehicle)
                 carspeed = VehicleSpeed(vehicle) * 3.6
-                acceleration = DecorGetFloat(vehicle,"DRIVEFORCE")
+                acceleration = GetHandling(GetPlate(vehicle)).flywheel
                 vehicletopspeed = trannyupgradespeed('speed')
                 maxgear = trannyupgradegear('gear')
+                highgear = tonumber(GetVehicleHighGear(vehicle))
+                olddriveinertia = tonumber(GetHandling(GetPlate(vehicle)).finaldrive)
+                oldriveforce = tonumber(GetHandling(GetPlate(vehicle)).flywheel)
             end
             Renzuzu.Wait(sleep)
         end
@@ -356,23 +481,26 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                 end
 
                 --main loop manual system
-                if GetVehicleHighGear(vehicle) ~= maxgear then
-                    SetVehicleHighGear(vehicle,round(maxgear))
+                if highgear ~= maxgear then
+                    SetVehicleHighGear(vehicle,round(GetVehStats(vehicle, "CHandlingData","nInitialDriveGears")))
+                    maxgear = tonumber(GetHandling(GetPlate(vehicle)).maxgear)
                 end
 
                 correctgears = GetGear(vehicle)
-                if savegear > 2 then
-                    local speedgearlimit = (vehicletopspeed * config.gears[maxgear][correctgears]) * 0.89
+                --ShowHelpNotification(tostring(savegear,correctgears,round(maxgear)), true, 1, 5)
+                --print(savegear,correctgears,round(maxgear))
+                if tonumber(savegear) > 1 and tonumber(correctgears) <= tonumber(maxgear) then
+                    local speedgearlimit = (vehicletopspeed * config.gears[maxgear][correctgears]) * 0.88
                     if correctgears < 1 then
                         correctgears = 1
                     end
-                    if savegear <= 2 then
+                    if savegear <= 1 then
                         correctgears = 1
                     end
                     if speed > speedgearlimit then
                         correctgears = correctgears + 1
                     end
-                    ShowHelpNotification(tostring(round(correctgears)), true, 1, 5)
+                    --ShowHelpNotification(tostring(round(correctgears)), true, 1, 5)
                 else
                     correctgears = savegear
                 end
@@ -381,7 +509,7 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                     Citizen.InvokeNative(0x8923dd42, vehicle, 0)
                     Renzu_Hud(setcurrentgearhash & 0xFFFFFFFF, vehicle, 0)
                     Renzu_Hud(nextgearhash & 0xFFFFFFFF, vehicle, 0)
-                else
+                elseif speed > 2 then
                     Citizen.InvokeNative(0x8923dd42, vehicle, correctgears)
                     Renzu_Hud(setcurrentgearhash & 0xFFFFFFFF, vehicle, correctgears)
                     Renzu_Hud(nextgearhash & 0xFFFFFFFF, vehicle, correctgears)
@@ -397,9 +525,9 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                             SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveLateral", veh_stats[plate].tirespec['fTractionCurveLateral'] * 0.7)
                             SetVehicleHandlingField(vehicle, "CHandlingData", "fLowSpeedTractionLossMult", veh_stats[plate].tirespec['fLowSpeedTractionLossMult'] * 1.7)
                         else
-                            SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveMin", DecorGetFloat(vehicle,"TRACTION") * 0.7)
-                            SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveLateral", DecorGetFloat(vehicle,"TRACTION2") * 0.7)
-                            SetVehicleHandlingField(vehicle, "CHandlingData", "fLowSpeedTractionLossMult", DecorGetFloat(vehicle,"TRACTION3") * 1.7)
+                            SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveMin", GetHandling(GetPlate(vehicle)).traction * 0.7)
+                            SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveLateral", GetHandling(GetPlate(vehicle)).traction2 * 0.7)
+                            SetVehicleHandlingField(vehicle, "CHandlingData", "fLowSpeedTractionLossMult", GetHandling(GetPlate(vehicle)).traction3 * 1.7)
                         end
                         notraction = true
                         Wait(0)
@@ -420,9 +548,9 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                                     SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveLateral", veh_stats[plate].tirespec['fTractionCurveLateral'] * 1.0)
                                     SetVehicleHandlingField(vehicle, "CHandlingData", "fLowSpeedTractionLossMult", veh_stats[plate].tirespec['fLowSpeedTractionLossMult'] * 1.0)
                                 else
-                                    SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveMin", DecorGetFloat(vehicle,"TRACTION") * 1.0)
-                                    SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveLateral", DecorGetFloat(vehicle,"TRACTION2") * 1.0)
-                                    SetVehicleHandlingField(vehicle, "CHandlingData", "fLowSpeedTractionLossMult", DecorGetFloat(vehicle,"TRACTION3") * 1.0)
+                                    SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveMin", GetHandling(GetPlate(vehicle)).traction * 1.0)
+                                    SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveLateral", GetHandling(GetPlate(vehicle)).traction2 * 1.0)
+                                    SetVehicleHandlingField(vehicle, "CHandlingData", "fLowSpeedTractionLossMult", GetHandling(GetPlate(vehicle)).traction3 * 1.0)
                                 end
                                 notraction = false
                             end
@@ -495,6 +623,10 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                     Renzu_SetGear(vehicle,1)
                 end
 
+                if not clutch and speed < 5 and savegear == 0 then
+                    Wait(1000)
+                end
+
                 --neutral launch control
                 -- if RCP(1, 20) and RCP(1, 32) and speed < 11 and rpm >= 0.5 and speed <= 5 or clutch and RCP(1, 32) and speed < 11 and rpm >= 0.5 and speed <= 5 then
                 --     SetRpm(vehicle,0.6)
@@ -563,10 +695,10 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
         if vehicle == 0 then
             vehicle = getveh()
         end
-        if DecorGetFloat(vehicle,"INERTIA") ~= 0.0 and DecorGetFloat(vehicle,"DRIVEFORCE") ~= 0.0 then
-            SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", DecorGetFloat(vehicle,"TOPSPEED"))
-            SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
-            SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
+        if GetHandling(GetPlate(vehicle)).finaldrive ~= 0.0 and GetHandling(GetPlate(vehicle)).flywheel ~= 0.0 then
+            SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", GetHandling(GetPlate(vehicle)).maxspeed)
+            SetVehStats(vehicle, "CHandlingData", "fDriveInertia", GetHandling(GetPlate(vehicle)).finaldrive)
+            SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", GetHandling(GetPlate(vehicle)).flywheel)
         end
     end)
 end
@@ -586,15 +718,15 @@ end
 
 function gearspeed(sg, wheel)
     if wheel then
-        if GetVehicleMod(vehicle,13) > 0 then
+        if tonumber(GetVehicleMod(vehicle,13)) > 0 then
             if mode == 'SPORTS' then
-                local bonus = (DecorGetFloat(vehicle,"TOPSPEED") * config.topspeed_multiplier)
+                local bonus = (GetHandling(GetPlate(vehicle)).maxspeed * config.topspeed_multiplier)
                 vehicletopspeed = bonus * 1.5
             else
-                vehicletopspeed = DecorGetFloat(vehicle,"TOPSPEED") * 1.5
+                vehicletopspeed = GetHandling(GetPlate(vehicle)).maxspeed * 1.5
             end
         else
-            vehicletopspeed = DecorGetFloat(vehicle,"TOPSPEED") * 1.0
+            vehicletopspeed = GetHandling(GetPlate(vehicle)).maxspeed * 1.0
         end
     end
     output = (vehicletopspeed * config.gears[maxgear][tonumber(sg)]) * 0.9
@@ -662,6 +794,7 @@ function antistall(speed, speedreduce, savegear, gearname, rpm, vehicle, current
         drivechange = false
         --SetVehicleHighGear(vehicle, maxgear)
     end
+    --Renzu_SetGear(vehicle,savegear)
     if speed - (speedreduce * driveforce) <= (gearname - speedreduce) and currentgear > 0 then
         gearup = currentgear
         stalling = true
@@ -714,8 +847,11 @@ local og = 0
 function speedtable(speed,gear)
     --SetVehicleReduceTraction(vehicle, true)
     if clutchpressed then return end
-    olddriveinertia = finaldrive
-    oldriveforce = flywheel
+    --olddriveinertia = tonumber(GetHandling(GetPlate(vehicle)).finaldrive)
+    -- if olddriveinertia > 1 then
+    --     olddriveinertia = 1.0
+    -- end
+    --oldriveforce = tonumber(GetHandling(GetPlate(vehicle)).flywheel)
     oldtopspeed = maxspeed * olddriveinertia -- normalize
     local engineload = oldriveforce + ((rpm * olddriveinertia) * (gear / oldriveforce))
     local speedreduce = (oldtopspeed) * (config.gears[maxgear][gear] * olddriveinertia) / gear * oldriveforce * engineload

@@ -9,7 +9,7 @@ function pedface() {
             console.log("URL")
             let url = 'https://nui-img/' + face + '/' + face + '?t=' + String(Math.round(new Date().getTime() / 1000));
             if (face == 'none') {
-                url = 'https://cdn.discordapp.com/attachments/696445330480300032/790173823202099240/newnewnewlogo.png';   
+                url = 'https://nui-img/pedmugshot_01/pedmugshot_01?t123';   // assuming theres a cache
             }
             console.log(url)
             $("#pedface").attr("src", ""+url+"")
@@ -24,8 +24,10 @@ $(document).on('click','#start',function(){
 });
 
 var pressedkey = 0
+const time = new Date().toLocaleTimeString();
 
 function setArmor(s) {
+    console.log("time",time)
     if (statusui == 'simple') {
         document.getElementById("armorsimple").style.clip = 'rect('+toclip(s)+', 100px, 100px, 0)'
     } else {
@@ -167,6 +169,16 @@ function setStatus(table) {
             document.getElementById(table[i].rpuidiv).style.width = ''+table[i].value+'%'
             document.getElementById(table[i].i_id_1).style.clip = 'rect('+toclip(table[i].value)+', 100px, 100px, 0)'
         }
+        if (table[i].value >= 80 && table[i].status == 'sanity') {
+            document.getElementById(table[i].id_3).style.setProperty("-webkit-filter", "drop-shadow(5px 5px 5px rgba(255, 5, 5, 1.0)");
+            document.getElementById(table[i].id_3).style.color = "rgb(255, 5, 5)";
+        } else if (table[i].value <= 40 && table[i].status !== 'sanity') {
+            document.getElementById(table[i].id_3).style.color = "rgb(255, 5, 5)";
+            document.getElementById(table[i].id_3).style.setProperty("-webkit-filter", "drop-shadow(5px -1px 5px rgba(255, 5, 5, 1.0)");
+        } else {
+            document.getElementById(table[i].id_3).style.color = "rgba(151, 147, 147, 0.623)";
+            document.getElementById(table[i].id_3).style.setProperty("-webkit-filter", "drop-shadow(15px -1px 22px rgba(255, 5, 5, 0.0)");
+        }
         if (table[i].hideifmax) {
             if (table[i].value == 100 && table[i].status !== 'armor') {
                 document.getElementById(table[i].id).style.display = 'none'
@@ -237,6 +249,13 @@ function setRpm(percent) {
     } else {
         e.style.stroke = 'white';
     }
+}
+
+function SetVehData(table) {
+    var speed = table['speed']
+    var rpm = table['rpm']
+    setSpeed(speed)
+    setRpm(rpm)
 }
 
 function setSpeed(s) {
@@ -455,6 +474,7 @@ function numberWithCommas(x) {
 }
 
 function setInfo(table) {
+    document.getElementById("idnumlabel").innerHTML = 'Citizen ID#: '+table.id+''
     document.getElementById("joblabel").innerHTML = ''+table.job+': '+table.joblabel+''
     document.getElementById("moneylabel").innerHTML = ''+numberWithCommas(table.money)+''
     document.getElementById("black_moneylabel").innerHTML = ''+numberWithCommas(table.black)+''
@@ -999,7 +1019,7 @@ function setCarui(ver) {
         document.getElementById("gasicon").style.bottom = '47%';
         document.getElementById("gasicon").style.opacity = '0.6';
         document.getElementById("tempicon").style.opacity = '0.6';
-        document.getElementById("geardiv").style.right = '42%';
+        document.getElementById("geardiv").style.right = '9.9vw';
         document.getElementById("geardiv").style.bottom = '42%';
         document.getElementById("geardiv").style.fontSize = '0.4vw';
         document.getElementById("right").style.right = '27%';
@@ -1406,11 +1426,9 @@ function SetNotify(table) {
         var offsetplus = -35
         var statuses = s
         for (const i in statuses) {
-            console.log(statuses[i].status)
             var offset = statuses[0].offset
             offsetplus = offsetplus + 35
             offset = (+offset - +offsetplus)
-            console.log(offset)
             var class1 = statuses[i].i_id_1_class
             var class2 = statuses[i].i_id_2_class
             var color1 = statuses[i].i_id_1_color
@@ -1418,7 +1436,7 @@ function SetNotify(table) {
             var divid = statuses[i].id
             var i_id_1 = statuses[i].i_id_1
             var i_id_2 = statuses[i].i_id_2
-            $("#statusv3").prepend('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:17px;position:relative;color:rgba(144, 144, 144, 0.876);float:right; margin-top:-25px;margin-left:-7px;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:17px;color:rgba(11, 39, 63, 0.707)"></i> <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+class1+'" style="font-size:19px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+class2+'" style="font-size:19px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
+            $("#statusv3").prepend('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:17px;position:relative;color:rgba(144, 144, 144, 0.876);float:right; margin-top:-25px;margin-left:-7px;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:17px;color:rgba(11, 39, 63, 0.707)"></i> <i id="'+statuses[i].id_3+'" class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+class1+'" style="font-size:19px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+class2+'" style="font-size:19px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
         }
     }
 
@@ -1499,6 +1517,12 @@ function SetNotify(table) {
             if (i == 'mileage') {
                 $('#mileagetext').html((+table[i]).toFixed(0)+" Km")
             }
+            if (i == 'trannytype') {
+                $('#trannytype').html(table[i])
+            }
+            if (i == 'enginename') {
+                $('#enginename').html(table[i])
+            }
         }
         if (table['bool']) {
             $('#carstatusui').fadeIn('fast');
@@ -1507,6 +1531,25 @@ function SetNotify(table) {
         }
     }
 
+    // function setStatusV1(sleep) {
+    //     setInterval(function(){ post("UpdateStatus",{}) }, sleep);
+    // }
+    // function setUpdatePlayer(sleep) {
+    //     setInterval(function(){ post("UpdatePlayer",{}) }, sleep);
+    // }
+    // function setStatusEffect(sleep) {
+    //     setInterval(function(){ post("setStatusEffect",{}) }, sleep);
+    // }
+    // function SetUpdateWeapon(sleep) {
+    //     setInterval(function(){ post("UpdateWeaponStatus",{}) }, sleep);
+    // }
+    function setShooting(sleep) {
+        setInterval(function(){ post("setShooting",{}) }, sleep);
+    }
+
+    function NuiLoop() {
+        setInterval(function(){ post("NuiLoop",{}) }, 2000);
+    }
 
 //FUNCTIONS
 var renzu_hud = {
@@ -1534,9 +1577,12 @@ var renzu_hud = {
     setMoveStatusUi,
     changeallclass,
     SetStatusOrder,
+    setShooting,
+    NuiLoop,
     //CAR
     setShow,
     setRpm,
+    SetVehData,
     setSpeed,
     setCarhp,
     setFuelLevel,
@@ -1597,6 +1643,6 @@ setTimeout(function(){
     $(".loading").fadeOut();
     setMode('NORMAL',carui)
     setMic(2)
-}, 4000);
+}, 5000);
 setShowCarStatus(false)
 pedface()

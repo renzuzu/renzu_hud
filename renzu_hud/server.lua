@@ -128,24 +128,24 @@ end)
 
 RegisterServerEvent("renzu_hud:savedata")
 AddEventHandler("renzu_hud:savedata", function(plate,table)
+	local source = source
 	local plate = plate
 	local foundplate = false
 	if plate ~= nil then
 		print("SAVING")
 		adv_table[tostring(plate)] = table
-		MySQL.Async.fetchAll("SELECT adv_stats,plate,owner FROM owned_vehicles WHERE plate=@plate", {['@plate'] = plate}, function(results)
-			if #results > 0 then
-				foundplate = true
-				MySQL.Sync.execute("UPDATE owned_vehicles SET adv_stats = @adv_stats WHERE plate = @plate", {
-					['@adv_stats'] = json.encode(adv_table[tostring(plate)]),
-					['@plate'] = plate
-				})
-			end
-		end)
+		local results = MySQL.Sync.fetchAll("SELECT adv_stats,plate,owner FROM owned_vehicles WHERE plate=@plate", {['@plate'] = plate})
+		if #results > 0 then
+			foundplate = true
+			MySQL.Sync.execute("UPDATE owned_vehicles SET adv_stats = @adv_stats WHERE plate = @plate", {
+				['@adv_stats'] = json.encode(adv_table[tostring(plate)]),
+				['@plate'] = plate
+			})
+		end
 		if not foundplate then
 			adv_table[tostring(plate)].owner = nil
 		end
-		TriggerClientEvent('renzu_hud:receivemile', -1, adv_table)
+		TriggerClientEvent('renzu_hud:receivedata', -1, adv_table, GetPlayerIdentifier(source))
 	end
 end)
 
@@ -175,7 +175,7 @@ AddEventHandler("renzu_hud:getdata", function(slot, fetchslot)
 		if Renzu[tonumber(source)] == nil then
 			CreatePlayer(source)
 		end
-		TriggerClientEvent('renzu_hud:receivemile', source, adv_table, GetPlayerIdentifier(source))
+		TriggerClientEvent('renzu_hud:receivedata', source, adv_table, GetPlayerIdentifier(source))
 	end
 end)
 
@@ -293,4 +293,75 @@ end)
 RegisterServerEvent('playerDropped')
 AddEventHandler('playerDropped', function(reason)
 	Renzu[tonumber(source)] = nil
+end)
+
+--ENGINE SYSTEM :D
+
+function firstToUpper(str)
+    return (str:gsub("^%l", string.upper))
+end
+
+Citizen.CreateThread(function()
+	if config.enable_engine_item then
+		Wait(1000)
+		print("test")
+		local c = 0
+		for v, k in pairs(config.engine) do -- you can remove this for loop after you install the engine sql
+			c = c + 1
+			print(c)
+			print(v)
+			local enginename = string.lower(v)
+			local label = string.upper(v)
+			print(firstToUpper(enginename))
+			--insertnew("muffler_"..enginename.."",""..label.." Muffler",100000)
+			MySQL.Async.fetchAll('SELECT * FROM items WHERE name = @name', {
+				['@name'] = "engine_"..enginename..""
+			}, function(foundRow)
+				if foundRow[1] == nil then
+					local weight = 'limit'
+					if config.weight_type then
+						MySQL.Sync.execute('INSERT INTO items (name, label, weight) VALUES (@name, @label, @weight)', {
+							['@name'] = "engine_"..enginename.."",
+							['@label'] = ""..firstToUpper(enginename).." Engine",
+							['@weight'] = config.weight
+						})
+						print("Inserting "..enginename.."")
+					else
+						MySQL.Sync.execute('INSERT INTO items (name, label) VALUES (@name, @label)', {
+							['@name'] = "engine_"..enginename.."",
+							['@label'] = ""..firstToUpper(enginename).." Engine",
+						})
+						print("Inserting "..enginename.."")
+					end
+				end
+			end)
+		end
+
+		for v, k in pairs(config.engine) do
+			local enginename = string.lower(v)
+			print("register item")
+			ESX.RegisterUsableItem("engine_"..enginename.."", function(source)
+				local xPlayer = ESX.GetPlayerFromId(source)
+				xPlayer.removeInventoryItem("engine_"..enginename.."", 1)
+				TriggerClientEvent('renzu_hud:change_engine', xPlayer.source, enginename)
+			end)
+		end
+	end
+end)
+
+RegisterServerEvent('renzu_hud:change_engine')
+AddEventHandler('renzu_hud:change_engine', function(plate, stats)
+	local plate = plate
+	adv_table[tostring(plate)] = stats
+	MySQL.Async.fetchAll("SELECT adv_stats,plate,owner FROM owned_vehicles WHERE plate=@plate", {['@plate'] = plate}, function(results)
+		if #results > 0 then
+			foundplate = true
+			MySQL.Sync.execute("UPDATE owned_vehicles SET adv_stats = @adv_stats WHERE plate = @plate", {
+				['@adv_stats'] = json.encode(adv_table[tostring(plate)]),
+				['@plate'] = plate
+			})
+		end
+	end)
+	TriggerClientEvent("renzu_hud:syncengine", -1, plate, stats)
+	print("syncing to all")
 end)

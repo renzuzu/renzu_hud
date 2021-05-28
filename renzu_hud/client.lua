@@ -149,27 +149,13 @@ Creation(function()
 		end, false)
 		RenzuKeybinds(config.commands['voip'], 'Voice Proximity', 'keyboard', config.keybinds['voip'])
 	end
+	return
 end)
 
--- local newfreq = nil
--- RenzuNetEvent("radio:freq")
--- RenzuEventHandler("radio:freq", function(freq)
--- 		if newfreq ~= freq or newfreq == nil then
--- 		RenzuSendUI({
--- 		type = "setRadio",
--- 		content = freq
--- 		})
--- 		newfreq = freq
--- 		end
--- end)
 charslot = nil
 RenzuNetEvent('renzu_hud:charslot')
 RenzuEventHandler('renzu_hud:charslot', function(charid)
 	charslot = charid
-	--print(charslot)
-	--print(charslot)
-	--print(charslot)
-	--print(charslot)
 	while not playerloaded do
 		Wait(100)
 	end
@@ -186,7 +172,7 @@ local lastped = nil
 function isplayer()
 	local mpm = GetHashKey("mp_m_freemode_01")
 	local mpf = GetHashKey("mp_f_freemode_01")
-	local model = GetEntityModel(ped)
+	local model = GetEntityModel(PlayerPedId())
 	if model == mpm then
 		return true
 	elseif model == mpf then
@@ -199,24 +185,28 @@ end
 Creation(function()
 	if charslot == nil and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0.0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= nil then
 		charslot = round(DecorGetFloat(PlayerPedId(),"CHARSLOT"))
-		--print("CHARSLOT")
+		----print("CHARSLOT")
 	else
 		Citizen.Wait(4000)
 	end
 	if DecorExistOn(PlayerPedId(), "PLAYERLOADED") and charslot ~= nil then
-		--print("PLAYERLOADED")
+		----print("PLAYERLOADED")
 		TriggerServerEvent("renzu_hud:getdata",charslot)
-	elseif config.loadedasmp and isplayer() then
+		playerloaded = true
+	end
+	--print('ismp?', playerloaded, isplayer())
+	if not playerloaded and config.loadedasmp and isplayer() then
 		--print("ISMP")
 		TriggerServerEvent("renzu_hud:getdata",0, true)
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
+		playerloaded = true
 	end
 	if config.framework == 'ESX' then
 		RenzuNetEvent('esx:playerLoaded')
 		RenzuEventHandler('esx:playerLoaded', function(xPlayer)
 			playerloaded = true
 			Renzuzu.Wait(2000)
-			--print("ESX")
+			----print("ESX")
 			lastped = PlayerPedId()
 			TriggerServerEvent("renzu_hud:getdata",charslot)
 			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
@@ -245,17 +235,32 @@ Creation(function()
 			end
 		end
 	end
+	--return
 end)
 
 
 --- NEW HUD FUNC
+function tablelength(T)
+	local count = 0
+	for _ in pairs(T) do count = count + 1 end
+	return tonumber(count)
+end
 
+dummyskin = {}
 RenzuNuiCallback('requestface', function(data, cb)
 	while not playerloaded do
 		Renzuzu.Wait(1000)
+		--print("Playerloadedface")
 	end
 	Renzuzu.Wait(5000)
+	TriggerEvent('skinchanger:getSkin', function(current) dummyskin = current end)
+	while tablelength(dummyskin) <= 0 do
+		--print(tablelength(dummyskin))
+		TriggerEvent('skinchanger:getSkin', function(current) dummyskin = current end)
+		Wait(1000)
+	end
     cb(getawsomeface())
+	ClearPedHeadshots()
 end)
 
 -- HELPERS
@@ -266,7 +271,13 @@ function getawsomeface()
     local playerPos = GetEntityCoords(PlayerPedId())
     local player = PlayerId()
 
-	local tempHandle = RegisterPedheadshotTransparent(PlayerPedId())
+	local tempHandle = nil
+
+	if config.gamebuild == 2189 then
+		tempHandle = RegisterPedheadshot_3(PlayerPedId())
+	else
+		tempHandle = RegisterPedheadshotTransparent(PlayerPedId())
+	end
 
 	local timer = 2000
 	while ((not tempHandle or not IsPedheadshotReady(tempHandle) or not IsPedheadshotValid(tempHandle)) and timer > 0) do
@@ -278,6 +289,19 @@ function getawsomeface()
 	if (IsPedheadshotReady(tempHandle) and IsPedheadshotValid(tempHandle)) then
 		headshotTxd = GetPedheadshotTxdString(tempHandle)
 		headshot = headshotTxd
+	end
+
+	if headshotTxd == 'none' then
+		tempHandle = RegisterPedheadshot_3(PlayerPedId())
+		timer = 2000
+		while ((not tempHandle or not IsPedheadshotReady(tempHandle) or not IsPedheadshotValid(tempHandle)) and timer > 0) do
+			Wait(10)
+			timer = timer - 10
+		end
+		if (IsPedheadshotReady(tempHandle) and IsPedheadshotValid(tempHandle)) then
+			headshotTxd = GetPedheadshotTxdString(tempHandle)
+			headshot = headshotTxd
+		end
 	end
 
 	return headshotTxd
@@ -298,17 +322,13 @@ end
 local statuses = {}
 local vitals = {}
 local statusloop = -1
-function updateStatus(pressed)
-	local sleep = 0
-	if not config.statusv2 or pressed then
-		Myinfo()
+
+function UpdateStatus(export,vitals)
+	if export then
+	vitals = exports['standalone_status']:GetStatus(statuses)
 	end
-	if statusloop == -1 or statusloop > 50 or pressed then
-		vitals = exports['standalone_status']:GetStatus(statuses)
-		statusloop = 0
-	else
-		sleep = 100
-	end
+	statusloop = 0
+	sleep = 11
 
 	for k1,v1 in pairs(config.statusordering) do
 		if v1.status == 'stamina' then
@@ -350,29 +370,84 @@ function updateStatus(pressed)
 	})
 end
 
-	Creation(function()
-		Renzuzu.Wait(2000)
-		for k,v in pairs(config.statusordering) do
-			if v.custom then
-				statuses[k] = v.status
-			end
+Creation(function()
+	if config.enablestatus then
+		RegisterNetEvent("esx_status:onTick")
+		AddEventHandler("esx_status:onTick", function(vitals)
+			UpdateStatus(false,vitals)
+		end)
+	end
+	return
+end)
+
+local garbage = 0
+Creation(function()
+	Renzuzu.Wait(2000)
+	for k,v in pairs(config.statusordering) do
+		if v.custom then
+			statuses[k] = v.status
 		end
+	end
+
+	if config.statusv2 then
 		RenzuSendUI({
 			type = "setShowstatusv2",
 			content = config.statusv2
 		})
-		if config.statusv2 then
-			while true do
-				local sleep = config.statusv2_sleep
-				updateStatus()
-				Renzuzu.Wait(sleep)
-			end
+	end
+
+	RenzuSendUI({
+		type = "NuiLoop",
+		content = 1000
+	})
+	RenzuNuiCallback('NuiLoop', function(data, cb)
+		--updateplayer()
+		if config.running_affect_status or config.melee_combat_affect_status or config.parachute_affect_status or config.playing_animation_affect_status then
+			Creation(function()
+				Wait(1000)
+				setStatusEffect()
+				return
+			end)
 		end
+		if config.weaponsui then
+			Creation(function()
+				Wait(1500)
+				WeaponStatus()
+				return
+			end)
+		end
+
+		if config.enablecompass then
+			Creation(function()
+				Wait(2000)
+				Compass()
+				return
+			end)
+		end
+
+		if config.bodystatus then
+			Creation(function()
+				BodyLoop()
+				return
+			end)
+		end
+
+		if config.customengine then
+			SyncVehicleSound()
+		end
+		if garbage > 200 then
+			collectgarbage()
+			garbage = 0
+		end
+		garbage = garbage + 1
+		--print(garbage,"Garbage")
 	end)
+	updateplayer(true)
+end)
 
 RenzuCommand(config.commands['showstatus'], function()
 	show = not show
-	updateStatus(true)
+	Myinfo(true)
     PlaySoundFrontend(PlayerId(), "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", true )
 	RenzuSendUI({
 		type = "setShowstatus",
@@ -382,6 +457,7 @@ end, false)
 
 Creation(function()
 	RenzuKeybinds(config.commands['showstatus'], 'HUD Status UI', 'keyboard', config.keybinds['showstatus'])
+	return
 end)
 
 start = false
@@ -399,14 +475,18 @@ RenzuNuiCallback('getoutvehicle', function(data, cb)
 	TaskLeaveVehicle(ped,vehicle,0)
 end)
 
+lastplate = nil
 Creation(function()
 	Wait(1000)
+	while not playerloaded do Citizen.Wait(100) end
+	Wait(100)
 	local tbl = config.statusordering
 	RenzuSendUI({type = "SetStatusOrder",content = tbl})
 	RenzuSendUI({type = 'setCarui', content = config.carui})
-	Wait(100)
+	Wait(500)
 	RenzuSendUI({type = "setStatusUI",content = config.statusui})
 	RenzuSendUI({type = "setCompass",content = config.enablecompass})
+	Wait(500)
 	RenzuSendUI({type = "changeallclass",content = config.uidesign})
 	statusplace()
 	--WHEN RESTARTED IN CAR
@@ -429,134 +509,177 @@ Creation(function()
 			type = "setStart",
 			content = start
 		})
+		vehicle = GetVehiclePedIsIn(PlayerPedId())
+		EnterVehicleEvent(true,vehicle)
 	end
 	--WHEN RESTARTED IN CAR
+	while veh_stats == nil do
+		--print("vehstats")
+		Wait(100)
+	end
 	local l = 0
+	--print("starting thread")
 	while true do
 		ped = PlayerPedId()
 		vehicle = GetVehiclePedIsIn(ped)
-		if vehicle ~= nil and vehicle ~= 0 then
-			-- plate = tostring(GetVehicleNumberPlateText(vehicle))
-			-- plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
-			hp = GetVehicleEngineHealth(vehicle)
-			gasolina = GetVehicleFuelLevel(vehicle)
-			if uimove then
-				Renzuzu.Wait(500)
-				local content = {
-					['bool'] = true,
-					['type'] = config.carui
-				}
-				RenzuSendUI({
-					type = "setShow",
-					content = content
-				})
-			end
-			uimove = false
-			if not invehicle then
-				if config.statusplace == 'bottom-right' then
-					RenzuSendUI({type = "setMoveStatusUi",content = true})
-				end
-				if GetPedInVehicleSeat(vehicle, -1) == ped and entering then
-					breakstart = false
-					SetNuiFocus(true, true)
-					while not start and not breakstart and config.carui == 'modern' do
-						SetVehicleEngineOn(vehicle,false,true,true)
-						if GetVehiclePedIsIn(ped) == 0 then
-							start = false
-							breakstart = true
-						end
-						--print("loop not started")
-						Renzuzu.Wait(1)
-					end
-					start = true
-					SetNuiFocus(false,false)
-					Renzuzu.Wait(100)
-					SetVehicleEngineOn(vehicle,true,false,true)
-					--print("starting engine")
-					while not GetIsVehicleEngineRunning do
-						--print("starting")
-						SetVehicleEngineOn(vehicle,true,false,true)
-						Renzuzu.Wait(0)
-					end
-					Renzuzu.Wait(200)
-					start = true
-					RenzuSendUI({
-						type = "setStart",
-						content = start
-					})
-				end
-				Renzuzu.Wait(200)
-				cansmoke = true
-				inVehicleFunctions()
-				Renzuzu.Wait(100)
-				if manual then
-					RenzuSendUI({
-						type = "setManual",
-						content = true
-					})
-				end
-				RenzuSendUI({
-					type = "setDifferential",
-					content = GetVehStats(vehicle, "CHandlingData","fDriveBiasFront")
-				})
-			end
-			invehicle = true
-		else
-			globaltopspeed = nil
-			entering = false
-			start = false
-			invehicle = false
-			speed = 0
-			rpm = 0
-			marcha = 0
-			VehIndicatorLight = 0
-			--DisplayRadar(false)
-			if config.statusplace == 'bottom-right' then
-				RenzuSendUI({type = "setMoveStatusUi",content = false})
-			end
-			if alreadyturbo then
-				RenzuSendUI({
-					type = "setShowTurboBoost",
-					content = false
-				})
-			end
-			if not uimove then
-				Renzuzu.Wait(500)
-				local content = {
-					['bool'] = false,
-					['type'] = config.carui
-				}
-				RenzuSendUI({
-					type = "setShow",
-					content = content
-				})
-
-				RenzuSendUI({
-					type = "setStart",
-					content = false
-				})
-			end
-			if ismapopen then
-				RenzuSendUI({map = true, type = 'sarado'})
-				ismapopen = false
-			end
-			if manual then
-				RenzuSendUI({
-					type = "setManual",
-					content = false
-				})
-				manual = false
-			end
-			alreadyturbo = false
-			Renzuzu.Wait(1000)
-			uimove = true
+		updateplayer()
+		if invehicle and vehicle == 0 then
+			EnterVehicleEvent(false)
 		end
 		Renzuzu.Wait(config.car_mainloop_sleep)
 	end
 end)
 
+function EnterVehicleEvent(state,vehicle)
+	--print(state,vehicle,"enter veh")
+	if state and vehicle ~= nil and vehicle ~= 0 then
+		--print("veh loop")
+		-- plate = tostring(GetVehicleNumberPlateText(vehicle))
+		-- plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+		hp = GetVehicleEngineHealth(vehicle)
+		gasolina = GetVehicleFuelLevel(vehicle)
+		lastplate = GetPlate(vehicle)
+		if uimove then
+			Renzuzu.Wait(500)
+			local content = {
+				['bool'] = true,
+				['type'] = config.carui
+			}
+			RenzuSendUI({
+				type = "setShow",
+				content = content
+			})
+		end
+		uimove = false
+		if not invehicle then
+			if config.statusplace == 'bottom-right' then
+				RenzuSendUI({type = "setMoveStatusUi",content = true})
+			end
+			if GetPedInVehicleSeat(vehicle, -1) == ped and entering then
+				breakstart = false
+				SetNuiFocus(true, true)
+				while not start and not breakstart and config.carui == 'modern' do
+					SetVehicleEngineOn(vehicle,false,true,true)
+					if GetVehiclePedIsIn(ped) == 0 then
+						start = false
+						breakstart = true
+					end
+					--print("loop not started")
+					Renzuzu.Wait(1)
+				end
+				start = true
+				SetNuiFocus(false,false)
+				Renzuzu.Wait(100)
+				SetVehicleEngineOn(vehicle,true,false,true)
+				--print("starting engine")
+				while not GetIsVehicleEngineRunning do
+					--print("starting")
+					SetVehicleEngineOn(vehicle,true,false,true)
+					Renzuzu.Wait(0)
+				end
+				Renzuzu.Wait(200)
+				start = true
+				RenzuSendUI({
+					type = "setStart",
+					content = start
+				})
+			end
+			Renzuzu.Wait(200)
+			cansmoke = true
+			inVehicleFunctions()
+			Renzuzu.Wait(100)
+			if manual then
+				RenzuSendUI({
+					type = "setManual",
+					content = true
+				})
+			end
+			RenzuSendUI({
+				type = "setDifferential",
+				content = GetVehStats(vehicle, "CHandlingData","fDriveBiasFront")
+			})
+		end
+		invehicle = true
+	else
+		--print("outveh loop")
+		globaltopspeed = nil
+		entering = false
+		start = false
+		invehicle = false
+		enginespec = false
+		speed = 0
+		rpm = 0
+		marcha = 0
+		--print(lastplate,"LAST PLATE")
+		if veh_stats[lastplate] ~= nil then
+			veh_stats[lastplate].entity = nil
+			currentengine[lastplate] = nil
+			lastplate = nil
+		end
+		VehIndicatorLight = 0
+		--DisplayRadar(false)
+		if config.statusplace == 'bottom-right' then
+			RenzuSendUI({type = "setMoveStatusUi",content = false})
+		end
+		if alreadyturbo then
+			RenzuSendUI({
+				type = "setShowTurboBoost",
+				content = false
+			})
+		end
+		if not uimove then
+			Renzuzu.Wait(500)
+			local content = {
+				['bool'] = false,
+				['type'] = config.carui
+			}
+			RenzuSendUI({
+				type = "setShow",
+				content = content
+			})
+
+			RenzuSendUI({
+				type = "setStart",
+				content = false
+			})
+		end
+		if ismapopen then
+			RenzuSendUI({map = true, type = 'sarado'})
+			ismapopen = false
+		end
+		if manual then
+			RenzuSendUI({
+				type = "setManual",
+				content = false
+			})
+			manual = false
+		end
+		alreadyturbo = false
+		Renzuzu.Wait(1000)
+		uimove = true
+	end
+end
+
 finaldrive, flywheel, maxspeed = 0,0,0
+
+function GetPlate(v)
+	plate = string.gsub(tostring(GetVehicleNumberPlateText(v)), '^%s*(.-)%s*$', '%1')
+	return plate
+end
+
+function GetHandling(plate)
+	return handlings[plate]
+end
+
+function DefaultHandling()
+	
+end
+
 function SavevehicleHandling()
+	while vehicle == nil or vehicle == 0 do
+		Wait(100)
+	end
+	plate = GetPlate(vehicle)
 	if not DecorExistOn(vehicle, "INERTIA") then
 		finaldrive = GetVehStats(vehicle, "CHandlingData","fDriveInertia")
 		DecorSetFloat(vehicle, "INERTIA", finaldrive)
@@ -575,7 +698,7 @@ function SavevehicleHandling()
 	if not DecorExistOn(vehicle, "TOPSPEED") then
 		maxspeed = GetVehStats(vehicle, "CHandlingData","fInitialDriveMaxFlatVel")
 		DecorSetFloat(vehicle, "TOPSPEED", maxspeed)
-		print("Vehicle Data Saved")
+		--print("Vehicle Data Saved")
 	else
 		SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", DecorGetFloat(vehicle,"TOPSPEED"))
 		maxspeed = DecorGetFloat(vehicle,"TOPSPEED")
@@ -629,6 +752,8 @@ function SavevehicleHandling()
 		SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveMax", DecorGetFloat(vehicle,"TRACTION5"))
 		traction5 = DecorGetFloat(vehicle,"TRACTION5")
 	end
+
+	handlings[plate] = {finaldrive = tonumber(finaldrive), flywheel = tonumber(flywheel), maxspeed = tonumber(maxspeed), maxgear = tonumber(maxgear), traction = tonumber(traction), traction2 = tonumber(traction2), traction3 = tonumber(traction3), traction4 = tonumber(traction4), traction5 = tonumber(traction5)}
 end
 
 --ASYNC FUNCTION CALL VEHICLE LOOPS
@@ -638,10 +763,10 @@ function inVehicleFunctions()
 			Renzuzu.Wait(1) -- lets wait invehicle to = true
 		end
 		SavevehicleHandling()
+		get_veh_stats(vehicle,GetPlate(vehicle))
 		SetForceHdVehicle(vehicle, true)
 		RpmandSpeedLoop()
 		NuiRpm()
-		NuiSpeed()
 		NuiCarhpandGas()
 		while not loadedplate do
 			Wait(100)
@@ -663,9 +788,23 @@ function inVehicleFunctions()
 			--print("Starting manual")
 			startmanual()
 		end
+		SetVehicleOnline()
+		return
 	end)
 end
 
+function SetVehicleOnline() -- for vehicle loop
+	while veh_stats[plate] == nil do
+		Wait(100)
+	end
+	local plate = GetPlate(vehicle)
+	if veh_stats[plate] ~= nil then
+		veh_stats[plate].entity = VehToNet(vehicle)
+		TriggerServerEvent('renzu_hud:savedata', plate, veh_stats[tostring(plate)])
+	end
+end
+
+local vtable = {}
 function RpmandSpeedLoop()
 	Creation(function()
 		while ESX == nil do
@@ -680,10 +819,15 @@ function RpmandSpeedLoop()
 				sleep = config.rpm_speed_loop
 				rpm = VehicleRpm(vehicle)
 				speed = VehicleSpeed(vehicle)
+				vtable = {
+					['rpm'] = rpm,
+					['speed'] = speed
+				}
 			end
 			Renzuzu.Wait(sleep)
 		end
 		--TerminateThisThread()
+		return
 	end)
 end
 
@@ -705,73 +849,30 @@ function NuiRpm()
 				if newrpm ~= rpm or newrpm == nil then
 					newrpm = rpm
 					RenzuSendUI({
-						type = "setRpm",
-						content = rpm
+						type = "SetVehData",
+						content = vtable
 					})
 					Renzuzu.Wait(config.Rpm_sleep_2)
 					RenzuSendUI({
-						type = "setRpm",
-						content = rpm
+						type = "SetVehData",
+						content = vtable
 					})
 					Renzuzu.Wait(config.Rpm_sleep_2)
 					RenzuSendUI({
-						type = "setRpm",
-						content = rpm
+						type = "SetVehData",
+						content = vtable
 					})
 					Renzuzu.Wait(config.Rpm_sleep_2)
 					RenzuSendUI({
-						type = "setRpm",
-						content = rpm
+						type = "SetVehData",
+						content = vtable
 					})
 				end
 			end
 			Renzuzu.Wait(sleep)
 		end
 		--TerminateThisThread()
-	end)
-end
-
-function NuiSpeed()
-	Creation(function()
-		while ESX == nil do
-			Renzuzu.Wait(2000)
-		end
-		while ped == nil do
-			Renzuzu.Wait(1000)
-		end
-		while invehicle do
-			local sleep = 2500
-			if vehicle ~= nil and vehicle ~= 0 then
-				sleep = config.Speed_sleep
-				if rpm < 0.21 then
-				Renzuzu.Wait(config.idle_rpm_speed_sleep)
-				end
-				if newspeed ~= speed or newspeed == nil then
-					newspeed = speed
-					RenzuSendUI({
-						type = "setSpeed",
-						content = speed
-					})
-					Renzuzu.Wait(config.Speed_sleep_2)
-					RenzuSendUI({
-						type = "setSpeed",
-						content = speed
-					})
-					Renzuzu.Wait(config.Speed_sleep_2)
-					RenzuSendUI({
-						type = "setSpeed",
-						content = speed
-					})
-					Renzuzu.Wait(config.Speed_sleep_2)
-					RenzuSendUI({
-						type = "setSpeed",
-						content = speed
-					})
-				end
-			end
-			Renzuzu.Wait(sleep)
-		end
-		--TerminateThisThread()
+		return
 	end)
 end
 
@@ -888,6 +989,7 @@ function NuiCarhpandGas()
 			Renzuzu.Wait(wait)
 		end
 		--TerminateThisThread()
+		return
 	end)
 end
 
@@ -925,6 +1027,7 @@ function NuiDistancetoWaypoint()
 			end
 			Renzuzu.Wait(sleep)
 		end
+		return
 		--TerminateThisThread()
 	end)
 
@@ -950,6 +1053,7 @@ function NuiDistancetoWaypoint()
 			Renzuzu.Wait(sleep)
 		end
 		--TerminateThisThread()
+		return
 	end)
 end
 
@@ -1010,18 +1114,24 @@ end
 -- end
 
 local veh_stats_loaded = false
-RegisterNetEvent("renzu_hud:receivemile")
-AddEventHandler("renzu_hud:receivemile", function(data,i)
-	veh_stats = nil
-	collectgarbage()
-	Citizen.Wait(100)
-	veh_stats = {}
+RegisterNetEvent("renzu_hud:receivedata")
+AddEventHandler("renzu_hud:receivedata", function(data,i)
+	-- veh_stats = nil
+	-- collectgarbage()
+	-- Citizen.Wait(100)
+	-- veh_stats = {}
 	veh_stats = data
-	identifier = i
+	if i ~= nil then
+		identifier = i
+	end
 	veh_stats_loaded = true
 end)
 
 function get_veh_stats(v,p)
+	--if veh_stats[plate] ~= nil then return end
+	while not veh_stats_loaded do
+		Wait(10)
+	end
 	if v ~= nil and p ~= nil then
 		vehicle = v
 		plate = p
@@ -1031,7 +1141,7 @@ function get_veh_stats(v,p)
 	-- plate = saveplate
 	local lets_save = false
 	if plate ~= nil and veh_stats[plate] == nil then
-		print("CREATING VEHSTATS")
+		--print("CREATING VEHSTATS")
 		lets_save = true
 		veh_stats[plate] = {}
 		veh_stats[plate].plate = plate
@@ -1057,13 +1167,19 @@ function get_veh_stats(v,p)
 		veh_stats[plate].nitro = 100
 	end
 	if veh_stats[plate].turbo == nil then
-		veh_stats[plate].turbo = 'racing'
+		veh_stats[plate].turbo = 'default'
 	end
 	if veh_stats[plate].manual == nil then
 		veh_stats[plate].manual = false
 	end
 	if veh_stats[plate].tires == nil then
 		veh_stats[plate].tires = 'default'
+	end
+	if veh_stats[plate].engine == nil then
+		veh_stats[plate].engine = 'default'
+	end
+	if veh_stats[plate].engine ~= nil and veh_stats[plate].engine ~= 'default' and currentengine[plate] ~= GetHashKey(tostring(veh_stats[plate].engine)) then
+		SetEngineSpecs(vehicle, GetHashKey(tostring(veh_stats[plate].engine)))
 	end
 	if veh_stats[plate].tires ~= nil and veh_stats[plate].tires ~= 'default' then
 		TireFunction(veh_stats[plate].tires)
@@ -1112,10 +1228,14 @@ function NuiMileAge()
 				while veh_stats[plate] == nil and invehicle do
 					Renzuzu.Wait(1000)
 				end
-				RenzuSendUI({
-					type = "setNitro",
-					content = veh_stats[plate].nitro
-				})
+				nitros = veh_stats[plate].nitro
+				if oldnitro == nil or oldnitro ~= nitros then
+					oldnitro = veh_stats[plate].nitro
+					RenzuSendUI({
+						type = "setNitro",
+						content = nitros
+					})
+				end
 				local mileage = veh_stats[plate].mileage
 				degrade = 1.0
 				while mileage >= config.mileagemax do
@@ -1136,7 +1256,7 @@ function NuiMileAge()
 				Renzuzu.Wait(wait)
 			end
 		end)
-		print("NUI DATA")
+		--print("NUI DATA")
 		while invehicle do
 			Renzuzu.Wait(config.mileage_update)
 			local ped = ped
@@ -1186,8 +1306,8 @@ function NuiMileAge()
 									if veh_stats[plate][tostring(i)] ~= nil and veh_stats[plate][tostring(i)].tirehealth <= 0 then
 										SetVehicleWheelHealth(vehicle, i, GetVehicleWheelHealth(vehicle,i) - config.tirewear)
 										if config.reducetraction then
-											SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveMin", DecorGetFloat(vehicle,"TRACTION") * config.curveloss)
-											SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveLateral", DecorGetFloat(vehicle,"TRACTION2") * config.acceleratetractionloss)
+											SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveMin", GetHandling(GetPlate(vehicle)).traction * config.curveloss)
+											SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveLateral", GetHandling(GetPlate(vehicle)).traction2 * config.acceleratetractionloss)
 										end
 									end
 									--print("reduct tires")
@@ -1230,88 +1350,12 @@ function NuiMileAge()
 			end
 		end
 		--TerminateThisThread()
+		return
 	end)
 end
 
--- function NuiVehicleClock()
--- 	Creation(function()
--- 		while invehicle do
--- 			local sleep = 2000
--- 			if vehicle ~= nil and vehicle ~= 0 then
--- 				sleep = 1000
--- 				CalculateTimeToDisplay()
--- 				timeformat()
--- 			end
--- 			Renzuzu.Wait(sleep)
--- 		end
--- 		--TerminateThisThread()
--- 	end)
--- end
-
--- function NuiVehicledoorstatus()
--- 	--NUI DOOR OPEN STATUS
--- 	Creation(function()
--- 		Renzuzu.Wait(1000)
--- 		while invehicle do
--- 			local sleep = 2000
--- 			local ped = ped
--- 			local vehicle = vehicle
--- 			local door = true
--- 			local hood = 0
--- 			local trunk = 0
--- 			if vehicle ~= nil and vehicle ~= 0 then
--- 				----print(GetVehicleDoorStatus(vehicle))
--- 				for i = 0, 6 do
--- 					Wait(10)
--- 					if GetVehicleDoorAngleRatio(vehicle,i) ~= 0.0 then
--- 						door = false
--- 						break
--- 					end
--- 				end
--- 				if door then
--- 					doorstatus = 0
--- 				else
--- 					doorstatus = 2
--- 				end
--- 				if newdoorstatus ~= doorstatus or newdoorstatus == nil then
--- 					newdoorstatus = doorstatus
--- 					RenzuSendUI({
--- 					type = "setDoor",
--- 					content = doorstatus
--- 					})
--- 				end
--- 				if GetVehicleDoorAngleRatio(vehicle,4) ~= 0.0 then
--- 					hood = 2
--- 				end
-
--- 				if newhood ~= hood or newhood == nil then
--- 					newhood = hood
--- 					RenzuSendUI({
--- 					type = "setHood",
--- 					content = hood
--- 					})
--- 				end
-
--- 				if GetVehicleDoorAngleRatio(vehicle,5) ~= 0.0 then
--- 					trunk = 2
--- 				end
--- 				if newtrunk ~= trunk or newtrunk == nil then
--- 					newtrunk = trunk
--- 					RenzuSendUI({
--- 					type = "setTrunk",
--- 					content = trunk
--- 					})
--- 				end
--- 			end
--- 			Renzuzu.Wait(sleep)
--- 		end
--- 		--TerminateThisThread()
--- 	end)
--- end
-
 function NuiVehicleHandbrake()
 	--NUI HANDBRAKE
-	print("HANDBRAKE")
 	local ped = ped
 	local vehicle = vehicle
 	if vehicle ~= nil and vehicle ~= 0 then
@@ -1337,6 +1381,7 @@ Creation(function() -- lets use space as a signal to handbrake NUI more effectiv
 		content = false
 	})
 	RenzuKeybinds(config.commands['car_handbrake'], 'Car Emergency Brake', 'keyboard', config.keybinds['car_handbrake'])
+	return
 end)
 
 RenzuCommand(config.commands['car_handbrake'], function()
@@ -1382,6 +1427,7 @@ function NuiShowMap()
 			end
 			--TerminateThisThread()
 		end
+		return
 	end)
 end
 
@@ -1392,8 +1438,8 @@ RenzuNetEvent('start:smoke')
 RenzuEventHandler('start:smoke', function(ent,coord)
 	local mycoord = GetEntityCoords(ped,false)
 	local dis = #(mycoord - coord)
-	local ent = ent
-	if dis < 100 then --SILLY WAY TO AVOID ONE SYNC INFINITY ISSUE, you can input < 200 up to 400 radius, yes its 400 not 300
+	local ent = NetToVeh(ent)
+	if dis < 100 then --SILLY WAY TO AVOID ONE SYNC INFINITY ISSUE
 		StartSmoke(ent)
 	end
 end)
@@ -1454,6 +1500,7 @@ function StartSmoke(ent)
 		end
 		refresh = false
 		Renzuzu.Wait(5000)
+		return
     end)
 end
 
@@ -1470,6 +1517,7 @@ function removeFCK()
 			end
 		end
 		smokes = {}
+		return
 	end)
 end
 
@@ -1517,6 +1565,7 @@ function NuiEngineTemp()
 				NuiEngineTemp()
 				--TerminateThisThread()
 			end
+			return
 		end)
 		Renzuzu.Wait(1000)
 		--triggered = false
@@ -1548,7 +1597,7 @@ function NuiEngineTemp()
 							SetVehicleEngineTemperature(vehicle, GetVehicleEngineTemperature(vehicle) + config.overheatadd)
 							if not triggered then
 								triggered = true
-								TriggerServerEvent("renzu_hud:smokesync", vehicle, GetEntityCoords(vehicle,false))
+								TriggerServerEvent("renzu_hud:smokesync", VehToNet(vehicle), GetEntityCoords(vehicle,false))
 							end
 							Notify('error','Engine',"Engine Problem")
 							while explosion < 500 do
@@ -1629,6 +1678,7 @@ function NuiEngineTemp()
 			end
 			overheatoutveh = false
 			--TerminateThisThread()
+			return
 		end)
 		Renzuzu.Wait(2000)
 		while overheatoutveh do
@@ -1645,6 +1695,7 @@ function NuiEngineTemp()
 		Renzuzu.Wait(2000)
 		triggered = false
 		--TerminateThisThread()
+		return
 	end)
 end
 
@@ -1661,11 +1712,11 @@ function Myinfo()
 		end
 
 		ESX.PlayerData = ESX.GetPlayerData()
-		xPlayer = ESX.GetPlayerData()
+		xPlayer = ESX.PlayerData
 		local money = 0
 		local black = 0
 		local bank = 0
-		for k,v in ipairs(ESX.PlayerData.accounts) do
+		for k,v in ipairs(xPlayer.accounts) do
 			if v.name == "money" then
 				money = v.money
 			end
@@ -1681,53 +1732,62 @@ function Myinfo()
 			joblabel = xPlayer.job.grade_name,
 			money = money,
 			black = black,
-			bank = bank
+			bank = bank,
+			id = GetPlayerServerId(PlayerId())
 		}
 		RenzuSendUI({
 			hud = "setInfo",
 			content = info
 		})
+		collectgarbage()
 	end
 end
 
-Creation(function()
-	while ESX == nil do
-		Renzuzu.Wait(55)
+AddEventHandler('gameEventTriggered', function (name, args)
+	if name == 'CEventNetworkEntityDamage' then
+		local victim = args[1];
+		if victim == ped then
+			updateplayer(true)
+			Wait(1000)
+			BodyMain()
+		end
 	end
-	local newdate = nil
-	local newstreet = nil
-	local newmic = nil
-	local newhealth = 1111
-	local newarmor = 1111
-	Renzuzu.Wait(1000)
-	while ped == 0 or ped == nil do
-		Renzuzu.Wait(111)
-		ped = PlayerPedId()
+	if name == 'CEventNetworkPlayerEnteredVehicle' then
+		--print("ENTER VEHICLE",args[1],pid,args[2])
+		if args[1] == pid then
+			vehicle = args[2]
+			EnterVehicleEvent(true,args[2])
+		end
 	end
-	while true do
-		local sleep = config.uitop_sleep
-		--ped = PlayerPedId()
+	--print(name)
+end)
+
+local newdate = nil
+local newstreet = nil
+local newmic = nil
+local newhealth = 1111
+local newarmor = 1111
+function updateplayer(instant)
 		health = (GetEntityHealth(ped)-100)
 		armor = GetPedArmour(ped)
-		config.statusordering[1].value = armor
 		pid = PlayerId()
-		if newarmor ~= armor or newarmor == nil then
-			RenzuSendUI({
-				hud = "setArmor",
-				content = armor
-			})
-			newarmor = armor
-		end
-		if newhealth ~= health or newhealth == nil then
-			RenzuSendUI({
-				hud = "setHp",
-				content = health
-			})
-			newhealth = health
-		end
-		Renzuzu.Wait(sleep)
+		config.statusordering[1].value = armor
+		config.statusordering[0].value = health
+	if newarmor ~= armor or newarmor == nil then
+		RenzuSendUI({
+			hud = "setArmor",
+			content = armor
+		})
+		newarmor = armor
 	end
-end)
+	if newhealth ~= health or newhealth == nil then
+		RenzuSendUI({
+			hud = "setHp",
+			content = health
+		})
+		newhealth = health
+	end
+end
 
 function haveseatbelt()
 	local vc = GetVehicleClass(vehicle)
@@ -1762,10 +1822,11 @@ function DoblackOut()
 			Citizen.Wait(1000)
 			DoScreenFadeIn(250)
 			alreadyblackout = false
-		
+			return
 		end)
 	end
 end
+
 function accidentsound()
 	if not sounded then
 		sounded = true
@@ -1773,6 +1834,7 @@ function accidentsound()
 			PlaySoundFrontend(-1, "SCREEN_FLASH", "CELEBRATION_SOUNDSET", 1)
 			Citizen.Wait(1)
 			sounded = false
+			return
 		end)
 	end
 end
@@ -1796,6 +1858,7 @@ function impactdamagetoveh()
 				SetVehicleEngineTemperature(vehicle, GetVehicleEngineTemperature(vehicle) + 45.0 )
 				Citizen.Wait(3000) 
 				accident = false
+				return
 			end)
 		end 
 	end
@@ -1821,6 +1884,7 @@ function hazyeffect()
 		StopScreenEffect('PeyoteEndOut')
 		StopScreenEffect('Dont_tazeme_bro')
 		StopScreenEffect('MP_race_crash')
+		return
 	end)
 end
 
@@ -1888,6 +1952,7 @@ function SendNuiSeatBelt()
 				Renzuzu.Wait(sleep)
 			end
 			Session[1],Session[2] = 0.0,0.0
+			return
 		end)
 	end
 end
@@ -1895,6 +1960,7 @@ end
 -- SEATBELT
 Creation(function()
 	RenzuKeybinds(config.commands['car_seatbelt'], 'Car Seatbelt', 'keyboard', config.keybinds['car_seatbelt'])
+	return
 end)
 
 RenzuCommand(config.commands['car_seatbelt'], function()
@@ -1950,6 +2016,7 @@ function sendsignaltoNUI()
 				Renzuzu.Wait(500)
 			end
 		end
+		return
 	end)
 end
 
@@ -2015,9 +2082,11 @@ end, false)
 
 Creation(function()
 	RenzuKeybinds(config.commands['signal_right'], 'Signal Right', 'keyboard', config.keybinds['signal_right'])
+	return
 end)
 
 function entervehicle()
+	if config.carui ~= 'modern' then return end
 	local p = PlayerPedId()
 	v = GetVehiclePedIsEntering(p)
 	local mycoords = GetEntityCoords(p)
@@ -2089,6 +2158,7 @@ end, false)
 
 Creation(function()
 	RenzuKeybinds(config.commands['entering'], 'Enter Vehicle', 'keyboard', config.keybinds['entering'])
+	return
 end)
 
 RenzuCommand(config.commands['signal_hazard'], function()
@@ -2123,6 +2193,7 @@ end, false)
 
 Creation(function()
 	RenzuKeybinds(config.commands['signal_hazard'], 'Signal Hazard', 'keyboard', config.keybinds['signal_hazard'])
+	return
 end)
 
 function drawTxt(text,font,x,y,scale,r,g,b,a)
@@ -2209,6 +2280,7 @@ function fuelusagerun()
 				end
 			end
 		end
+		return
 	end)
 end
 
@@ -2239,7 +2311,7 @@ RenzuNetEvent('renzu_hud:hasturbo')
 RenzuEventHandler('renzu_hud:hasturbo', function(type)
 	alreadyturbo = true
 	Wait(1000)
-	print("TURBO ACTIVATE")
+	--print("TURBO ACTIVATE")
 	if config.turbogauge then
 		RenzuSendUI({
 			type = "setShowTurboBoost",
@@ -2251,9 +2323,11 @@ RenzuEventHandler('renzu_hud:hasturbo', function(type)
 	Creation(function()
 		turboanimation(type)
 		Boost(true)
+		return
 	end)
 end)
 
+local propturbo = nil
 function Boost(hasturbo)
 	local newgear = 0
 	local rpm = VehicleRpm(vehicle)
@@ -2271,6 +2345,7 @@ function Boost(hasturbo)
 			end
 			Renzuzu.Wait(sleep)
 		end
+		return
 	end)
 	if hasturbo and config.turbo_boost[veh_stats[plate].turbo] > config.boost then
 		turbo = config.turbo_boost[veh_stats[plate].turbo]
@@ -2280,14 +2355,14 @@ function Boost(hasturbo)
 	end
 	local torque = 0
 	Creation(function()
-		print("starting boost func")
+		--print("starting boost func")
+		local turbo_type = tostring(veh_stats[plate].turbo or 'default')
 		while mode == 'SPORTS' and invehicle or hasturbo and invehicle do
 			local sleep = 2000
 			--local ply = PlayerPedId()
 			local reset = true
 			local vehicle = vehicle
 			if vehicle ~= 0 then
-				print("turbo",plate,veh_stats[plate])
 				sleep = 7
 				-- SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
 				-- SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
@@ -2310,7 +2385,7 @@ function Boost(hasturbo)
 					rpm2 = 0.2
 				end
 				--print(rpm)
-				if tonumber(rpm) then
+				if tonumber(rpm) > 0.3 then
 					--local speed = VehicleSpeed(vehicle) * 3.6
 					if sound and IsControlJustReleased(1, 32) then
 						StopSound(soundofnitro)
@@ -2321,7 +2396,6 @@ function Boost(hasturbo)
 					local lag = 1
 					local pressure = 0.5
 					if IsControlPressed(1, 32) and plate ~= nil and veh_stats[plate] ~= nil then
-						local turbo_type = tostring(veh_stats[plate].turbo or 'default')
 						if not sound then
 							soundofnitro = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
 							sound = true
@@ -2346,7 +2420,8 @@ function Boost(hasturbo)
 							end
 							lag = lag + 0.1
 							end
-							Renzuzu.Wait(1)
+							SetVehicleBoost(vehicle, 0.1 + (rpm2 / 2))
+							Renzuzu.Wait(20)
 							--Notify('success',"PRESSURE",lag)
 							--drawTxt("BOOST lag:  "..(config.lagamount[turbo_type] * lag).."",4,0.5,0.93,0.50,255,255,255,180)
 							--drawTxt("BOOST engineload:  "..(engineload / (DecorGetFloat(vehicle,"TOPSPEED") / (config.lagamount[turbo_type] * lag))).."",4,0.5,0.83,0.50,255,255,255,180)
@@ -2377,6 +2452,7 @@ function Boost(hasturbo)
 						gear = 1
 					end
 					boost = (boost_pressure * 7)
+					Wait(20)
 					if degrade ~= 1.0 then -- config.turbo_boost[veh_stats[plate].turbo]
 						if plate ~= nil and veh_stats[plate] and config.turbo_boost[turbo_type] > config.boost then
 							boostlevel = config.turbo_boost[turbo_type]
@@ -2388,15 +2464,19 @@ function Boost(hasturbo)
 					--ShowHelpNotification(boost, true, 1, 5)
 				else
 					rpm = VehicleRpm(vehicle)
+					Wait(100)
 				end
 			end
 			Renzuzu.Wait(sleep)
 		end
+		return
 	end)
 	Creation(function()
+		local pressed = false
 		while invehicle do
 			--print("boost")
-			if IsControlPressed(1, 32) and rpm > 0.4 then
+			if IsControlPressed(1, 32) and rpm > 0.4 and not RCR(1, 32) then
+				pressed = true
 				if boost < 1.0 then
 					boost = 1.0
 				end
@@ -2414,19 +2494,25 @@ function Boost(hasturbo)
 				--SetVehicleCheatPowerIncrease(vehicle, (boost * rpm) * rpm)
 				SetVehicleBoost(vehicle, boost*1.01)
 				if config.turbogauge then
-					print("gauge")
-					print(boost_pressure)
-					local table = {
-						['speed'] = boost_pressure / 2.65,
-						['max'] = turbo
-					}
+					-- table = {
+					-- 	['speed'] = boost_pressure / 2.65,
+					-- 	['max'] = turbo
+					-- }
 					RenzuSendUI({
 						type = "setTurboBoost",
-						content = table
+						content = {
+							['speed'] = boost_pressure / 2.65,
+							['max'] = turbo
+						}
 					})
+					Wait(40)
 				end
+			else
+				Wait(100)
 			end
-			if RCR(1, 32) then
+			if GetVehicleThrottleOffset(vehicle) <= 0.0 then
+				Wait(200)
+				pressed = false
 				local t = {
 					['speed'] = 0.0,
 					['max'] = turbo
@@ -2439,25 +2525,29 @@ function Boost(hasturbo)
 			end
 			Citizen.Wait(7)
 		end
+		RenzuSendUI({
+			type = "setShowTurboBoost",
+			content = false
+		})
 		alreadyturbo = false
 		globaltopspeed = nil
 		topspeedmodifier = 1.0
 		busy = true
 		Renzuzu.Wait(100)
 		vehicle = getveh()
-		if DecorGetFloat(vehicle,"INERTIA") ~= 0.0 and DecorGetFloat(vehicle,"DRIVEFORCE") ~= 0.0 then
-			SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", DecorGetFloat(vehicle,"TOPSPEED"))
-			SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
-			SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
-			while not GetVehStats(vehicle, "CHandlingData","fDriveInertia") == DecorGetFloat(vehicle,"INERTIA") and invehicle do
-				if DecorGetFloat(vehicle,"INERTIA") ~= nil then
-					SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
+		if GetHandling(GetPlate(vehicle)).flywheel ~= 0.0 and GetHandling(GetPlate(vehicle)).finaldrive ~= 0.0 then
+			SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", GetHandling(GetPlate(vehicle)).maxspeed)
+			SetVehStats(vehicle, "CHandlingData", "fDriveInertia", GetHandling(GetPlate(vehicle)).finaldrive)
+			SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", GetHandling(GetPlate(vehicle)).flywheel)
+			while not GetVehStats(vehicle, "CHandlingData","fDriveInertia") == GetHandling(GetPlate(vehicle)).finaldrive and invehicle do
+				if GetHandling(GetPlate(vehicle)).finaldrive ~= nil then
+					SetVehStats(vehicle, "CHandlingData", "fDriveInertia", GetHandling(GetPlate(vehicle)).finaldrive)
 				end
 				Renzuzu.Wait(0)
 			end
-			while not GetVehStats(vehicle, "CHandlingData","fInitialDriveForce") == DecorGetFloat(vehicle,"DRIVEFORCE") and invehicle do
-				if DecorGetFloat(vehicle,"DRIVEFORCE") ~= nil then
-					SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", DecorGetFloat(vehicle,"DRIVEFORCE"))
+			while not GetVehStats(vehicle, "CHandlingData","fInitialDriveForce") == GetHandling(GetPlate(vehicle)).flywheel and invehicle do
+				if GetHandling(GetPlate(vehicle)).flywheel ~= nil then
+					SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", GetHandling(GetPlate(vehicle)).flywheel)
 				end
 				Renzuzu.Wait(0)
 			end
@@ -2467,9 +2557,11 @@ function Boost(hasturbo)
 		StopSound(soundofnitro)
 		ReleaseSoundId(soundofnitro)
 		if propturbo ~= nil then
-			DeleteEntity(propturbo)
+			print("deleting")
+			ReqAndDelete(propturbo,true)
 			propturbo = nil
 		end
+		return
 	end)
 end
 
@@ -2534,14 +2626,15 @@ function vehiclemode()
 				end
 				Renzuzu.Wait(sleep)
 			end
+			return
 		end)
 
 		local sound = false
 		Creation(function()
 			local newgear = 0
-			olddriveinertia = DecorGetFloat(vehicle,"INERTIA")
-			oldriveforce = DecorGetFloat(vehicle,"DRIVEFORCE")
-			oldtopspeed = DecorGetFloat(vehicle,"TOPSPEED")-- normalize
+			olddriveinertia = GetHandling(GetPlate(vehicle)).finaldrive
+			oldriveforce = GetHandling(GetPlate(vehicle)).flywheel
+			oldtopspeed = GetHandling(GetPlate(vehicle)).maxspeed -- normalize
 			-- DecorSetFloat(vehicle, "INERTIA", olddriveinertia)
 			-- DecorSetFloat(vehicle, "DRIVEFORCE", oldriveforce)
 			-- DecorSetFloat(vehicle, "TOPSPEED", oldtopspeed)
@@ -2554,10 +2647,10 @@ function vehiclemode()
 			--SetEntityMaxSpeed(vehicle,fo * 2.0)
 			if config.sports_increase_topspeed then
 				if GetVehicleMod(vehicle,13) > 0 then
-					local bonus = (DecorGetFloat(vehicle,"TOPSPEED") * config.topspeed_multiplier)
+					local bonus = (GetHandling(GetPlate(vehicle)).maxspeed * config.topspeed_multiplier)
 					globaltopspeed = bonus * 1.5
 				else
-					globaltopspeed = DecorGetFloat(vehicle,"TOPSPEED") * config.topspeed_multiplier
+					globaltopspeed = GetHandling(GetPlate(vehicle)).maxspeed * config.topspeed_multiplier
 				end
 				SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", globaltopspeed)
 				--SetVehicleEnginePowerMultiplier(vehicle,boost * config.topspeed_multiplier)
@@ -2568,6 +2661,7 @@ function vehiclemode()
 				Citizen.Wait(1000) -- do nothing turbo torque is more higher
 			end
 			Boost()
+			return
 		end)
 	elseif mode == 'SPORTS' and invehicle then
 		mode = 'ECO'
@@ -2583,7 +2677,7 @@ function vehiclemode()
 		local sound = false
 		Creation(function()
 			local olddriveinertia = 1.0
-			olddriveinertia = DecorGetFloat(vehicle,"INERTIA")
+			olddriveinertia = GetHandling(GetPlate(vehicle)).finaldrive
 			SetVehStats(vehicle, "CHandlingData", "fDriveInertia", config.eco)
 			while mode == 'ECO' and invehicle do
 				local sleep = 2000
@@ -2606,16 +2700,17 @@ function vehiclemode()
 			busy = true
 			Renzuzu.Wait(100)
 			vehicle = getveh()
-			if DecorGetFloat(vehicle,"INERTIA") ~= 0.0 then
-				SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
-				while not GetVehStats(vehicle, "CHandlingData","fDriveInertia") == DecorGetFloat(vehicle,"INERTIA") and invehicle do
-					SetVehStats(vehicle, "CHandlingData", "fDriveInertia", DecorGetFloat(vehicle,"INERTIA"))
+			if GetHandling(GetPlate(vehicle)).finaldrive ~= 0.0 then
+				SetVehStats(vehicle, "CHandlingData", "fDriveInertia", GetHandling(GetPlate(vehicle)).finaldrive)
+				while not GetVehStats(vehicle, "CHandlingData","fDriveInertia") == GetHandling(GetPlate(vehicle)).finaldrive and invehicle do
+					SetVehStats(vehicle, "CHandlingData", "fDriveInertia", GetHandling(GetPlate(vehicle)).finaldrive)
 					Renzuzu.Wait(0)
 				end
 			end
 			busy = false
 			StopSound(soundofnitro)
 			ReleaseSoundId(soundofnitro)
+			return
 		end)
 	else
 		mode = 'NORMAL'
@@ -2636,12 +2731,13 @@ end, false)
 Creation(function()
 	mode = 'NORMAL'
 	RenzuKeybinds(config.commands['mode'], 'Vehicle Mode', 'keyboard', config.keybinds['mode'])
+	return
 end)
 
 local old_diff = nil
 local togglediff = false
 function differential()
-	--print("pressed")
+	----print("pressed")
 	local diff = GetVehStats(vehicle, "CHandlingData","fDriveBiasFront")
 	if diff > 0.01 and diff < 0.9 and old_diff == nil and not togglediff then -- default 4wd
 		old_diff = diff -- save old
@@ -2686,6 +2782,7 @@ function differential()
 			togglediff = false
 			old_diff = 0
 		end
+		return
 	end)
 	
 end
@@ -2698,6 +2795,7 @@ end, false)
 
 Creation(function()
 	RenzuKeybinds(config.commands['differential'], '4WD Mode', 'keyboard', config.keybinds['differential'])
+	return
 end)
 
 function Notify(type,title,message)
@@ -2742,6 +2840,7 @@ Creation(function()
 		Renzuzu.Wait(100)
 		SetRadarBigmapEnabled(false, false)
 	end
+	return
 end)
 
 Creation(function()
@@ -2759,6 +2858,7 @@ Creation(function()
 			end
 		end
 	end
+	return
 end)
 
 function requestmodel(model)
@@ -2940,7 +3040,7 @@ function Cruisecontrol()
 			type = "setCruiseControl",
 			content = cruising
 		})
-		local topspeed = GetVehStats(GetVehiclePedIsIn(GetPlayerPed(-1), false), "CHandlingData", "fInitialDriveMaxFlatVel") * 0.64
+		local topspeed = GetHandling(GetPlate(vehicle)).maxspeed * 0.64
 		local speed = VehicleSpeed(vehicle)
 		if cruising then
 			text = "locked to "..(speed*3.6).." kmh"
@@ -2954,6 +3054,7 @@ function Cruisecontrol()
 		end
 		SetEntityMaxSpeed(vehicle,topspeed)
 		cruising = false
+		return
 	end)
 end
 
@@ -2965,101 +3066,116 @@ end, false)
 
 Creation(function()
 	RenzuKeybinds(config.commands['cruisecontrol'], 'Vehicle Cruise Control', 'keyboard', config.keybinds['cruisecontrol'])
+	return
 end)
 
+shooting = false
 Creation(function()
+	Wait(1000)
 	if config.firing_affect_status then
 		while ped == nil or ped == 0 do
 			Citizen.Wait(100)
 		end
-		local count = 0
-		local killed = {}
-		while true do
-			local lastent = nil
-			local pid = pid
-			shooting = false
-			while IsPlayerFreeAiming(pid) do
-				shooting = false
-				if IsPedShooting(ped) then
-					if config.killing_affect_status then
-						val, ent = GetEntityPlayerIsFreeAimingAt(pid)
-						----print("shooting")
-						if lastent ~= nil and lastent ~= 0 then
-							if not killed[lastent] and IsEntityDead(lastent) and GetPedSourceOfDeath(lastent) == ped then
-								killed[lastent] = true
-								--print("LAST ENTITY IS DEAD "..lastent.."")
-								lastent = nil
-								TriggerEvent('esx_status:'..config.killing_status_mode..'', config.killing_affected_status, config.killing_status_val)
-								Citizen.Wait(100)
+		RenzuSendUI({
+			type = "setShooting",
+			content = 2000
+		})
+		--Citizen.Wait(2000) -- 2 seconds wait to check if player is aiming, more optimized 100x than to loop wait(0) just to check if player is firing or not
+		RenzuNuiCallback('setShooting', function(data, cb)
+			--print("ishooting",shooting)
+			if not shooting then
+				--print("not shooting")
+				Creation(function()
+					local count = 0
+					local killed = {}
+					local lastent = nil
+					local pid = pid
+					while IsPlayerFreeAiming(pid) do
+						if IsPedShooting(ped) then
+							--print("shooting")
+							shooting = true
+							if config.killing_affect_status then
+								val, ent = GetEntityPlayerIsFreeAimingAt(pid)
+								----print("shooting")
+								if lastent ~= nil and lastent ~= 0 then
+									if not killed[lastent] and IsEntityDead(lastent) and GetPedSourceOfDeath(lastent) == ped then
+										killed[lastent] = true
+										--print("LAST ENTITY IS DEAD "..lastent.."")
+										lastent = nil
+										TriggerEvent('esx_status:'..config.killing_status_mode..'', config.killing_affected_status, config.killing_status_val)
+										Citizen.Wait(100)
+									end
+								end
+								if ent ~= lastent then
+									lastent = nil
+								end
 							end
+							if count > config.firing_bullets then
+								count = 0
+								TriggerEvent('esx_status:'..config.firing_status_mode..'', config.firing_affected_status, config.firing_statusaddval)
+								----print("STATUS ADDED")
+							end
+							count = count + 1
+							----print(count)
+							lastent = ent
+							shooting = true
+							if config.bodystatus then
+								if armbone > armbone2 then
+									recoil(armbone / 5.0)
+								else
+									recoil(armbone2 / 5.0)
+								end
+							end
+							Citizen.Wait(5)
 						end
-						if ent ~= lastent then
-							lastent = nil
-						end
+						----print("aiming")
+						Citizen.Wait(5)
 					end
-					if count > config.firing_bullets then
-						count = 0
-						TriggerEvent('esx_status:'..config.firing_status_mode..'', config.firing_affected_status, config.firing_statusaddval)
-						----print("STATUS ADDED")
-					end
-					count = count + 1
-					----print(count)
-					lastent = ent
-					shooting = true
-					if config.bodystatus then
-						if armbone > armbone2 then
-							recoil(armbone / 5.0)
-						else
-							recoil(armbone2 / 5.0)
-						end
-					end
-					Citizen.Wait(5)
-				end
-				----print("aiming")
-				Citizen.Wait(5)
+					shooting = false
+					return
+				end)
 			end
-			
-			Citizen.Wait(2000) -- 2 seconds wait to check if player is aiming, more optimized 100x than to loop wait(0) just to check if player is firing or not
-		end
+		end)
 	end
+	return
 end)
 
-Creation(function()
-	if config.running_affect_status or config.melee_combat_affect_status or config.parachute_affect_status or config.playing_animation_affect_status then
-		while true do
-			if config.running_affect_status then
-				while IsPedRunning(ped) do
-					Citizen.Wait(1000)
-					TriggerEvent('esx_status:'..config.running_status_mode..'', config.running_affected_status, config.running_status_val)
-				end
-			end
-			if config.melee_combat_affect_status then
-				while IsPedInMeleeCombat(ped) do
-					Citizen.Wait(1000)
-					TriggerEvent('esx_status:'..config.melee_combat_status_mode..'', config.melee_combat_affected_status, config.melee_combat_status_val)
-				end	
-			end
-			if config.parachute_affect_status then
-				while IsPedInParachuteFreeFall(ped) do
-					Citizen.Wait(1000)
-					TriggerEvent('esx_status:'..config.parachute_status_mode..'', config.parachute_affected_status, config.parachute_status_val)
-				end	
-			end
-			if config.playing_animation_affect_status then
-				--if IsEntityPlayingAnim(ped, )
-				for k,v in pairs(config.status_animation) do
-					Wait(0)
-					if IsEntityPlayingAnim(ped, v.dict, v.name, 3) then
-						--print("LOADED")
-						TriggerEvent('esx_status:'..v.mode..'', v.status, v.val)
-						Citizen.Wait(1000)
-					end
-				end
-			end
-			Citizen.Wait(2500)
+function setStatusEffect()
+	if config.running_affect_status then
+		if IsPedRunning(ped) or IsPedSprinting(ped) then
+			Citizen.Wait(111)
+			print("running")
+			UpdateStatus(true)
+			TriggerEvent('esx_status:'..config.running_status_mode..'', config.running_affected_status, config.running_status_val)
 		end
 	end
-end)
+	if config.melee_combat_affect_status then
+		if IsPedInMeleeCombat(ped) then
+			Citizen.Wait(1000)
+			TriggerEvent('esx_status:'..config.melee_combat_status_mode..'', config.melee_combat_affected_status, config.melee_combat_status_val)
+		end	
+	end
+	if config.parachute_affect_status then
+		if IsPedInParachuteFreeFall(ped) then
+			Citizen.Wait(1000)
+			TriggerEvent('esx_status:'..config.parachute_status_mode..'', config.parachute_affected_status, config.parachute_status_val)
+		end	
+	end
+	if config.playing_animation_affect_status then
+		--if IsEntityPlayingAnim(ped, )
+		for k,v in pairs(config.status_animation) do
+			Wait(0)
+			if IsEntityPlayingAnim(ped, v.dict, v.name, 3) then
+				--print("LOADED")
+				TriggerEvent('esx_status:'..v.mode..'', v.status, v.val)
+				Citizen.Wait(1000)
+			end
+		end
+	end
+	if IsPedSwimmingUnderWater(ped) then
+		UpdateStatus(true)
+	end
+end
 
 function statusplace()
 	local placing = config.statusplace
@@ -3106,6 +3222,7 @@ end, false)
 
 Creation(function()
 	RenzuKeybinds(config.commands['bodystatus'], 'Open Body Status', 'keyboard', config.keybinds['bodystatus'])
+	return
 end)
 
 RegisterNetEvent('renzu_hud:bodystatus')
@@ -3144,88 +3261,83 @@ Creation(function()
 			type = "setUpdateBodyStatus",
 			content = bonecategory
 		})
-		while config.bodystatus do
-			Citizen.Wait(config.bodystatuswait)
-			BodyMain()
-		end
+		-- while config.bodystatus do
+		-- 	Citizen.Wait(config.bodystatuswait)
+		-- 	BodyMain()
+		-- end
 	end
+	return
 end)
 
-Creation(function()
-	if config.bodystatus then
-		while receive == 'new' do
-			Citizen.Wait(100)
-		end
-		while config.bodystatus and receive do
-			Citizen.Wait(3500)
-			local ped = ped
-			local pid = pid
-			if bonecategory["ped_head"] == nil then
-				bonecategory["ped_head"] = 0
-			end
-			if not head and bonecategory["ped_head"] > 0 then
-				SetTimecycleModifier(config.headtimecycle)
-				SetTimecycleModifierStrength(math.min(bonecategory["ped_head"] / 1, 1.1))
-				head = true
-				Notify('error','Body System',"Head has been damaged")
-			elseif bonecategory["ped_head"] <= 0 then
-				if head then
-					ClearTimecycleModifier()
-					head = false 
-				end
-			end
-			if bonecategory["ped_body"] == nil then
-				bonecategory["ped_body"] = 0
-			end
-			if bonecategory["ped_body"] > 0 then
-				if not body then
-					bodydamage()
-					Notify('error','Body System',"Chest has been damaged")
-				end
-				body = true
-				SetPlayerHealthRechargeMultiplier(pid, 0.0)
-			elseif body then
-				body = false
-			else
-				body = false
-			end
-
-			if bonecategory["right_hand"] > 0 or bonecategory["left_hand"] > 0 then
-				if not arm then
-					armdamage()
-					Notify('error','Body System',"Arm has been damaged")
-				end
-				arm = true
-				if bonecategory["left_hand"] < bonecategory["right_hand"] then  
-					armbone = bonecategory["right_hand"]
-				else 
-					armbone2 = bonecategory["left_hand"]
-				end
-			else
-				arm = false
-			end
-
-			if bonecategory and bonecategory["left_leg"] and bonecategory["right_leg"] and (bonecategory["left_leg"] >= 2 or bonecategory["right_leg"] >= 2) then
-				if not leg then
-					RequestAnimSet("move_m@injured")
-					legdamage()
-					Notify('error','Body System',"Leg has been damaged")
-				end
-				leg = true
-				SetPedMoveRateOverride(ped, 0.6)
-				SetPedMovementClipset(ped, "move_m@injured", true)
-			elseif leg then
-				leg = false
-				ResetPedMovementClipset(GetPlayerPed(-1))
-				ResetPedWeaponMovementClipset(GetPlayerPed(-1))
-				ResetPedStrafeClipset(GetPlayerPed(-1))
-				SetPedMoveRateOverride(ped, 1.0)
-			else
-				leg = false
-			end
+function BodyLoop()
+	if receive == 'new' then return end
+	Citizen.Wait(2500)
+	local ped = ped
+	local pid = pid
+	if bonecategory["ped_head"] == nil then
+		bonecategory["ped_head"] = 0
+	end
+	if not head and bonecategory["ped_head"] > 0 then
+		SetTimecycleModifier(config.headtimecycle)
+		SetTimecycleModifierStrength(math.min(bonecategory["ped_head"] * 0.4, 1.1))
+		head = true
+		Notify('error','Body System',"Head has been damaged")
+	elseif bonecategory["ped_head"] <= 0 then
+		if head then
+			ClearTimecycleModifier()
+			head = false 
 		end
 	end
-end)
+	if bonecategory["ped_body"] == nil then
+		bonecategory["ped_body"] = 0
+	end
+	if bonecategory["ped_body"] > 0 then
+		if not body then
+			bodydamage()
+			Notify('error','Body System',"Chest has been damaged")
+		end
+		body = true
+		SetPlayerHealthRechargeMultiplier(pid, 0.0)
+	elseif body then
+		body = false
+	else
+		body = false
+	end
+
+	if bonecategory["right_hand"] > 0 or bonecategory["left_hand"] > 0 then
+		if not arm then
+			armdamage()
+			Notify('error','Body System',"Arm has been damaged")
+		end
+		arm = true
+		if bonecategory["left_hand"] < bonecategory["right_hand"] then  
+			armbone = bonecategory["right_hand"]
+		else 
+			armbone2 = bonecategory["left_hand"]
+		end
+	else
+		arm = false
+	end
+
+	if bonecategory and bonecategory["left_leg"] and bonecategory["right_leg"] and (bonecategory["left_leg"] >= 2 or bonecategory["right_leg"] >= 2) then
+		if not leg then
+			RequestAnimSet("move_m@injured")
+			legdamage()
+			Notify('error','Body System',"Leg has been damaged")
+		end
+		leg = true
+		SetPedMoveRateOverride(ped, 0.6)
+		SetPedMovementClipset(ped, "move_m@injured", true)
+	elseif leg then
+		leg = false
+		ResetPedMovementClipset(GetPlayerPed(-1))
+		ResetPedWeaponMovementClipset(GetPlayerPed(-1))
+		ResetPedStrafeClipset(GetPlayerPed(-1))
+		SetPedMoveRateOverride(ped, 1.0)
+	else
+		leg = false
+	end
+end
 
 function bodydamage()
 	Creation(function()
@@ -3237,13 +3349,15 @@ function bodydamage()
 			if config.disabledregen then
 				SetPlayerHealthRechargeMultiplier(pid, 0.0)
 			end
-			if health > config.chesteffect_minhealth then
-				SetEntityHealth(PlayerPedId(),health - config.chesteffect_healthdegrade)
+			--print(health)
+			if health ~= nil and health > 40 then
+				SetEntityHealth(PlayerPedId(),(health + 100) - config.chesteffect_healthdegrade)
 			end
 		end
 		SetPlayerHealthRechargeMultiplier(pid, 1.0)
 		SetPlayerSprint(pid, true)
 	end)
+	return
 end
 
 function recoil(r)
@@ -3252,7 +3366,7 @@ function recoil(r)
 		--repeat 
 			Wait(0)
 			p = GetGameplayCamRelativePitch()
-			SetGameplayCamRelativePitch(p+0.3, config.thirdperson_armrecoil)
+			SetGameplayCamRelativePitch(p+0.3, (bonecategory["left_hand"] + bonecategory["right_hand"] / 5) * config.firstperson_armrecoil)
 			tv = tv+0.1
 		--until tv >= r and arm and shooting
 	else
@@ -3260,7 +3374,7 @@ function recoil(r)
 			Wait(0)
 			p = GetGameplayCamRelativePitch()
 			if r > 0.1 then
-				SetGameplayCamRelativePitch(p+0.6, config.firstperson_armrecoil)
+				SetGameplayCamRelativePitch(p+0.6, (bonecategory["left_hand"] + bonecategory["right_hand"] / 5) * config.firstperson_armrecoil)
 				tv = tv+0.6
 			else
 				SetGameplayCamRelativePitch(p+0.016, 0.333)
@@ -3286,7 +3400,15 @@ function armdamage() -- vehicle
 						steeringlock = GetVehStats(vehicle, "CHandlingData","fSteeringLock")
 						DecorSetFloat(vehicle, "STEERINGLOCK", steeringlock)
 						--print("SAVED")
-						SetVehStats(vehicle, "CHandlingData", "fSteeringLock", config.armdamage_invehicle_effect)
+						if bonecategory["left_hand"] > 0 or bonecategory["right_hand"] > 0 then
+							local steer = (steeringlock - (bonecategory["left_hand"] + bonecategory["right_hand"]))
+							if steer < 5.0 then
+								steer = 5.0
+							end
+							--print(steer * config.armdamage_invehicle_effect)
+							--print(steer)
+							SetVehStats(vehicle, "CHandlingData", "fSteeringLock", (steer * config.armdamage_invehicle_effect))
+						end
 					end
 				end
 				Citizen.Wait(2000)
@@ -3300,6 +3422,7 @@ function armdamage() -- vehicle
 			Citizen.Wait(3000) -- Wait until ped goes off to vehicle or until arm is in pain.
 		end
 		SetVehStats(getveh(), "CHandlingData", "fSteeringLock", DecorGetFloat(getveh(),"STEERINGLOCK")) -- the back the original stats
+		return
 	end)
 end
 
@@ -3313,6 +3436,7 @@ function legdamage()
 			SetPedMoveRateOverride(PlayerPedId(), config.legeffectmovement	)
 			SetPedMovementClipset(PlayerPedId(), "move_m@injured", true)
 		end
+		return
 	end)
 end
 lastdamage = nil
@@ -3320,6 +3444,7 @@ function CheckBody()
 	local ok, id = GetPedLastDamageBone(ped)
 	if ok then
 		for damagetype,val in pairs(config.buto) do
+			Wait(0)
 			for bone,index in pairs(val) do
 				if index == id and lastdamage ~= id then 
 					lastdamage = id
@@ -3334,9 +3459,10 @@ end
 local oldlife = GetEntityHealth(PlayerPedId())
 function BodyMain()
 	local life = health
-	if life < oldlife then
-		local index,bodytype = CheckBody()
+	if health ~= nil and life < oldlife then
+		local index,bodytype = nil, nil
 		if not config.weaponsonly or not HasEntityBeenDamagedByWeapon(ped, 0 , 1) and HasEntityBeenDamagedByWeapon(ped, 0 , 2) and config.weaponsonly then
+			index,bodytype = CheckBody()
 			--if isWeapon(GetPedCauseOfDeath(PlayerPedId())) then
 		if index and bodytype then
 			if index ~= nil and parts[bodytype] ~= nil and parts[bodytype][index] ~= nil and bonecategory ~= nil and bonecategory[bodytype] ~= nil then
@@ -3393,6 +3519,7 @@ function Makeloading(msg,ms)
 	Citizen.CreateThread(function()
 		Citizen.Wait(ms)
 		BusyspinnerOff()
+		return
 	end)
 end
 
@@ -3404,6 +3531,7 @@ Creation(function()
 			end
 		end, false)
 	end
+	return
 end)
 
 local windowbones = {
@@ -3459,6 +3587,8 @@ function CarControl()
 				whileinput()
 				Wait(5)
 			end
+			SetNuiFocusKeepInput(false)
+			return
 		end)
 	else
 		if GetVehicleDoorLockStatus(vehicle) ~= 1 then
@@ -3483,6 +3613,7 @@ Creation(function()
 	if config.enablecarcontrol then
 		RenzuKeybinds(config.commands['carcontrol'], 'Open Car Control', 'keyboard', config.keybinds['carcontrol'])
 	end
+	return
 end)
 
 RenzuNuiCallback('closecarcontrol', function(data, cb)
@@ -3509,6 +3640,7 @@ function shuffleseat(index)
 	else
 		Creation(function()
 			entervehicle()
+			return
 		end)
 		TaskEnterVehicle(ped, getveh(), 10.0, index, 2.0, 0)
 	end
@@ -3571,52 +3703,76 @@ RenzuNuiCallback('setVehicleEnginestate', function(data, cb)
 	SetNuiFocus(false,false)
 end)
 
+local busyplate = {}
+local busyairsus = false
 RegisterNetEvent("renzu_hud:airsuspension")
 AddEventHandler("renzu_hud:airsuspension", function(vehicle,val,coords)
-	if #(coords - GetEntityCoords(ped)) < 50 then
-		playsound(GetEntityCoords(vehicle),20,'suspension',1.0)
-		local max = 0
-		local data = {}
-		local min = GetVehicleSuspensionHeight(vehicle)
-		data.val = val
-		if (data.val * 100) < 15 then
-			val = min
-			data.val = data.val - 0.1
-			local good = false
-			while min > data.val do
-				SetVehicleSuspensionHeight(getveh(),GetVehicleSuspensionHeight(vehicle) - (1.0 * 0.01))
-				min = GetVehicleSuspensionHeight(vehicle)
-				Citizen.Wait(100)
-				good = true
+	local v = NetToVeh(vehicle)
+	Creation(function()
+		Wait(math.random(1,500))
+		if vehicle ~= 0 and #(coords - GetEntityCoords(ped)) < 50 and not busyplate[GetPlate(v)] then
+			busyplate[GetPlate(v)] = true
+			playsound(GetEntityCoords(v),20,'suspension',1.0)
+			local max = 0
+			local data = {}
+			local min = GetVehicleSuspensionHeight(v)
+			local count = 0
+			data.val = val
+			if (data.val * 100) < 15 then
+				val = min
+				data.val = data.val - 0.1
+				local good = false
+				count = 0
+				while min > data.val and busyplate[GetPlate(v)] and count < 50 do
+					SetVehicleSuspensionHeight(v,GetVehicleSuspensionHeight(v) - (1.0 * 0.01))
+					min = GetVehicleSuspensionHeight(v)
+					count = count + 1
+					Citizen.Wait(100)
+					good = true
+				end
+				--SetVehicleSuspensionHeight(v,data.val)
+				count = 0
+				while not good and min < data.val and busyplate[GetPlate(v)] and count < 50 do
+					SetVehicleSuspensionHeight(v,GetVehicleSuspensionHeight(v) + (1.0 * 0.01))
+					min = GetVehicleSuspensionHeight(v)
+					count = count + 1
+					Citizen.Wait(100)
+				end
+				SetVehicleSuspensionHeight(v,data.val)
+			else
+				val = min
+				local good = false
+				count = 0
+				while min < data.val and busyplate[GetPlate(v)] and count < 50 do
+					SetVehicleSuspensionHeight(v,GetVehicleSuspensionHeight(v) + (1.0 * 0.01))
+					min = GetVehicleSuspensionHeight(v)
+					count = count + 1
+					Citizen.Wait(100)
+					good = true
+				end
+				--SetVehicleSuspensionHeight(v,data.val)
+				count = 0
+				while not good and min > data.val and busyplate[GetPlate(v)] and count < 50 do
+					SetVehicleSuspensionHeight(v,GetVehicleSuspensionHeight(v) - (1.0 * 0.01))
+					count = count + 1
+					min = GetVehicleSuspensionHeight(v)
+					Citizen.Wait(100)
+				end
+				SetVehicleSuspensionHeight(v,data.val)
 			end
-			while not good and min < data.val do
-				SetVehicleSuspensionHeight(getveh(),GetVehicleSuspensionHeight(vehicle) + (1.0 * 0.01))
-				min = GetVehicleSuspensionHeight(vehicle)
-				Citizen.Wait(100)
-			end
-		else
-			val = min
-			local good = false
-			while min < data.val do
-				SetVehicleSuspensionHeight(getveh(),GetVehicleSuspensionHeight(vehicle) + (1.0 * 0.01))
-				min = GetVehicleSuspensionHeight(vehicle)
-				Citizen.Wait(100)
-				good = true
-			end
-
-			while not good and min > data.val do
-				SetVehicleSuspensionHeight(getveh(),GetVehicleSuspensionHeight(vehicle) - (1.0 * 0.01))
-				min = GetVehicleSuspensionHeight(vehicle)
-				Citizen.Wait(100)
-			end
+			--TriggerServerEvent("renzu_hud:airsuspension_state",VehToNet(vehicle), true)
+			busyplate[GetPlate(v)] = false
+			busyairsus = false
 		end
-	end
+		return
+	end)
 end)
 
 RenzuNuiCallback('setvehicleheight', function(data, cb)
 	vehicle = getveh()
-    if vehicle ~= nil and vehicle ~= 0 then
-		TriggerServerEvent("renzu_hud:airsuspension",vehicle, data.val, GetEntityCoords(vehicle))
+    if vehicle ~= nil and vehicle ~= 0 and not busyairsus then
+		busyairsus = true
+		TriggerServerEvent("renzu_hud:airsuspension",VehToNet(vehicle), data.val, GetEntityCoords(vehicle))
     end
 end)
 
@@ -3672,6 +3828,7 @@ RenzuNuiCallback('setneoneffect1', function(data, cb)
 				Citizen.Wait(222)
 			end
 			SetVehicleNeonLightsColour(getveh(),o_r,og,ob)
+			return
 		end)
 	end
 end)
@@ -3710,6 +3867,7 @@ RenzuNuiCallback('setneoneffect2', function(data, cb)
 				end
 				Citizen.Wait(155)
 			end
+			return
 		end)
 	end
 end)
@@ -3739,9 +3897,72 @@ end)
 --WEAPONS
 local oldweapon = nil
 local weaponui = false
+wstatus = {}
+
+function WeaponStatus()
+	if wstatus['armed'] then return end
+	local weapon = nil
+	if IsPedArmed(ped, 7) and not invehicle then
+		while IsPedArmed(ped, 7) and not invehicle do
+			sleep = config.ammoupdatedelay
+			weapon = GetSelectedPedWeapon(ped)
+			local ammoTotal = GetAmmoInPedWeapon(ped,weapon)
+			local bool,ammoClip = GetAmmoInClip(ped,weapon)
+			local ammoRemaining = math.floor(ammoTotal - ammoClip)
+			local maxammo = GetMaxAmmoInClip(ped, weapon, 1)
+			wstatus['armed'] = true
+			----print(ammoRemaining)
+			if oldweapon ~= weapon then
+				for key,value in pairs(config.WeaponTable) do
+					for name,v in pairs(config.WeaponTable[key]) do
+						weap = weapon == GetHashKey('weapon_'..name)
+						if weap then
+							wstatus['weapon'] = 'weapon_'..name
+						end
+					end
+				end
+			end
+			local weapon_ammo = {
+				['clip'] = ammoClip,
+				['ammo'] = ammoRemaining,
+				['max'] = maxammo
+			}
+			RenzuSendUI({
+				type = "setAmmo",
+				content = weapon_ammo
+			})
+			if not weaponui then
+				RenzuSendUI({
+					type = "setWeaponUi",
+					content = true
+				})
+				weaponui = true
+			end
+			Wait(sleep)
+		end
+		wstatus['armed'] = false
+
+	else
+		if weaponui then
+			RenzuSendUI({
+				type = "setWeaponUi",
+				content = false
+			})
+			weaponui = false
+		end
+		wstatus['armed'] = false	
+	end
+	if oldweapon ~= weapon then
+		RenzuSendUI({
+			type = "setWeapon",
+			content = wstatus['weapon']
+		})
+		oldweapon = weapon
+	end
+end
 
 Creation(function()
-	Citizen.Wait(500)
+	Citizen.Wait(1500)
 	if config.weaponsui then
 		if config.crosshairenable then
 			RenzuSendUI({
@@ -3749,71 +3970,8 @@ Creation(function()
 				content = config.crosshair
 			})
 		end
-		while true do
-			local sleep = 2000
-			if config.weaponsui then
-				local status = {}
-				local weapon = nil
-				sleep = 1000
-				--print("WEAPON")
-				if IsPedArmed(ped, 7) and not invehicle then
-					sleep = config.ammoupdatedelay
-					weapon = GetSelectedPedWeapon(ped)
-					local ammoTotal = GetAmmoInPedWeapon(ped,weapon)
-					local bool,ammoClip = GetAmmoInClip(ped,weapon)
-					local ammoRemaining = math.floor(ammoTotal - ammoClip)
-					local maxammo = GetMaxAmmoInClip(ped, weapon, 1)
-					status['armed'] = true
-					----print(ammoRemaining)
-					if oldweapon ~= weapon then
-						for key,value in pairs(config.WeaponTable) do
-							for name,v in pairs(config.WeaponTable[key]) do
-								weap = weapon == GetHashKey('weapon_'..name)
-								if weap then
-									status['weapon'] = 'weapon_'..name
-								end
-							end
-						end
-					end
-					local weapon_ammo = {
-						['clip'] = ammoClip,
-						['ammo'] = ammoRemaining,
-						['max'] = maxammo
-					}
-					RenzuSendUI({
-						type = "setAmmo",
-						content = weapon_ammo
-					})
-					if not weaponui then
-						RenzuSendUI({
-							type = "setWeaponUi",
-							content = true
-						})
-						weaponui = true
-					end
-
-				else
-					if weaponui then
-						RenzuSendUI({
-							type = "setWeaponUi",
-							content = false
-						})
-						weaponui = false
-					end
-					Citizen.Wait(1000)
-					status['armed'] = false	
-				end
-				if oldweapon ~= weapon then
-					RenzuSendUI({
-						type = "setWeapon",
-						content = status['weapon']
-					})
-					oldweapon = weapon
-				end
-			end
-			Citizen.Wait(sleep)
-		end
 	end
+	return
 end)
 
 RenzuCommand(config.commands['weaponui'], function()
@@ -3856,15 +4014,16 @@ function EnableNitro()
 				if GetPedInVehicleSeat(vehicle, -1) == ped then
 					cansleep = 1
 					if veh_stats[plate].nitro > 5 and RCP(0, 21) and not RCR2(0, 21) then
-						pressed = true
 						SetVehicleEngineHealth(vehicle, GetVehicleEngineHealth(vehicle) - 0.05)
 						if veh_stats[plate].nitro - 0.02 > 0 then
-							if speed > 5 then
+							if speed > 5 and not pressed then
+								pressed = true
 								SetTimecycleModifier("ship_explosion_underwater")
 								SetExtraTimecycleModifier("StreetLightingJunction")
 								SetExtraTimecycleModifierStrength(0.1)
 								SetTimecycleModifierStrength(0.1)
 								--StartScreenEffect('MP_Celeb_Preload_Fade', 0, true)
+								TriggerServerEvent("renzu_hud:nitro_flame", VehToNet(vehicle), GetEntityCoords(vehicle))
 							end
 							SetVehicleEngineTorqueMultiplier(vehicle, config.nitroboost * 2 * rpm)
 							veh_stats[plate].nitro = veh_stats[plate].nitro - config.nitrocost
@@ -3872,7 +4031,6 @@ function EnableNitro()
 								type = "setNitro",
 								content = veh_stats[plate].nitro
 							})
-							TriggerServerEvent("renzu_hud:nitro_flame", VehToNet(vehicle), GetEntityCoords(vehicle))
 							--TriggerEvent("laptop:nos", n_boost)
 							if config.nitro_sound and speed > 5 then
 								SetVehicleBoostActive(vehicle, 1)
@@ -3885,7 +4043,8 @@ function EnableNitro()
 							SetVehicleBoostActive(vehicle, 0)
 						end
 					end
-					if RCR2(0, 21) and not RCP(0, 21) then
+					if pressed and IsControlJustReleased(0, 21) and not RCP(0, 21) then
+						Wait(100)
 						pressed = false
 						ClearExtraTimecycleModifier()
 						ClearTimecycleModifier()
@@ -3908,12 +4067,15 @@ function EnableNitro()
 								RemoveParticleFx(k, true)
 								k = nil
 							end
+							return
 						end)
+						collectgarbage()
 					end
 				end
 			end
 			Wait(cansleep)
 		end
+		return
 	end)
 end
 
@@ -3934,6 +4096,7 @@ AddEventHandler("renzu_hud:addnitro", function(amount)
 		nitro_state = 100
 end)
 
+local flametable = {}
 RegisterNetEvent("renzu_hud:nitro_flame")
 AddEventHandler("renzu_hud:nitro_flame", function(c_veh,coords)
 	if #(coords - GetEntityCoords(ped)) < 50 then
@@ -3944,15 +4107,7 @@ AddEventHandler("renzu_hud:nitro_flame", function(c_veh,coords)
 			end
 		end
 		if GetEntitySpeed(NetToVeh(c_veh)) * 3.6 > 5 then
-			for _,bones in pairs(config.exhaust_bones) do
-				UseParticleFxAssetNextCall(config.nitroasset)
-				local index = GetEntityBoneIndexByName(vehicle, bones)
-				if index ~= config.bannedindex then
-					local boneposition = GetWorldPositionOfEntityBone(vehicle, index)
-					local mufflerpos = GetOffsetFromEntityGivenWorldCoords(vehicle, boneposition.x, boneposition.y, boneposition.z)
-					StartParticleFxNonLoopedOnEntity(config.exhaust_particle_name,vehicle,mufflerpos.x,mufflerpos.y,mufflerpos.z,0.0,0.0,0.0,config.exhaust_flame_size,false,false,false)
-				end
-			end
+			local vehicle = NetToVeh(c_veh)
 			if not light_trail_isfuck then
 				light_trail_isfuck = true
 				for _,bones in pairs(config.tailights_bone) do
@@ -3960,10 +4115,38 @@ AddEventHandler("renzu_hud:nitro_flame", function(c_veh,coords)
 					lightrailparticle = StartParticleFxLoopedOnEntityBone(config.trail_particle_name, vehicle, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, GetEntityBoneIndexByName(vehicle, bones), config.trail_size, false, false, false)
 					SetParticleFxLoopedEvolution(lightrailparticle, "speed", 1.00, false)
 					table.insert(lightshit, lightrailparticle)
+					for k,v in pairs(lightshit) do
+						StopParticleFxLooped(k, 1)
+						RemoveParticleFx(k, true)
+						k = nil
+					end
 				end
 			end
+			for _,bones in pairs(config.exhaust_bones) do
+				UseParticleFxAssetNextCall(config.nitroasset)
+				local index = GetEntityBoneIndexByName(vehicle, bones)
+				if index ~= config.bannedindex then
+					local boneposition = GetWorldPositionOfEntityBone(vehicle, index)
+					local mufflerpos = GetOffsetFromEntityGivenWorldCoords(vehicle, boneposition.x, boneposition.y, boneposition.z)
+					flames = StartParticleFxLoopedOnEntity('ent_amb_candle_flame',vehicle,mufflerpos.x,mufflerpos.y+0.9,mufflerpos.z-0.2,0.0,0.0,0.0,config.exhaust_flame_size * 6,false,false,false)
+					SetParticleFxLoopedEvolution(flames, "speed", 0.00, false)
+					SetParticleFxLoopedFarClipDist(flames,0.5)
+					table.insert(flametable, flames)
+					Wait(100)
+				end
+			end
+			while GetVehicleThrottleOffset(vehicle) > 0.1 do
+				Wait(100)
+			end
+			for k,v in pairs(flames) do
+				StopParticleFxLooped(k, 1)
+				RemoveParticleFx(k, true)
+				k = nil
+			end
+
 		else
 			if not purgefuck then
+				local vehicle = NetToVeh(c_veh)
 				purgefuck = true
 				local index = GetEntityBoneIndexByName(vehicle, config.purge_left_bone)
 				local bone_position = GetWorldPositionOfEntityBone(vehicle, index)
@@ -3977,6 +4160,11 @@ AddEventHandler("renzu_hud:nitro_flame", function(c_veh,coords)
 				UseParticleFxAssetNextCall(config.nitroasset)
 				purge2 = StartParticleFxLoopedOnEntity(config.purge_paticle_name,vehicle,particle_location.x - 0.03, particle_location.y + 0.1, particle_location.z+0.2, config.purge_size, 20.0, 0.0, 0.5)
 				table.insert(purgeshit, purge2)
+				for k,v in pairs(purgeshit) do
+					StopParticleFxLooped(k, 1)
+					RemoveParticleFx(k, true)
+					k = nil
+				end
 			end
 		end
 	end
@@ -4005,6 +4193,7 @@ Creation(function()
 	if config.enablenitro then
 		RenzuKeybinds(config.commands['enablenitro'], 'Enable Nitro Control', 'keyboard', config.keybinds['enablenitro'])
 	end
+	return
 end)
 
 function angle(veh)
@@ -4033,7 +4222,7 @@ function NuiWheelSystem()
 			sleep = 500
 			for i = 0, numwheel - 1 do
 				--Wait(1)
-				if rpm > config.minrpm_wheelspin_detect and speed > 1 and (rpm * 100.0) < (tractioncontrol(WheelSpeed(vehicle,i) * 3.6,GetGear(vehicle), true) * 85.0) then
+				if plate ~= nil and rpm > config.minrpm_wheelspin_detect and speed > 1 and (rpm * 100.0) < (tractioncontrol(WheelSpeed(vehicle,i) * 3.6,GetGear(vehicle), true) * 85.0) then
 					if veh_stats[plate][tostring(i)] ~= nil and veh_stats[plate][tostring(i)].tirehealth > 0 then
 						veh_stats[plate][tostring(i)].tirehealth = veh_stats[plate][tostring(i)].tirehealth - config.tirestress
 					end
@@ -4043,7 +4232,7 @@ function NuiWheelSystem()
 					end
 				end
 			end
-			if speed > config.minspeed_curving and angle(vehicle) >= config.minimum_angle_for_curving and angle(vehicle) <= 18 and GetEntityHeightAboveGround(vehicle) <= 1.5 then
+			if speed ~= nil and speed > config.minspeed_curving and angle(vehicle) >= config.minimum_angle_for_curving and angle(vehicle) <= 18 and GetEntityHeightAboveGround(vehicle) <= 1.5 then
 				for i = 0, numwheel - 1 do
 					if veh_stats[plate][tostring(i)] ~= nil and veh_stats[plate][tostring(i)].tirehealth > 0 then
 						veh_stats[plate][tostring(i)].tirehealth = veh_stats[plate][tostring(i)].tirehealth - config.tirestress
@@ -4056,6 +4245,7 @@ function NuiWheelSystem()
 			end
 			Citizen.Wait(sleep)
 		end
+		return
 	end)
 end
 
@@ -4084,7 +4274,6 @@ function tireanimation()
 	Citizen.InvokeNative(0xAD738C3085FE7E11,proptire,true,true)
 end
 
-local propturbo = nil
 function turboanimation(type)
 	--CarregarObjeto("anim@heists@box_carry@","idle","hei_prop_heist_box",50,28422)
 	local ped = PlayerPedId()
@@ -4108,13 +4297,20 @@ function turboanimation(type)
 		Citizen.Wait(10)
 	end
 	local coords = GetOffsetFromEntityInWorldCoords(ped,0.0,0.0,-5.0)
-	propturbo = CreateObjectNoOffset(GetHashKey(prop),coords.x,coords.y,coords.z,false,true,false)
-	SetEntityCollision(propturbo,true,true)
-	-- SetEntityCompletelyDisableCollision(propturbo,false,true)
-	-- SetEntityNoCollisionEntity(getveh(),propturbo,false)
-	--SetEntityAlpha(propturbo,255,false)
-	AttachEntityToEntity(propturbo,getveh(),GetEntityBoneIndexByName(getveh(),'neon_f'),0.3,offset,offsetz,0.0,0.0,90.0,true,false,false,false,70,true)
-	Citizen.InvokeNative(0xAD738C3085FE7E11,propturbo,true,true)
+	if propturbo ~= nil then
+		--print("deleting")
+		ReqAndDelete(propturbo,true)
+		propturbo = nil
+	end
+	if propturbo == nil then
+		propturbo = CreateObjectNoOffset(GetHashKey(prop),coords.x,coords.y,coords.z,true,true,true)
+		SetEntityCollision(propturbo,true,true)
+		-- SetEntityCompletelyDisableCollision(propturbo,false,true)
+		-- SetEntityNoCollisionEntity(getveh(),propturbo,false)
+		--SetEntityAlpha(propturbo,255,false)
+		AttachEntityToEntity(propturbo,getveh(),GetEntityBoneIndexByName(getveh(),'neon_f'),0.3,offset,offsetz,0.0,0.0,90.0,true,false,false,false,70,true)
+		Citizen.InvokeNative(0xAD738C3085FE7E11,propturbo,true,true)
+	end
 end
 
 function TireFunction(type)
@@ -4239,18 +4435,19 @@ Creation(function()
 			TriggerEvent("renzu_hud:installtire")
 		end, false)
 	end
+	return
 end)
 
 local keyless = false
 function Carlock()
+	while veh_stats == nil do
+		Wait(100)
+	end
 	if not veh_stats_loaded then
 		get_veh_stats()
 	end
 	keyless = not keyless
-	RenzuSendUI({
-		type = "setShowKeyless",
-		content = keyless
-	})
+	local foundveh = false
 	if keyless then
 		----print("inside loop")
 		local vehicles = {}
@@ -4263,6 +4460,7 @@ function Carlock()
 				----print("dis loop")
 				local plate = string.gsub(GetVehicleNumberPlateText(v), "%s+", "")
 				plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+				--print(plate,veh_stats[tostring(plate)],veh_stats[tostring(plate)].owner,identifier)
 				if veh_stats[tostring(plate)] ~= nil and veh_stats[tostring(plate)].owner ~= nil and identifier ~= nil then
 					----print("identifier loop")
 					checkindentifier = string.gsub(veh_stats[plate].owner, 'Char5', '')
@@ -4313,12 +4511,45 @@ function Carlock()
 				type = "setKeyless",
 				content = table
 			})
+			foundveh = true
 			Notify('success','Vehicle Lock System','Owned Vehicle Found with Plate # '..nearestplate..'')
 			Wait(200)
 			SetNuiFocus(true,true)
 		end
 	else
 		SetNuiFocus(false,false)
+	end
+	Wait(500)
+	if foundveh then
+		RenzuSendUI({
+			type = "setShowKeyless",
+			content = keyless
+		})
+	else
+		local bone = GetEntityBoneIndexByName(getveh(),'door_dside_f')
+		if getveh() ~= 0 and #(GetEntityCoords(ped) - GetWorldPositionOfEntityBone(getveh(),bone)) < 5 and GetVehicleDoorLockStatus(getveh()) ~= 1 then
+			playanimation('creatures@rottweiler@tricks@','petting_franklin')
+			local carnap = exports["cd_keymaster"]:StartKeyMaster()
+			if carnap then
+				--print("good")
+				SetVehicleDoorsLocked(getveh(),1)
+				SetVehicleNeedsToBeHotwired(getveh(),true)
+				TaskEnterVehicle(ped, getveh(), 10.0, -1, 2.0, 0)
+			else
+				SetVehicleNeedsToBeHotwired(getveh(),true)
+				SetVehicleDoorsLocked(getveh(),7)
+				TaskEnterVehicle(ped, getveh(), 10.0, -1, 2.0, 0)
+				SetVehicleAlarm(getveh(), 1)
+				StartVehicleAlarm(getveh())
+				SetVehicleAlarmTimeLeft(getveh(), 180000)
+				CreateIncidentWithEntity(7,ped,3,100.0)
+				PlayPoliceReport("SCRIPTED_SCANNER_REPORT_CAR_STEAL_2_01",0.0)
+			end
+		elseif GetVehicleDoorLockStatus(getveh()) == 1 then
+			SetVehicleNeedsToBeHotwired(getveh(),true)
+			TaskEnterVehicle(ped, getveh(), 10.0, -1, 2.0, 0)
+		end
+		ClearPedTasks(ped)
 	end
 end
 
@@ -4329,6 +4560,7 @@ Creation(function()
 		end, false)
 		RenzuKeybinds(config.commands['carlock'], 'Toggle Carlock System', 'keyboard', config.keybinds['carlock'])
 	end
+	return
 end)
 
 function playsound(vehicle,max,file,maxvol)
@@ -4448,9 +4680,10 @@ local shouldUpdateSkin = false
 local pedSkin = {}
 local oldclothes = nil
 local clothestate = {}
-
+dummyskin1 = {}
 Creation(function()
 	Wait(500)
+	--print("CLOTHING")
 	if config.clothing then
 		while DecorGetBool(PlayerPedId(), "PLAYERLOADED") ~= 1 do
 			Citizen.Wait(100)
@@ -4459,6 +4692,14 @@ Creation(function()
 				DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 				break
 			end
+			--print("Playerloaded")
+		end
+		TriggerEvent('skinchanger:getSkin', function(current)
+			dummyskin1 = current
+		end)
+		while tablelength(dummyskin1) <= 0 do
+			TriggerEvent('skinchanger:getSkin', function(current) dummyskin1 = current end)
+			Wait(1000)
 		end
 		SaveCurrentClothes(true)
 		skinsave = false
@@ -4471,6 +4712,7 @@ Creation(function()
 		end, false)
 		RenzuKeybinds(config.commands['clothing'], 'Toggle Clothing UI', 'keyboard', config.keybinds['clothing'])
 	end
+	return
 end)
 
 function whileinput()
@@ -4510,6 +4752,7 @@ function Clothing()
 				whileinput()
 				Wait(0)
 			end
+			return
 		end)
 	end
 end
@@ -4650,6 +4893,7 @@ function SaveCurrentClothes(firstload)
 			end
 		end
 		while oldclothes == nil do
+			--print("OLDCLOTHESNIL")
 			Wait(0)
 		end
 		ClotheState()
@@ -4736,9 +4980,17 @@ function CarStatus()
 	for i = 0, numwheel - 1 do
 		tirehealth = tirehealth + veh_stats[plate][tostring(i)].tirehealth
 	end
-	print(tirehealth)
+	--print(tirehealth)
 	local total_tirehealth = tirehealth / (config.tirebrandnewhealth * numwheel) * 100
-	print(total_tirehealth)
+	--print(total_tirehealth)
+	local trannytype = veh_stats[plate].manual
+	if trannytype then
+		trannytype = 'Manual'
+	else
+		trannytype = 'Automatic'
+	end
+	local enginename = veh_stats[plate].engine
+	enginename = enginename:gsub("^%l", string.upper).." Engine"
 	local table = {
 		['bool'] = carstatus,
 		['engine'] = GetVehicleMod(vehicle, 11) + 1,
@@ -4751,6 +5003,8 @@ function CarStatus()
 		['oil'] = veh_stats[plate].oil,
 		['tires_health'] = total_tirehealth,
 		['mileage'] = veh_stats[plate].mileage,
+		['trannytype'] = trannytype,
+		['enginename'] = enginename,
 	}
 	RenzuSendUI({
 		type = "setShowCarStatus",
@@ -4766,4 +5020,192 @@ Creation(function()
 		end, false)
 		RenzuKeybinds(config.commands['vehicle_status'], 'Toggle Vehicle Status', 'keyboard', config.keybinds['vehicle_status'])
 	end
+	return
 end)
+
+--ENGINE SYSTEM
+
+local enginelist = {}
+local syncengine = {}
+local syncveh = {}
+
+RegisterNetEvent('renzu_hud:change_engine')
+AddEventHandler('renzu_hud:change_engine', function(engine)
+	if getveh() ~= 0 then
+		plate = tostring(GetVehicleNumberPlateText(getveh()))
+		plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+		get_veh_stats(getveh(), plate)
+		veh_stats[plate].engine = engine
+		--print("loop item")
+		TriggerServerEvent('renzu_hud:change_engine', plate, veh_stats[plate])
+	end
+end)
+
+RegisterNetEvent('renzu_hud:syncengine')
+AddEventHandler('renzu_hud:syncengine', function(plate, table)
+    veh_stats[tostring(plate)] = table
+end)
+
+function tostringplate(plate)
+    if plate ~= nil then
+    return string.gsub(tostring(plate), '^%s*(.-)%s*$', '%1')
+    else
+    return 123454
+    end
+end
+
+function closestveh(coords)
+    --for k,vv in pairs(GetGamePool('CVehicle')) do
+        for k,v in pairs(veh_stats) do
+			if v.entity ~= nil then
+				local vv = NetToVeh(v.entity)
+				local vehcoords = GetEntityCoords(vv)
+				local dist = #(coords-vehcoords)
+				local plate = GetVehicleNumberPlateText(vv)
+				--anti desync
+				if k ~= nil and v.engine ~= nil and v.engine ~= 'default' then
+					if not syncveh[vv] and tostringplate(plate) == tostringplate(k) and syncengine[tostringplate(k)] ~= nil then
+						syncengine[tostringplate(k)] = nil
+					end
+					if dist < 100 and syncengine[tostringplate(k)] ~= v.engine and vv ~= nil then
+						if tostringplate(plate) == tostringplate(k) then
+							ForceVehicleEngineAudio(vv, v.engine)
+							syncengine[tostringplate(k)] = v.engine
+							syncveh[vv] = v.engine
+						end
+					end
+				end
+			end
+        end
+    --end
+end
+
+function SyncVehicleSound()
+	if veh_stats == nil then return end
+	Citizen.CreateThread(function()
+		Wait(1000)
+		closestveh(GetEntityCoords(ped))
+		return
+	end)
+end
+
+function SetEngineSpecs(veh, model)
+	if GetPedInVehicleSeat(veh, -1) == ped then
+		enginespec = false
+		--print("INSIDE LOOP")
+		currentengine[plate] = model
+		Wait(1300)
+		Citizen.CreateThread(function()
+			local model = model
+			local handling = GetHandlingfromModel(model)
+			local getcurrentvehicleweight = GetVehStats(vehicle, "CHandlingData","fMass")
+			local multiplier = 1.0
+			multiplier = (handling['fMass'] / getcurrentvehicleweight)
+			enginespec = true
+			Wait(10)
+			if tonumber(handling['nInitialDriveGears']) > GetVehStats(vehicle, "CHandlingData","nInitialDriveGears") then
+				-- another anti weird bug ( if the new engine gears is > the existing one, the existing old max gear persist, so we use this native below to cheat the bug)
+				SetVehicleHighGear(vehicle,tonumber(handling['nInitialDriveGears']) )
+				Citizen.InvokeNative(0x8923dd42, vehicle, tonumber(handling['nInitialDriveGears']) )
+				Renzu_Hud(setcurrentgearhash & 0xFFFFFFFF, vehicle, tonumber(handling['nInitialDriveGears']) )
+				Renzu_Hud(nextgearhash & 0xFFFFFFFF, vehicle, tonumber(handling['nInitialDriveGears']) )
+				Wait(11)
+				Renzu_Hud(setcurrentgearhash & 0xFFFFFFFF, vehicle, 1)
+			end
+			while enginespec do
+				--print(multiplier)
+				for k,v in pairs(handling) do
+					if k == 'nInitialDriveGears' then
+						GetHandling(GetPlate(vehicle)).maxgear = v
+						----print("gear")
+						gears = tonumber(v)
+						if gears < 6 and tonumber(GetVehicleMod(vehicle,13)) > 0 then
+							gears = tonumber(v) + 1
+						end
+						SetVehicleHandlingInt(vehicle, "CHandlingData", "nInitialDriveGears", gears)
+						SetVehicleHandlingField(getveh(), 'CHandlingData', "nInitialDriveGears", gears)
+						--SetVehicleHighGear(vehicle, v)
+					elseif k == 'fDriveInertia' then
+						GetHandling(GetPlate(vehicle)).finaldrive = v
+						--print("final drive",GetHandling(GetPlate(vehicle)).finaldrive, multiplier,handling['fMass'], getcurrentvehicleweight)
+						if multiplier < 0.8 then -- weight does not affect reving power
+							m = 0.8
+						else
+							m = multiplier
+						end
+						SetVehStats(vehicle, "CHandlingData", "fDriveInertia", v * m)
+					elseif k == 'fInitialDriveForce' then
+						--multiplier is on everytime, this will produce realistic result, ex. Sanchez Engine to vehicle. sanchez is a bike/motorcycle, it have a less weight compare to sedan vehicles, so sanchez will produce very low acceleration on sedan cars
+						GetHandling(GetPlate(vehicle)).flywheel = v
+						SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", v * multiplier)
+					elseif k == 'fInitialDriveMaxFlatVel' then
+						GetHandling(GetPlate(vehicle)).maxspeed = v
+						if not manual then
+							SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", v * 1.0)
+						end
+					elseif k ~= 'fMass' then
+						SetVehStats(vehicle, "CHandlingData", tostring(k), v * 1.0)
+						--SetVehicleHandlingField(getveh(), 'CHandlingData', tostring(k), tonumber(v))
+					end
+					--SetVehicleHandlingField(getveh(), 'CHandlingData', tostring(k), tonumber(v))
+				end
+				SetVehicleEnginePowerMultiplier(vehicle, 1.0) -- needed if maxvel and inertia is change, weird.. this can be call once only to trick the bug, but this is a 1 sec loop it doesnt matter.
+				
+				Wait(1000)
+			end
+			return
+		end)
+	end
+	--SetVehicleHandlingField()
+end
+
+function GetHandlingfromModel(model)
+	local model = model
+	for k,v in pairs(vehiclehandling['Item']) do
+        if GetHashKey(v.handlingName) == model then
+			local table = {
+				['fDriveInertia'] = tonumber(v.fDriveInertia['_value']),
+				['nInitialDriveGears'] = tonumber(v.nInitialDriveGears['_value']),
+				['fInitialDriveForce'] = tonumber(v.fInitialDriveForce['_value']),
+				['fClutchChangeRateScaleUpShift'] = tonumber(v.fClutchChangeRateScaleUpShift['_value']),
+				['fClutchChangeRateScaleDownShift'] = tonumber(v.fClutchChangeRateScaleDownShift['_value']),
+				['fInitialDriveMaxFlatVel'] = tonumber(v.fInitialDriveMaxFlatVel['_value']),
+				['fMass'] = tonumber(v.fMass['_value']),
+			}
+			return table
+        end
+    end
+	return false
+end
+
+function ReqAndDelete(object, detach)
+	--if DoesEntityExist(object) then
+		NetworkRequestControlOfEntity(object)
+		local attempt = 0
+		while not NetworkHasControlOfEntity(object) and attempt < 100 do
+			NetworkRequestControlOfEntity(object)
+			Citizen.Wait(11)
+			attempt = attempt + 1
+		end
+		if detach then
+			DetachEntity(getveh(), 0, false)
+			DetachEntity(object, 0, false)
+		end
+		local count = 0
+		SetEntityAsNoLongerNeeded(object)
+		while DoesEntityExist(object) and count < 100 do -- delete loop
+			count = count + 1
+			SetEntityAlpha(object, 1, true)
+			SetEntityAsMissionEntity(object)
+			DeleteEntity(object)
+			Wait(100)
+			--print("deleting")
+		end
+		if DoesEntityExist(object) then -- if onesync is broken :D
+			--print("teleporting")
+			SetEntityCoords(object,0.0,0.0,0.0)
+		end
+	--end
+end
+
+collectgarbage() -- collect all destroyed threads from memory

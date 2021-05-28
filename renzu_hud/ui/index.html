@@ -13,7 +13,7 @@
 		<script src="js/init.js" type="text/javascript"></script>
 	<!-- <script src="nui://game/ui/jquery.js" type="text/javascript"></script> -->
 	<script src="js/listener.js" type="text/javascript"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+  <link rel="stylesheet" href="css/fontawsome/all.min.css" />
   <script src="https://kit.fontawesome.com/44e6403392.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="css/compass.css" />
   <link rel="stylesheet" href="css/map.css" type="text/css">
@@ -23,6 +23,9 @@
   <link rel="stylesheet" href="css/slider.css" />
 
         <style>
+          .blink {
+            -webkit-transition:-webkit-filter 0.4s ease-in-out;
+          }
           .turbo_boost {
           position: absolute;
           right: -11px;
@@ -382,7 +385,7 @@
               right: 115px;
               max-width: 50%;
               position: absolute;
-              top: 440px;
+              top: 480px;
               height:17px;
               width:105px;
               z-index:1000;
@@ -409,7 +412,7 @@
               right: 115px;
               max-width: 50%;
               position: absolute;
-              top: 488px;
+              top: 528px;
               height:17px;
               width:105px;
               z-index:1000;
@@ -436,7 +439,7 @@
               right: 115px;
               max-width: 50%;
               position: absolute;
-              top: 528px;
+              top: 568px;
               height:15px;
               width:105px;
               z-index:1000;
@@ -464,7 +467,7 @@
               right: 115px;
               max-width: 50%;
               position: absolute;
-              top: 571px;
+              top: 611px;
               height:15px;
               width:105px;
               z-index:1000;
@@ -491,7 +494,7 @@
               right: 115px;
               max-width: 50%;
               position: absolute;
-              top: 621px;
+              top: 661px;
               height:15px;
               width:105px;
               z-index:1000;
@@ -517,7 +520,7 @@
               right: 115px;
               max-width: 50%;
               position: absolute;
-              top: 665px;
+              top: 705px;
               height:15px;
               width:105px;
               z-index:1000;
@@ -618,7 +621,7 @@
         color:orange;
         position:absolute;
         right:83px;
-        top:438px;
+        top:478px;
         font-size:21px;
       }
       #water {
@@ -626,7 +629,7 @@
         color:rgb(19, 101, 255);
         position:absolute;
         right:85px;
-        top:483px;
+        top:523px;
         font-size:21px;
       }
       #stress {
@@ -634,7 +637,7 @@
         color:rgb(255, 16, 68);
         position:absolute;
         right:82px;
-        top:527px;
+        top:567px;
         font-size:21px;
       }
       #stamina {
@@ -642,7 +645,7 @@
         color:rgb(16, 255, 136);
         position:absolute;
         right:84px;
-        top:572px;
+        top:612px;
         font-size:21px;
       }
       #oxygen {
@@ -650,7 +653,7 @@
         color:rgb(15, 227, 255);
         position:absolute;
         right:82px;
-        top:616px;
+        top:656px;
         font-size:18px;
       }
       #energy {
@@ -658,7 +661,7 @@
         color:rgb(24, 20, 255);
         position:absolute;
         right:81px;
-        top:660px;
+        top:700px;
         font-size:18px;
       }
 
@@ -832,7 +835,6 @@
       }
 
       #geardiv {
-        text-align: center;
         font-size:8px;
         color:#d8d2d4;
         z-index:1002;
@@ -1042,7 +1044,7 @@
       }
       #tempicon {
         z-index:1005;
-        font-size:16.5px;
+        font-size:1.5vh;
         position: absolute;
         bottom:147px;
         color:rgb(255, 255, 255);
@@ -1050,7 +1052,7 @@
       }
       #gasicon {
         z-index:1005;
-        font-size:15px;
+        font-size:1.5vh;
         position: absolute;
         bottom:148px;
         color:rgb(255, 255, 255);
@@ -1085,12 +1087,30 @@
         bottom:122px;
       }
 
+      #idnum {
+        z-index:1001;
+        color:rgb(231, 231, 231);
+        position:absolute;
+        right:220px;
+        top:165px;
+        font-size:23px;
+      }
+      #idnumlabel {
+        text-align: center;
+        z-index:1001;
+        color:rgb(231, 231, 231);
+        position:absolute;
+        right:110px;
+        top:172px;
+        font-size:9px;
+      }
+
       #job {
         z-index:1001;
         color:rgb(231, 231, 231);
         position:absolute;
         right:220px;
-        top:162px;
+        top:212px;
         font-size:27px;
       }
       #joblabel {
@@ -1099,7 +1119,7 @@
         color:rgb(231, 231, 231);
         position:absolute;
         right:90px;
-        top:172px;
+        top:222px;
         font-size:9px;
       }
 
@@ -1108,7 +1128,7 @@
         color:rgb(231, 231, 231);
         position:absolute;
         right:220px;
-        top:212px;
+        top:262px;
         font-size:27px;
       }
       #moneylabel {
@@ -1116,7 +1136,7 @@
         color:rgb(231, 231, 231);
         position:absolute;
         right:90px;
-        top:222px;
+        top:272px;
         font-size:12px;
       }
 
@@ -1125,7 +1145,7 @@
         color:rgb(231, 231, 231);
         position:absolute;
         right:220px;
-        top:268px;
+        top:318px;
         font-size:27px;
       }
       #black_moneylabel {
@@ -1133,7 +1153,7 @@
         color:rgb(231, 231, 231);
         position:absolute;
         right:90px;
-        top:278px;
+        top:328px;
         font-size:12px;
       }
 
@@ -1142,7 +1162,7 @@
         color:rgb(231, 231, 231);
         position:absolute;
         right:217px;
-        top:322px;
+        top:372px;
         font-size:21px;
       }
       #banklabel {
@@ -1150,7 +1170,7 @@
         color:rgb(231, 231, 231);
         position:absolute;
         right:90px;
-        top:332px;
+        top:375px;
         font-size:12px;
       }
       #info {
@@ -1158,7 +1178,7 @@
         color:rgb(231, 231, 231);
         position:absolute;
         right:128px;
-        top:116px;
+        top:122px;
         font-size:10px;
       }
       #bodyinfo {
@@ -1222,7 +1242,7 @@
         color:rgb(231, 231, 231);
         position:absolute;
         right:120px;
-        top:387px;
+        top:430px;
         font-size:10px;
       }
     </style>
@@ -1241,10 +1261,12 @@
       <i id="stamina" class="fad fa-running"></i>
       <i id="oxygen" class="fad fa-lungs"></i>
       <i id="energy" class="fad fa-bed"></i>
-      <img style="z-index:999;position:absolute;right:25px;top:380px;opacity:0.9;width:260px;height:350px;" src="img/rpui.png" />
-      <img style="z-index:1001;position:absolute;right:60px;top:425px;opacity:1;height:270px;" src="img/ui.png" />
+      <img style="z-index:999;position:absolute;right:25px;top:420px;opacity:0.9;width:260px;height:370px;" src="img/rpui.png" />
+      <img style="z-index:1001;position:absolute;right:60px;top:465px;opacity:1;height:270px;" src="img/ui.png" />
 
       <div id="rpui">
+        <i id="idnum" class="fad fa-id-card"></i>
+        <div id="idnumlabel">1</div>
         <i id="job" class="far fa-user-hard-hat"></i>
         <div id="joblabel">Meralco: Employee</div>
         <i id="money" class="fad fa-wallet"></i>
@@ -1253,7 +1275,7 @@
         <div id="black_moneylabel">1,000,000</div>
         <i id="bank" class="fad fa-money-check"></i>
         <div id="banklabel">100,000,000</div>
-        <img style="z-index:999;position:absolute;right:25px;top:110px;opacity:0.8;width:260px;height:280px;" src="img/rpui.png" />
+        <img style="z-index:999;position:absolute;right:25px;top:110px;opacity:0.8;width:260px;height:353px;" src="img/rpui.png" />
         <div id="info">My Info:</div>
         <div id="stats">My Status:</div>
       </div>
@@ -1644,7 +1666,7 @@
         <div id="rpmtext">x 1000rpm</div>
         <i style="display:none;" id="tempicon" class="fad fa-oil-temp"></i>
         <i style="display:none;" id="gasicon" class="fad fa-gas-pump"></i>
-        <div id="geardiv"><span id="gear">P</span> <span id="geartext">Gear</span></div>
+        <div id="geardiv"><span id="gear">P</span> <span id="geartext"></span></div>
         
         <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:22%;bottom:20%;color:rgba(144, 144, 144, 0.876); display:none;'>
           <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
@@ -1713,7 +1735,7 @@
         <div style="display:none;" id="diffdiv"><span id="diff">OFF</span></div>
       </div>
 
-      <div id="minimal" style="display:none;position:absolute;right:-0.5%;bottom:-40px;width:25%;">
+      <div id="minimal" style="display:none;position:absolute;right:-0.5vw;bottom:-40px;width:30vw;">
           <img style="-webkit-filter: drop-shadow(1px -1px 0.4px rgba(255, 255, 255, 0.822));z-index:999;position:relative;opacity:0.85;width:100%;right:0;float:right;" src="img/carui_minimal.png?img/car.png" />
           <svg id="rpm" style="z-index:1005;position:absolute;right:60%;bottom:36%;opacity:0.65;width:40%;height:30%;transform: rotate(-60deg);" xmlns="http://www.w3.org/2000/svg" height="210" width="210" viewBox="0 0 177 177" data-value="1">
           <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
@@ -1850,7 +1872,7 @@
         <div id="rpmtext">x 1000rpm</div>
       <i id="tempicon" class="fad fa-oil-temp"></i>
       <i id="gasicon" class="fad fa-gas-pump"></i>
-      <div id="geardiv"><span id="gear">P</span> <span id="geartext">Gear</span></div>
+      <div id="geardiv"><span id="gear">P</span> <span id="geartext"></span></div>
 
       <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:22%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
         <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
@@ -1894,7 +1916,7 @@
         <img style="display:none;height:70%;position:absolute;top:14%;left:22%;" id="onlight" src="img/lighton.png" />
         <img style="display:none;height:70%;position:absolute;top:14%;left:22%;" id="highlight" src="img/lighthigh.png" />
       </span>
-      <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:5%;bottom:53%;color:rgba(144, 144, 144, 0.876)'>
+      <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:5.6%;bottom:53.5%;color:rgba(144, 144, 144, 0.876)'>
         <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
         <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
         <i class="fas fa-tint fa-stack-1x" style='font-size:1.1vw;color:rgb(2, 116, 192);z-index:1130;opacity:1.0;'></i>
@@ -2087,15 +2109,17 @@
       <img id="carstatimg" style="z-index:1001;position:absolute;right:500px;top:100px;opacity:1;height:550px;" src="img/carstatus.png" />
       <span id="brakelevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:657px;border-radius:5px;top:250px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/chest.png">LVL 1</span>
       <span id="enginelevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:835px;top:250px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/head.png">LVL 1</span>
+      <span id="enginename" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:905px;top:180px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/head.png">Default Engine</span>
       <span id="suspensionlevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:890px;top:384px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/rightarm.png">LVL 1</span>
+      <span id="trannytype" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:945px;top:300px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/head.png">Automatic</span>
       <span id="trannylevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:608px;top:382px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/leftarm.png">LVL 1</span>
       <span id="turbolevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:840px;top:514.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/rightleg.png">LVL 1</span>
       <span id="tirelevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:654px;top:515.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/leftleg.png">LVL 1</span>
 
-      <img id="coolantlevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(5, 84, 255));z-index:1001;position:absolute;left:574px;top:581.8px;opacity:1.0;height:40px;" src="img/coolant.png" />
-      <span id="coolanttext" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;left:634px;top:598.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;overflow:hidden;" src="img/leftleg.png">LVL 1</span>
-      <img id="oillevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(5, 84, 255));z-index:1001;position:absolute;left:574px;top:641.8px;opacity:1.0;height:40px;" src="img/oil.png" />
-      <span id="oiltext" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;left:634px;top:658.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;overflow:hidden;" src="img/leftleg.png">LVL 1</span>
+      <img id="coolantlevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(5, 84, 255));z-index:1001;position:absolute;right:974px;top:581.8px;opacity:1.0;height:40px;" src="img/coolant.png" />
+      <span id="coolanttext" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:934px;top:598.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;overflow:hidden;" src="img/leftleg.png">LVL 1</span>
+      <img id="oillevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(5, 84, 255));z-index:1001;position:absolute;right:974px;top:641.8px;opacity:1.0;height:40px;" src="img/oil.png" />
+      <span id="oiltext" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:934px;top:658.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;overflow:hidden;" src="img/leftleg.png">LVL 1</span>
 
       <img id="mileagelevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(5, 84, 255));z-index:1001;position:absolute;right:744px;top:581.8px;opacity:1.0;height:40px;" src="img/mileage.png" />
       <span id="mileagetext" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:654px;top:598.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;overflow:hidden;" src="img/leftleg.png">LVL 1</span>
