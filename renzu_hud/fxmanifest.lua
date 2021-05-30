@@ -1,5 +1,6 @@
 fx_version 'bodacious'
--- Renzu HUD
+-- Renzu HUD 
+-- https://github.com/renzuzu/renzu_hud
 -- YOU ARE NOT ALLOWED TO SELL THIS
 -- MADE BY Renzuzu
 game 'gta5'
@@ -19,6 +20,7 @@ server_scripts {
 client_scripts {
 	"config.lua",
 	'handling.lua',
+	'function.lua',
 	"client.lua",
 	"street.lua",
 	"manual.lua",
@@ -42,10 +44,10 @@ files {
 	'stream/*.ydr',
 	'handling.min.json',
 	'popgroups.ymt',
-	"turbo.ytyp"
+	--"turbo.ytyp"
 }
 
-data_file 'DLC_ITYP_REQUEST' 'turbo.ytyp'
-data_file 'FIVEM_LOVES_YOU_341B23A2F0E0F131' 'popgroups'
-data_file 'FIVEM_LOVES_YOU_341B23A2F0E0F131' 'popgroups.ymt'
-data_file 'DLC_POP_GROUPS' 'popgroups.ymt'
+--data_file 'DLC_ITYP_REQUEST' 'turbo.ytyp'
+--data_file 'FIVEM_LOVES_YOU_341B23A2F0E0F131' 'popgroups'
+--data_file 'FIVEM_LOVES_YOU_341B23A2F0E0F131' 'popgroups.ymt'
+--data_file 'DLC_POP_GROUPS' 'popgroups.ymt'

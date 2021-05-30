@@ -20,96 +20,45 @@ Citizen.CreateThread(function()
 		end
 	end)
 	print("^g RENZU HUD STARTED!")
+	if config.enable_commands_as_item then
+		RenzuCommand('useitem', function(source,args)
+			if args[1] ~= nil and config.ESX_Items[args[1]] ~= nil then
+				if havePermission(GetPlayerIdentifier(source, 0)) then
+					TriggerClientEvent(config.ESX_Items[args[1]].event, source, config.ESX_Items[args[1]].value)
+				end
+			end
+		end, false)
+	end
 	if config.framework == 'ESX' then
-		ESX.RegisterUsableItem('nitro', function(source)
-			local xPlayer = GetPlayerFromId(source)
-			TriggerClientEvent('renzu_hud:addnitro', source)
-			xPlayer.removeInventoryItem('nitro', 1)
-		end)
-	
-		ESX.RegisterUsableItem('coolant', function(source)
-			local xPlayer = GetPlayerFromId(source)
-			TriggerClientEvent("renzu_hud:coolant", source)
-			xPlayer.removeInventoryItem('coolant', 1)
-		end)
-	
-		ESX.RegisterUsableItem('engineoil', function(source)
-			local xPlayer = GetPlayerFromId(source)
-			TriggerClientEvent("renzu_hud:oil", source)
-			xPlayer.removeInventoryItem('engineoil', 1)
-		end)
-	
-		ESX.RegisterUsableItem('turbo_street', function(source)
-			local xPlayer = GetPlayerFromId(source)
-			TriggerClientEvent("renzu_hud:install_turbo", source, 'street')
-			xPlayer.removeInventoryItem('turbo_street', 1)
-		end)
-	
-		ESX.RegisterUsableItem('turbo_sports', function(source)
-			local xPlayer = GetPlayerFromId(source)
-			TriggerClientEvent("renzu_hud:install_turbo", source, 'sports')
-			xPlayer.removeInventoryItem('turbo_sports', 1)
-		end)
-	
-		ESX.RegisterUsableItem('turbo_racing', function(source)
-			local xPlayer = GetPlayerFromId(source)
-			TriggerClientEvent("renzu_hud:install_turbo", source, 'racing')
-			xPlayer.removeInventoryItem('turbo_racing', 1)
-		end)
-	
-		ESX.RegisterUsableItem('head_brace', function(source)
-			local xPlayer = GetPlayerFromId(source)
-			TriggerClientEvent("renzu_hud:healbody", source, 'head')
-			xPlayer.removeInventoryItem('head_brace', 1)
-		end)
-	
-		ESX.RegisterUsableItem('leg_bandage', function(source)
-			local xPlayer = GetPlayerFromId(source)
-			TriggerClientEvent("renzu_hud:healbody", source, 'leg')
-			xPlayer.removeInventoryItem('leg_bandage', 1)
-		end)
-	
-		ESX.RegisterUsableItem('arm_bandage', function(source)
-			local xPlayer = GetPlayerFromId(source)
-			TriggerClientEvent("renzu_hud:healbody", source, 'arm')
-			xPlayer.removeInventoryItem('arm_bandage', 1)
-		end)
-	
-		ESX.RegisterUsableItem('body_bandage', function(source)
-			local xPlayer = GetPlayerFromId(source)
-			TriggerClientEvent("renzu_hud:healbody", source, 'chest')
-			xPlayer.removeInventoryItem('body_bandage', 1)
-		end)
-	
-		ESX.RegisterUsableItem('street_tirekit', function(source)
-			local xPlayer = GetPlayerFromId(source)
-			TriggerClientEvent("renzu_hud:installtire", source, 'default')
-			xPlayer.removeInventoryItem('street_tirekit', 1)
-		end)
-	
-		ESX.RegisterUsableItem('sports_tirekit', function(source)
-			local xPlayer = GetPlayerFromId(source)
-			TriggerClientEvent("renzu_hud:installtire", source, 'sports')
-			xPlayer.removeInventoryItem('sports_tirekit', 1)
-		end)
-	
-		ESX.RegisterUsableItem('racing_tirekit', function(source)
-			local xPlayer = GetPlayerFromId(source)
-			TriggerClientEvent("renzu_hud:installtire", source, 'racing')
-			xPlayer.removeInventoryItem('racing_tirekit', 1)
-		end)
-	
-		ESX.RegisterUsableItem('drag_tirekit', function(source)
-			local xPlayer = GetPlayerFromId(source)
-			TriggerClientEvent("renzu_hud:installtire", source, 'drag')
-			xPlayer.removeInventoryItem('drag_tirekit', 1)
-		end)
-	
-		ESX.RegisterUsableItem('manual_tranny', function(source)
-			local xPlayer = GetPlayerFromId(source)
-			TriggerClientEvent("renzu_hud:manual", source, true)
-			xPlayer.removeInventoryItem('manual_tranny', 1)
-		end)
+		for k,v in pairs(config.ESX_Items) do
+			MySQL.Async.fetchAll('SELECT * FROM items WHERE name = @name', {
+				['@name'] = v.name
+			}, function(foundRow)
+				if foundRow[1] == nil then
+					local weight = 'limit'
+					if config.weight_type then
+						MySQL.Sync.execute('INSERT INTO items (name, label, weight) VALUES (@name, @label, @weight)', {
+							['@name'] = v.name,
+							['@label'] = ""..firstToUpper(v.label).."",
+							['@weight'] = v.weight
+						})
+						print("Inserting "..v.name.." new item")
+					else
+						MySQL.Sync.execute('INSERT INTO items (name, label) VALUES (@name, @label)', {
+							['@name'] = v.name,
+							['@label'] = ""..firstToUpper(v.label).."",
+						})
+						print("Inserting "..v.item.." new item")
+					end
+				end
+			end)
+			ESX.RegisterUsableItem(v.name, function(source)
+				local xPlayer = GetPlayerFromId(source)
+				if v.job and xPlayer.job.name ~= tostring(v.job) then xPlayer.showNotification('You are not a '..v.job..'', false, false, 130) return end
+				TriggerClientEvent(v.event, source, v.value)
+				xPlayer.removeInventoryItem(v.name, 1)
+			end)
+		end
 		if config.use_esx_accesories then
 			-- COPYRIGHT TO ESX ACCESOSRIES LINK https://github.com/esx-framework/esx_accessories/blob/e812dde63bcb746e9b49bad704a9c9174d6329fa/server/main.lua#L31
 			ESX.RegisterServerCallback('esx_accessories:get', function(source, cb, accessory)
@@ -188,11 +137,14 @@ end)
 
 bodytable = {}
 RegisterServerEvent('renzu_hud:checkbody')
-AddEventHandler('renzu_hud:checkbody', function()
+AddEventHandler('renzu_hud:checkbody', function(target)
 	if config.framework == 'ESX' then
 		while ESX == nil do
 			Wait(10)
 		end
+	end
+	if target ~= nil then
+		source = target
 	end
 	local source = source
 	local xPlayer = GetPlayerFromId(source)
@@ -209,7 +161,12 @@ AddEventHandler('renzu_hud:checkbody', function()
 		if res[1].bodystatus and json.decode(res[1].bodystatus) ~= nil then 
 			done = json.decode(res[1].bodystatus)
 		end
-		TriggerClientEvent('renzu_hud:bodystatus', source, done)
+		if target == nil then
+			target = false
+		else
+			target = true
+		end
+		TriggerClientEvent('renzu_hud:bodystatus', source, done, target)
 	end)
 end)
 
@@ -365,3 +322,12 @@ AddEventHandler('renzu_hud:change_engine', function(plate, stats)
 	TriggerClientEvent("renzu_hud:syncengine", -1, plate, stats)
 	print("syncing to all")
 end)
+
+function havePermission(i)
+	for k,v in pairs(config.commanditem_permission) do
+		if v == i then
+		return true
+		end
+	end
+	return false
+end

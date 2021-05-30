@@ -333,12 +333,12 @@ function setCoolant(percent) {
 var manual = false
 function setShow(table) {
   if (table['bool']) {
-        $("#"+table['type']+"").animate({
+        $("#"+carui+"").animate({
             opacity: "1"
         },400);
         setHeadlights(0)
   } else {
-    $("#"+table['type']+"").animate({
+    $("#"+carui+"").animate({
       opacity: "0"
     },400);
   }
@@ -1003,7 +1003,15 @@ function setCrosshair(val) {
 
 setWeaponUi(false)
 
+var carui_element = []
 function setCarui(ver) {
+    document.getElementById("uibody").style.display = 'block'
+    if (carui_element['modern'] == undefined) {
+        carui_element['modern'] = document.getElementById("modern").innerHTML
+        carui_element['minimal'] = document.getElementById("minimal").innerHTML
+        carui_element['simple'] = document.getElementById("simple").innerHTML
+    }
+    document.getElementById(ver).innerHTML = carui_element[ver]
     carui = ver
     if (ver == 'minimal') {
         document.getElementById("modern").innerHTML = '';
@@ -1019,7 +1027,7 @@ function setCarui(ver) {
         document.getElementById("gasicon").style.bottom = '47%';
         document.getElementById("gasicon").style.opacity = '0.6';
         document.getElementById("tempicon").style.opacity = '0.6';
-        document.getElementById("geardiv").style.right = '9.9vw';
+        document.getElementById("geardiv").style.right = '13.7vw';
         document.getElementById("geardiv").style.bottom = '42%';
         document.getElementById("geardiv").style.fontSize = '0.4vw';
         document.getElementById("right").style.right = '27%';
@@ -1064,7 +1072,7 @@ function setCarui(ver) {
         document.getElementById("gasicon").style.bottom = '47%';
         document.getElementById("gasicon").style.opacity = '0.6';
         document.getElementById("tempicon").style.opacity = '0.6';
-        document.getElementById("geardiv").style.right = '42%';
+        document.getElementById("geardiv").style.right = '45%';
         document.getElementById("geardiv").style.bottom = '42%';
         document.getElementById("geardiv").style.fontSize = '0.4vw';
         document.getElementById("right").style.right = '37%';
@@ -1091,6 +1099,7 @@ function setCarui(ver) {
         document.getElementById("diffdiv").style.background = '#00000000';
         document.getElementById("diffdiv").style.fontSize = '0.4vw';
     }
+    setMode('NORMAL',carui)
 }
 function setCompass(bool) {
     if (bool) {
@@ -1111,6 +1120,7 @@ function setStatusUI(ver) {
         document.getElementById("armorsimple").style.display = 'block';
         document.getElementById("uisimplearmor").style.display = 'block';
         document.getElementById("armorsimplebg").style.display = 'block';
+        document.getElementById("voip_2").style.marginLeft = '40px';
         document.getElementById("uibar").innerHTML = '';
         $("#statusver").attr("src", "img/simplestatus.png")
         document.getElementById("statusnormal").style.display = 'none';
@@ -1641,7 +1651,6 @@ window.addEventListener("message", event => {
 setTimeout(function(){
     $(".fadeout").fadeOut();
     $(".loading").fadeOut();
-    setMode('NORMAL',carui)
     setMic(2)
 }, 5000);
 setShowCarStatus(false)
