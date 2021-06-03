@@ -1,5 +1,8 @@
 var carui = 'minimal'
 var statusui = 'normal'
+var status_type = 'icons'
+var class_icon = 'octagon'
+var statleft = false
 function pedface() {
     console.log("REQUESTING")
     $.post(`https://${GetParentResourceName()}/requestface`, {}, function(data) {
@@ -29,7 +32,11 @@ const time = new Date().toLocaleTimeString();
 function setArmor(s) {
     console.log("time",time)
     if (statusui == 'simple') {
-        document.getElementById("armorsimple").style.clip = 'rect('+toclip(s)+', 100px, 100px, 0)'
+        if (status_type == 'icons') {
+            document.getElementById("armorsimple").style.clip = 'rect('+toclip(s)+', 100px, 100px, 0)'
+        } else {
+            setNoobCircle('armorsimple', s)
+        }
     } else {
         document.getElementById("armor").style.width = ''+s+'%'
     }
@@ -37,7 +44,11 @@ function setArmor(s) {
 
 function setHp(s) {
     if (statusui == 'simple') {
-        document.getElementById("healthsimple").style.clip = 'rect('+toclip(s)+', 100px, 100px, 0)'
+        if (status_type == 'icons') {
+            document.getElementById("healthsimple").style.clip = 'rect('+toclip(s)+', 100px, 100px, 0)'
+        } else {
+            setNoobCircle('healthsimple', s)
+        }
     } else {
         document.getElementById("health").style.width = ''+s+'%'
     }
@@ -48,23 +59,43 @@ function setMic(type) {
     // $("#mic-color").removeClass("verde");
     // $("#mic-color").removeClass("azul");
     // $("#mic-color").removeClass("vermelho");
-
+    if (status_type == 'icons') {
+        did = 'microphone'
+    } else if (statusui == 'simple') {
+        did = 'voipsimplebg'
+        if (type == 1) {
+            val = 20
+            //$("#microphone").css("color", 'rgb(227, 250, 22)');
+            $("#microphone").attr('style', "stroke:rgb(227, 250, 22)")
+        } else if (type == 2) {
+            val = 50
+            $("#microphone").attr('style', "stroke:rgb(23, 255, 15)")
+            //$("#microphone").css("color", 'rgb(255, 35, 6)');
+        } else if (type == 3) {
+            val = 100
+            $("#microphone").attr('style', "rgb(255, 35, 6)")
+            //$("#microphone").css("color", 'rgb(23, 255, 15)');
+        }
+        setNoobCircle('microphone', val)
+    } else {
+        did = 'microphone'
+    }
     switch (type) {
         case 1:
         new Notify ({status: 'success',title: 'Voice System',text: 'VOIP : Whisper Mode',autoclose: true})
-        $("#microphone").css("color", 'rgb(227, 250, 22)');
+        $("#"+did+"").css("color", 'rgb(227, 250, 22)');
         break;
         case 2:
         new Notify ({status: 'success',title: 'Voice System',text: 'VOIP : Normal Mode',autoclose: true})
-        $("#microphone").css("color", 'rgb(23, 255, 15)');
+        $("#"+did+"").css("color", 'rgb(23, 255, 15)');
         break;    
         case 3:
         new Notify ({status: 'success',title: 'Voice System',text: 'VOIP : Shout Mode',autoclose: true})
-        $("#microphone").css("color", 'rgb(255, 35, 6)');
+        $("#"+did+"").css("color", 'rgb(255, 35, 6)');
         break;
         default:
         new Notify ({status: 'success',title: 'Voice System',text: 'VOIP : Normal Mode',autoclose: true})
-        $("#microphone").css("color", 'rgb(23, 255, 15)');
+        $("#"+did+"").css("color", 'rgb(23, 255, 15)');
         break;
     }
 }
@@ -162,17 +193,25 @@ function toclip(val) {
 
 var status_move = []
 var move_count = []
-function setStatus(table) {
+
+function setStatus(t) {
+    var table = t['data']
+    var type = t['type']
+    status_type = type
     for (const i in table) {
         move_count[i] = i
         if (table[i].rpuidiv !== 'null') {
             document.getElementById(table[i].rpuidiv).style.width = ''+table[i].value+'%'
-            document.getElementById(table[i].i_id_1).style.clip = 'rect('+toclip(table[i].value)+', 100px, 100px, 0)'
+            if (type == 'icons') {
+                document.getElementById(table[i].i_id_1).style.clip = 'rect('+toclip(table[i].value)+', 100px, 100px, 0)'
+            } else {
+                setNoobCircle(table[i].i_id_1, table[i].value)
+            }
         }
         if (table[i].value >= 80 && table[i].status == 'sanity') {
             document.getElementById(table[i].id_3).style.setProperty("-webkit-filter", "drop-shadow(5px 5px 5px rgba(255, 5, 5, 1.0)");
             document.getElementById(table[i].id_3).style.color = "rgb(255, 5, 5)";
-        } else if (table[i].value <= 40 && table[i].status !== 'sanity') {
+        } else if (table[i].value <= 40 && table[i].status !== 'sanity' && table[i].status !== 'voip') {
             document.getElementById(table[i].id_3).style.color = "rgb(255, 5, 5)";
             document.getElementById(table[i].id_3).style.setProperty("-webkit-filter", "drop-shadow(5px -1px 5px rgba(255, 5, 5, 1.0)");
         } else {
@@ -192,18 +231,6 @@ function setStatus(table) {
             }
         }
     }
-    // document.getElementById("hunger").style.width = ''+table.hunger+'%'
-    // document.getElementById("thirst").style.width = ''+table.thirst+'%'
-    // document.getElementById("stressbar").style.width = ''+table.stress+'%'
-    // document.getElementById("staminabar").style.width = ''+table.stamina+'%'
-    // document.getElementById("oxygenbar").style.width = ''+table.oxygen+'%'
-    // document.getElementById("energybar").style.width = ''+table.energy+'%'
-    // document.getElementById("food2").style.clip = 'rect('+toclip(table.hunger)+', 100px, 100px, 0)'
-    // document.getElementById("water2").style.clip = 'rect('+toclip(table.thirst)+', 100px, 100px, 0)'
-    // document.getElementById("stress2").style.clip = 'rect('+toclip(table.stress)+', 100px, 100px, 0)'
-    // document.getElementById("stamina2").style.clip = 'rect('+toclip(table.stamina)+', 100px, 100px, 0)'
-    // document.getElementById("oxygen2").style.clip = 'rect('+toclip(table.oxygen)+', 100px, 100px, 0)'
-    // document.getElementById("energy2").style.clip = 'rect('+toclip(table.energy)+', 100px, 100px, 0)'
 }
 
 function setShowstatus(bool) {
@@ -720,11 +747,30 @@ function setUpdateBodyStatus(table) {
             val = 0.0
         }
         if(key) {
-            if (val < 0.4 && val >= 0.1) {
-                val = 0.4
+            if (val < 0.29 && val >= 0.1) {
+                val = 0.29
             }
             totalpain = totalpain + val
             document.getElementById(key).style.opacity = val;
+            console.log(key,val)
+            if (val > 0.9) {
+                document.getElementById(''+key+'_status').innerHTML = 'Severe';
+            } else if (val > 0.7) {
+                document.getElementById(''+key+'_status').innerHTML = 'Damaged';
+            } else if (val > 0.5) {
+                document.getElementById(''+key+'_status').innerHTML = 'Injured';
+            } else if (val > 0.3) {
+                document.getElementById(''+key+'_status').innerHTML = 'inPain';
+            } else if (val >= 0.29) {
+                document.getElementById(''+key+'_status').innerHTML = 'Small Pain';
+            } else if(val <= 0) {
+                document.getElementById(''+key+'_status').innerHTML = 'Normal';
+            }
+            if (val >= 0.29) {
+                document.getElementById(''+key+'_heal').style.opacity = '0.5';
+            } else {
+                document.getElementById(''+key+'_heal').style.opacity = '0.0';
+            }
             if (totalpain > 4) {
                 pulse('red')
             } else if(totalpain > 3) {
@@ -738,6 +784,63 @@ function setUpdateBodyStatus(table) {
             }
         }
     }
+}
+
+function setBodyParts(table) {
+    console.log("bodyparts")
+    $(document).ready(function(){
+        for (const key in table) {
+            //console.log(table[key])
+            // $("#"+table[key]+"_heal").mouseover(function(){
+            //     $("#"+table[key]+"_heal").css("opacity", "1.0");
+            //     console.log("hover")
+            // });
+            // $("#"+table[key]+"_heal").mouseout(function(){
+            //     $("#"+table[key]+"_heal").css("opacity", "1.0");
+            // });
+            if (key == 'arm') {
+                for (const key2 in table[key]) {
+                    var idname = ""+table[key][key2]+"_heal"
+                    console.log(idname)
+                    $("#"+idname+"").hover(function(){
+                        $(this).css("opacity", "1.0");
+                        console.log("hover")
+                        }, function(){
+                        $(this).css("opacity", "0.5");
+                    });
+                    $("#"+idname+"").click(function(){
+                        post("healpart",{part:key})
+                    });
+                }
+            } else if (key == 'leg') {
+                for (const key2 in table[key]) {
+                    var idname = ""+table[key][key2]+"_heal"
+                    console.log(idname)
+                    $("#"+idname+"").hover(function(){
+                        $(this).css("opacity", "1.0");
+                        console.log("hover")
+                        }, function(){
+                        $(this).css("opacity", "0.5");
+                    });
+                    $("#"+idname+"").click(function(){
+                        post("healpart",{part:key})
+                    });
+                }
+            } else {
+                var idname = ""+table[key]+"_heal"
+                console.log(idname)
+                $("#"+idname+"").hover(function(){
+                    $(this).css("opacity", "1.0");
+                    console.log("hover")
+                    }, function(){
+                    $(this).css("opacity", "0.5");
+                });
+                $("#"+idname+"").click(function(){
+                    post("healpart",{part:key})
+                });
+            }
+        }
+    });
 }
 
 function setShowCarcontrol(bool) {
@@ -1100,6 +1203,7 @@ function setCarui(ver) {
         document.getElementById("diffdiv").style.fontSize = '0.4vw';
     }
     setMode('NORMAL',carui)
+    changeallclass(class_icon)
 }
 function setCompass(bool) {
     if (bool) {
@@ -1113,14 +1217,19 @@ function setCompass(bool) {
     }
 }
 
-function setStatusUI(ver) {
+function setStatusUI(t) {
+    var ver = t['ver']
+    var type = t['type']
+        status_type = type
     if (ver == 'simple') {
         statusui = 'simple'
         document.getElementById("uisimplehp").style.display = 'block';
         document.getElementById("armorsimple").style.display = 'block';
         document.getElementById("uisimplearmor").style.display = 'block';
-        document.getElementById("armorsimplebg").style.display = 'block';
-        document.getElementById("voip_2").style.marginLeft = '40px';
+        if (type == 'icons') {
+            document.getElementById("armorsimplebg").style.display = 'block';
+        }
+        //document.getElementById("voip_2").style.marginLeft = '40px';
         document.getElementById("uibar").innerHTML = '';
         $("#statusver").attr("src", "img/simplestatus.png")
         document.getElementById("statusnormal").style.display = 'none';
@@ -1160,9 +1269,17 @@ function setStatusUILocation(table) {
 function setMoveStatusUi(bool) {
     console.log("MOVE UI")
     if (bool) {
-        document.getElementById("statusv3").style.right = '22%';
+        if (status_type == 'icons') {
+            document.getElementById("statusv3").style.right = '22%';
+        } else {
+            document.getElementById("statusv3").style.right = '30%';
+        }
     } else {
-        document.getElementById("statusv3").style.right = '25px';
+        if (status_type == 'icons') {
+            document.getElementById("statusv3").style.right = '25px';
+        } else {
+            document.getElementById("statusv3").style.right = '85px';
+        }
     }
 }
 
@@ -1371,11 +1488,17 @@ function SetNotify(table) {
             document.getElementById("radio").style.display = 'block';
             document.getElementById("mic-radio").innerHTML = ''+channel+'';
             if (statusui == 'simple') {
-                document.getElementById("radio").style.top = '44px';
-                document.getElementById("radio").style.right = '43px';
+                document.getElementById("radio").style.top = '25px';
+                document.getElementById("radio").style.right = '20px';
+                if (statleft == 'top-right') {
+                    document.getElementById("statusv3").style.right = '320px';
+                }
                 $("#radio").fadeIn();
             }
         } else {
+            if (statleft == 'top-right') {
+                document.getElementById("statusv3").style.right = '90px';
+            }
             //document.getElementById("radio").style.display = 'none';
             $("#radio").fadeOut();
         }
@@ -1393,10 +1516,14 @@ function SetNotify(table) {
     }
 
     function setClotheState(table) {
+        console.log("clothe",table['bool'])
         if (!table['bool']) {
-            $("#variants_"+table['variant']+"").css("--fa-secondary-color", 'rgb(255, 0, 0)');
+            //$("#variants_"+table['variant']+"").css("--fa-secondary-color", 'red');
+            $("#variants_"+table['variant']+"").addClass("clotheoff");
+            //console.log("red color","variants_"+table['variant']+"")
         } else {
-            $("#variants_"+table['variant']+"").css("--fa-secondary-color", 'unset');   
+            $("#variants_"+table['variant']+"").removeClass("clotheoff")
+            //$("#variants_"+table['variant']+"").css("--fa-secondary-color", 'unset');   
         }
     }
 
@@ -1421,9 +1548,17 @@ function SetNotify(table) {
     }
 
     function changeallclass(setting) {
+        class_icon = setting
         var all = document.getElementsByClassName('fa-octagon');
         for (var i = 0; i < all.length; i++) {
             all[i].classList.toggle("fa-"+setting+"");
+        }
+        if (setting !== 'circle' && settings !== 'octagon') {
+            var icon = document.getElementsByClassName('default');
+            for (var i = 0; i < icon.length; i++) {
+                console.log(i)
+                icon[i].classList.toggle("square");
+            }
         }
     }
 
@@ -1432,21 +1567,42 @@ function SetNotify(table) {
         [array[i], array[j]] = [array[j], array[i]];
     }
 
-    function SetStatusOrder(s) {
+    function setNoobCircle(id,percent) {
+        var rpm = (percent);
+        var e = document.getElementById(id);
+        let length = e.getTotalLength();
+        let to = length * ((100 - percent) / 100);
+        e.style.strokeDashoffset = to;
+    }
+    
+    function SetStatusOrder(t) {
+        var s = t['table']
+        statleft = t['float']
         var offsetplus = -35
         var statuses = s
         for (const i in statuses) {
-            var offset = statuses[0].offset
-            offsetplus = offsetplus + 35
-            offset = (+offset - +offsetplus)
-            var class1 = statuses[i].i_id_1_class
-            var class2 = statuses[i].i_id_2_class
-            var color1 = statuses[i].i_id_1_color
-            var color2 = statuses[i].i_id_2_color
-            var divid = statuses[i].id
-            var i_id_1 = statuses[i].i_id_1
-            var i_id_2 = statuses[i].i_id_2
-            $("#statusv3").prepend('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:17px;position:relative;color:rgba(144, 144, 144, 0.876);float:right; margin-top:-25px;margin-left:-7px;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:17px;color:rgba(11, 39, 63, 0.707)"></i> <i id="'+statuses[i].id_3+'" class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+class1+'" style="font-size:19px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+class2+'" style="font-size:19px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
+            if (statuses[i].enable) {
+                var offset = statuses[0].offset
+                offsetplus = offsetplus + 35
+                offset = (+offset - +offsetplus)
+                var class1 = statuses[i].i_id_1_class
+                var class2 = statuses[i].i_id_2_class
+                var color1 = statuses[i].i_id_1_color
+                var color2 = statuses[i].i_id_2_color
+                var divid = statuses[i].id
+                var i_id_1 = statuses[i].i_id_1
+                var i_id_2 = statuses[i].i_id_2
+                if (statleft == 'top-left' || statleft == 'bottom-left') {
+                    float = 'left'
+                } else {
+                    float = 'right'
+                }
+                if (status_type == 'icons') {
+                    $("#statusv3").prepend('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:17px;position:relative;color:rgba(144, 144, 144, 0.876);float:right; margin-top:-25px;margin-left:-7px;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:17px;color:rgba(11, 39, 63, 0.707)"></i> <i id="'+statuses[i].id_3+'" class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+class1+'" style="font-size:19px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+class2+'" style="font-size:19px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
+                } else {
+                    $("#statusv3").prepend('<div id="'+divid+'" style="float:'+float+';height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;left:3.5vw;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:1.25vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;"></i> <i id="'+statuses[i].id_3+'" class="fal fa-octagon fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i> <i id="'+statuses[i].i_id_2+'" class="'+statuses[i].i_id_1_class+'" style="font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.14vw;bottom:-0.53vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.9vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="'+statuses[i].i_id_1+'" class="meter" stroke="'+statuses[i].i_id_1_color+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
+                }
+            }
         }
     }
 
@@ -1561,6 +1717,29 @@ function SetNotify(table) {
         setInterval(function(){ post("NuiLoop",{}) }, 2000);
     }
 
+    function Drag(bool) {
+        if (bool) {
+            $('#statusv3').draggable({
+                // ...
+                drag: function(event, ui) {
+                  console.log($(event.target).width() + " x " + $(event.target).height());
+                  console.log(ui.position.top + " x " + ui.position.left);
+                },
+                stop: function(event, ui) {
+                  console.log($(event.target).width() + " x " + $(event.target).height());
+                  console.log(ui.position.top + " x " + ui.position.left);
+                },
+                scroll: false
+              }).draggable('enable');
+        } else {
+            $('#statusv3').draggable().draggable('disable');
+        }
+    }
+
+    function setStatusType(type) {
+        status_type = type
+    }
+
 //FUNCTIONS
 var renzu_hud = {
     setArmor,
@@ -1589,6 +1768,9 @@ var renzu_hud = {
     SetStatusOrder,
     setShooting,
     NuiLoop,
+    Drag,
+    setStatusType,
+    setBodyParts,
     //CAR
     setShow,
     setRpm,

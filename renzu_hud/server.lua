@@ -143,12 +143,14 @@ AddEventHandler('renzu_hud:checkbody', function(target)
 			Wait(10)
 		end
 	end
+	local source = source
+	local originalsource = source
 	if target ~= nil then
 		source = target
 	end
-	local source = source
 	local xPlayer = GetPlayerFromId(source)
 	local done = false
+	print(source,target)
 	while xPlayer == nil do
 		CreatePlayer(source)
 		Citizen.Wait(500)
@@ -166,7 +168,8 @@ AddEventHandler('renzu_hud:checkbody', function(target)
 		else
 			target = true
 		end
-		TriggerClientEvent('renzu_hud:bodystatus', source, done, target)
+		print(target,source)
+		TriggerClientEvent('renzu_hud:bodystatus', originalsource, done, target)
 	end)
 end)
 
@@ -176,6 +179,16 @@ AddEventHandler('renzu_hud:savebody', function(bodystatus)
 	local identifier = xPlayer.identifier
 	bodytable[identifier] = bodystatus
 	MySQL.Async.execute('UPDATE users SET bodystatus=@bodystatus WHERE identifier=@identifier',{['@bodystatus'] = json.encode(bodystatus),['@identifier'] = identifier})
+end)
+
+RegisterServerEvent('renzu_hud:healbody')
+AddEventHandler('renzu_hud:healbody', function(target,part)
+	print("1")
+	local xPlayer = GetPlayerFromId(source)
+	local identifier = xPlayer.identifier
+	if config.framework ~= 'ESX' or config.framework == 'ESX' and xPlayer.job.name == config.checkbodycommandjob then
+		TriggerClientEvent('renzu_hud:healbody', target, part, true)
+	end
 end)
 
 RegisterServerEvent("renzu_hud:nitro_flame")
@@ -193,14 +206,19 @@ AddEventHandler("renzu_hud:airsuspension", function(entity,val,coords)
 	TriggerClientEvent("renzu_hud:airsuspension", -1, entity,val,coords)
 end)
 
+local antispam = {}
 RegisterServerEvent("mumble:SetVoiceData")
 AddEventHandler("mumble:SetVoiceData", function(mode,prox)
 	local source = source
 	if mode == 'mode' then
 		TriggerClientEvent("renzu_hud:SetVoiceData", source, 'proximity', prox)
 	end
-	if mode == 'radio' then
+	if mode == 'radio' and not antispam[source] then
+		antispam[source] = true
+		print(prox)
 		TriggerClientEvent("renzu_hud:SetVoiceData", source, 'radio', prox)
+		Wait(10)
+		antispam[source] = false
 	end
 end)
 
@@ -299,6 +317,7 @@ Citizen.CreateThread(function()
 			print("register item")
 			ESX.RegisterUsableItem("engine_"..enginename.."", function(source)
 				local xPlayer = ESX.GetPlayerFromId(source)
+				if config.engine_jobonly and xPlayer.job.name ~= tostring(config.engine_job) then xPlayer.showNotification('You are not a '..config.engine_job..'', false, false, 130) return end
 				xPlayer.removeInventoryItem("engine_"..enginename.."", 1)
 				TriggerClientEvent('renzu_hud:change_engine', xPlayer.source, enginename)
 			end)

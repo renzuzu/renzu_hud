@@ -35,6 +35,7 @@ function isplayer()
 	local mpm = GetHashKey("mp_m_freemode_01")
 	local mpf = GetHashKey("mp_f_freemode_01")
 	local model = GetEntityModel(PlayerPedId())
+	print(model,"MODEL")
 	if model == mpm then
 		return true
 	elseif model == mpf then
@@ -51,6 +52,7 @@ function tablelength(T)
 end
 
 function getawsomeface()
+	if config.statusui ~= 'normal' then return end
     ClearPedHeadshots()
 	Wait(2000)
     local playerPos = GetEntityCoords(PlayerPedId())
@@ -112,6 +114,7 @@ function UpdateStatus(export,vitals)
 		end
 		if v1.status == 'oxygen' then
 			v1.value = GetPlayerUnderwaterTimeRemaining(pid) * 10
+			print(v1.value)
 		end
 		if v1.custom and statusloop <= 1  then
 			if vitals[v1.status] ~= nil and vitals[v1.status] then
@@ -142,7 +145,7 @@ function UpdateStatus(export,vitals)
 	statusloop = statusloop + 1
 	RenzuSendUI({
 		type = "setStatus",
-		content = config.statusordering
+		content = {['type']= config.status_type, ['data'] = config.statusordering}
 	})
 end
 
@@ -981,13 +984,26 @@ end
 
 function getveh()
 	local v = GetVehiclePedIsIn(PlayerPedId(), false)
+	local lastveh = GetVehiclePedIsIn(PlayerPedId(), true)
+	local dis = -1
 	if v == 0 then
-		if #(GetEntityCoords(ped) - GetEntityCoords(GetPlayersLastVehicle())) < 5 then
-			v = GetPlayersLastVehicle()
+		if #(GetEntityCoords(ped) - GetEntityCoords(lastveh)) < 5 then
+			v = lastveh
 		end
+		dis = #(GetEntityCoords(ped) - GetEntityCoords(lastveh))
+	end
+	if dis > 3 then
+		v = 0
 	end
 	if v == 0 then
+		local count = 5
 		v = GetClosestVehicle(GetEntityCoords(PlayerPedId()), 5.000, 0, 70)
+		while #(GetEntityCoords(ped) - GetEntityCoords(v)) > 5 and count >= 0 do
+			v = GetClosestVehicle(GetEntityCoords(PlayerPedId()), 5.000, 0, 70)
+			count = count - 1
+			Wait(100)
+			print("fucker")
+		end
 	end
 	return tonumber(v)
 end
@@ -1267,6 +1283,8 @@ function Myinfo()
 	end
 end
 
+newarmor = nil
+newhealth = nil
 function updateplayer(instant)
 	health = (GetEntityHealth(ped)-100)
 	armor = GetPedArmour(ped)
@@ -1889,6 +1907,7 @@ function Boost(hasturbo)
 			ReqAndDelete(propturbo,true)
 			propturbo = nil
 		end
+		boost = 1.0
 		return
 	end)
 end
@@ -2158,25 +2177,50 @@ function statusplace()
 	local placing = config.statusplace
 	local table = {}
 	if placing == 'top-right' then
-		table = {['top'] = '45px', ['right'] = '90px'}
+		if config.status_type == 'icons' then
+			table = {['top'] = '45px', ['right'] = '90px'}
+		else
+			if config.statusui == 'simple' then
+				table = {['top'] = '40px', ['right'] = '110px'}
+			else
+				table = {['top'] = '10px', ['right'] = '110px'}
+			end
+		end
 	elseif placing == 'top-left' then
 		if config.statusui == 'simple' then
-			table = {['top'] = '100px', ['left'] = '45px'}
+			if config.status_type == 'icons' then
+				table = {['top'] = '40px', ['left'] = '-110px'}
+			else
+				table = {['top'] = '85px', ['left'] = '-55px'}
+			end
+
 		else
-			table = {['top'] = '100px', ['left'] = '-55px'}
+			if config.status_type == 'icons' then
+				table = {['top'] = '50px', ['left'] = '-155px'}
+			else
+				table = {['top'] = '25px', ['left'] = '-105px'}
+			end
 		end
 	elseif placing == 'bottom-left' then
 		if config.statusui == 'simple' then
-			table = {['bottom'] = '30px', ['left'] = '1vh'}
+			table = {['bottom'] = '-1vh', ['left'] = '1vh'}
 		else
 			table = {['bottom'] = '20px', ['left'] = '-35px'}
 		end
 	elseif placing == 'bottom-right' then
-		table = {['bottom'] = '20px', ['right'] = '25px'}
+		if config.status_type == 'icons' then
+			table = {['bottom'] = '20px', ['right'] = '25px'}
+		else
+			table = {['bottom'] = '0px', ['right'] = '85px'}
+		end
 	elseif placing == 'bottom-center' then
 		table = {['bottom'] = '20px', ['left'] = '35%', ['right'] = '35%'}
 	elseif placing == 'top-center' then
-		table = {['top'] = '40px', ['left'] = '45%', ['right'] = '45%'}
+		if config.status_type == 'icons' then
+			table = {['top'] = '40px', ['left'] = '45%', ['right'] = '45%'}
+		else
+			table = {['top'] = '10px', ['left'] = '25%'}
+		end
 	end
 	RenzuSendUI({
 		type = "setStatusUILocation",
@@ -2200,7 +2244,7 @@ function CheckPatient()
 		for k,v in pairs(players) do
 			local o_id = GetPlayerServerId(v)
 			if o_id ~= GetPlayerServerId(PlayerId()) then
-				local curDist = #(GetPlayerPed(v) - plyPos)
+				local curDist = #(GetPlayerPed(v) - GetEntityCoords(ped))
 				if not dist or curDist < dist then
 					closest = o_id
 					dist = curDist
@@ -2218,14 +2262,19 @@ function CheckPatient()
 end
 
 function BodyUi(target)
+	print(target)
+	healing = target
 	if target ~= nil then
 		TriggerServerEvent('renzu_hud:checkbody', tonumber(target))
 	end
 	bodyui = not bodyui
-	RenzuSendUI({
-		type = "setShowBodyUi",
-		content = bodyui
-	})
+	if target == nil then
+		RenzuSendUI({
+			type = "setShowBodyUi",
+			content = bodyui
+		})
+	end
+	Wait(100)
 	if target ~= nil then
 		while bodyui do
 			Wait(100)
@@ -2791,7 +2840,7 @@ function turboanimation(type)
 		ReqAndDelete(propturbo,true)
 		propturbo = nil
 	end
-	if propturbo == nil then
+	if config.turboprop and propturbo == nil then
 		propturbo = CreateObjectNoOffset(GetHashKey(prop),coords.x,coords.y,coords.z,true,true,true)
 		SetEntityCollision(propturbo,true,true)
 		-- SetEntityCompletelyDisableCollision(propturbo,false,true)
@@ -2898,11 +2947,12 @@ function Carlock()
 			type = "setShowKeyless",
 			content = keyless
 		})
-	else
+	elseif config.enable_carjacking then
 		local bone = GetEntityBoneIndexByName(getveh(),'door_dside_f')
-		if getveh() ~= 0 and #(GetEntityCoords(ped) - GetWorldPositionOfEntityBone(getveh(),bone)) < 5 and GetVehicleDoorLockStatus(getveh()) ~= 1 then
+		if getveh() ~= 0 and #(GetEntityCoords(ped) - GetWorldPositionOfEntityBone(getveh(),bone)) < config.carjackdistance and GetVehicleDoorLockStatus(getveh()) ~= 1 then
 			playanimation('creatures@rottweiler@tricks@','petting_franklin')
-			local carnap = exports["cd_keymaster"]:StartKeyMaster()
+			local carnap = minigame_carjack()
+			print(carnap)
 			if carnap then
 				--print("good")
 				SetVehicleDoorsLocked(getveh(),1)
@@ -2923,6 +2973,8 @@ function Carlock()
 			TaskEnterVehicle(ped, getveh(), 10.0, -1, 2.0, 0)
 		end
 		ClearPedTasks(ped)
+	else
+		Notify('error','Vehicle Lock System',' No Vehicle in area')
 	end
 end
 
@@ -3256,7 +3308,11 @@ function SetEngineSpecs(veh, model)
 					elseif k == 'fInitialDriveMaxFlatVel' then
 						GetHandling(GetPlate(vehicle)).maxspeed = v
 						if not manual then
-							SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", v * 1.0)
+							mult = 1.0
+							if tonumber(GetVehicleMod(vehicle,13)) > 0 then
+								mult = 1.25
+							end
+							SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", v * mult)
 						end
 					elseif k ~= 'fMass' then
 						SetVehStats(vehicle, "CHandlingData", tostring(k), v * 1.0)
@@ -3343,4 +3399,63 @@ function DefineCarUI(ver)
 			NuiShowMap()
 		end
 	end
+end
+
+standmodel , enginemodel = nil, nil
+function repairengine(plate)
+	local vehicle = getveh()
+	local prop_stand = 'prop_engine_hoist'
+	local prop_engine = 'prop_car_engine_01'
+	print("engine repair")
+	Citizen.Wait(200)
+	local bone = GetEntityBoneIndexByName(vehicle,'engine')
+	local d1,d2 = GetModelDimensions(GetEntityModel(vehicle))
+	local stand = GetOffsetFromEntityInWorldCoords(vehicle, 0.0,d2.y+0.4,0.0)
+	local obj = nil
+
+	local veh_heading = GetEntityHeading(vehicle)
+	local veh_coord = GetEntityCoords(vehicle,false)
+	local x,y,z = table.unpack(GetWorldPositionOfEntityBone(vehicle, bone))
+	local animDict = "anim@amb@business@meth@meth_monitoring_cooking@cooking@"
+	RequestAnimDict(animDict)
+	while not HasAnimDictLoaded(animDict) do 
+		Renzuzu.Wait(1)
+		RequestAnimDict(animDict)
+	end
+	requestmodel('bkr_prop_meth_sacid')
+	local animPos, targetHeading = GetAnimInitialOffsetPosition(animDict, "chemical_pour_long_cooker", x,y,z, 0.0,0.0,veh_heading, 0, 2), 52.8159
+	local ax,ay,az = table.unpack(animPos)
+	local rx,ry,rz = table.unpack(GetEntityForwardVector(vehicle) * 1.5)
+	local realx,realy,realz = x - ax , y - ay , z - az
+	local coordf = veh_coord + GetEntityForwardVector(vehicle) * 3.0
+	standmodel = CreateObject(GetHashKey(prop_stand),coordf,true,true,true)
+	obj = standmodel
+	standprop = obj
+	SetEntityAsMissionEntity(obj, true, true)
+	print("spawn stand")
+	SetEntityNoCollisionEntity(vehicle, obj, false)
+	SetEntityHeading(obj, GetEntityHeading(vehicle))
+	PlaceObjectOnGroundProperly(obj)
+	FreezeEntityPosition(obj, true)
+	SetEntityCollision(obj, false, true)
+	while not DoesEntityExist(obj) do
+		Citizen.Wait(100)
+	end
+	local d21 = GetModelDimensions(GetEntityModel(obj))
+	local stand = GetOffsetFromEntityInWorldCoords(obj, 0.0,d21.y+0.2,0.0)
+	Citizen.Wait(500)
+	local engine_r = GetEntityBoneRotation(vehicle, bone)
+	enginemodel = CreateObject(GetHashKey(prop_engine),stand.x+0.27,stand.y-0.2,stand.z+1.45,true,true,true)
+	AttachEntityToEntity(enginemodel,vehicle,GetEntityBoneIndexByName(vehicle,'neon_f'),0.0,-0.45,1.5,0.0,90.0,0.0,true,false,false,false,70,true)
+	--AttachEntityToEntity(enginemodel,vehicle,bone,0.0,0.0,0.0,0.0,0.0,0.0,false,false,false,false,1,false)
+	carryModel2 = enginemodel
+	engineprop = carryModel2
+	--SetEntityHeading(engineprop, 0)
+	SetEntityAsMissionEntity(engineprop, true, true)
+	print("spawn engine")
+	SetEntityNoCollisionEntity(vehicle, carryModel2, false)
+	FreezeEntityPosition(carryModel2, true)
+	SetEntityNoCollisionEntity(carryModel2, obj, false)
+	SetEntityCollision(carryModel2, false, true)
+	
 end

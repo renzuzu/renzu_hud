@@ -8,12 +8,11 @@
 
         <title>Renzu HUD</title>
 		<link href="https://fonts.googleapis.com/css?family=Cabin+Sketch:bold" rel="stylesheet" type="text/css" />
-		<script src="js/jquery.js" type="text/javascript"></script>
 		<script src="js/raphael.js" type="text/javascript"></script>
 		<script src="js/init.js" type="text/javascript"></script>
 	<!-- <script src="nui://game/ui/jquery.js" type="text/javascript"></script> -->
 	<script src="js/listener.js" type="text/javascript"></script>
-  <link rel="stylesheet" href="css/fontawsome/all.min.css" />
+  <script defer src="fontawsome/js/all.min.js"></script> <!--load all styles -->
   <script src="https://kit.fontawesome.com/44e6403392.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="css/compass.css" />
   <link rel="stylesheet" href="css/map.css" type="text/css">
@@ -21,11 +20,7 @@
   <link href="css/default.css" rel="stylesheet" type="text/css" />
   <link rel="stylesheet" href="css/simple-notify.css" />
   <link rel="stylesheet" href="css/slider.css" />
-
         <style>
-          .blink {
-            -webkit-transition:-webkit-filter 0.4s ease-in-out;
-          }
           .turbo_boost {
           position: absolute;
           right: -11px;
@@ -34,6 +29,12 @@
           width: 410px;
           display: inline-flex;
           zoom: .95;
+          }
+          .clotheoff {
+            --fa-secondary-color: #d80101 !important;
+          }
+          .clotheon {
+            --fa-secondary-color: unset;
           }
 
           .turbo_hud .test1 {
@@ -683,10 +684,8 @@
       svg path {
         will-change: auto;
         stroke-width: 20px;
-        #stroke: hsl(217, 100%, 49%);
-        #stroke-dasharray: 1;
         stroke-miterlimit: round;
-        transition: stroke-dashoffset 1ms ease-in-out;
+        transition: stroke-dashoffset 0ms ease;
       }
       #speedmeter {
         text-shadow: 2px 2px 5px rgb(4, 40, 117);
@@ -1244,6 +1243,11 @@
         top:430px;
         font-size:10px;
       }
+      .square {
+        height:2.35vw !important;
+        left:-0.25vw !important;
+        bottom:-0.25vw !important;
+      }
     </style>
     <div>
         <img id="statusnormal" style="z-index:999;position:absolute;right:-20px;top:-10px;opacity:1;height:160px;" src="img/status.png" />
@@ -1308,7 +1312,7 @@
       <!-- <img id="statusver" style="z-index:1001;position:absolute;right:84px;top:-5px;opacity:1;height:80px;" src="img/status2.png" /> -->
     </div>
 
-    <div id="statusv3" style="display:block;position:absolute;width:300px;">
+    <div id="statusv3" style="display:block;position:absolute;width:600px;height:70px;">
       
       <!-- <span class="fa-stack fa-2x" style='font-size:17px;position:absolute;right:30px;top:-28px;color:rgba(144, 144, 144, 0.876)'>
         <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
@@ -1366,11 +1370,11 @@
     <i id="healthsimplebg" class="fas fa-heartbeat fa-stack-1x" style='font-size:19px;color:rgb(83, 0, 0);z-index:1130;opacity:1.0;'></i>
   </span> -->
 
-  <span id="voip_2" class="fa-stack fa-2x" style='font-size:17px;position:relative;float:left; margin-top:-25px;margin-left:-30px;color:rgba(144, 144, 144, 0.876)'>
+  <!-- <span id="voip_2" class="fa-stack fa-2x" style='font-size:17px;position:relative;float:left; margin-top:-25px;margin-left:-30px;color:rgba(144, 144, 144, 0.876)'>
     <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
     <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
     <i id="microphone" class="fas fa-microphone fa-stack-1x" style='font-size:19px;z-index:1131;opacity:1.0;'></i>
-  </span>
+  </span> -->
 
   </div>
 
@@ -1528,6 +1532,74 @@
         </div>
       </div>
 
+      <div id="statusv4" style="display:block;position:absolute;width:100%;bottom:1%;height:70px;">
+        <!-- <div id="'+divid+'" style="float:left;height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'">
+          <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;left:3.5vw;">
+            <i class="fas fa-circle fa-stack-2x" style="font-size:1.2vw;color:rgba(11, 39, 63, 0.707);margin-left:0.4vw;"></i>
+            <i id="'+statuses[i].id_3+'" class="fal fa-circle fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i>
+            <i id="carhealthbar" class="'+statuses[i].i_id_1_class+'" style="font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1vw;"></i>
+            <svg preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.14vw;bottom:-0.53vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.9vw;" xmlns="http://www.w3.org/2000/svg" height="2.9vw" width="5.5vw" viewBox="0 0 200 200" data-value="1">
+              <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/>
+              <path id="'+statuses[i].i_id_1+'" class="meter" stroke="'+statuses[i].i_id_1_color+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="0" stroke-dashoffset="360"/>
+            </svg>
+          </span>
+
+          <div id="'+divid+'" style="float:right;height:70px;width:54px;display:'+statuses[i].display+'"> 
+            <span class="fa-stack fa-2x" style="font-size:0.9vw;position:relative;color:rgba(144, 144, 144, 0.876);margin-bottom:-53px;margin-left:65px;"> 
+              <i class="fas fa-circle fa-stack-2x" style="font-size:1.2vw;color:rgba(11, 39, 63, 0.707);margin-left:5px;"></i> 
+              <i id="'+statuses[i].id_3+'" class="fal fa-circle fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i> 
+              <i id="hearty" class="'+statuses[i].i_id_1_class+'" style="font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;margin-left:20px;"></i> 
+            </span> 
+            <svg id="" style="z-index:1205;position:relative;opacity:0.65;transform: rotate(0deg);margin-bottom:-46px;height:53px;margin-left:15px;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1"> 
+              <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> 
+              <path id="'+statuses[i].i_id_1+'" class="meter" stroke="'+statuses[i].i_id_1_color+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> 
+          </div> -->
+        </div>
+        <!-- <div id="healthv4" style="float:left;height:70px;width:54px;">
+          <span class="fa-stack fa-2x" style='font-size:0.9vw;position:relative;color:rgba(144, 144, 144, 0.876);margin-bottom:-53px;margin-left:65px;'>
+            <i class="fas fa-circle fa-stack-2x" style='font-size:1.2vw;color:rgba(11, 39, 63, 0.707);margin-left:5px;'></i>
+            <i class="fal fa-circle fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i>
+            <i id="carhealthbar" class="fad fa-heart fa-stack-1x" style='font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;margin-left:20px;'></i>
+          </span>
+          <svg id="stat" style="z-index:1205;position:relative;opacity:0.65;transform: rotate(0deg);margin-bottom:-46px;height:53px;margin-left:15px;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+            <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/>
+            <path id="nitropath" class="meter" stroke="red" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="0" stroke-dashoffset="360"/>
+          </svg>
+        </div>
+        <div id="healthv4" style="float:left;height:70px;width:54px;">
+          <span class="fa-stack fa-2x" style='font-size:0.9vw;position:relative;color:rgba(144, 144, 144, 0.876);margin-bottom:-53px;margin-left:65px;'>
+            <i class="fas fa-circle fa-stack-2x" style='font-size:1.2vw;color:rgba(11, 39, 63, 0.707);margin-left:5px;'></i>
+            <i class="fal fa-circle fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i>
+            <i id="carhealthbar" class="fad fa-heart fa-stack-1x" style='font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;margin-left:20px;'></i>
+          </span>
+          <svg id="stat" style="z-index:1205;position:relative;opacity:0.65;transform: rotate(0deg);margin-bottom:-46px;height:53px;margin-left:15px;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+            <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/>
+            <path id="nitropath" class="meter" stroke="red" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="0" stroke-dashoffset="360"/>
+          </svg>
+        </div>
+        <div id="healthv4" style="float:left;height:70px;width:54px;">
+          <span class="fa-stack fa-2x" style='font-size:0.9vw;position:relative;color:rgba(144, 144, 144, 0.876);margin-bottom:-53px;margin-left:65px;'>
+            <i class="fas fa-circle fa-stack-2x" style='font-size:1.2vw;color:rgba(11, 39, 63, 0.707);margin-left:5px;'></i>
+            <i class="fal fa-circle fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i>
+            <i id="carhealthbar" class="fad fa-heart fa-stack-1x" style='font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;margin-left:20px;'></i>
+          </span>
+          <svg id="stat" style="z-index:1205;position:relative;opacity:0.65;transform: rotate(0deg);margin-bottom:-46px;height:53px;margin-left:15px;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+            <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/>
+            <path id="nitropath" class="meter" stroke="red" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="222" stroke-dashoffset="360"/>
+          </svg>
+        </div>
+        <div id="healthv4" style="float:left;height:70px;width:54px;">
+          <span class="fa-stack fa-2x" style='font-size:0.9vw;position:relative;color:rgba(144, 144, 144, 0.876);margin-bottom:-53px;margin-left:65px;'>
+            <i class="fas fa-circle fa-stack-2x" style='font-size:1.2vw;color:rgba(11, 39, 63, 0.707);margin-left:5px;'></i>
+            <i class="fal fa-circle fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i>
+            <i id="carhealthbar" class="fad fa-heart fa-stack-1x" style='font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;margin-left:20px;'></i>
+          </span>
+          <svg id="stat" style="z-index:1205;position:relative;opacity:0.65;transform: rotate(0deg);margin-bottom:-46px;height:53px;margin-left:15px;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+            <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/>
+            <path id="nitropath" class="meter" stroke="red" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="0" stroke-dashoffset="360"/>
+          </svg>
+        </div> -->
+      </div>
       <div id="simple" style="display:none;position:absolute;right:-4.5%;bottom:-20px;width:25%;">
         <img style="-webkit-filter: drop-shadow(1px -1px 0.4px rgba(255, 255, 255, 0.822));z-index:999;position:relative;opacity:0.85;width:100%;right:0;float:right;" src="img/carui_simple.png?img/car.png" />
         <svg id="rpm" style="z-index:1005;position:absolute;right:60%;bottom:36%;opacity:0.65;width:40%;height:30%;transform: rotate(-60deg);" xmlns="http://www.w3.org/2000/svg" height="210" width="210" viewBox="0 0 177 177" data-value="1">
@@ -1674,40 +1746,40 @@
           <img style="display:block; height:80%;width:60%;position:absolute;top:11%;left:20%;opacity:0.6" id="handbrakeclose" src="img/handbrakeclose.png" />
         </span>
 
-        <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:40%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
-          <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
-          <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
-          <i id="gasbar" class="fad fa-gas-pump fa-stack-1x" style='font-size:1.0vw;color:rgb(231, 231, 231);z-index:1131;opacity:1.0;'></i>
-          <i id="gasbg" class="fad fa-gas-pump fa-stack-1x" style='font-size:1.0vw;color:rgba(253, 0, 0, 0.856);z-index:1130;opacity:0.1;'></i>
+        <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:35%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
+          <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+          <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgba(151, 147, 147, 0.623);"></i>
+          <i id="gasbar" class="fad fa-gas-pump fa-stack-1x" style='font-size:1.2vw;color:rgb(231, 231, 231);z-index:1131;opacity:1.0;margin-left:0.8vw;'></i>
+          <i id="gasbg" class="fad fa-gas-pump fa-stack-1x" style='font-size:1.2vw;color:rgba(253, 0, 0, 0.856);z-index:1130;opacity:0.1;margin-left:0.8vw;'></i>
         </span>
 
-        <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:48%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
-          <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
-          <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
-          <i id="carhealthbar" class="fad fa-car-mechanic fa-stack-1x" style='font-size:1.1vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;'></i>
-          <i id="carhealthbg" class="fad fa-car-mechanic fa-stack-1x" style='font-size:1.1vw;color:rgba(235, 5, 5, 0.89);z-index:1130;opacity:0.1;'></i>
+        <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:45%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
+          <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+          <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgba(151, 147, 147, 0.623);"></i>
+          <i id="carhealthbar" class="fad fa-car-mechanic fa-stack-1x" style='font-size:1.2vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;margin-left:0.8vw;'></i>
+          <i id="carhealthbg" class="fad fa-car-mechanic fa-stack-1x" style='font-size:1.2vw;color:rgba(235, 5, 5, 0.89);z-index:1130;opacity:0.1;margin-left:0.8vw;'></i>
         </span>
 
-        <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:56%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
-          <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
-          <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
-          <img style="display:block; height:75%; width:65%;position:absolute;top:10%;left:18%;opacity:0.6" id="doorclose" src="img/doorclose.png" />
-          <img style="display:none; height:75%;width:65%;position:absolute;top:10%;left:18%;opacity:0.7" id="dooropen" src="img/dooropen.png" />
+        <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:55%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
+          <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+          <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgba(151, 147, 147, 0.623);"></i>
+          <img style="display:block; height:85%; width:75%;position:absolute;top:8%;left:29%;opacity:0.6" id="doorclose" src="img/doorclose.png" />
+          <img style="display:none; height:85%;width:75%;position:absolute;top:8%;left:29%;opacity:0.7" id="dooropen" src="img/dooropen.png" />
         </span>
 
-        <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:64%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
-          <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
-          <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
-          <img style="display:block; height:70%;position:absolute;top:14%;left:22%;" id="seatbelt" src="img/seatbeltoff.png" />
-          <img style="display:none;height:70%;position:absolute;top:14%;left:22%;" id="onseatbelt" src="img/seatbelton.png" />
+        <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:65%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
+          <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+          <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgba(151, 147, 147, 0.623);"></i>
+          <img style="display:block; height:90%;position:absolute;top:11%;left:29%;" id="seatbelt" src="img/seatbeltoff.png" />
+          <img style="display:none;height:90%;position:absolute;top:11%;left:29%;" id="onseatbelt" src="img/seatbelton.png" />
         </span>
 
-        <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:72%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
-          <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
-          <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
-          <img style="display:block; height:70%;position:absolute;top:14%;left:22%;opacity:0.5;" id="offlight" src="img/lightoff.png" />
-          <img style="display:none;height:70%;position:absolute;top:14%;left:22%;" id="onlight" src="img/lighton.png" />
-          <img style="display:none;height:70%;position:absolute;top:14%;left:22%;" id="highlight" src="img/lighthigh.png" />
+        <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:75%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
+          <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+          <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgba(151, 147, 147, 0.623);"></i>
+          <img style="display:block; height:90%;position:absolute;top:11%;left:29%;opacity:0.5;" id="offlight" src="img/lightoff.png" />
+          <img style="display:none;height:90%;position:absolute;top:11%;left:29%;" id="onlight" src="img/lighton.png" />
+          <img style="display:none;height:90%;position:absolute;top:11%;left:29%;" id="highlight" src="img/lighthigh.png" />
         </span>
         <!-- <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:5%;bottom:53%;color:rgba(144, 144, 144, 0.876)'>
           <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
@@ -1874,46 +1946,46 @@
       <div id="geardiv"><span id="gear">P</span> <span id="geartext"></span></div>
 
       <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:22%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
-        <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
-        <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
-        <img style="display:block; height:80%;width:60%;position:absolute;top:11%;left:20%;" id="handbrakeopen" src="img/handbrakeopen.png" />
-        <img style="display:block; height:80%;width:60%;position:absolute;top:11%;left:20%;opacity:0.6" id="handbrakeclose" src="img/handbrakeclose.png" />
+        <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+        <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
+        <img style="display:block; height:100%;width:80%;position:absolute;top:4%;left:32.5%;" id="handbrakeopen" src="img/handbrakeopen.png" />
+        <img style="display:block; height:100%;width:80%;position:absolute;top:4%;left:32.5%;opacity:0.6" id="handbrakeclose" src="img/handbrakeclose.png" />
       </span>
 
-      <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:30%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
-        <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
-        <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
-        <img id="hoodopen" style="display:block; height:90%;width:70%;position:absolute;top:5%;left:18%;" src="img/hoodopen.png" />
-        <img id="hoodclose" style="display:none; height:90%;width:70%;position:absolute;top:5%;left:18%;;opacity:0.6" src="img/hoodclose.png" />
+      <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:31%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
+        <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+        <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
+        <img id="hoodopen" style="display:block; height:100%;width:80%;position:absolute;top:0%;left:33%;" src="img/hoodopen.png" />
+        <img id="hoodclose" style="display:none; height:100%;width:80%;position:absolute;top:0%;left:33%;;opacity:0.6" src="img/hoodclose.png" />
       </span>
 
-      <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:38%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
-        <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
-        <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
-        <img id="trunkopen" style="display:block; height:90%;width:70%;position:absolute;top:5%;left:18%;" src="img/trunkopen.png" />
-        <img id="trunkclose" style="display:block; height:90%;width:70%;position:absolute;top:5%;left:18%;;opacity:0.6" src="img/trunkclose.png" />
+      <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:40%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
+        <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+        <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
+        <img id="trunkopen" style="display:block; height:100%;width:80%;position:absolute;top:0%;left:33%;" src="img/trunkopen.png" />
+        <img id="trunkclose" style="display:block; height:100%;width:80%;position:absolute;top:0%;left:33%;;opacity:0.6" src="img/trunkclose.png" />
       </span>
 
-      <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:46%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
-        <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
-        <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
-        <img style="display:block; height:75%; width:65%;position:absolute;top:10%;left:18%;opacity:0.6" id="doorclose" src="img/doorclose.png" />
-        <img style="display:none; height:75%;width:65%;position:absolute;top:10%;left:18%;opacity:0.7" id="dooropen" src="img/dooropen.png" />
+      <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:49%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
+        <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+        <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
+        <img style="display:block; height:85%; width:75%;position:absolute;top:1%;left:33%;opacity:0.6" id="doorclose" src="img/doorclose.png" />
+        <img style="display:none; height:85%;width:75%;position:absolute;top:1%;left:33%;opacity:0.7" id="dooropen" src="img/dooropen.png" />
       </span>
 
-      <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:54%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
-        <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
-        <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
-        <img style="display:block; height:70%;position:absolute;top:14%;left:22%;" id="seatbelt" src="img/seatbeltoff.png" />
-        <img style="display:none;height:70%;position:absolute;top:14%;left:22%;" id="onseatbelt" src="img/seatbelton.png" />
+      <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:58%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
+        <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+        <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
+        <img style="display:block; height:85%;position:absolute;top:4%;left:38%;" id="seatbelt" src="img/seatbeltoff.png" />
+        <img style="display:none;height:85%;position:absolute;top:4%;left:38%;" id="onseatbelt" src="img/seatbelton.png" />
       </span>
 
-      <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:62%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
-        <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
-        <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
-        <img style="display:block; height:70%;position:absolute;top:14%;left:22%;opacity:0.5;" id="offlight" src="img/lightoff.png" />
-        <img style="display:none;height:70%;position:absolute;top:14%;left:22%;" id="onlight" src="img/lighton.png" />
-        <img style="display:none;height:70%;position:absolute;top:14%;left:22%;" id="highlight" src="img/lighthigh.png" />
+      <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:66.9%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
+        <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+        <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
+        <img style="display:block; height:100%;position:absolute;top:3%;left:35%;opacity:0.5;" id="offlight" src="img/lightoff.png" />
+        <img style="display:none;height:100%;position:absolute;top:3%;left:35%;" id="onlight" src="img/lighton.png" />
+        <img style="display:none;height:100%;position:absolute;top:3%;left:35%;" id="highlight" src="img/lighthigh.png" />
       </span>
       <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:5.6%;bottom:53.5%;color:rgba(144, 144, 144, 0.876)'>
         <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
@@ -2093,12 +2165,27 @@
       <img style="z-index:900;position:absolute;right:440px;top:100px;opacity:0.7;height:650px;" src="img/bodybg.png" />
       <div class="pulse" style="z-index: 1111;"></div>
       <img id="bodystatus" style="z-index:1001;position:absolute;right:500px;top:100px;opacity:1;height:550px;" src="img/bodyui.png" />
+      
+      <i class="fad fa-first-aid" id="ped_body_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:632px;top:178px;opacity:0.5;font-size:50px;color:#e7e7e7;"></i>
+      <i class="fad fa-first-aid" id="ped_head_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:811px;top:177px;opacity:0.5;font-size:50px;color:#e7e7e7;"></i>
+      <i class="fad fa-first-aid" id="right_hand_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:856px;top:309px;opacity:0.5;font-size:50px;color:#e7e7e7;"></i>
+      <i class="fad fa-first-aid" id="left_hand_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:578px;top:306px;opacity:0.5;font-size:50px;color:#e7e7e7;"></i>
+      <i class="fad fa-first-aid" id="left_leg_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:807px;top:441.8px;opacity:0.5;font-size:50px;color:#e7e7e7;"></i>
+      <i class="fad fa-first-aid" id="right_leg_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:624px;top:441.8px;opacity:0.5;font-size:50px;color:#e7e7e7;"></i>
+
       <img id="ped_body" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:632px;top:178px;opacity:0.0;height:100px;" src="img/chest.png" />
       <img id="ped_head" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:811px;top:177px;opacity:0.0;height:100px;" src="img/head.png" />
       <img id="right_hand" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:856px;top:309px;opacity:0.0;height:110px;" src="img/rightarm.png" />
       <img id="left_hand" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:578px;top:306px;opacity:0.0;height:110px;" src="img/leftarm.png" />
       <img id="left_leg" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:807px;top:441.8px;opacity:0.0;height:110px;" src="img/rightleg.png" />
       <img id="right_leg" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:624px;top:441.8px;opacity:0.0;height:110px;" src="img/leftleg.png" />
+
+      <span id="ped_body_status" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:657px;border-radius:5px;top:280px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/chest.png">Normal</span>
+      <span id="ped_head_status" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:835px;top:280px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/head.png">Normal</span>
+      <span id="right_hand_status" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:890px;top:414px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/rightarm.png">Normal</span>
+      <span id="left_hand_status" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:608px;top:412px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/leftarm.png">Normal</span>
+      <span id="left_leg_status" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:840px;top:544.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/rightleg.png">Normal</span>
+      <span id="right_leg_status" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:654px;top:545.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/leftleg.png">Normal</span>
     </div>
 
     <div id="carstatusui" style="display:block;">
@@ -2153,9 +2240,6 @@
         <img style="display:none;" id="crosshair" src="img/crosshair_1.png" class="crosshair"/>
       </div>
     </div>
-
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script src="nui://game/ui/jquery.js" type="text/javascript"></script>
           <style>
             #start {
               display:block;
@@ -2288,7 +2372,9 @@
                 </div>
             </div>
         </div>
-      <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+
+      <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+      <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
       <script src="js/map.js"></script>
       <script src="js/demo.js"></script>
       <script src="js/simple-notify.min.js"></script>

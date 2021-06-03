@@ -14,6 +14,11 @@ Creation(function()
 	DecorRegister("PLAYERLOADED", 1);DecorRegister("CHARSLOT", 1)
 end)
 
+RegisterNetEvent('esx:setJob')
+AddEventHandler('esx:setJob', function(job)
+	xPlayer.job = job
+end)
+
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- VOICE FUNC
 -----------------------------------------------------------------------------------------------------------------------------------------
@@ -29,6 +34,7 @@ RenzuEventHandler("pma-voice:setTalkingMode", function(prox)
 end)
 
 --MUMBLE VOIP SetVoice Listener
+local current_channel = 0
 RenzuNetEvent("renzu_hud:SetVoiceData")
 RenzuEventHandler("renzu_hud:SetVoiceData", function(mode,val)
 	if mode == 'proximity' then
@@ -37,16 +43,18 @@ RenzuEventHandler("renzu_hud:SetVoiceData", function(mode,val)
 			type = "setMic",
 			content = val
 		})
-	elseif mode == 'radio' and val > 0 then
+	elseif mode == 'radio' and val > 0 and val ~= current_channel then
 		RenzuSendUI({
 			type = "setRadioChannel",
 			content = config.radiochannels[val]
 		})
-	elseif mode == 'radio' and val <= 0 then
+		current_channel = val
+	elseif mode == 'radio' and val <= 0 or val == current_channel then
 		RenzuSendUI({
 			type = "setRadioChannel",
 			content = false
 		})
+		current_channel = 0
 	end
 end)
 
@@ -108,6 +116,7 @@ RenzuEventHandler('renzu_hud:charslot', function(charid)
 end)
 
 Creation(function()
+	Wait(1000)
 	if charslot == nil and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0.0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= nil then
 		charslot = round(DecorGetFloat(PlayerPedId(),"CHARSLOT"))
 		----print("CHARSLOT")
@@ -120,12 +129,6 @@ Creation(function()
 		playerloaded = true
 	end
 	--print('ismp?', playerloaded, isplayer())
-	if not playerloaded and config.loadedasmp and isplayer() then
-		--print("ISMP")
-		TriggerServerEvent("renzu_hud:getdata",0, true)
-		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
-		playerloaded = true
-	end
 	if config.framework == 'ESX' then
 		RenzuNetEvent('esx:playerLoaded')
 		RenzuEventHandler('esx:playerLoaded', function(xPlayer)
@@ -145,6 +148,13 @@ Creation(function()
 			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 			TriggerServerEvent("renzu_hud:getdata",charslot)	
 		end)
+	end
+	Wait(500)
+	if DecorExistOn(PlayerPedId(), "PLAYERLOADED") and config.loadedasmp and isplayer() then
+		print("ISMP")
+		TriggerServerEvent("renzu_hud:getdata",0, true)
+		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
+		playerloaded = true
 	end
 	while not playerloaded do
 		Wait(1000)
@@ -186,7 +196,9 @@ end)
 
 Creation(function()
 	for k,v in pairs(config.statusordering) do
-		notifycd[v.status] = 0
+		if v.enable then
+			notifycd[v.status] = 0
+		end
 	end
 	if config.enablestatus then
 		RegisterNetEvent("esx_status:onTick")
@@ -200,7 +212,7 @@ end)
 Creation(function()
 	Renzuzu.Wait(2000)
 	for k,v in pairs(config.statusordering) do
-		if v.custom then
+		if v.custom and v.enable then
 			statuses[k] = v.status
 		end
 	end
@@ -293,14 +305,15 @@ Creation(function()
 	RenzuSendUI({map = true, type = 'sarado'})
 	while not playerloaded do Citizen.Wait(100) end
 	Wait(100)
-	local tbl = config.statusordering
+	RenzuSendUI({type = "setStatusType",content = config.status_type})
+	local tbl = {['table'] = config.statusordering, ['float'] = config.statusplace}
 	RenzuSendUI({type = 'setCarui', content = config.carui})
 	Wait(500)
 	RenzuSendUI({type = "setCompass",content = config.enablecompass})
 	Wait(500)
-	RenzuSendUI({type = "setStatusUI",content = config.statusui})
-	Wait(500)
 	RenzuSendUI({type = "SetStatusOrder",content = tbl})
+	Wait(500)
+	RenzuSendUI({type = "setStatusUI",content = {['type'] = config.status_type, ['ver'] = config.statusui}})
 	Wait(500)
 	RenzuSendUI({type = "changeallclass",content = config.uidesign})
 	Wait(100)
@@ -900,8 +913,10 @@ end)
 
 RegisterNetEvent('renzu_hud:bodystatus')
 AddEventHandler('renzu_hud:bodystatus', function(status,other)
+	RenzuSendUI({type = "setBodyParts",content = config.healtype})
 	local status = status
 	receive = true
+	bodystatus = {}
 	bodystatus = status
 	for type,val in pairs(config.buto) do
 		if bodystatus then 
@@ -916,13 +931,35 @@ AddEventHandler('renzu_hud:bodystatus', function(status,other)
 			end
 		end
 	end
+	if other then
+		RenzuSendUI({
+			type = "setShowBodyUi",
+			content = bodyui
+		})
+		Wait(100)
+		SetNuiFocusKeepInput(bodyui)
+		SetNuiFocus(bodyui,bodyui)
+	end
+	Wait(100)
 	RenzuSendUI({
 		type = "setUpdateBodyStatus",
 		content = bonecategory
 	})
+	Creation(function()
+		while bodyui do
+			whileinput()
+			Wait(5)
+		end
+		SetNuiFocusKeepInput(false)
+		SetNuiFocus(false,false)
+		return
+	end)
 end)
 
 Creation(function()
+	while not playerloaded do
+		Wait(100)
+	end
 	if config.bodystatus then
 		Citizen.Wait(1000)
 		while DecorGetBool(PlayerPedId(), "PLAYERLOADED") ~= 1 do
@@ -937,10 +974,31 @@ Creation(function()
 	return
 end)
 
+local busyheal = false
+RenzuNuiCallback('healpart', function(data, cb)
+	Wait(math.random(300,1000))
+	if not busyheal then
+		busyheal = true
+		TaskTurnPedToFaceEntity(ped,GetPlayerPed(GetPlayerFromServerId(healing)))
+		Wait(300)
+		TaskStartScenarioInPlace(ped, 'CODE_HUMAN_MEDIC_TEND_TO_DEAD', -1, true)
+		TriggerServerEvent('renzu_hud:healbody',healing,data.part)
+		Makeloading('Applying Item',12000)
+		Wait(12000)
+		Notify('success','Body System',"Healing Successful")
+		Wait(100)
+		TriggerServerEvent('renzu_hud:checkbody', tonumber(healing))
+		ClearPedTasks(ped)
+		busyheal = false
+	end
+end)
+
 RegisterNetEvent('renzu_hud:healbody')
-AddEventHandler('renzu_hud:healbody', function(bodypart)
+AddEventHandler('renzu_hud:healbody', function(bodypart, patient)
 	-- Preparing
-	TaskStartScenarioInPlace(ped, 'CODE_HUMAN_MEDIC_TEND_TO_DEAD', -1, true)
+	if not patient then
+		TaskStartScenarioInPlace(ped, 'CODE_HUMAN_MEDIC_TEND_TO_DEAD', -1, true)
+	end
 	Makeloading('Applying Item',10000)
     Wait(10000)
     ClearPedTasks(ped)
@@ -1722,15 +1780,85 @@ end)
 
 --ENGINE SYSTEM
 
+local busy_install = false
 RegisterNetEvent('renzu_hud:change_engine')
 AddEventHandler('renzu_hud:change_engine', function(engine)
-	if getveh() ~= 0 then
-		plate = tostring(GetVehicleNumberPlateText(getveh()))
-		plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
-		get_veh_stats(getveh(), plate)
-		veh_stats[plate].engine = engine
-		--print("loop item")
-		TriggerServerEvent('renzu_hud:change_engine', plate, veh_stats[plate])
+	if not busy_install then
+		local oldengine = engine
+		local bone = GetEntityBoneIndexByName(getveh(),'engine')
+		local x,y,z = table.unpack(GetWorldPositionOfEntityBone(getveh(), bone))
+		if getveh() ~= 0 and #(GetEntityCoords(ped) - vector3(x,y,z)) <= config.engine_dis then
+			busy_install = true
+			SetVehicleFixed(getveh())
+			plate = tostring(GetVehicleNumberPlateText(getveh()))
+			plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+			get_veh_stats(getveh(), plate)
+			veh_stats[plate].engine = engine
+			--print("loop item")
+			Citizen.Wait(2000)
+			playanimation('creatures@rottweiler@tricks@','petting_franklin')
+			--ExecuteCommand("e petting")
+			Renzuzu.Wait(2500)
+			ClearPedTasks(ped)
+			playanimation('mp_player_int_uppergang_sign_a','mp_player_int_gang_sign_a')
+			--ExecuteCommand("e gangsign")
+			Renzuzu.Wait(200)
+			SetVehicleDoorOpen(getveh(),4,false,false)
+			Renzuzu.Wait(400)
+			ClearPedTasks(ped)
+			SetVehicleDoorOpen(getveh(),4,false,false)
+			Wait(1000)
+			SetVehicleDoorBroken(getveh(),4,true)
+			Wait(1000)
+			if config.enable_engine_prop then
+				repairengine(plate)
+				installing = true
+			end
+			engine_c = GetOffsetFromEntityInWorldCoords(enginemodel)
+			local count = 25
+			DetachEntity(enginemodel)
+			while installing do
+				if RCR(1, 173) then
+					SetEntityCoords(enginemodel,engine_c.x,engine_c.y,engine_c.z - 0.05)
+					engine_c = GetOffsetFromEntityInWorldCoords(enginemodel)
+					count = count - 1
+				end
+				if RCR(1, 172) then
+					SetEntityCoords(enginemodel,engine_c.x,engine_c.y,engine_c.z + 0.05)
+					engine_c = GetOffsetFromEntityInWorldCoords(enginemodel)
+					count = count + 1
+				end
+				if count <= 0 then
+					installing = false
+					busy_install = false
+					break
+				end
+				Wait(7)
+			end
+
+			playanimation('creatures@rottweiler@tricks@','petting_franklin')
+			Wait(10000)
+			busy_install = false
+			installing = false
+			ReqAndDelete(enginemodel,true)
+			ReqAndDelete(standmodel,true)
+			ClearPedTasks(ped)
+			SetVehicleFixed(getveh())
+			TriggerServerEvent('renzu_hud:change_engine', plate, veh_stats[plate])
+		else
+			Notify('warning','Engine System',"You must be infront of the vehicle engine - Walk to the engine position now")
+			while engine == oldengine do
+				print(#(vector3(x,y,z) - GetEntityCoords(ped)), oldengine)
+				if #(vector3(x,y,z) - GetEntityCoords(ped)) <= 2.2 then
+					busy_install = false
+					TriggerEvent('renzu_hud:change_engine',oldengine)
+					break
+				end
+				Wait(100)
+			end
+		end
+	else
+		Notify('warning','Engine System',"You have ongoing installation, go to the vehicle")
 	end
 end)
 
@@ -1741,6 +1869,15 @@ end)
 
 RenzuCommand(config.commands['carui'], function(source, args, raw)
 	DefineCarUI(args[1])
+end)
+
+RenzuCommand(config.commands['dragui'], function(source, args, raw)
+	bool = not bool
+	RenzuSendUI({
+		type = "Drag",
+		content = bool
+	})
+	SetNuiFocus(bool,bool)
 end)
 
 CreateThread(function()

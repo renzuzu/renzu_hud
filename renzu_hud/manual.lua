@@ -211,7 +211,10 @@ RenzuCommand('manual', function()
         })
         DecorSetBool(vehicle, "MANUAL", false)
         newmanual = false
-    elseif not manual then
+    else
+        manual = false
+        manualstatus = false
+        Wait(100)
         startmanual()
 	end
     manual = not manual
