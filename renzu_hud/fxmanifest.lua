@@ -5,9 +5,9 @@ fx_version 'bodacious'
 -- MADE BY Renzuzu
 game 'gta5'
 
--- lua54 'on'
--- is_cfxv2 'yes'
--- use_fxv2_oal 'true'
+lua54 'on'
+is_cfxv2 'yes'
+use_fxv2_oal 'true'
 
 ui_page {
     'ui/index.html',

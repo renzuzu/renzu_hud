@@ -183,11 +183,49 @@ end)
 
 RegisterServerEvent('renzu_hud:healbody')
 AddEventHandler('renzu_hud:healbody', function(target,part)
-	print("1")
+	print("1",part)
 	local xPlayer = GetPlayerFromId(source)
 	local identifier = xPlayer.identifier
 	if config.framework ~= 'ESX' or config.framework == 'ESX' and xPlayer.job.name == config.checkbodycommandjob then
+		if target == nil then
+			target = source
+		end
 		TriggerClientEvent('renzu_hud:healbody', target, part, true)
+	end
+end)
+
+function bandages(part)
+	local b = nil
+	if part == 'ped_body' then b = config.ESX_Items['body_bandage']
+	elseif part == 'left_leg' or part == 'right_leg' then b = config.ESX_Items['arm_bandage']
+	elseif part == 'ped_head' then b = config.ESX_Items['leg_bandage']
+	elseif part == 'right_hand' or part == 'left_hand' then b = config.ESX_Items['head_brace'] end
+	return b
+end
+
+RegisterServerEvent('renzu_hud:checkitem')
+AddEventHandler('renzu_hud:checkitem', function(part)
+	local xPlayer = GetPlayerFromId(source)
+	local identifier = xPlayer.identifier
+	local b = nil
+	local part = part
+	if part == 'chest' then 
+		b = config.ESX_Items['body_bandage']
+	elseif part == 'leg' then 
+		b = config.ESX_Items['leg_bandage']
+	elseif part == 'arm' then 
+		b = config.ESX_Items['arm_bandage']
+	elseif part == 'head' then 
+		b = config.ESX_Items['head_brace'] 
+	end
+	local bandage = b.name
+	if config.framework ~= 'ESX' or config.framework == 'ESX' and xPlayer.job.name == config.checkbodycommandjob and xPlayer.getInventoryItem(bandage).count >= 1 then
+		TriggerClientEvent('renzu_hud:healpart', source, part)
+		if config.framework == 'ESX' then
+			xPlayer.removeInventoryItem(bandage, 1)
+		end
+	else
+		xPlayer.showNotification('You are not a '..config.checkbodycommandjob..' or you dont have a item', false, false, 130)
 	end
 end)
 
@@ -215,7 +253,6 @@ AddEventHandler("mumble:SetVoiceData", function(mode,prox)
 	end
 	if mode == 'radio' and not antispam[source] then
 		antispam[source] = true
-		print(prox)
 		TriggerClientEvent("renzu_hud:SetVoiceData", source, 'radio', prox)
 		Wait(10)
 		antispam[source] = false
@@ -248,7 +285,6 @@ end
 function CreatePlayer(source)
 	local xPlayer = Standalone(source, GetSteam(source), GetPlayerName(source), charslot[source] or 1)
 	Renzu[tonumber(source)] = xPlayer
-	print("Creating New Data")
 end
 
 function GetPlayerFromId(source)
@@ -279,16 +315,16 @@ end
 Citizen.CreateThread(function()
 	if config.enable_engine_item then
 		Wait(1000)
-		print("test")
 		local c = 0
+		if config.custom_engine_enable then
+			for k, v in pairs(config.custom_engine) do
+				config.engine[tostring(v.handlingName)] = true
+			end
+		end
 		for v, k in pairs(config.engine) do -- you can remove this for loop after you install the engine sql
 			c = c + 1
-			print(c)
-			print(v)
 			local enginename = string.lower(v)
 			local label = string.upper(v)
-			print(firstToUpper(enginename))
-			--insertnew("muffler_"..enginename.."",""..label.." Muffler",100000)
 			MySQL.Async.fetchAll('SELECT * FROM items WHERE name = @name', {
 				['@name'] = "engine_"..enginename..""
 			}, function(foundRow)
@@ -314,13 +350,27 @@ Citizen.CreateThread(function()
 
 		for v, k in pairs(config.engine) do
 			local enginename = string.lower(v)
-			print("register item")
+			--print("register item")
 			ESX.RegisterUsableItem("engine_"..enginename.."", function(source)
 				local xPlayer = ESX.GetPlayerFromId(source)
 				if config.engine_jobonly and xPlayer.job.name ~= tostring(config.engine_job) then xPlayer.showNotification('You are not a '..config.engine_job..'', false, false, 130) return end
 				xPlayer.removeInventoryItem("engine_"..enginename.."", 1)
 				TriggerClientEvent('renzu_hud:change_engine', xPlayer.source, enginename)
 			end)
+		end
+
+		if config.enable_commands then
+			RenzuCommand('installengine', function(source,args)
+				if args[1] ~= nil and config.ESX_Items[args[1]] ~= nil then
+					if havePermission(GetPlayerIdentifier(source, 0)) then
+						for v, k in pairs(config.engine) do
+							if v == args[1] then
+								TriggerClientEvent('renzu_hud:change_engine', source, v)
+							end
+						end
+					end
+				end
+			end, false)
 		end
 	end
 end)

@@ -3,26 +3,54 @@ var statusui = 'normal'
 var status_type = 'icons'
 var class_icon = 'octagon'
 var statleft = false
+var isambulance = false
+var loopfuck = false
 function pedface() {
-    console.log("REQUESTING")
+    //////console.log("REQUESTING")
     $.post(`https://${GetParentResourceName()}/requestface`, {}, function(data) {
-        console.log("POSTED")
+        //////console.log("POSTED")
         let face = data;
         if (face) {
-            console.log("URL")
+            //////console.log("URL")
             let url = 'https://nui-img/' + face + '/' + face + '?t=' + String(Math.round(new Date().getTime() / 1000));
             if (face == 'none') {
                 url = 'https://nui-img/pedmugshot_01/pedmugshot_01?t123';   // assuming theres a cache
             }
-            console.log(url)
+            ////console.log(url)
             $("#pedface").attr("src", ""+url+"")
 
         }  
     });
 }
 
+function getvehdata() {
+    //////console.log("REQUESTING")
+    $.post(`https://${GetParentResourceName()}/getvehicledata`, {}, function(data) {
+        SetVehData(data)
+    });
+}
+
+var keyPressed = false
+$(document).on('keydown', function(e) {
+    var key;
+    keyPressed = true;
+    key = String.fromCharCode(e.keyCode);
+    //this is where you map your key
+    if (key === 'W') {
+        console.log(key);
+        //or some other code
+    }
+  $(this).on('keyup', function() {
+    if (keyPressed === true) {
+      keyPressed = false;
+      console.log('Key no longer held down');
+      //or some other code
+    }
+  });
+});
+
 $(document).on('click','#start',function(){
-    console.log("START")
+    //////console.log("START")
     $.post(`https://${GetParentResourceName()}/pushtostart`, {}, function(data) {}); 
 });
 
@@ -30,7 +58,7 @@ var pressedkey = 0
 const time = new Date().toLocaleTimeString();
 
 function setArmor(s) {
-    console.log("time",time)
+    //////console.log("time",time)
     if (statusui == 'simple') {
         if (status_type == 'icons') {
             document.getElementById("armorsimple").style.clip = 'rect('+toclip(s)+', 100px, 100px, 0)'
@@ -55,10 +83,6 @@ function setHp(s) {
 }
 
 function setMic(type) {
-    // $("#mic-color").removeClass("amarelo");
-    // $("#mic-color").removeClass("verde");
-    // $("#mic-color").removeClass("azul");
-    // $("#mic-color").removeClass("vermelho");
     if (status_type == 'icons') {
         did = 'microphone'
     } else if (statusui == 'simple') {
@@ -104,14 +128,14 @@ function setFuelLevel(value) {
     var max = 100;
     var total = value / max
     var gas = total * 100
-    //console.log("GASUI")
+    ////////console.log("GASUI")
     if (carui == 'modern') {
-        //console.log(carui);
+        //////console.log(carui);
     document.getElementById("gasbar").style.width = ''+gas+'%'
     } else if (carui == 'minimal') {
         var e = document.getElementById("gasbar");
         let length = e.getTotalLength();
-        //console.log(gas)
+        //////console.log(gas)
         let to = length * ((93 - gas) / 100);
         e.style.strokeDashoffset = to;
     } else if (carui == 'simple') {
@@ -126,7 +150,7 @@ function setCarhp(value) {
     if (carui == 'minimal') {
         var e = document.getElementById("carhealthbar");
         let length = e.getTotalLength();
-        //console.log(hp)
+        //////console.log(hp)
         let to = length * ((100 - hp) / 100);
         e.style.strokeDashoffset = to;
     } else if(carui == 'modern') {
@@ -167,18 +191,6 @@ function onMessageRecieved(event) {
         let direction = [item.direction.r, item.direction.g, item.direction.b, item.direction.a];
         let zone = [item.zone.r, item.zone.g, item.zone.b, item.zone.a];
         let street = [item.street.r, item.street.g, item.street.b, item.street.a];
-      
-        // // jQuery #direction to proper color & font-size configuration
-        // $('#direction').css('color', 'rgba('+direction.join(', ')+')');
-        // $('#direction').css('font-size', item.direction.size + 'vh');
-
-        // // jQuery #street to proper color & font-size configuration
-        // $('#street').css('color', 'rgba('+street.join(', ')+')');
-        // $('#street').css('font-size', item.street.size + 'vh');
-
-        // // jQuery #zone to proper color & font-size configuration
-        // $('#zone').css('color', 'rgba('+zone.join(', ')+')');
-        // $('#zone').css('font-size', item.zone.size + 'vh');
 
         for (let i=0; i < borderDOM.length; i++) {
             borderDOM[i].style.color = 'rgba('+border.join(', ')+')';
@@ -233,11 +245,19 @@ function setStatus(t) {
     }
 }
 
-function setShowstatus(bool) {
+function setShowstatus(t) {
+    var bool = t['bool']
+    var enable = t['enable']
     if (bool) {
         $("#status").fadeIn();
         setTimeout(function(){
             $("#statusbar").fadeIn();
+            if (!enable) {
+                document.getElementById('status_prog').style.display = 'none'
+                document.getElementById('statusbar').style.display = 'none'
+                document.getElementById('status').style.overflow = 'hidden'
+                document.getElementById('stats').style.display = 'none'
+            }
         }, 333);
     } else {
         $("#statusbar").fadeOut();
@@ -248,7 +268,7 @@ function setShowstatus(bool) {
 }
 
 function setShowstatusv2(bool) {
-    //console.log(bool)
+    //////console.log(bool)
     if (bool) {
         $("#status2").fadeIn();
     } else {
@@ -339,6 +359,7 @@ function setSpeed(s) {
 function setCoolant(percent) {
     var water = (percent);
     rpm2 = water.toFixed(0)
+    //console.log(rpm2)
     //document.getElementById("rpmmeter").innerHTML = ""+rpm2+"";
     var e = document.getElementById("coolantpath");
     let length = e.getTotalLength();
@@ -346,15 +367,6 @@ function setCoolant(percent) {
     let to = length * ((100 - value) / 100);
     val = to / 1000
     e.style.strokeDashoffset = to;
-    // if (percent > 0.9) {
-    //     e.style.stroke = 'red';
-    // } else if (percent > 0.7) {
-    //     e.style.stroke = 'orange';
-    // } else if (percent > 0.4) {
-    //     e.style.stroke = 'yellow';
-    // } else {
-    //     e.style.stroke = 'white';
-    // }
 }
 
 var manual = false
@@ -364,10 +376,13 @@ function setShow(table) {
             opacity: "1"
         },400);
         setHeadlights(0)
+        document.getElementById(""+carui+"").style.display = 'block'
   } else {
     $("#"+carui+"").animate({
       opacity: "0"
     },400);
+    document.getElementById(""+carui+"").style.display = 'none'
+    //clearInterval(loopfuck);
   }
 }
 
@@ -376,14 +391,20 @@ function setHeadlights(v) {
         document.getElementById("offlight").style.display = 'none'
         document.getElementById("onlight").style.display = 'block'
         document.getElementById("highlight").style.display = 'none'
+        if (carui == 'modern') { return }
+        document.getElementById(""+carui+"_light").style.setProperty("-webkit-filter", "drop-shadow(1px 1px 3px rgba(3, 137, 246, 1.0)");
     } else if (v == 2) {
         document.getElementById("offlight").style.display = 'none'
         document.getElementById("onlight").style.display = 'none'
         document.getElementById("highlight").style.display = 'block'
+        if (carui == 'modern') { return }
+        document.getElementById(""+carui+"_light").style.setProperty("-webkit-filter", "drop-shadow(1px 1px 3px rgba(3, 137, 246, 1.0)");
     } else {
         document.getElementById("offlight").style.display = 'block'
         document.getElementById("onlight").style.display = 'none'
         document.getElementById("highlight").style.display = 'none'
+        if (carui == 'modern') { return }
+        document.getElementById(""+carui+"_light").style.setProperty("-webkit-filter", "drop-shadow(1px -1px 0.4px rgba(255, 255, 255, 0.822))");
     }
 }
 
@@ -410,7 +431,7 @@ function playsoundSeatbelt(bool) {
 }
 
 function setMileage(value) {
-    //console.log(value)
+    //////console.log(value)
     mileage = value.toFixed(0);
     if (mileage >= 1000) {
         document.getElementById("mileage").style.margin = '0 2px 0 0'
@@ -440,13 +461,13 @@ function setWaydistance(value) {
     if (dis >= 1000) {
         document.getElementById("distance").style.margin = '0 -1px 0 0'
     } else if (dis >= 100) {
-        document.getElementById("distance").style.margin = '0 10px 0 0'
+        document.getElementById("distance").style.margin = '0 4px 0 0'
     } else if (dis >= 10) {
-        document.getElementById("distance").style.margin = '0 15px 0 0'
+        document.getElementById("distance").style.margin = '0 8px 0 0'
     }
     if (dis <= 0) {
         document.getElementById("distext").innerHTML = ''
-        document.getElementById("distance").style.margin = '0 -4px 0 0'
+        document.getElementById("distance").style.margin = '0 -1px 0 0'
         dis = 'ARRIVE'
     } else {
         document.getElementById("distext").innerHTML = 'DIS'
@@ -606,11 +627,16 @@ function setBrake(s) {
 function CarMap(detalye) {
     var detail = detalye;
     var table = detail.content
+    var r = document.querySelector(':root');
     if (detail.type == "updatemapa") {
+        ////console.log("updating map ui")
         $(".centermap").css("transform", "rotate(" + table.myheading + "deg)");
         $("#carblip").css("transform", "translateX(-50%) translateY(50%) rotate(" + table.camheading + "deg)");
-        $(":root").css("--Y", table.y);
-        $(":root").css("--X", table.x);
+        ////console.log(table.y,table.x)
+        r.style.setProperty('--Y', table.y);
+        r.style.setProperty('--X', table.x);
+        //$(":root").css("--Y", table.y);
+        //$(":root").css("--X", table.x);
     } else {
         if (detail.type == "sarado") {
             $(".carhudmap").fadeOut();
@@ -628,6 +654,7 @@ function CarMap(detalye) {
 }
 
 function setTemp(temp) {
+    //console.log(carui,"temp")
     var temp = temp - 50
     if (carui == 'modern') {
         document.getElementById("cartempbar").style.width = ''+temp+'%'
@@ -737,16 +764,19 @@ function pulse(stroke) {
     });
 }
 
-
+var bodystatus = {}
 function setUpdateBodyStatus(table) {
+    bodystatus = table
     var totalpain = 0
     for (const key in table) {
         var val = table[key] * 0.1;
-        //console.log(val)
+        //////console.log(val)
         if (val == undefined) {
             val = 0.0
         }
         if(key) {
+            document.getElementById(''+key+'_heal').style.zIndex = '0';
+            document.getElementById(''+key+'_heal').style.opacity = '0.0';
             if (val < 0.29 && val >= 0.1) {
                 val = 0.29
             }
@@ -766,10 +796,12 @@ function setUpdateBodyStatus(table) {
             } else if(val <= 0) {
                 document.getElementById(''+key+'_status').innerHTML = 'Normal';
             }
-            if (val >= 0.29) {
+            if (val >= 0.29 && isambulance) {
                 document.getElementById(''+key+'_heal').style.opacity = '0.5';
+                document.getElementById(''+key+'_heal').style.zIndex = '1222';
             } else {
                 document.getElementById(''+key+'_heal').style.opacity = '0.0';
+                document.getElementById(''+key+'_heal').style.zIndex = '0';
             }
             if (totalpain > 4) {
                 pulse('red')
@@ -787,24 +819,16 @@ function setUpdateBodyStatus(table) {
 }
 
 function setBodyParts(table) {
-    console.log("bodyparts")
+    //////console.log("bodyparts")
     $(document).ready(function(){
         for (const key in table) {
-            //console.log(table[key])
-            // $("#"+table[key]+"_heal").mouseover(function(){
-            //     $("#"+table[key]+"_heal").css("opacity", "1.0");
-            //     console.log("hover")
-            // });
-            // $("#"+table[key]+"_heal").mouseout(function(){
-            //     $("#"+table[key]+"_heal").css("opacity", "1.0");
-            // });
             if (key == 'arm') {
                 for (const key2 in table[key]) {
                     var idname = ""+table[key][key2]+"_heal"
-                    console.log(idname)
+                    //////console.log(idname)
                     $("#"+idname+"").hover(function(){
                         $(this).css("opacity", "1.0");
-                        console.log("hover")
+                        //////console.log("hover")
                         }, function(){
                         $(this).css("opacity", "0.5");
                     });
@@ -815,10 +839,10 @@ function setBodyParts(table) {
             } else if (key == 'leg') {
                 for (const key2 in table[key]) {
                     var idname = ""+table[key][key2]+"_heal"
-                    console.log(idname)
+                    //////console.log(idname)
                     $("#"+idname+"").hover(function(){
                         $(this).css("opacity", "1.0");
-                        console.log("hover")
+                        //////console.log("hover")
                         }, function(){
                         $(this).css("opacity", "0.5");
                     });
@@ -828,10 +852,10 @@ function setBodyParts(table) {
                 }
             } else {
                 var idname = ""+table[key]+"_heal"
-                console.log(idname)
+                //////console.log(idname)
                 $("#"+idname+"").hover(function(){
                     $(this).css("opacity", "1.0");
-                    console.log("hover")
+                    //////console.log("hover")
                     }, function(){
                     $(this).css("opacity", "0.5");
                 });
@@ -858,7 +882,7 @@ function post(name,data){
 	var data = data;
 	$.post("https://hud/"+name,JSON.stringify(data),function(datab){
 		if (datab != "ok"){
-			//console.log(datab);
+			//////console.log(datab);
 		}
 	});
 }
@@ -967,7 +991,7 @@ function setWindowState(table) {
 }
 
 function Carcontrolcallbackui(type,index) {
-    console.log("callback car control")
+    //////console.log("callback car control")
     if (type == 'window') {
         bool = !bool
         if (index == 2) {
@@ -1044,7 +1068,7 @@ function Carcontrolcallbackui(type,index) {
 }
 
 function setWeapon(weapon) {
-    //console.log(""+weapon+".png")
+    ////////console.log(""+weapon+".png")
     var url = "img/weapons/"+weapon+".png"
     $("#weaponimg").attr("src", url)
     setTimeout(function(){
@@ -1065,7 +1089,7 @@ function setAmmo(table) {
     var max = table['max'];
     var ammo = table['clip'];
     var percent = ammo / max * 100;
-    //console.log(percent)
+    //////console.log(percent)
     var bullets = percent;
     //rpm2 = bullets.toFixed(0) * 100
     var e = document.getElementById("weaponpath");
@@ -1075,15 +1099,6 @@ function setAmmo(table) {
     val = to / 1000
     e.style.strokeDashoffset = to;
     document.getElementById("ammotext").innerHTML = ''+table['ammo']+'';
-    // if (percent > 0.9) {
-    //     e.style.stroke = 'red';
-    // } else if (percent > 0.7) {
-    //     e.style.stroke = 'orange';
-    // } else if (percent > 0.4) {
-    //     e.style.stroke = 'yellow';
-    // } else {
-    //     e.style.stroke = 'white';
-    // }
 }
 
 function setWeaponUi(bool) {
@@ -1108,12 +1123,13 @@ setWeaponUi(false)
 
 var carui_element = []
 function setCarui(ver) {
-    document.getElementById("uibody").style.display = 'block'
     if (carui_element['modern'] == undefined) {
         carui_element['modern'] = document.getElementById("modern").innerHTML
         carui_element['minimal'] = document.getElementById("minimal").innerHTML
         carui_element['simple'] = document.getElementById("simple").innerHTML
     }
+    //loopfuck = setInterval(function(){ getvehdata() }, 200);
+    document.getElementById(ver).innerHTML = ''
     document.getElementById(ver).innerHTML = carui_element[ver]
     carui = ver
     if (ver == 'minimal') {
@@ -1145,11 +1161,15 @@ function setCarui(ver) {
         document.getElementById("milediv").style.fontSize = '0.5vw';
         document.getElementById("milediv").style.fontSize = '0.5vw';
         document.getElementById("milediv").style.webkitFilter = "drop-shadow(1px 1px 2px rgb(5, 155, 255))";
-        document.getElementById("timediv").style.right = '42%';
+        document.getElementById("timediv").style.right = '44%';
+        document.getElementById("timediv").style.textAlign = 'unset';
+        document.getElementById("timediv").style.width = 'unset';
         document.getElementById("timediv").style.bottom = '72.6%';
         document.getElementById("timediv").style.fontSize = '0.4vw';
         document.getElementById("distancediv").style.right = '53%';
         document.getElementById("distancediv").style.bottom = '73%';
+        document.getElementById("distancediv").style.width = 'unset';
+        document.getElementById("distancediv").style.textAlign = 'unset';
         document.getElementById("distancediv").style.background = '#00000000';
         document.getElementById("distancediv").style.fontSize = '0.4vw';
         document.getElementById("diffdiv").style.right = '33%';
@@ -1221,7 +1241,13 @@ function setStatusUI(t) {
     var ver = t['ver']
     var type = t['type']
         status_type = type
-    if (ver == 'simple') {
+    if (!t['enable'] && ver == 'simple') {
+        document.getElementById("uibar").innerHTML = '';
+        document.getElementById("logo").innerHTML = '';
+        document.getElementById("voip_1").innerHTML = '';
+        document.getElementById("statusnormal").style.display = 'none';
+    }
+    if (ver == 'simple' && t['enable']) {
         statusui = 'simple'
         document.getElementById("uisimplehp").style.display = 'block';
         document.getElementById("armorsimple").style.display = 'block';
@@ -1241,33 +1267,33 @@ function setStatusUI(t) {
         //document.getElementById("mic").style.right = '363px';
         //document.getElementById("mic-color").style.width = '15px';
         //document.getElementById("mic-color").style.height = '27px';
-    } else {
+    } else if (t['enable']) {
         document.getElementById("voip_2").innerHTML = '';
     }
 }
 
 function setStatusUILocation(table) {
-    console.log("MOVE UI")
+    //////console.log("MOVE UI")
     if (table['top']) {
-        console.log(table['top'])
+        ////console.log(table['top'])
         document.getElementById("statusv3").style.top = ''+table['top']+'';
     }
     if (table['right']) {
-        console.log(table['right'])
+        ////console.log(table['right'])
         document.getElementById("statusv3").style.right = ''+table['right']+'';
     }
     if (table['bottom']) {
-        console.log(table['bottom'])
+        ////console.log(table['bottom'])
         document.getElementById("statusv3").style.bottom = ''+table['bottom']+'';
     }
     if (table['left']) {
-        console.log(table['left'])
+        ////console.log(table['left'])
         document.getElementById("statusv3").style.left = ''+table['left']+'';
     }
 }
 
 function setMoveStatusUi(bool) {
-    console.log("MOVE UI")
+    //////console.log("MOVE UI")
     if (bool) {
         if (status_type == 'icons') {
             document.getElementById("statusv3").style.right = '22%';
@@ -1284,6 +1310,7 @@ function setMoveStatusUi(bool) {
 }
 
 function setNitro(nitro) {
+    if (carui !== 'minimal') { return }
     var e = document.getElementById("nitropath");
     let length = e.getTotalLength();
     let value = nitro;
@@ -1310,24 +1337,24 @@ var currentvehicle = undefined
 var openall = false
 var alarm = false
 function carlockcallback(type) {
-    console.log("callback car keyless system")
+    //////console.log("callback car keyless system")
     if (type == 'lock') {
         post("setvehiclelock",{vehicle:currentvehicle})
-        console.log("locking")
+        //////console.log("locking")
         document.getElementById("carlock").style.display = 'block';
         document.getElementById("carunlock").style.display = 'none';
     }
     if (type == 'unlock') {
         post("setvehicleunlock",{vehicle:currentvehicle})
-        console.log("unlocking")
+        //////console.log("unlocking")
         document.getElementById("carunlock").style.display = 'block';
         document.getElementById("carlock").style.display = 'none';
     }
     if (type == 'openall') {
         openall = !openall
-        console.log(openall)
+        ////console.log(openall)
         post("setvehicleopendoors",{vehicle:currentvehicle, bool:openall})
-        console.log("openall")
+        //////console.log("openall")
         if (openall) {
             document.getElementById("allopen").style.display = 'block';
         } else {
@@ -1336,9 +1363,9 @@ function carlockcallback(type) {
     }
     if (type == 'alarm') {
         alarm = !alarm
-        console.log(alarm)
+        ////console.log(alarm)
         post("setvehiclealarm",{vehicle:currentvehicle, bool:alarm})
-        console.log("alarm")
+        //////console.log("alarm")
         if (alarm) {
             document.getElementById("alarm").style.display = 'block';
         } else {
@@ -1389,7 +1416,7 @@ document.onkeyup = function (data) {
     if (data.keyCode == '144' || data.keyCode == '27') {
         if (pressedkey2) {
             pressedkey2 = false
-            console.log('pressed')
+            ////console.log('pressed')
             $.post(`https://${GetParentResourceName()}/closecarcontrol`, {}, function(data) {});
         }
         if (!pressedkey2) {
@@ -1403,6 +1430,7 @@ document.onkeyup = function (data) {
         }
     }
 };
+
 function playsound(table) {
     var file = table['file']
     var volume = table['volume']
@@ -1419,7 +1447,7 @@ function playsound(table) {
 }
 
 function SetNotify(table) {
-    console.log("notify")
+    //////console.log("notify")
     new Notify ({status: table['type'],title: table['title'],text: table['message'],autoclose: true})
 }
 
@@ -1444,30 +1472,30 @@ function SetNotify(table) {
 
     $('input[type=radio][name=neon]').change(function() {
         if (this.value == 'on') {
-            console.log("ON")
+            //////console.log("ON")
             post("setvehicleneon",{bool:true})
         } else {
-            console.log("OFF")
+            //////console.log("OFF")
             post("setvehicleneon",{bool:false})
         }
     });
 
     $('input[type=radio][name=neoneffect1]').change(function() {
         if (this.value == 'on') {
-            console.log("ON")
+            //////console.log("ON")
             post("setneoneffect1",{bool:true})
         } else {
-            console.log("OFF")
+            //////console.log("OFF")
             post("setneoneffect1",{bool:false})
         }
     });
 
     $('input[type=radio][name=neoneffect2]').change(function() {
         if (this.value == 'on') {
-            console.log("ON")
+            //////console.log("ON")
             post("setneoneffect2",{bool:true})
         } else {
-            console.log("OFF")
+            //////console.log("OFF")
             post("setneoneffect2",{bool:false})
         }
     });
@@ -1483,7 +1511,7 @@ function SetNotify(table) {
     }
 
     function setRadioChannel(channel) {
-        console.log(channel)
+        ////console.log(channel)
         if (channel !== false && channel !== undefined) {
             document.getElementById("radio").style.display = 'block';
             document.getElementById("mic-radio").innerHTML = ''+channel+'';
@@ -1516,11 +1544,11 @@ function SetNotify(table) {
     }
 
     function setClotheState(table) {
-        console.log("clothe",table['bool'])
+        //////console.log("clothe",table['bool'])
         if (!table['bool']) {
             //$("#variants_"+table['variant']+"").css("--fa-secondary-color", 'red');
             $("#variants_"+table['variant']+"").addClass("clotheoff");
-            //console.log("red color","variants_"+table['variant']+"")
+            ////////console.log("red color","variants_"+table['variant']+"")
         } else {
             $("#variants_"+table['variant']+"").removeClass("clotheoff")
             //$("#variants_"+table['variant']+"").css("--fa-secondary-color", 'unset');   
@@ -1556,7 +1584,7 @@ function SetNotify(table) {
         if (setting !== 'circle' && settings !== 'octagon') {
             var icon = document.getElementsByClassName('default');
             for (var i = 0; i < icon.length; i++) {
-                console.log(i)
+                ////console.log(i)
                 icon[i].classList.toggle("square");
             }
         }
@@ -1600,16 +1628,16 @@ function SetNotify(table) {
                 if (status_type == 'icons') {
                     $("#statusv3").prepend('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:17px;position:relative;color:rgba(144, 144, 144, 0.876);float:right; margin-top:-25px;margin-left:-7px;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:17px;color:rgba(11, 39, 63, 0.707)"></i> <i id="'+statuses[i].id_3+'" class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+class1+'" style="font-size:19px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+class2+'" style="font-size:19px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
                 } else {
-                    $("#statusv3").prepend('<div id="'+divid+'" style="float:'+float+';height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;left:3.5vw;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:1.25vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;"></i> <i id="'+statuses[i].id_3+'" class="fal fa-octagon fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i> <i id="'+statuses[i].i_id_2+'" class="'+statuses[i].i_id_1_class+'" style="font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.14vw;bottom:-0.53vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.9vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="'+statuses[i].i_id_1+'" class="meter" stroke="'+statuses[i].i_id_1_color+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
+                    $("#statusv3").prepend('<div id="'+divid+'" style="float:'+float+';height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;left:3.5vw;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:1.25vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;"></i> <i id="'+statuses[i].id_3+'" class="fal fa-octagon fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i> <i id="'+statuses[i].i_id_2+'" class="'+statuses[i].i_id_1_class+'" style="font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.14vw;bottom:-0.53vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.9vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="'+statuses[i].i_id_1+'" class="meter statushud" stroke="'+statuses[i].i_id_1_color+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
                 }
             }
         }
     }
 
     function setShowTurboBoost(bool) {
-        console.log("show turbo")
+        //////console.log("show turbo")
         if (bool) {
-            console.log(bool)
+            ////console.log(bool)
             $('.turbo_hud').fadeIn('fast');
         } else {
             $('.turbo_hud').fadeOut('fast');
@@ -1619,7 +1647,7 @@ function SetNotify(table) {
     function setTurboBoost(table) {
         let data = table
         //$('.turbo_hud').fadeIn('fast');
-        console.log(data['speed'])
+        ////console.log(data['speed'])
         if (data['speed']) {
             if (data['speed'] < 0) {
                 data['speed'] = 0
@@ -1649,7 +1677,7 @@ function SetNotify(table) {
 
     function setShowCarStatus(table) {
         for (const i in table) {
-            console.log(i,table[i])
+            ////console.log(i,table[i])
             if (i == 'brake') {
                 $('#brakelevel').html("LVL "+(+table[i]+1))
             }
@@ -1696,19 +1724,7 @@ function SetNotify(table) {
             $('#carstatusui').fadeOut('fast');
         }
     }
-
-    // function setStatusV1(sleep) {
-    //     setInterval(function(){ post("UpdateStatus",{}) }, sleep);
-    // }
-    // function setUpdatePlayer(sleep) {
-    //     setInterval(function(){ post("UpdatePlayer",{}) }, sleep);
-    // }
-    // function setStatusEffect(sleep) {
-    //     setInterval(function(){ post("setStatusEffect",{}) }, sleep);
-    // }
-    // function SetUpdateWeapon(sleep) {
-    //     setInterval(function(){ post("UpdateWeaponStatus",{}) }, sleep);
-    // }
+    
     function setShooting(sleep) {
         setInterval(function(){ post("setShooting",{}) }, sleep);
     }
@@ -1722,12 +1738,12 @@ function SetNotify(table) {
             $('#statusv3').draggable({
                 // ...
                 drag: function(event, ui) {
-                  console.log($(event.target).width() + " x " + $(event.target).height());
-                  console.log(ui.position.top + " x " + ui.position.left);
+                  ////console.log($(event.target).width() + " x " + $(event.target).height());
+                  ////console.log(ui.position.top + " x " + ui.position.left);
                 },
                 stop: function(event, ui) {
-                  console.log($(event.target).width() + " x " + $(event.target).height());
-                  console.log(ui.position.top + " x " + ui.position.left);
+                  ////console.log($(event.target).width() + " x " + $(event.target).height());
+                  ////console.log(ui.position.top + " x " + ui.position.left);
                 },
                 scroll: false
               }).draggable('enable');
@@ -1736,8 +1752,90 @@ function SetNotify(table) {
         }
     }
 
+    function DragCar(bool) {
+        if (bool) {
+            $('#simple').draggable({
+            // ...
+            drag: function(event, ui) {
+                ////console.log($(event.target).width() + " x " + $(event.target).height());
+                ////console.log(ui.position.top + " x " + ui.position.left);
+            },
+            stop: function(event, ui) {
+                ////console.log($(event.target).width() + " x " + $(event.target).height());
+                ////console.log(ui.position.top + " x " + ui.position.left);
+            },
+            scroll: false
+            }).draggable('enable');
+            $('#minimal').draggable({
+            // ...
+            drag: function(event, ui) {
+                ////console.log($(event.target).width() + " x " + $(event.target).height());
+                ////console.log(ui.position.top + " x " + ui.position.left);
+            },
+            stop: function(event, ui) {
+                ////console.log($(event.target).width() + " x " + $(event.target).height());
+                ////console.log(ui.position.top + " x " + ui.position.left);
+            },
+            scroll: false
+            }).draggable('enable');
+            $('#modern').draggable({
+            // ...
+            drag: function(event, ui) {
+                ////console.log($(event.target).width() + " x " + $(event.target).height());
+                ////console.log(ui.position.top + " x " + ui.position.left);
+            },
+            stop: function(event, ui) {
+                ////console.log($(event.target).width() + " x " + $(event.target).height());
+                ////console.log(ui.position.top + " x " + ui.position.left);
+            },
+            scroll: false
+            }).draggable('enable');
+        } else {
+            $('#modern').draggable().draggable('disable');
+            $('#simple').draggable().draggable('disable');
+            $('#minimal').draggable().draggable('disable');
+        }
+    }
+
     function setStatusType(type) {
+        document.getElementById("uibody").style.display = 'block'
         status_type = type
+    }
+
+    function isAmbulance(bool) {
+        isambulance = bool
+    }
+
+    function hideui(bool) {
+        if (bool) {
+            display = 'block'
+        } else {
+            display = 'none'
+        }
+        document.getElementById("uibody").style.display = ''+display+''
+    }
+
+    function uiconfig(table) {
+        var r = document.querySelector(':root');
+        var acce = table.acceleration
+        if (acce == 'hardware') {
+            acce = 'hardware_acce'
+            $(".carhud").removeClass("gpu_acce");
+            $(".carhud").addClass(acce);
+            $(".statushud").addClass(acce);
+        } else if (acce == 'gpu') {
+            acce = 'gpu_acce'
+            $(".carhud").removeClass("hardware_acce");
+            $(".carhud").addClass(acce);
+            $(".statushud").addClass(acce);
+        } else {
+            $(".carhud").removeClass("hardware_acce");
+            $(".carhud").removeClass("gpu_acce");
+            $(".statushud").removeClass('gpu_acce');
+            $(".statushud").removeClass('hardware_acce');
+        }
+        r.style.setProperty('--ms', table.animation_ms);
+        r.style.setProperty('--trans', table.transition);
     }
 
 //FUNCTIONS
@@ -1771,6 +1869,9 @@ var renzu_hud = {
     Drag,
     setStatusType,
     setBodyParts,
+    isAmbulance,
+    hideui,
+    uiconfig,
     //CAR
     setShow,
     setRpm,
@@ -1809,13 +1910,14 @@ var renzu_hud = {
     setMapVersion,
     setTurboBoost,
     setShowTurboBoost,
-    setShowCarStatus
+    setShowCarStatus,
+    DragCar,
 
 };
 
 window.addEventListener("message", event => {
     const item = event.data || event.detail;
-    //console.log(item.type);
+    //////console.log(item.type);
     if (renzu_hud[item.type]) {
         renzu_hud[item.type](item.content);
     }

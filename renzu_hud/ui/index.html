@@ -8,8 +8,6 @@
 
         <title>Renzu HUD</title>
 		<link href="https://fonts.googleapis.com/css?family=Cabin+Sketch:bold" rel="stylesheet" type="text/css" />
-		<script src="js/raphael.js" type="text/javascript"></script>
-		<script src="js/init.js" type="text/javascript"></script>
 	<!-- <script src="nui://game/ui/jquery.js" type="text/javascript"></script> -->
 	<script src="js/listener.js" type="text/javascript"></script>
   <script defer src="fontawsome/js/all.min.js"></script> <!--load all styles -->
@@ -21,6 +19,34 @@
   <link rel="stylesheet" href="css/simple-notify.css" />
   <link rel="stylesheet" href="css/slider.css" />
         <style>
+          .gpu_acce {
+            -webkit-transform: translate3d(0,0,0) !important;
+            -moz-transform: translate3d(0,0,0) !important;
+            -ms-transform: translate3d(0,0,0) !important;
+            -o-transform: translate3d(0,0,0) !important;
+            transform: translate3d(0,0,0) !important;
+            -moz-transition: var(--animation) 0ms;
+            -webkit-transition: var(--animation) 0ms;
+            -o-transition: var(--animation) 0ms;
+            transition: var(--animation) 0ms;
+            backface-visibility: hidden;
+            perspective: 1000;
+            will-change: transform;
+          }
+          .hardware_acce {
+            -webkit-transform: translateZ(0) !important;
+            -moz-transform: translateZ(0) !important;
+            -ms-transform: translateZ(0) !important;
+            -o-transform: translateZ(0) !important;
+            transform: translateZ(0) !important;
+            -moz-transition: var(--animation) 0ms;
+            -webkit-transition: var(--animation) 0ms;
+            -o-transition: var(--animation) 0ms;
+            transition: var(--animation) 0ms;
+            backface-visibility: hidden;
+            perspective: 1000;
+            will-change: transform;
+          }
           .turbo_boost {
           position: absolute;
           right: -11px;
@@ -687,6 +713,28 @@
         stroke-miterlimit: round;
         transition: stroke-dashoffset 0ms ease;
       }
+      svg .rpm {
+        will-change: auto;
+        stroke-width: 20px;
+        stroke-miterlimit: round;
+        transition: stroke-dashoffset var(--ms) var(--trans) 0ms;
+      }
+      svg .boost {
+        will-change: transform;
+        transition: stroke-dashoffset var(--ms) var(--trans) 0ms;
+      }
+      svg .carhud {
+        will-change: auto;
+        stroke-width: 20px;
+        stroke-miterlimit: round;
+        transition: stroke-dashoffset var(--ms) var(--trans) 0ms;
+      }
+      svg .statushud {
+        will-change: auto;
+        stroke-width: 20px;
+        stroke-miterlimit: round;
+        transition: stroke-dashoffset var(--ms) var(--trans) 0ms;
+      }
       #speedmeter {
         text-shadow: 2px 2px 5px rgb(4, 40, 117);
         font-size:25px;
@@ -1258,15 +1306,16 @@
         </span>
     </div>
     <div id="status">
-      <i id="food" class="fad fa-cheeseburger"></i>
-      <i id="water" class="fad fa-glass"></i>
-      <i id="stress" class="fad fa-head-side-brain"></i>
-      <i id="stamina" class="fad fa-running"></i>
-      <i id="oxygen" class="fad fa-lungs"></i>
-      <i id="energy" class="fad fa-bed"></i>
-      <img style="z-index:999;position:absolute;right:25px;top:420px;opacity:0.9;width:260px;height:370px;" src="img/rpui.png" />
-      <img style="z-index:1001;position:absolute;right:60px;top:465px;opacity:1;height:270px;" src="img/ui.png" />
-
+      <div id="status_prog">
+        <i id="food" class="fad fa-cheeseburger"></i>
+        <i id="water" class="fad fa-glass"></i>
+        <i id="stress" class="fad fa-head-side-brain"></i>
+        <i id="stamina" class="fad fa-running"></i>
+        <i id="oxygen" class="fad fa-lungs"></i>
+        <i id="energy" class="fad fa-bed"></i>
+        <img style="z-index:999;position:absolute;right:25px;top:420px;opacity:0.9;width:260px;height:370px;" src="img/rpui.png" />
+        <img style="z-index:1001;position:absolute;right:60px;top:465px;opacity:1;height:270px;" src="img/ui.png" />
+      </div>
       <div id="rpui">
         <i id="idnum" class="fad fa-id-card"></i>
         <div id="idnumlabel">1</div>
@@ -1283,100 +1332,9 @@
         <div id="stats">My Status:</div>
       </div>
     </div>
-    <div id="status2" style="opacity:0.9">
-      <!-- <span id="hex" class="fa-stack fa-2x">
-        <i class="fal fa-hexagon fa-stack-2x" style="color:ffffff;font-size:20px;z-index: 1004;"></i>
-        <i class="fad fa-cheeseburger fa-stack-1x fa-inverse"></i>
-      </span>
-      <li class="icon" id="healths"><i class="fas fa-heart"></i><span>a</span></li>
-      <i class="fal fa-hexagon fa-stack-2x" style="color:ffffff;font-size:20px;z-index: 1004;">
-        <span style="display: block; position: absolute; left: 50%; bottom: 0; transform: translate(-50%,0); width: 100%; height: 100%; background: linear-gradient(180deg, #ff8000 0%, #cd6700 100%);"></span>
-      </i> -->
-      <!-- <i style="display:none;" id="healthsimple" class="fas fa-heartbeat"></i>
-      <i style="display:none;" id="armorsimple" class="far fa-shield-alt"></i>
-      <i style="display:none;" id="healthsimplebg" class="fas fa-heartbeat"></i>
-      <i style="display:none;" id="armorsimplebg" class="far fa-shield-alt"></i> -->
-      <!-- <i id="food2" class="fad fa-cheeseburger"></i>
-      <i id="water2" class="fad fa-glass"></i>
-      <i id="stress2" class="fad fa-head-side-brain"></i>
-      <i id="stamina2" class="fad fa-running"></i>
-      <i id="oxygen2" class="fad fa-lungs"></i>
-      <i id="energy2" class="fas fa-snooze"></i>
-      <i id="food2bg" class="fad fa-cheeseburger"></i>
-      <i id="water2bg" class="fad fa-glass"></i>
-      <i id="stress2bg" class="fad fa-head-side-brain"></i>
-      <i id="stamina2bg" class="fad fa-running"></i>
-      <i id="oxygen2bg" class="fad fa-lungs"></i>
-      <i id="energy2bg" class="fad fa-snooze"></i> -->
-      <!-- <img style="z-index:1001;position:absolute;right:123px;top:-5px;opacity:1;height:80px;" src="img/status2.png" /> -->
-      <!-- <img id="statusver" style="z-index:1001;position:absolute;right:84px;top:-5px;opacity:1;height:80px;" src="img/status2.png" /> -->
-    </div>
+    <div id="status2" style="opacity:0.9"></div>
 
-    <div id="statusv3" style="display:block;position:absolute;width:600px;height:70px;">
-      
-      <!-- <span class="fa-stack fa-2x" style='font-size:17px;position:absolute;right:30px;top:-28px;color:rgba(144, 144, 144, 0.876)'>
-        <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
-        <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
-        <i id="energy2" class="fas fa-snooze fa-stack-1x" style='font-size:19px;color:rgb(233, 233, 233);z-index:1131;opacity:1.0;'></i>
-        <i id="energy2bg" class="fas fa-snooze fa-stack-1x" style='font-size:19px;color:rgb(243, 57, 0);z-index:1130;opacity:1.0;'></i>
-      </span>
-
-      <span class="fa-stack fa-2x" style='font-size:17px;position:absolute;right:65px;top:-28px;color:rgba(144, 144, 144, 0.876)'>
-        <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
-        <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
-        <i id="oxygen2" class="fad fa-lungs fa-stack-1x" style='font-size:19px;color:rgb(15, 227, 255);z-index:1131;opacity:1.0;'></i>
-        <i id="oxygen2bg" class="fad fa-lungs fa-stack-1x" style='font-size:19px;color:rgba(8, 76, 85, 0.788);z-index:1130;opacity:1.0;'></i>
-      </span>
-
-  <span class="fa-stack fa-2x" style='font-size:17px;position:absolute;right:100px;top:-28px;color:rgba(144, 144, 144, 0.876)'>
-    <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
-    <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
-    <i id="stamina2" class="fad fa-running fa-stack-1x" style='font-size:19px;color:rgb(16, 255, 136);z-index:1131;opacity:1.0;'></i>
-    <i id="stamina2bg" class="fad fa-running fa-stack-1x" style='font-size:19px;color:rgba(0, 119, 57, 0.945);z-index:1130;opacity:1.0;'></i>
-  </span>
-
-  <span class="fa-stack fa-2x" style='font-size:17px;position:absolute;right:135px;top:-28px;color:rgba(144, 144, 144, 0.876)'>
-    <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
-    <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
-    <i id="stress2"  class="fad fa-head-side-brain fa-stack-1x" style='font-size:19px;color:rgb(255, 16, 68);z-index:1131;opacity:1.0;'></i>
-    <i id="stress2bg" class="fad fa-head-side-brain fa-stack-1x" style='font-size:19px;color:rgba(35, 255, 101, 0.842);z-index:1130;opacity:1.0;'></i>
-  </span>
-
-  <span class="fa-stack fa-2x" style='font-size:17px;position:absolute;right:170px;top:-28px;color:rgba(144, 144, 144, 0.876)'>
-    <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
-    <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
-    <i id="water2" class="fad fa-glass fa-stack-1x" style='font-size:19px;color:rgb(36, 113, 255);z-index:1131;opacity:1.0;'></i>
-    <i id="water2bg" class="fad fa-glass fa-stack-1x" style='font-size:19px;color:rgb(0, 11, 112);z-index:1130;opacity:1.0;'></i>
-  </span>
-
-  <span class="fa-stack fa-2x" style='font-size:17px;position:absolute;right:205px;top:-28px;color:rgba(144, 144, 144, 0.876)'>
-    <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
-    <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
-    <i id="food2" class="fad fa-cheeseburger fa-stack-1x" style='font-size:19px;color:rgb(221, 144, 0);z-index:1131;opacity:1.0;'></i>
-    <i id="food2bg" class="fad fa-cheeseburger fa-stack-1x" style='font-size:19px;color:rgb(114, 68, 0);z-index:1130;opacity:1.0;'></i>
-  </span>
-
-  <span id="uisimplearmor" class="fa-stack fa-2x" style='font-size:17px;position:absolute;right:240px;top:-28px;color:rgba(144, 144, 144, 0.876);display:none;'>
-    <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
-    <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
-    <i id="armorsimple"  class="far fa-shield-alt fa-stack-1x" style='font-size:19px;color:rgb(1, 103, 255);z-index:1131;opacity:1.0;'></i>
-    <i id="armorsimplebg" class="far fa-shield-alt fa-stack-1x" style='font-size:19px;color:rgb(0, 41, 129);z-index:1130;opacity:1.0;'></i>
-  </span>
-
-  <span id="uisimplehp" class="fa-stack fa-2x" style='font-size:17px;position:absolute;right:275px;top:-28px;color:rgba(144, 144, 144, 0.876);display:none;'>
-    <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
-    <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
-    <i id="healthsimple" class="fas fa-heartbeat fa-stack-1x" style='font-size:19px;color:rgb(251, 29, 9);z-index:1131;opacity:1.0;'></i>
-    <i id="healthsimplebg" class="fas fa-heartbeat fa-stack-1x" style='font-size:19px;color:rgb(83, 0, 0);z-index:1130;opacity:1.0;'></i>
-  </span> -->
-
-  <!-- <span id="voip_2" class="fa-stack fa-2x" style='font-size:17px;position:relative;float:left; margin-top:-25px;margin-left:-30px;color:rgba(144, 144, 144, 0.876)'>
-    <i class="fas fa-octagon fa-stack-2x" style='font-size:17px;color:rgba(11, 39, 63, 0.707)'></i>
-    <i class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i>
-    <i id="microphone" class="fas fa-microphone fa-stack-1x" style='font-size:19px;z-index:1131;opacity:1.0;'></i>
-  </span> -->
-
-  </div>
+    <div id="statusv3" style="display:block;position:absolute;width:700px;height:70px;"></div>
 
     <div id="carcontrolui" style="display:none;z-index:900;position:absolute;right:-140px;top:-200px;opacity:1.0;height:650px;">
       <div id="carcontrolinfo">Car Control:</div>
@@ -1532,76 +1490,8 @@
         </div>
       </div>
 
-      <div id="statusv4" style="display:block;position:absolute;width:100%;bottom:1%;height:70px;">
-        <!-- <div id="'+divid+'" style="float:left;height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'">
-          <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;left:3.5vw;">
-            <i class="fas fa-circle fa-stack-2x" style="font-size:1.2vw;color:rgba(11, 39, 63, 0.707);margin-left:0.4vw;"></i>
-            <i id="'+statuses[i].id_3+'" class="fal fa-circle fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i>
-            <i id="carhealthbar" class="'+statuses[i].i_id_1_class+'" style="font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1vw;"></i>
-            <svg preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.14vw;bottom:-0.53vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.9vw;" xmlns="http://www.w3.org/2000/svg" height="2.9vw" width="5.5vw" viewBox="0 0 200 200" data-value="1">
-              <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/>
-              <path id="'+statuses[i].i_id_1+'" class="meter" stroke="'+statuses[i].i_id_1_color+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="0" stroke-dashoffset="360"/>
-            </svg>
-          </span>
-
-          <div id="'+divid+'" style="float:right;height:70px;width:54px;display:'+statuses[i].display+'"> 
-            <span class="fa-stack fa-2x" style="font-size:0.9vw;position:relative;color:rgba(144, 144, 144, 0.876);margin-bottom:-53px;margin-left:65px;"> 
-              <i class="fas fa-circle fa-stack-2x" style="font-size:1.2vw;color:rgba(11, 39, 63, 0.707);margin-left:5px;"></i> 
-              <i id="'+statuses[i].id_3+'" class="fal fa-circle fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i> 
-              <i id="hearty" class="'+statuses[i].i_id_1_class+'" style="font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;margin-left:20px;"></i> 
-            </span> 
-            <svg id="" style="z-index:1205;position:relative;opacity:0.65;transform: rotate(0deg);margin-bottom:-46px;height:53px;margin-left:15px;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1"> 
-              <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> 
-              <path id="'+statuses[i].i_id_1+'" class="meter" stroke="'+statuses[i].i_id_1_color+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> 
-          </div> -->
-        </div>
-        <!-- <div id="healthv4" style="float:left;height:70px;width:54px;">
-          <span class="fa-stack fa-2x" style='font-size:0.9vw;position:relative;color:rgba(144, 144, 144, 0.876);margin-bottom:-53px;margin-left:65px;'>
-            <i class="fas fa-circle fa-stack-2x" style='font-size:1.2vw;color:rgba(11, 39, 63, 0.707);margin-left:5px;'></i>
-            <i class="fal fa-circle fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i>
-            <i id="carhealthbar" class="fad fa-heart fa-stack-1x" style='font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;margin-left:20px;'></i>
-          </span>
-          <svg id="stat" style="z-index:1205;position:relative;opacity:0.65;transform: rotate(0deg);margin-bottom:-46px;height:53px;margin-left:15px;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
-            <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/>
-            <path id="nitropath" class="meter" stroke="red" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="0" stroke-dashoffset="360"/>
-          </svg>
-        </div>
-        <div id="healthv4" style="float:left;height:70px;width:54px;">
-          <span class="fa-stack fa-2x" style='font-size:0.9vw;position:relative;color:rgba(144, 144, 144, 0.876);margin-bottom:-53px;margin-left:65px;'>
-            <i class="fas fa-circle fa-stack-2x" style='font-size:1.2vw;color:rgba(11, 39, 63, 0.707);margin-left:5px;'></i>
-            <i class="fal fa-circle fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i>
-            <i id="carhealthbar" class="fad fa-heart fa-stack-1x" style='font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;margin-left:20px;'></i>
-          </span>
-          <svg id="stat" style="z-index:1205;position:relative;opacity:0.65;transform: rotate(0deg);margin-bottom:-46px;height:53px;margin-left:15px;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
-            <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/>
-            <path id="nitropath" class="meter" stroke="red" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="0" stroke-dashoffset="360"/>
-          </svg>
-        </div>
-        <div id="healthv4" style="float:left;height:70px;width:54px;">
-          <span class="fa-stack fa-2x" style='font-size:0.9vw;position:relative;color:rgba(144, 144, 144, 0.876);margin-bottom:-53px;margin-left:65px;'>
-            <i class="fas fa-circle fa-stack-2x" style='font-size:1.2vw;color:rgba(11, 39, 63, 0.707);margin-left:5px;'></i>
-            <i class="fal fa-circle fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i>
-            <i id="carhealthbar" class="fad fa-heart fa-stack-1x" style='font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;margin-left:20px;'></i>
-          </span>
-          <svg id="stat" style="z-index:1205;position:relative;opacity:0.65;transform: rotate(0deg);margin-bottom:-46px;height:53px;margin-left:15px;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
-            <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/>
-            <path id="nitropath" class="meter" stroke="red" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="222" stroke-dashoffset="360"/>
-          </svg>
-        </div>
-        <div id="healthv4" style="float:left;height:70px;width:54px;">
-          <span class="fa-stack fa-2x" style='font-size:0.9vw;position:relative;color:rgba(144, 144, 144, 0.876);margin-bottom:-53px;margin-left:65px;'>
-            <i class="fas fa-circle fa-stack-2x" style='font-size:1.2vw;color:rgba(11, 39, 63, 0.707);margin-left:5px;'></i>
-            <i class="fal fa-circle fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i>
-            <i id="carhealthbar" class="fad fa-heart fa-stack-1x" style='font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;margin-left:20px;'></i>
-          </span>
-          <svg id="stat" style="z-index:1205;position:relative;opacity:0.65;transform: rotate(0deg);margin-bottom:-46px;height:53px;margin-left:15px;" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
-            <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/>
-            <path id="nitropath" class="meter" stroke="red" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="0" stroke-dashoffset="360"/>
-          </svg>
-        </div> -->
-      </div>
       <div id="simple" style="display:none;position:absolute;right:-4.5%;bottom:-20px;width:25%;">
-        <img style="-webkit-filter: drop-shadow(1px -1px 0.4px rgba(255, 255, 255, 0.822));z-index:999;position:relative;opacity:0.85;width:100%;right:0;float:right;" src="img/carui_simple.png?img/car.png" />
+        <img id="simple_light" style="-webkit-filter: drop-shadow(1px -1px 0.4px rgba(255, 255, 255, 0.822));z-index:999;position:relative;opacity:0.85;width:100%;right:0;float:right;" src="img/carui_simple.png?img/car.png" />
         <svg id="rpm" style="z-index:1005;position:absolute;right:60%;bottom:36%;opacity:0.65;width:40%;height:30%;transform: rotate(-60deg);" xmlns="http://www.w3.org/2000/svg" height="210" width="210" viewBox="0 0 177 177" data-value="1">
         <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
         <defs>
@@ -1616,7 +1506,7 @@
               <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
           </filter>
         </defs>
-        <path id="rpmpath" class="meter" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="filter:url(#dropshadow)" stroke-dasharray="280" stroke-dashoffset="280"/>
+        <path id="rpmpath" class="meter rpm" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="filter:url(#dropshadow)" stroke-dasharray="280" stroke-dashoffset="280"/>
         </svg>
         <div id="rpmmeter" style="display:none;">1000</div>
         <svg id="speed" style="z-index:1005;position:absolute;right:22%;bottom:26%;opacity:0.65;;width:54%;height:47%;transform: rotate(0deg)" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
@@ -1633,25 +1523,9 @@
               <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
           </filter>
         </defs>
-        <path id="speedpath" class="meter" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
+        <path id="speedpath" class="meter carhud" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
         </svg>
         <div id="speedmeter">0</div>
-        <!-- <svg id="gas" style="z-index:1005;position:absolute;right:6.5%;bottom:34.5%;opacity:0.65;height:22%;width:18%;transform: rotate(-100deg) scaleX(1) scaleY(-1);;" xmlns="http://www.w3.org/2000/svg" height="84" width="84" viewBox="0 0 140 140" data-value="1">
-        <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 170.93 0"  fill="none"/>
-        <defs>
-          <filter id="dropshadow2" width="170%" height="110%">
-              <feOffset result="offOut" in="SourceGraphic" dx="2" dy="2"></feOffset>
-              <feColorMatrix result="matrixOut" in="offOut" type="matrix"
-            values="1.000  0.000  0.000  0.000  0.000 
-            0.000  1.000  0.000  0.000  0.000 
-            0.000  0.000  6.000  0.000  0.000 
-            0.000  0.000  0.000  1.000  0.000" />
-              <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="8"></feGaussianBlur>
-              <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
-          </filter>
-        </defs>
-        <path id="gasbar" class="meter" stroke="gold" d="M41 149.5a77 77 0 1 1 170.93 0" fill="none" style="filter:url(#dropshadow2)" stroke-dasharray="180" stroke-dashoffset="250"/>
-        </svg> -->
 
         <svg id="cartemp" style="display:none;z-index:1005;position:absolute;right:13.7%;bottom:56.5%;opacity:0.65;height:23%;width:20%;transform: rotate(-200deg) scaleX(1) scaleY(-1);;" xmlns="http://www.w3.org/2000/svg" height="84" width="84" viewBox="0 0 140 140" data-value="1">
         <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 170.93 0"  fill="none"/>
@@ -1667,40 +1541,8 @@
               <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
           </filter>
         </defs>
-        <path id="cartempbar" class="meter" stroke="red" d="M41 149.5a77 77 0 1 1 170.93 0" fill="none" style="filter:url(#dropshadow2)" stroke-dasharray="190" stroke-dashoffset="190"/>
+        <path id="cartempbar" class="meter carhud" stroke="red" d="M41 149.5a77 77 0 1 1 170.93 0" fill="none" style="filter:url(#dropshadow2)" stroke-dasharray="190" stroke-dashoffset="190"/>
         </svg>
-        <!-- <svg id="vehiclehealth" style="z-index:1005;position:absolute;right:0.2%;bottom:39.9%;opacity:0.65;;width:20%;height:13%;transform: rotate(0deg)" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
-        <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 111.93 0"  fill="none"/>
-        <defs>
-          <filter id="dropshadow" width="170%" height="110%">
-              <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
-              <feColorMatrix result="matrixOut" in="offOut" type="matrix"
-            values="1.000  0.000  0.000  0.000  0.000 
-            0.000  1.000  0.000  0.000  0.000 
-            0.000  0.000  6.000  0.000  0.000 
-            0.000  0.000  0.000  1.000  0.000" />
-              <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="5"></feGaussianBlur>
-              <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
-          </filter>
-        </defs>
-        <path id="carhealthbar" class="meter" stroke="#2B68E2" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
-        </svg> -->
-        <!-- <svg id="vehicleoil" style="z-index:1005;position:absolute;right:71.7%;bottom:65.9%;opacity:0.65;;width:20%;height:13%;transform: rotate(0deg)" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
-        <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 111.93 0"  fill="none"/>
-        <defs>
-          <filter id="dropshadow" width="170%" height="110%">
-              <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
-              <feColorMatrix result="matrixOut" in="offOut" type="matrix"
-            values="1.000  0.000  0.000  0.000  0.000 
-            0.000  1.000  0.000  0.000  0.000 
-            0.000  0.000  6.000  0.000  0.000 
-            0.000  0.000  0.000  1.000  0.000" />
-              <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="5"></feGaussianBlur>
-              <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
-          </filter>
-        </defs>
-        <path id="oilpath" class="meter" stroke="#2B68E2" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="0" stroke-dashoffset="360"/>
-        </svg> -->
         <svg id="coolant" style="display:none;z-index:1005;position:absolute;right:-0.7%;bottom:50.5%;opacity:0.65;;width:20%;height:13%;transform: rotate(0deg)" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
         <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 111.93 0"  fill="none"/>
         <defs>
@@ -1715,7 +1557,7 @@
               <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
           </filter>
         </defs>
-        <path id="coolantpath" class="meter" stroke="#2B68E2" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
+        <path id="coolantpath" class="meter carhud" stroke="#2B68E2" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
         </svg>
         <svg id="nitro" style="display:none;z-index:1005;position:absolute;right:3.1%;bottom:29.6%;opacity:0.65;;width:20%;height:13%;transform: rotate(0deg)" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
         <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 111.93 0"  fill="none"/>
@@ -1731,7 +1573,7 @@
               <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
           </filter>
         </defs>
-        <path id="nitropath" class="meter" stroke="red" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
+        <path id="nitropath" class="meter carhud" stroke="red" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
         </svg>
         <div id="modediv"><span id="mode">ECO</span></div>
         <div id="rpmtext">x 1000rpm</div>
@@ -1781,21 +1623,11 @@
           <img style="display:none;height:90%;position:absolute;top:11%;left:29%;" id="onlight" src="img/lighton.png" />
           <img style="display:none;height:90%;position:absolute;top:11%;left:29%;" id="highlight" src="img/lighthigh.png" />
         </span>
-        <!-- <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:5%;bottom:53%;color:rgba(144, 144, 144, 0.876)'>
-          <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
-          <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
-          <i class="fas fa-tint fa-stack-1x" style='font-size:1.1vw;color:rgb(2, 116, 192);z-index:1130;opacity:1.0;'></i>
-        </span> -->
         <span class="fa-stack fa-2x" style='font-size:0.5vw;position:absolute;right:67%;bottom:40%;color:rgba(144, 144, 144, 0.294)'>
           <i class="fas fa-octagon fa-stack-2x" style='font-size:0.7vw;color:rgba(11, 39, 63, 0.055)'></i>
           <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.023)"></i>
           <i class="fas fa-oil-can fa-stack-1x" style='font-size:0.9vw;color:rgba(93, 93, 93, 0.782);z-index:1130;opacity:1.0;padding-left:7px;'></i>
         </span>
-        <!-- <span class="fa-stack fa-2x" style='font-size:0.5vw;position:absolute;right:9.9%;bottom:44.5%;color:rgba(144, 144, 144, 0.294)'>
-          <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
-          <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
-          <i class="fad fa-car-mechanic fa-stack-1x"  style='font-size:0.9vw;color:rgba(182, 182, 182, 0.685);z-index:1130;opacity:1.0;margin-left:45%;'></i>
-        </span> -->
 
         <i id="right" class="fas fa-arrow-alt-right"></i>
         <i id="left" class="fas fa-arrow-alt-left"></i>
@@ -1807,22 +1639,22 @@
       </div>
 
       <div id="minimal" style="display:none;position:absolute;right:-0.5vw;bottom:-40px;width:30vw;">
-          <img style="-webkit-filter: drop-shadow(1px -1px 0.4px rgba(255, 255, 255, 0.822));z-index:999;position:relative;opacity:0.85;width:100%;right:0;float:right;" src="img/carui_minimal.png?img/car.png" />
+          <img id="minimal_light" style="z-index:999;position:relative;opacity:0.85;width:100%;right:0;float:right;" src="img/carui_minimal.png?img/car.png" />
           <svg id="rpm" style="z-index:1005;position:absolute;right:60%;bottom:36%;opacity:0.65;width:40%;height:30%;transform: rotate(-60deg);" xmlns="http://www.w3.org/2000/svg" height="210" width="210" viewBox="0 0 177 177" data-value="1">
-          <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
-          <defs>
-            <filter id="dropshadow" width="170%" height="110%">
-                <feOffset result="offOut" in="SourceGraphic" dx="4" dy="7"></feOffset>
-                <feColorMatrix result="matrixOut" in="offOut" type="matrix"
-              values="1.000  0.000  0.000  0.000  0.000 
-              0.000  1.000  0.000  0.000  0.000 
-              0.000  0.000  6.000  0.000  0.000 
-              0.000  0.000  0.000  1.000  0.000" />
-                <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="8"></feGaussianBlur>
-                <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
-            </filter>
-          </defs>
-          <path id="rpmpath" class="meter" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="filter:url(#dropshadow)" stroke-dasharray="280" stroke-dashoffset="280"/>
+            <defs>
+              <filter id="dropshadow" width="170%" height="110%">
+                  <feOffset result="offOut" in="SourceGraphic" dx="4" dy="7"></feOffset>
+                  <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+                values="1.000  0.000  0.000  0.000  0.000 
+                0.000  1.000  0.000  0.000  0.000 
+                0.000  0.000  6.000  0.000  0.000 
+                0.000  0.000  0.000  1.000  0.000" />
+                  <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="8"></feGaussianBlur>
+                  <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+              </filter>
+            </defs>
+          <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0"  style="filter:url(#dropshadow)" fill="none"/>
+          <path id="rpmpath" class="meter rpm" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="filter:url(#dropshadow)" stroke-dasharray="280" stroke-dashoffset="280"/>
         </svg>
         <div id="rpmmeter" style="display:none;">1000</div>
         <svg id="speed" style="z-index:1005;position:absolute;right:22%;bottom:26%;opacity:0.65;;width:54%;height:47%;transform: rotate(0deg)" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
@@ -1839,7 +1671,7 @@
                 <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
             </filter>
           </defs>
-          <path id="speedpath" class="meter" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
+          <path id="speedpath" class="meter carhud" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
         </svg>
         <div id="speedmeter">0</div>
         <svg id="gas" style="z-index:1005;position:absolute;right:6.5%;bottom:34.5%;opacity:0.65;height:22%;width:18%;transform: rotate(-100deg) scaleX(1) scaleY(-1);;" xmlns="http://www.w3.org/2000/svg" height="84" width="84" viewBox="0 0 140 140" data-value="1">
@@ -1856,7 +1688,7 @@
                 <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
             </filter>
           </defs>
-          <path id="gasbar" class="meter" stroke="gold" d="M41 149.5a77 77 0 1 1 170.93 0" fill="none" style="filter:url(#dropshadow2)" stroke-dasharray="180" stroke-dashoffset="250"/>
+          <path id="gasbar" class="meter carhud" stroke="gold" d="M41 149.5a77 77 0 1 1 170.93 0" fill="none" style="filter:url(#dropshadow2)" stroke-dasharray="180" stroke-dashoffset="250"/>
         </svg>
 
         <svg id="cartemp" style="z-index:1005;position:absolute;right:13.7%;bottom:56.5%;opacity:0.65;height:23%;width:20%;transform: rotate(-200deg) scaleX(1) scaleY(-1);;" xmlns="http://www.w3.org/2000/svg" height="84" width="84" viewBox="0 0 140 140" data-value="1">
@@ -1873,7 +1705,7 @@
                 <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
             </filter>
           </defs>
-          <path id="cartempbar" class="meter" stroke="red" d="M41 149.5a77 77 0 1 1 170.93 0" fill="none" style="filter:url(#dropshadow2)" stroke-dasharray="190" stroke-dashoffset="190"/>
+          <path id="cartempbar" class="meter carhud" stroke="red" d="M41 149.5a77 77 0 1 1 170.93 0" fill="none" style="filter:url(#dropshadow2)" stroke-dasharray="190" stroke-dashoffset="190"/>
         </svg>
         <svg id="vehiclehealth" style="z-index:1005;position:absolute;right:0.2%;bottom:39.9%;opacity:0.65;;width:20%;height:13%;transform: rotate(0deg)" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
           <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 111.93 0"  fill="none"/>
@@ -1889,24 +1721,8 @@
                 <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
             </filter>
           </defs>
-          <path id="carhealthbar" class="meter" stroke="#2B68E2" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
+          <path id="carhealthbar" class="meter carhud" stroke="#2B68E2" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
         </svg>
-        <!-- <svg id="vehicleoil" style="z-index:1005;position:absolute;right:71.7%;bottom:65.9%;opacity:0.65;;width:20%;height:13%;transform: rotate(0deg)" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
-          <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 111.93 0"  fill="none"/>
-          <defs>
-            <filter id="dropshadow" width="170%" height="110%">
-                <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
-                <feColorMatrix result="matrixOut" in="offOut" type="matrix"
-              values="1.000  0.000  0.000  0.000  0.000 
-              0.000  1.000  0.000  0.000  0.000 
-              0.000  0.000  6.000  0.000  0.000 
-              0.000  0.000  0.000  1.000  0.000" />
-                <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="5"></feGaussianBlur>
-                <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
-            </filter>
-          </defs>
-          <path id="oilpath" class="meter" stroke="#2B68E2" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="0" stroke-dashoffset="360"/>
-        </svg> -->
         <svg id="coolant" style="z-index:1005;position:absolute;right:-0.7%;bottom:50.5%;opacity:0.65;;width:20%;height:13%;transform: rotate(0deg)" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
           <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 111.93 0"  fill="none"/>
           <defs>
@@ -1921,7 +1737,7 @@
                 <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
             </filter>
           </defs>
-          <path id="coolantpath" class="meter" stroke="#2B68E2" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
+          <path id="coolantpath" class="meter carhud" stroke="#2B68E2" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
         </svg>
         <svg id="nitro" style="z-index:1005;position:absolute;right:3.1%;bottom:29.6%;opacity:0.65;;width:20%;height:13%;transform: rotate(0deg)" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
           <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 111.93 0"  fill="none"/>
@@ -1937,7 +1753,7 @@
                 <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
             </filter>
           </defs>
-          <path id="nitropath" class="meter" stroke="red" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
+          <path id="nitropath" class="meter carhud" stroke="red" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
         </svg>
         <div id="modediv"><span id="mode">ECO</span></div>
         <div id="rpmtext">x 1000rpm</div>
@@ -1947,60 +1763,60 @@
 
       <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:22%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
         <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
-        <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
+        <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(147, 150, 151, 0.623)"></i>
         <img style="display:block; height:100%;width:80%;position:absolute;top:4%;left:32.5%;" id="handbrakeopen" src="img/handbrakeopen.png" />
-        <img style="display:block; height:100%;width:80%;position:absolute;top:4%;left:32.5%;opacity:0.6" id="handbrakeclose" src="img/handbrakeclose.png" />
+        <img style="display:block; height:100%;width:80%;position:absolute;top:4%;left:32.5%;opacity:0.6;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" id="handbrakeclose" src="img/handbrakeclose.png" />
       </span>
 
       <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:31%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
         <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
         <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
         <img id="hoodopen" style="display:block; height:100%;width:80%;position:absolute;top:0%;left:33%;" src="img/hoodopen.png" />
-        <img id="hoodclose" style="display:none; height:100%;width:80%;position:absolute;top:0%;left:33%;;opacity:0.6" src="img/hoodclose.png" />
+        <img id="hoodclose" style="display:none; height:100%;width:80%;position:absolute;top:0%;left:33%;;opacity:0.6;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" src="img/hoodclose.png" />
       </span>
 
       <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:40%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
         <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
         <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
         <img id="trunkopen" style="display:block; height:100%;width:80%;position:absolute;top:0%;left:33%;" src="img/trunkopen.png" />
-        <img id="trunkclose" style="display:block; height:100%;width:80%;position:absolute;top:0%;left:33%;;opacity:0.6" src="img/trunkclose.png" />
+        <img id="trunkclose" style="display:block; height:100%;width:80%;position:absolute;top:0%;left:33%;;opacity:0.6;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" src="img/trunkclose.png" />
       </span>
 
       <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:49%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
         <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
         <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
-        <img style="display:block; height:85%; width:75%;position:absolute;top:1%;left:33%;opacity:0.6" id="doorclose" src="img/doorclose.png" />
+        <img style="display:block; height:85%; width:75%;position:absolute;top:1%;left:33%;opacity:0.6;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" id="doorclose" src="img/doorclose.png" />
         <img style="display:none; height:85%;width:75%;position:absolute;top:1%;left:33%;opacity:0.7" id="dooropen" src="img/dooropen.png" />
       </span>
 
       <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:58%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
         <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
         <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
-        <img style="display:block; height:85%;position:absolute;top:4%;left:38%;" id="seatbelt" src="img/seatbeltoff.png" />
-        <img style="display:none;height:85%;position:absolute;top:4%;left:38%;" id="onseatbelt" src="img/seatbelton.png" />
+        <img style="display:block; height:85%;position:absolute;top:4%;left:38%;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" id="seatbelt" src="img/seatbeltoff.png" />
+        <img style="display:none;height:85%;position:absolute;top:4%;left:38%;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" id="onseatbelt" src="img/seatbelton.png" />
       </span>
 
       <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:66.9%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
         <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
         <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
-        <img style="display:block; height:100%;position:absolute;top:3%;left:35%;opacity:0.5;" id="offlight" src="img/lightoff.png" />
-        <img style="display:none;height:100%;position:absolute;top:3%;left:35%;" id="onlight" src="img/lighton.png" />
-        <img style="display:none;height:100%;position:absolute;top:3%;left:35%;" id="highlight" src="img/lighthigh.png" />
+        <img style="display:block; height:100%;position:absolute;top:3%;left:35%;opacity:0.5;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" id="offlight" src="img/lightoff.png" />
+        <img style="display:none;height:100%;position:absolute;top:3%;left:35%;-webkit-filter: drop-shadow(1px -1px 2px rgba(0, 0, 0, 0.822));" id="onlight" src="img/lighton.png" />
+        <img style="display:none;height:100%;position:absolute;top:3%;left:35%;-webkit-filter: drop-shadow(1px -1px 2px rgba(4, 6, 7, 0.822));" id="highlight" src="img/lighthigh.png" />
       </span>
       <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:5.6%;bottom:53.5%;color:rgba(144, 144, 144, 0.876)'>
         <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
         <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
-        <i class="fas fa-tint fa-stack-1x" style='font-size:1.1vw;color:rgb(2, 116, 192);z-index:1130;opacity:1.0;'></i>
+        <i class="fas fa-tint fa-stack-1x" style='font-size:1.1vw;color:rgb(2, 116, 192);z-index:1130;opacity:1.0;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));'></i>
       </span>
       <span class="fa-stack fa-2x" style='font-size:0.5vw;position:absolute;right:67%;bottom:40%;color:rgba(144, 144, 144, 0.294)'>
         <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.20)'></i>
         <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.01)"></i>
-        <i class="fas fa-oil-can fa-stack-1x" style='font-size:1.14vw;color:rgba(144, 144, 144, 0.849);z-index:1130;opacity:1.0;padding-left:12px;'></i>
+        <i class="fas fa-oil-can fa-stack-1x" style='font-size:1.14vw;color:rgba(144, 144, 144, 0.849);z-index:1130;opacity:1.0;padding-left:12px;-webkit-filter: drop-shadow(1px -1px 0.9px rgba(6, 8, 8, 0.822));'></i>
       </span>
       <span class="fa-stack fa-2x" style='font-size:0.5vw;position:absolute;right:9.9%;bottom:44.5%;color:rgba(144, 144, 144, 0.294)'>
         <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
         <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
-        <i class="fad fa-car-mechanic fa-stack-1x"  style='font-size:0.9vw;color:rgba(182, 182, 182, 0.685);z-index:1130;opacity:1.0;margin-left:45%;'></i>
+        <i class="fad fa-car-mechanic fa-stack-1x"  style='font-size:0.9vw;color:rgba(182, 182, 182, 0.685);z-index:1130;opacity:1.0;margin-left:45%;-webkit-filter: drop-shadow(1px -1px 0.9px rgba(6, 8, 8, 0.822));'></i>
       </span>
 
     <i id="right" class="fas fa-arrow-alt-right"></i>
@@ -2018,6 +1834,16 @@
     <img id="wheel3" style="-webkit-filter: drop-shadow(1px -1px 0.4px rgba(255, 0, 0, 0.822));z-index:999;position:absolute;opacity:0.85;width:10%;height:20%;left:4.5vw;bottom:3vw;opacity:0.0;" src="img/tirerearright.png?img/car.png" />
       </div>
       <div id="modern" style="display:none;">
+          <a id="start"></a>
+          <div class="carhudmap">
+              <div class="fadeout"></div>
+              <img src="img/carblip.png" alt="you" id="carblip" />
+              <div class="centermap">
+                <div class="maploc">
+                  <img style="width:100%;" id="mapimg" src="img/loading.png">
+                </div>
+              </div>
+          </div>
           <img id="carui" style="-webkit-filter: drop-shadow(1px -1px 0.4px rgba(255, 255, 255, 0.822));z-index:999;position:absolute;right:10px;bottom:10px;opacity:0.95;height:180px" src="img/carui_false.png?img/car.png" />
           <!-- <img id="carui" style="-webkit-filter: drop-shadow(1px -1px 0.4px rgba(255, 255, 255, 0.822));z-index:999;position:absolute;right:10px;bottom:10px;opacity:0.95;height:180px" src="img/carui_false.png?img/car.png" /> -->
           <!-- z-index:998;position:absolute;right:-27px;bottom:15px;opacity:0.65;height:125px;transform: rotate(-270deg) scaleX(-1); <svg id="rpm" style="z-index:999;position:absolute;right:-34px;bottom:12px;opacity:0.65;height:132px;transform: rotate(90deg);transform: scaleX(-1);" xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1"> -->
@@ -2035,7 +1861,7 @@
                   <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
               </filter>
             </defs>
-            <path id="rpmpath" class="meter" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="filter:url(#dropshadow)" stroke-dasharray="280" stroke-dashoffset="280"/>
+            <path id="rpmpath" class="meter rpm" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="filter:url(#dropshadow)" stroke-dasharray="280" stroke-dashoffset="280"/>
           </svg>
           <div id="rpmmeter">1000</div>
           <div id="rpmtext">x 1000rpm</div>
@@ -2053,7 +1879,7 @@
                   <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
               </filter>
             </defs>
-            <path id="speedpath" class="meter" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="filter:url(#dropshadow)" stroke-dasharray="290" stroke-dashoffset="290"/>
+            <path id="speedpath" class="meter carhud" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="filter:url(#dropshadow)" stroke-dasharray="290" stroke-dashoffset="290"/>
           </svg>
 
           <svg id="coolant" style="z-index:998;position:absolute;right:211px;bottom:10px;opacity:0.65;height:165px;transform: rotate(-90deg)" xmlns="http://www.w3.org/2000/svg" height="250" width="200" viewBox="0 0 250 200" data-value="1">
@@ -2070,7 +1896,7 @@
                   <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
               </filter>
             </defs>
-            <path style="stroke-width: 7px;stroke: rgb(0, 101, 253);" id="coolantpath" class="meter" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" stroke-dasharray="0" stroke-dashoffset="290"/>
+            <path style="stroke-width: 7px;stroke: rgb(0, 101, 253);" id="coolantpath" class="meter carhud" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" stroke-dasharray="290" stroke-dashoffset="0"/>
           </svg>
 
           <svg id="oil" style="z-index:998;position:absolute;right:-39px;bottom:10px;opacity:0.65;height:165px;transform:rotate(-270deg) scaleX(-1);" xmlns="http://www.w3.org/2000/svg" height="250" width="200" viewBox="0 0 250 200" data-value="1">
@@ -2087,7 +1913,7 @@
                   <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
               </filter>
             </defs>
-            <path style="stroke-width: 7px;stroke: rgb(128, 221, 22);" id="oilpath" class="meter" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" stroke-dasharray="290" stroke-dashoffset="0"/>
+            <path style="stroke-width: 7px;stroke: rgb(128, 221, 22);" id="oilpath" class="meter carhud" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" stroke-dasharray="290" stroke-dashoffset="0"/>
           </svg>
 
           <div id="body" style="z-index:-1;position:absolute;border-radius:41%;right:21px;bottom:10px;height:175px;width:330px;background-color: #00000078;"></div>
@@ -2166,12 +1992,12 @@
       <div class="pulse" style="z-index: 1111;"></div>
       <img id="bodystatus" style="z-index:1001;position:absolute;right:500px;top:100px;opacity:1;height:550px;" src="img/bodyui.png" />
       
-      <i class="fad fa-first-aid" id="ped_body_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:632px;top:178px;opacity:0.5;font-size:50px;color:#e7e7e7;"></i>
-      <i class="fad fa-first-aid" id="ped_head_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:811px;top:177px;opacity:0.5;font-size:50px;color:#e7e7e7;"></i>
-      <i class="fad fa-first-aid" id="right_hand_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:856px;top:309px;opacity:0.5;font-size:50px;color:#e7e7e7;"></i>
-      <i class="fad fa-first-aid" id="left_hand_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:578px;top:306px;opacity:0.5;font-size:50px;color:#e7e7e7;"></i>
-      <i class="fad fa-first-aid" id="left_leg_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:807px;top:441.8px;opacity:0.5;font-size:50px;color:#e7e7e7;"></i>
-      <i class="fad fa-first-aid" id="right_leg_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:624px;top:441.8px;opacity:0.5;font-size:50px;color:#e7e7e7;"></i>
+      <i class="fad fa-first-aid" id="ped_body_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:632px;top:178px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
+      <i class="fad fa-first-aid" id="ped_head_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:811px;top:177px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
+      <i class="fad fa-first-aid" id="right_hand_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:856px;top:309px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
+      <i class="fad fa-first-aid" id="left_hand_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:578px;top:306px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
+      <i class="fad fa-first-aid" id="left_leg_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:807px;top:441.8px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
+      <i class="fad fa-first-aid" id="right_leg_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:624px;top:441.8px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
 
       <img id="ped_body" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:632px;top:178px;opacity:0.0;height:100px;" src="img/chest.png" />
       <img id="ped_head" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:811px;top:177px;opacity:0.0;height:100px;" src="img/head.png" />
@@ -2233,7 +2059,7 @@
       <img id="weaponimg" style="z-index:901;position:absolute;right:70px;bottom:180px;opacity:0.9;max-height:40px;max-width:100px;;align-content:center;align:center;display: block;margin-left: auto;margin-right: auto;" src="img/weapons/weapon_advancedrifle.png" />
       <svg id="weapon" style="z-index:889;position:absolute;right:-39px;bottom:90px;opacity:0.65;height:212px;transform: rotate(-270deg) scaleX(-1);" xmlns="http://www.w3.org/2000/svg" height="250" width="250" viewBox="0 0 250 250" data-value="1">
         <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
-        <path id="weaponpath" class="meter" stroke="skyblue" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" stroke-dasharray="280" stroke-dashoffset="280"/>
+        <path id="weaponpath" class="meter carhud" stroke="skyblue" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" stroke-dasharray="280" stroke-dashoffset="280"/>
       </svg>
       <div id="ammotext">500</div>
       <div class="crosshair-wrapper">
@@ -2255,18 +2081,8 @@
             stroke-width: 10 !important;
             }
           </style>
-          <a id="start"></a>
           <div id="shift" style="bottom:140px;position:absolute;right:-46px;background-repeat: no-repeat !important;">
             <div id="shifter" style="background-repeat: no-repeat !important;height:150px;width:150px; background-size:90px 130px !important;opacity:0.81;"></div>
-          </div>
-          <div class="carhudmap">
-              <div class="fadeout"></div>
-              <img src="img/carblip.png" alt="you" id="carblip" />
-              <div class="centermap">
-                <div class="maploc">
-                  <img style="width:100%;" id="mapimg" src="img/loading.png">
-                </div>
-              </div>
           </div>
 
           <div id="clothe" style="position:absolute;top:30%;left:30%;bottom:50%;z-index:99999;height:70vh;width:700px;display:none;">
@@ -2356,7 +2172,7 @@
                         <circle class="progress1" stroke="rgb(52, 147, 255)" stroke-width="3" style="stroke-opacity: 1;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="0 100" stroke-dashoffset="0"/>
                         <circle class="progress2" stroke="rgb(52, 147, 255)" stroke-width="3" style="stroke-opacity: 1;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="0 100" stroke-dashoffset="0"/>
                         <circle class="progress4" stroke="rgb(52, 147, 255)" stroke-width="3" style="stroke-opacity: 1;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="0 100" stroke-dashoffset="0"/>
-                        <circle class="progress3" stroke="rgb(52, 147, 255)" stroke-width="1.8" style="stroke-opacity: 1;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="0 180" stroke-dashoffset="0"/>
+                        <circle class="progress3 boost" stroke="rgb(52, 147, 255)" stroke-width="1.8" style="stroke-opacity: 1;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="0 180" stroke-dashoffset="0"/>
                         <defs>
                           <linearGradient id="gradient">
                             <stop offset="30%" stop-color="#FF0245" />
