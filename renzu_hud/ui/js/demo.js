@@ -1455,8 +1455,8 @@ function SetNotify(table) {
     const settings = {
     fill: '#1abc9c',
     background: '#d7dcdf' };
-    const sliders = document.querySelectorAll('.range-slider');
-    Array.prototype.forEach.call(sliders, slider => {
+    const suspension = document.querySelectorAll('#suspension');
+    Array.prototype.forEach.call(suspension, slider => {
         slider.querySelector('input').addEventListener('input', event => {
             slider.querySelector('span').innerHTML = event.target.value * 0.01;
             applyFill(event.target);
@@ -1464,12 +1464,72 @@ function SetNotify(table) {
         });
         applyFill(slider.querySelector('input'));
     });
+
+    const wheeloffsetfront = document.querySelectorAll('#wheeloffsetfront');
+    Array.prototype.forEach.call(wheeloffsetfront, slider => {
+        slider.querySelector('input').addEventListener('input', event => {
+            slider.querySelector('span').innerHTML = event.target.value * 0.01;
+            applyFill(event.target);
+            console.log(event.target.value)
+            post("setvehiclewheeloffsetfront",{val:event.target.value})
+        });
+        applyFill(slider.querySelector('input'));
+    });
+
+    const wheeloffsetrear = document.querySelectorAll('#wheeloffsetrear');
+    Array.prototype.forEach.call(wheeloffsetrear, slider => {
+        slider.querySelector('input').addEventListener('input', event => {
+            slider.querySelector('span').innerHTML = event.target.value * 0.01;
+            applyFill(event.target);
+            console.log(event.target.value)
+            post("setvehiclewheeloffsetrear",{val:event.target.value})
+        });
+        applyFill(slider.querySelector('input'));
+    });
+
+    const wheelrotationfront = document.querySelectorAll('#wheelrotationfront');
+    Array.prototype.forEach.call(wheelrotationfront, slider => {
+        slider.querySelector('input').addEventListener('input', event => {
+            slider.querySelector('span').innerHTML = event.target.value * 0.01;
+            applyFill(event.target);
+            post("setvehiclewheelrotationfront",{val:event.target.value})
+        });
+        applyFill(slider.querySelector('input'));
+    });
+
+    const wheelrotationrear = document.querySelectorAll('#wheelrotationrear');
+    Array.prototype.forEach.call(wheelrotationrear, slider => {
+        slider.querySelector('input').addEventListener('input', event => {
+            slider.querySelector('span').innerHTML = event.target.value * 0.01;
+            applyFill(event.target);
+            post("setvehiclewheelrotationrear",{val:event.target.value})
+        });
+        applyFill(slider.querySelector('input'));
+    });
+
     function applyFill(slider) {
         const percentage = 100 * (slider.value - slider.min) / (slider.max - slider.min);
         const bg = `linear-gradient(90deg, ${settings.fill} ${percentage}%, ${settings.background} ${percentage + 0.1}%)`;
         slider.style.background = bg;
     }
 
+    function unsetradio() {
+        //$('input[type=radio][name=wheelsetting]').val('off')
+        console.log("unset")
+        $("input[type=radio][name=wheelsetting][value='off']").prop("checked", true);
+        //post("wheelsetting",{bool:true})
+    }
+
+    $('input[type=radio][name=wheelsetting]').change(function() {
+        if (this.value == 'on') {
+            console.log("ON")
+            post("wheelsetting",{bool:false})
+        } else {
+            console.log("OFF")
+            post("wheelsetting",{bool:true})
+        }
+    });
+    
     $('input[type=radio][name=neon]').change(function() {
         if (this.value == 'on') {
             //////console.log("ON")
@@ -1872,6 +1932,7 @@ var renzu_hud = {
     isAmbulance,
     hideui,
     uiconfig,
+    unsetradio,
     //CAR
     setShow,
     setRpm,

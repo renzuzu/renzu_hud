@@ -28,28 +28,11 @@ end)
 RenzuCommand('handling', function(source, args, raw)
     --SetEngineSpecs(GetHashKey(args[1]))
     --SetVehicleWheelWidth(getveh(),1.1)
-    Creation(function()
-        local myveh = getveh()
-        while true do
-            -- SetVehicleWheelTireColliderWidth(getveh(),0,1.1)
-            -- SetVehicleWheelTireColliderWidth(getveh(),1,1.1)
-            SetVehicleWheelXOffset(myveh,0,-0.77)
-            SetVehicleWheelXOffset(myveh,1,0.77)
-            SetVehicleWheelYRotation(myveh,0,-0.3)
-            SetVehicleWheelYRotation(myveh,1,0.3)
-            SetVehicleWheelYRotation(myveh,2,-0.2)
-            SetVehicleWheelYRotation(myveh,3,0.2)
-            -- for k,v in pairs(vehiclehandling['Item']) do
-            --     --print(k)
-            --     --print(v.handlingName)
-            --     if v.handlingName == 'BLISTA' then
-            --         print(GetHashKey(v.handlingName),GetHashKey("blista"))
-            --         print(v.fDriveInertia['_value'])
-            --     end
-            -- end
-            Wait(0)
-        end
-    end)
+    ClearTimecycleModifier()
+    ClearExtraTimecycleModifier()
+    print(GetVehicleWheelYRotation(getveh(),1))
+    print(GetVehicleWheelXOffset(getveh(),1))
+    print(GetVehicleWheelXOffset(getveh(),1) < (-0.7) and GetVehicleWheelXOffset(getveh(),1) > -0.8)
 end)
 
 RenzuCommand('drivetocoord', function(source, args, raw)

@@ -203,6 +203,7 @@ RenzuNuiCallback('requestface', function(data, cb)
 end)
 
 Creation(function()
+	Wait(1000)
 	for k,v in pairs(config.statusordering) do
 		if v.enable then
 			notifycd[v.status] = 0
@@ -245,6 +246,7 @@ Creation(function()
 	local ec = config.enablecompass
 	local bs = config.bodystatus
 	local va = config.enable_carui and config.customengine
+	local wa = config.wheelstancer
 	local nuiloop = false
 	if se then
 		nuiloop = true
@@ -256,6 +258,11 @@ Creation(function()
 		nuiloop = true
 	elseif va then
 		nuiloop = true
+	elseif wa then
+		nuiloop = true
+	end
+	while veh_stats == nil do
+		Wait(100)
 	end
 	if nuiloop then
 		RenzuNuiCallback('NuiLoop', function(data, cb)
@@ -292,6 +299,10 @@ Creation(function()
 
 			if va then
 				SyncVehicleSound()
+			end
+
+			if wa then
+				SyncWheelSetting()
 			end
 			if garbage > 200 then
 				collectgarbage()
@@ -645,7 +656,13 @@ end)
 RenzuNetEvent('renzu_hud:install_turbo')
 RenzuEventHandler('renzu_hud:install_turbo', function(type)
 	local type = type
+	local veh = getveh()
 	turboanimation(type)
+	local plate = string.gsub(GetVehicleNumberPlateText(veh), "%s+", "")
+	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+	if veh_stats[plate] == nil then
+		get_veh_stats(veh, plate)
+	end
 	Citizen.Wait(2000)
 	playanimation('creatures@rottweiler@tricks@','petting_franklin')
 	--ExecuteCommand("e petting")
@@ -654,21 +671,19 @@ RenzuEventHandler('renzu_hud:install_turbo', function(type)
 	playanimation('mp_player_int_uppergang_sign_a','mp_player_int_gang_sign_a')
 	--ExecuteCommand("e gangsign")
 	Renzuzu.Wait(200)
-	SetVehicleDoorOpen(getveh(),4,false,false)
+	SetVehicleDoorOpen(veh,4,false,false)
 	Renzuzu.Wait(400)
 	ClearPedTasks(ped)
-	SetVehicleDoorOpen(getveh(),4,false,false)
+	SetVehicleDoorOpen(veh,4,false,false)
 	playanimation('creatures@rottweiler@tricks@','petting_franklin')
 	Citizen.Wait(10000)
-	local plate = string.gsub(GetVehicleNumberPlateText(getveh()), "%s+", "")
-	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
 	veh_stats[plate].turbo = type
 	veh_stats[plate].turbo_health = config.turbo_health
 	TriggerServerEvent('renzu_hud:savedata', plate, veh_stats[tostring(plate)])
 	Notify('success','Turbo Install',""..veh_stats[plate].turbo.." turbine has been install")
 	playanimation('rcmepsilonism8','bag_handler_close_trunk_walk_left')
 	Renzuzu.Wait(2000)
-	SetVehicleDoorShut(getveh(),4,false)
+	SetVehicleDoorShut(veh,4,false)
 	Renzuzu.Wait(300)
 	ClearPedTasks(ped)
 	ClearPedTasks(ped)
@@ -1264,6 +1279,179 @@ RenzuNuiCallback('setvehicleheight', function(data, cb)
 		busyairsus = true
 		TriggerServerEvent("renzu_hud:airsuspension",VehToNet(vehicle), data.val, GetEntityCoords(vehicle))
     end
+end)
+
+RenzuNuiCallback('setvehiclewheeloffsetfront', function(data, cb)
+	vehicle = getveh()
+	plate = tostring(GetVehicleNumberPlateText(vehicle))
+	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+    if vehicle ~= nil and vehicle ~= 0 then
+		if wheelsettings[plate] == nil then wheelsettings[plate] = {} end
+		local val = round(data.val * 100)
+		print(val)
+		print("-0."..val.."")
+		SetVehicleWheelXOffset(vehicle,0,tonumber("-0."..val..""))
+		SetVehicleWheelXOffset(vehicle,1,tonumber("0."..val..""))
+		if wheelsettings[plate]['wheeloffsetfront'] == nil then wheelsettings[plate]['wheeloffsetfront'] = {} end
+		wheelsettings[plate]['wheeloffsetfront'].wheel0 = tonumber("-0."..val.."")
+		wheelsettings[plate]['wheeloffsetfront'].wheel1 = tonumber("0."..val.."")
+		wheeledit = true
+		if nearstancer[plate] ~= nil then
+			nearstancer[plate].wheeledit = true
+		end
+		RenzuSendUI({type = "unsetradio",content = false})
+    end
+end)
+
+RenzuNuiCallback('setvehiclewheeloffsetrear', function(data, cb)
+	vehicle = getveh()
+	plate = tostring(GetVehicleNumberPlateText(vehicle))
+	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+    if vehicle ~= nil and vehicle ~= 0 then
+		if wheelsettings[plate] == nil then wheelsettings[plate] = {} end
+		local val = round(data.val * 100)
+		print(val)
+		print("-0."..val.."")
+		SetVehicleWheelXOffset(vehicle,2,tonumber("-0."..val..""))
+		SetVehicleWheelXOffset(vehicle,3,tonumber("0."..val..""))
+		if wheelsettings[plate]['wheeloffsetrear'] == nil then wheelsettings[plate]['wheeloffsetrear'] = {} end
+		wheelsettings[plate]['wheeloffsetrear'].wheel2 = tonumber("-0."..val.."")
+		wheelsettings[plate]['wheeloffsetrear'].wheel3 = tonumber("0."..val.."")
+		wheeledit = true
+		if nearstancer[plate] ~= nil then
+			nearstancer[plate].wheeledit = true
+		end
+		RenzuSendUI({type = "unsetradio",content = false})
+    end
+end)
+
+RenzuNuiCallback('setvehiclewheelrotationfront', function(data, cb)
+	vehicle = getveh()
+	plate = tostring(GetVehicleNumberPlateText(vehicle))
+	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+    if vehicle ~= nil and vehicle ~= 0 then
+		if wheelsettings[plate] == nil then wheelsettings[plate] = {} end
+		local val = round(data.val * 100)
+		print(val)
+		print("-0."..val.."")
+		SetVehicleWheelYRotation(vehicle,0,tonumber("-0."..val..""))
+		SetVehicleWheelYRotation(vehicle,1,tonumber("0."..val..""))
+		if wheelsettings[plate]['wheelrotationfront'] == nil then wheelsettings[plate]['wheelrotationfront'] = {} end
+		wheelsettings[plate]['wheelrotationfront'].wheel0 = tonumber("-0."..val.."")
+		wheelsettings[plate]['wheelrotationfront'].wheel1 = tonumber("0."..val.."")
+		wheeledit = true
+		if nearstancer[plate] ~= nil then
+			nearstancer[plate].wheeledit = true
+		end
+		RenzuSendUI({type = "unsetradio",content = false})
+    end
+end)
+
+RenzuNuiCallback('setvehiclewheelrotationrear', function(data, cb)
+	vehicle = getveh()
+	plate = tostring(GetVehicleNumberPlateText(vehicle))
+	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+    if vehicle ~= nil and vehicle ~= 0 then
+		if wheelsettings[plate] == nil then wheelsettings[plate] = {} end
+		local val = round(data.val * 100)
+		print(val)
+		print("-0."..val.."")
+		SetVehicleWheelYRotation(vehicle,2,tonumber("-0."..val..""))
+		SetVehicleWheelYRotation(vehicle,3,tonumber("0."..val..""))
+		if wheelsettings[plate]['wheelrotationrear'] == nil then wheelsettings[plate]['wheelrotationrear'] = {} end
+		wheelsettings[plate]['wheelrotationrear'].wheel2 = tonumber("-0."..val.."")
+		wheelsettings[plate]['wheelrotationrear'].wheel3 = tonumber("0."..val.."")
+		wheeledit = true
+		if nearstancer[plate] ~= nil then
+			nearstancer[plate].wheeledit = true
+		end
+		RenzuSendUI({type = "unsetradio",content = false})
+    end
+end)
+
+Creation(function()
+	Wait(1000)
+	if config.wheelstancer then
+		while veh_stats == nil do
+			Wait(100)
+		end
+		while true do
+			local sleep = 2000
+			for k,v in pairs(nearstancer) do
+				if not v.wheeledit and v.dist < 100 and veh_stats[v.plate] ~= nil and veh_stats[v.plate]['wheelsetting'] ~= nil then
+					sleep = 0
+					SetVehicleWheelWidth(v.entity,0.7) -- trick to avoid stance bug
+					SetVehicleWheelXOffset(v.entity,0,tonumber(veh_stats[v.plate]['wheelsetting']['wheeloffsetfront'].wheel0))
+					SetVehicleWheelXOffset(v.entity,1,tonumber(veh_stats[v.plate]['wheelsetting']['wheeloffsetfront'].wheel1))
+					SetVehicleWheelXOffset(v.entity,2,tonumber(veh_stats[v.plate]['wheelsetting']['wheeloffsetrear'].wheel2))
+					SetVehicleWheelXOffset(v.entity,3,tonumber(veh_stats[v.plate]['wheelsetting']['wheeloffsetrear'].wheel3))
+					SetVehicleWheelSize(v.entity,GetVehicleWheelSize(v.entity)) -- trick to avoid stance bug tricking the system or game that this is all visual only not physics maybe?
+					SetVehicleWheelYRotation(v.entity,0,tonumber(veh_stats[v.plate]['wheelsetting']['wheelrotationfront'].wheel0))
+					SetVehicleWheelYRotation(v.entity,1,tonumber(veh_stats[v.plate]['wheelsetting']['wheelrotationfront'].wheel1))
+					SetVehicleWheelYRotation(v.entity,2,tonumber(veh_stats[v.plate]['wheelsetting']['wheelrotationrear'].wheel2))
+					SetVehicleWheelYRotation(v.entity,3,tonumber(veh_stats[v.plate]['wheelsetting']['wheelrotationrear'].wheel3))
+					SetVehicleWheelTireColliderWidth(v.entity,0,0.4)
+					SetVehicleWheelTireColliderWidth(v.entity,1,0.4)
+					SetVehicleWheelTireColliderWidth(v.entity,2,0.1)
+					SetVehicleWheelTireColliderWidth(v.entity,3,0.1)
+				end
+			end
+			Wait(sleep)
+		end
+	end
+	return
+end)
+
+RenzuNuiCallback('wheelsetting', function(data, cb)
+	vehicle = getveh()
+	wheeledit = false
+	print("UNSET")
+	print("UNSET")
+	print("UNSET")
+	print("UNSET")
+	print("UNSET")
+	plate = tostring(GetVehicleNumberPlateText(vehicle))
+	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+	get_veh_stats(getveh(), plate)
+	if veh_stats[plate]['wheelsetting'] == nil then
+		veh_stats[plate]['wheelsetting'] = {}
+	end
+	local vehicle_height = GetVehicleSuspensionHeight(vehicle)
+	--for i = 0, numwheel - 1 do
+	--will rewrite later for shorter code
+	if wheelsettings[plate]['wheeloffsetfront'].wheel0 == nil then
+		wheelsettings[plate]['wheeloffsetfront'].wheel0 = GetVehicleWheelXOffset(vehicle,0)
+	end
+	if wheelsettings[plate]['wheeloffsetfront'].wheel1 == nil then
+		wheelsettings[plate]['wheeloffsetfront'].wheel1 = GetVehicleWheelXOffset(vehicle,1)
+	end
+	if wheelsettings[plate]['wheeloffsetrear'].wheel2 == nil then
+		wheelsettings[plate]['wheeloffsetrear'].wheel2 = GetVehicleWheelXOffset(vehicle,2)
+	end
+	if wheelsettings[plate]['wheeloffsetrear'].wheel3 == nil then
+		wheelsettings[plate]['wheeloffsetrear'].wheel3 = GetVehicleWheelXOffset(vehicle,3)
+	end
+
+	if wheelsettings[plate]['wheelrotationfront'].wheel0 == nil then
+		wheelsettings[plate]['wheelrotationfront'].wheel0 = GetVehicleWheelYRotation(vehicle,0)
+	end
+	if wheelsettings[plate]['wheelrotationfront'].wheel1 == nil then
+		wheelsettings[plate]['wheelrotationfront'].wheel1 = GetVehicleWheelYRotation(vehicle,1)
+	end
+	if wheelsettings[plate]['wheelrotationrear'].wheel2 == nil then
+		wheelsettings[plate]['wheelrotationrear'].wheel2 = GetVehicleWheelYRotation(vehicle,2)
+	end
+	if wheelsettings[plate]['wheelrotationrear'].wheel3 == nil then
+		wheelsettings[plate]['wheelrotationrear'].wheel3 = GetVehicleWheelYRotation(vehicle,3)
+	end
+	veh_stats[plate]['wheelsetting'] = wheelsettings[plate]
+	--end
+	veh_stats[plate].height = vehicle_height
+    if vehicle ~= nil and vehicle ~= 0 and not data.bool then
+		TriggerServerEvent('renzu_hud:savedata', plate, veh_stats[tostring(plate)])
+	end
+	Wait(1000)
+	nearstancer[plate].wheeledit = false
 end)
 
 RenzuNuiCallback('setvehicleneon', function(data, cb)

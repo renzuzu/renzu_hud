@@ -3522,6 +3522,38 @@ function repairengine(plate)
 	SetEntityCollision(carryModel2, false, true)
 end
 
+function SyncWheelSetting()
+	local coords = GetEntityCoords(PlayerPedId())
+	for k,v in pairs(veh_stats) do
+		if v.entity ~= nil and NetworkDoesEntityExistWithNetworkId(v.entity) and v.plate == tostringplate(GetVehicleNumberPlateText(NetToVeh(v.entity))) then
+			local vv = NetToVeh(v.entity)
+			local vehcoords = GetEntityCoords(vv)
+			local dist = #(coords-vehcoords)
+			--print(dist,"Stancer")
+			local plate = GetVehicleNumberPlateText(vv)
+			plate = string.gsub(plate, "%s+", "")
+			--print(plate)
+			if nearstancer[plate] == nil then
+				nearstancer[plate] = {entity = vv, dist = dist, plate = plate}
+			end
+			nearstancer[plate].dist = dist
+			nearstancer[plate].entity = vv
+			-- if nearstancer[vv] ~= nil and nearstancer[vv].plate ~= nil and nearstancer[vv].plate == plate and dist > 140 then
+			-- 	nearstancer[vv] = nil
+			-- end
+			if v.height ~= nil and not nearstancer[plate].wheeledit then
+				SetVehicleSuspensionHeight(vv,v.height)
+			end
+		end
+	end
+	for k,v in pairs(nearstancer) do
+		if v.dist > 250 or not DoesEntityExist(v.entity) then
+			print(v.plate,"deleted")
+			nearstancer[k] = nil
+		end
+	end
+end
+
 function Renzu_Function(func)
 	local f = {}
 	setmetatable(f, {

@@ -14,6 +14,7 @@ Citizen.CreateThread(function()
 					local stats = json.decode(v.adv_stats)
 					stats.plate = string.gsub(v.plate, "%s+", "")
 					stats.owner = v.owner
+					stats.entity = nil
 					adv_table[v.plate] = stats
 				end
 			end
@@ -78,7 +79,7 @@ end)
 RegisterServerEvent("renzu_hud:savedata")
 AddEventHandler("renzu_hud:savedata", function(plate,table)
 	local source = source
-	local plate = plate
+	local plate = string.gsub(plate, "%s+", "")
 	local foundplate = false
 	if plate ~= nil then
 		print("SAVING")
@@ -242,6 +243,12 @@ end)
 RegisterServerEvent("renzu_hud:airsuspension")
 AddEventHandler("renzu_hud:airsuspension", function(entity,val,coords)
 	TriggerClientEvent("renzu_hud:airsuspension", -1, entity,val,coords)
+end)
+
+local wheelsetting = {}
+RegisterServerEvent("renzu_hud:wheelsetting")
+AddEventHandler("renzu_hud:wheelsetting", function(entity,val,coords)
+	TriggerClientEvent("renzu_hud:wheelsetting", -1, entity,wheelsetting)
 end)
 
 local antispam = {}
