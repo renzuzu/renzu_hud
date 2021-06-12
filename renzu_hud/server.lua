@@ -2,8 +2,9 @@ local adv_table = {}
 Renzu = {}
 charslot = {}
 ESX = nil
+SetConvar("game_enableFlyThroughWindscreen", true)
 Citizen.CreateThread(function()
-	Citizen.Wait(500)
+	Wait(1000)
 	if config.framework == 'ESX' then
 		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 	end
@@ -62,7 +63,7 @@ Citizen.CreateThread(function()
 		end
 		if config.use_esx_accesories then
 			-- COPYRIGHT TO ESX ACCESOSRIES LINK https://github.com/esx-framework/esx_accessories/blob/e812dde63bcb746e9b49bad704a9c9174d6329fa/server/main.lua#L31
-			ESX.RegisterServerCallback('esx_accessories:get', function(source, cb, accessory)
+			ESX.RegisterServerCallback('esx_accessories:get2', function(source, cb, accessory)
 				print("SKINS")
 				local xPlayer = GetPlayerFromId(source)
 				TriggerEvent('esx_datastore:getDataStore', 'user_' .. string.lower(accessory), xPlayer.identifier, function(store)
@@ -95,7 +96,7 @@ AddEventHandler("renzu_hud:savedata", function(plate,table)
 		if not foundplate then
 			adv_table[tostring(plate)].owner = nil
 		end
-		TriggerClientEvent('renzu_hud:receivedata', -1, adv_table, GetPlayerIdentifier(source))
+		TriggerClientEvent('renzu_hud:receivedata', -1, adv_table)
 	end
 end)
 
@@ -233,6 +234,11 @@ end)
 RegisterServerEvent("renzu_hud:nitro_flame")
 AddEventHandler("renzu_hud:nitro_flame", function(entity,coords)
 	TriggerClientEvent("renzu_hud:nitro_flame", -1, entity,coords)
+end)
+
+RegisterServerEvent("renzu_hud:nitro_flame_stop")
+AddEventHandler("renzu_hud:nitro_flame_stop", function(entity,coords)
+	TriggerClientEvent("renzu_hud:nitro_flame_stop", -1, entity,coords)
 end)
 
 RegisterServerEvent("renzu_hud:synclock")

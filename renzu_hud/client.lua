@@ -146,6 +146,8 @@ Creation(function()
 			lastped = PlayerPedId()
 			TriggerServerEvent("renzu_hud:getdata",charslot)
 			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
+			Wait(5000)
+			RenzuSendUI({content = true, type = 'pedface'})
 		end)
 	else
 		RenzuNetEvent('playerSpawned')
@@ -154,7 +156,9 @@ Creation(function()
 			Renzuzu.Wait(2000)
 			lastped = PlayerPedId()
 			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
-			TriggerServerEvent("renzu_hud:getdata",charslot)	
+			TriggerServerEvent("renzu_hud:getdata",charslot)
+			Wait(5000)
+			RenzuSendUI({content = true, type = 'pedface'})	
 		end)
 	end
 	Wait(500)
@@ -267,14 +271,14 @@ Creation(function()
 	if nuiloop then
 		RenzuNuiCallback('NuiLoop', function(data, cb)
 			--updateplayer()
-			if se then
+			if se and not invehicle then
 				Creation(function()
 					Wait(1000)
 					setStatusEffect()
 					return
 				end)
 			end
-			if wui then
+			if wui and not invehicle then
 				Creation(function()
 					Wait(1500)
 					WeaponStatus()
@@ -290,7 +294,7 @@ Creation(function()
 				end)
 			end
 
-			if bs then
+			if bs and not invehicle then
 				Creation(function()
 					BodyLoop()
 					return
@@ -401,7 +405,7 @@ Creation(function()
 	while true do
 		ped = PlayerPedId()
 		vehicle = GetVehiclePedIsIn(ped)
-		if config.enablestatus or not config.enablestatus and config.statusui == 'normal' then
+		if not invehicle and config.enablestatus or not invehicle and not config.enablestatus and config.statusui == 'normal' then
 			updateplayer()
 		end
 		if invehicle and vehicle == 0 then
@@ -504,7 +508,9 @@ RenzuCommand(config.commands['car_seatbelt'], function()
 						})
 					end
 					Notify('warning','Seatbelt',"Seatbelt has been Detached")
-					SendNuiSeatBelt()
+					SetFlyThroughWindscreenParams(config.seatbeltminspeed, 2.2352, 0.0, 0.0)
+					SetPedConfigFlag(PlayerPedId(), 32, true)
+					--SendNuiSeatBelt()
 				end)
 			else
 				SetTimeout(1000,function()
@@ -515,9 +521,11 @@ RenzuCommand(config.commands['car_seatbelt'], function()
 						type = "setBelt",
 						content = belt
 						})
+						SetFlyThroughWindscreenParams(config.seatbeltmaxspeed, 2.2352, 0.0, 0.0)
+						--SetPedConfigFlag(PlayerPedId(), 32, false)
 						Notify('success','Seatbelt',"Seatbelt has been attached")
 					end
-					SendNuiSeatBelt()
+					--SendNuiSeatBelt()
 				end)
 			end
 		end
@@ -1378,7 +1386,7 @@ Creation(function()
 		while true do
 			local sleep = 2000
 			for k,v in pairs(nearstancer) do
-				if not v.wheeledit and v.dist < 100 and veh_stats[v.plate] ~= nil and veh_stats[v.plate]['wheelsetting'] ~= nil then
+				if v.speed > 1 and not v.wheeledit and v.dist < 100 and veh_stats[v.plate] ~= nil and veh_stats[v.plate]['wheelsetting'] ~= nil then
 					sleep = 0
 					SetVehicleWheelWidth(v.entity,0.7) -- trick to avoid stance bug
 					SetVehicleWheelXOffset(v.entity,0,tonumber(veh_stats[v.plate]['wheelsetting']['wheeloffsetfront'].wheel0))
@@ -1613,11 +1621,44 @@ AddEventHandler("renzu_hud:addnitro", function(amount)
             end
             ESX.ShowNotification("Nitro has been reloaded")
 		end)
-		nitro_state = 100
+		veh_stats[GetPlate(getveh())].nitro = 100
+end)
+
+RegisterNetEvent("renzu_hud:nitro_flame_stop")
+AddEventHandler("renzu_hud:nitro_flame_stop", function(c_veh,coords)
+		print("CHUPA")
+		if purgefuck[c_veh] ~= nil then
+			purgefuck[c_veh] = false
+		end
+		for k,v in pairs(purgeshit) do
+			print("remove")
+			if k == c_veh then
+				for k2,v2 in pairs(v) do
+					StopParticleFxLooped(k2, 1)
+					RemoveParticleFx(k2, true)
+					k2 = nil
+					print('remove2')
+				end
+				k = nil
+			end
+		end
+		for k,v in pairs(lightshit) do
+			if k == c_veh then
+				for k2,v2 in pairs(v) do
+					StopParticleFxLooped(k2, 1)
+					RemoveParticleFx(k2, true)
+					k2 = nil
+					print('remove2')
+				end
+				k = nil
+			end
+		end
+		RemoveParticleFxFromEntity(NetToVeh(c_veh))
 end)
 
 RegisterNetEvent("renzu_hud:nitro_flame")
 AddEventHandler("renzu_hud:nitro_flame", function(c_veh,coords)
+	print(coords - GetEntityCoords(ped))
 	if #(coords - GetEntityCoords(ped)) < 50 then
 		if not HasNamedPtfxAssetLoaded(config.nitroasset) then
 			RequestNamedPtfxAsset(config.nitroasset)
@@ -1627,19 +1668,14 @@ AddEventHandler("renzu_hud:nitro_flame", function(c_veh,coords)
 		end
 		if GetEntitySpeed(NetToVeh(c_veh)) * 3.6 > 5 then
 			local vehicle = NetToVeh(c_veh)
-			if not light_trail_isfuck then
-				light_trail_isfuck = true
-				for _,bones in pairs(config.tailights_bone) do
-					UseParticleFxAssetNextCall(config.nitroasset)
-					lightrailparticle = StartParticleFxLoopedOnEntityBone(config.trail_particle_name, vehicle, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, GetEntityBoneIndexByName(vehicle, bones), config.trail_size, false, false, false)
-					SetParticleFxLoopedEvolution(lightrailparticle, "speed", 1.00, false)
-					table.insert(lightshit, lightrailparticle)
-					for k,v in pairs(lightshit) do
-						StopParticleFxLooped(k, 1)
-						RemoveParticleFx(k, true)
-						k = nil
-					end
+			for _,bones in pairs(config.tailights_bone) do
+				UseParticleFxAssetNextCall(config.nitroasset)
+				lightrailparticle = StartParticleFxLoopedOnEntityBone(config.trail_particle_name, vehicle, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, GetEntityBoneIndexByName(vehicle, bones), config.trail_size, false, false, false)
+				SetParticleFxLoopedEvolution(lightrailparticle, "speed", 1.00, false)
+				if lightshit[c_veh] == nil then
+					lightshit[c_veh] = {}
 				end
+				table.insert(lightshit[c_veh], lightrailparticle)
 			end
 			for _,bones in pairs(config.exhaust_bones) do
 				UseParticleFxAssetNextCall(config.nitroasset)
@@ -1664,25 +1700,32 @@ AddEventHandler("renzu_hud:nitro_flame", function(c_veh,coords)
 			end
 
 		else
-			if not purgefuck then
+			if not purgefuck[c_veh] then
 				local vehicle = NetToVeh(c_veh)
-				purgefuck = true
+				purgefuck[c_veh] = true
+				print("purge")
 				local index = GetEntityBoneIndexByName(vehicle, config.purge_left_bone)
 				local bone_position = GetWorldPositionOfEntityBone(vehicle, index)
 				local particle_location = GetOffsetFromEntityGivenWorldCoords(vehicle, bone_position.x, bone_position.y, bone_position.z)
 				UseParticleFxAssetNextCall(config.nitroasset)
-				purge1 = StartParticleFxLoopedOnEntity(config.purge_paticle_name,vehicle,particle_location.x + 0.03, particle_location.y + 0.1, particle_location.z+0.2, config.purge_size, -20.0, 0.0, 0.5)
-				table.insert(purgeshit, purge1)
+				purge1 = StartParticleFxLoopedOnEntity(config.purge_paticle_name,vehicle,particle_location.x + 0.03, particle_location.y + 0.1, particle_location.z+0.2, 20.0, 0.0, 0.5,config.purge_size,false,false,false)
+																																												---20.0, 0.0, 0.5,config.purge_size,false,false,false)
+				SetVehicleBoostActive(vehicle, 1, 0)
+				SetVehicleBoostActive(vehicle, 0, 0)
+				if purgeshit[c_veh] == nil then
+					purgeshit[c_veh] = {}
+				end
+				table.insert(purgeshit[c_veh], purge1)
 				local index = GetEntityBoneIndexByName(vehicle, config.purge_right_bone)
 				local bone_position = GetWorldPositionOfEntityBone(vehicle, index)
 				local particle_location = GetOffsetFromEntityGivenWorldCoords(vehicle, bone_position.x, bone_position.y, bone_position.z)
 				UseParticleFxAssetNextCall(config.nitroasset)
-				purge2 = StartParticleFxLoopedOnEntity(config.purge_paticle_name,vehicle,particle_location.x - 0.03, particle_location.y + 0.1, particle_location.z+0.2, config.purge_size, 20.0, 0.0, 0.5)
-				table.insert(purgeshit, purge2)
-				for k,v in pairs(purgeshit) do
-					StopParticleFxLooped(k, 1)
-					RemoveParticleFx(k, true)
-					k = nil
+				purge2 = StartParticleFxLoopedOnEntity(config.purge_paticle_name,vehicle,particle_location.x - 0.03, particle_location.y + 0.1, particle_location.z+0.2, 20.0, 0.0, 0.5,config.purge_size,false,false,false)
+				table.insert(purgeshit[c_veh], purge2)
+				while purgefuck[c_veh] do
+					Wait(55)
+					SetVehicleBoostActive(vehicle, 1, 0)
+					SetVehicleBoostActive(vehicle, 0, 0)
 				end
 			end
 		end
@@ -1861,22 +1904,29 @@ Creation(function()
 end)
 
 RegisterNetEvent("renzu_hud:synclock")
-AddEventHandler("renzu_hud:synclock", function(vehicle, type, coords)
+AddEventHandler("renzu_hud:synclock", function(v, type, coords)
+	local v = NetToVeh(v)
 	if #(coords - GetEntityCoords(ped)) < 50 then
-		SetVehicleLights(vehicle, 2);Citizen.Wait(100);SetVehicleLights(vehicle, 0);Citizen.Wait(200);SetVehicleLights(vehicle, 2)
+		SetVehicleLights(v, 2);Citizen.Wait(100);SetVehicleLights(v, 0);Citizen.Wait(200);SetVehicleLights(v, 2)
 		Citizen.Wait(100)
-		SetVehicleLights(vehicle, 0)	
+		SetVehicleLights(v, 0)	
 		if type == 'lock' then
 			--print("locking shit")
 			playsound(coords,20,'lock',1.0)
-			SetVehicleDoorsLocked(vehicle,2)
+			SetVehicleDoorsLocked(v,2)
 			Wait(500)
 			ClearPedTasks(ped)
+		end
+		if type == 'force' then
+			SetVehicleDoorsLocked(v,7)
+		end
+		if type == 'carjack' then
+			SetVehicleDoorsLocked(v,1)
 		end
 		if type == 'unlock' then
 			--print("unlocking shit")
 			playsound(coords,20,'unlock',1.0)
-			SetVehicleDoorsLocked(vehicle,1)
+			SetVehicleDoorsLocked(v,1)
 			Wait(500)
 			ClearPedTasks(ped)
 		end
@@ -1897,7 +1947,7 @@ RenzuNuiCallback('setvehiclelock', function(data, cb)
 		playanimation('anim@mp_player_intmenu@key_fob@','fob_click')
 		--Makeloading('Lock Plate # '..GetVehicleNumberPlateText(data.vehicle)..'',1000)
 		Notify('success','Vehicle Lock System','Lock Plate # '..GetVehicleNumberPlateText(data.vehicle)..'')
-		TriggerServerEvent("renzu_hud:synclock", data.vehicle, 'lock', GetEntityCoords(ped))
+		TriggerServerEvent("renzu_hud:synclock", VehToNet(data.vehicle), 'lock', GetEntityCoords(ped))
     end
 end)
 
@@ -1906,7 +1956,7 @@ RenzuNuiCallback('setvehicleunlock', function(data, cb)
 		playanimation('anim@mp_player_intmenu@key_fob@','fob_click')
 		--Makeloading('Unlock Plate # '..GetVehicleNumberPlateText(data.vehicle)..'',1000)
 		Notify('success','Vehicle Lock System','Unlock Plate # '..GetVehicleNumberPlateText(data.vehicle)..'')
-		TriggerServerEvent("renzu_hud:synclock", data.vehicle, 'unlock', GetEntityCoords(ped))
+		TriggerServerEvent("renzu_hud:synclock", VehToNet(data.vehicle), 'unlock', GetEntityCoords(ped))
     end
 end)
 
@@ -1966,6 +2016,7 @@ Creation(function()
 				break
 			end
 			--print("Playerloaded")
+			print("PL")
 		end
 		Wait(4000) -- wait 4 sec after the playerloaded event to get ped skin
 		TriggerEvent('skinchanger:getSkin', function(current)
@@ -1974,10 +2025,12 @@ Creation(function()
 		while tablelength(dummyskin1) <= 2 do
 			TriggerEvent('skinchanger:getSkin', function(current) dummyskin1 = current end)
 			Wait(1000)
+			print("dummy")
 		end
 		SaveCurrentClothes(true)
 		skinsave = false
 		RenzuCommand(config.commands['clothing'], function()
+			SaveCurrentClothes(false)
 			if not skinsave then
 				--SaveCurrentClothes(false)
 				skinsave = true
@@ -1999,10 +2052,13 @@ RegisterNUICallback('ChangeClothes', function(data)
 			Notify("success","Clothe System",""..data.variant.." is put on")
 			local st = nil
 			TriggerEvent('skinchanger:getSkin', function(current)
-				TriggerEvent('skinchanger:loadClothes', current, config.clothing[tostring(data.variant)].skin)
+				TriggerEvent('skinchanger:loadClothes', current, config.clothing[data.variant].skin)
 			end)
 			PlaySoundFrontend(PlayerId(), 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 1)
 			clothestate[tostring(data.variant)] = false
+			if data.variant == 'mask_1' or data.variant == 'helmet_1' then
+				RenzuSendUI({content = true, type = 'pedface'})
+			end
 			local table = {
 				['bool'] = clothestate[data.variant],
 				['variant'] = data.variant
@@ -2018,10 +2074,13 @@ RegisterNUICallback('ChangeClothes', function(data)
 				TaskAnimation(config.clothing[data.variant]['taskplay'])
 				Notify("success","Clothe System",""..data.variant.." is put off")
 				local Changes = {}
+				if data.variant == 'mask_1' or data.variant == 'helmet_1' then
+					RenzuSendUI({content = true, type = 'pedface'})
+				end
+				Changes[tostring(data.variant)], Changes[tostring(data.variant2)] = skin[tostring(data.variant)], skin[tostring(data.variant2)]
 				if data.variant == 'torso_1' then
 					Changes['arms'], Changes['arms_2'] = skin['arms'], skin['arms_2']
 				end
-				Changes[tostring(data.variant)], Changes[tostring(data.variant2)] = skin[tostring(data.variant)], skin[tostring(data.variant2)]
 				TriggerEvent('skinchanger:getSkin', function(current)
 					TriggerEvent('skinchanger:loadClothes', current, Changes)
 				end)

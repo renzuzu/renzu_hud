@@ -1933,6 +1933,7 @@ var renzu_hud = {
     hideui,
     uiconfig,
     unsetradio,
+    pedface,
     //CAR
     setShow,
     setRpm,
@@ -1999,4 +2000,3 @@ setTimeout(function(){
     setMic(2)
 }, 5000);
 setShowCarStatus(false)
-pedface()

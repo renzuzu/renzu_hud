@@ -473,10 +473,6 @@ function RpmandSpeedLoop()
 				sleep = config.rpm_speed_loop
 				rpm = VehicleRpm(vehicle)
 				speed = VehicleSpeed(vehicle)
-				vtable = {
-					['rpm'] = rpm,
-					['speed'] = speed
-				}
 			end
 			Renzuzu.Wait(sleep)
 		end
@@ -500,6 +496,10 @@ function NuiRpm()
 				if rpm < 0.21 then
 				Renzuzu.Wait(config.idle_rpm_speed_sleep)
 				end
+				vtable = {
+					['rpm'] = rpm,
+					['speed'] = speed
+				}
 				if newrpm ~= rpm or newrpm == nil then
 					newrpm = rpm
 					RenzuSendUI({
@@ -843,7 +843,7 @@ function NuiMileAge()
 			local ped = ped
 			local vehicle = vehicle
 			local driver = GetPedInVehicleSeat(vehicle, -1)
-			if vehicle ~= nil and vehicle ~= 0 and IsPedInAnyVehicle(ped, false) and driver == ped then
+			if vehicle ~= nil and vehicle ~= 0 and driver == ped then
 				-- local plate = tostring(GetVehicleNumberPlateText(vehicle))
 				-- plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
 				local newPos = GetEntityCoords(ped)
@@ -851,7 +851,9 @@ function NuiMileAge()
 				lastve = GetVehiclePedIsIn(ped, false)
 				if plate ~= nil then
 					--saveplate = string.match(GetVehicleNumberPlateText(vehicle), '%f[%d]%d[,.%d]*%f[%D]')
-					get_veh_stats()
+					if veh_stats[plate] == nil then
+						get_veh_stats()
+					end
 					--print(veh_stats[plate].coolant)
 					if plate ~= nil and veh_stats[plate].plate == plate then
 						if oldPos == nil then
@@ -877,6 +879,7 @@ function NuiMileAge()
 								oldPos3 = newPos
 								local numwheel = GetVehicleNumberOfWheels(vehicle)
 								for i = 0, numwheel - 1 do
+									Wait(100)
 									if veh_stats[plate][tostring(i)] ~= nil and veh_stats[plate][tostring(i)].tirehealth > 0 then
 										local bonuswear = 0.0
 										if config.wearspeedmultiplier then
@@ -1137,7 +1140,7 @@ function NuiEngineTemp()
 			newtemp = nil
 			if vehicle ~= nil and vehicle ~= 0 then
 				--print(veh_stats[plate].coolant)
-				sleep = 1000
+				sleep = 2000
 				local temp = GetVehicleEngineTemperature(vehicle)
 				local overheat = false
 				while rpm > config.dangerrpm and config.engineoverheat and not config.driftcars[vehiclemodel] do
@@ -1426,7 +1429,11 @@ end
 
 function SendNuiSeatBelt()
 	Citizen.Wait(300)
-	if vehicle ~= nil and vehicle ~= 0 and config.enableseatbeltfunc then
+	if config.seatbelt_2 then
+		SetFlyThroughWindscreenParams(config.seatbeltminspeed, 2.2352, 0.0, 0.0)
+		SetPedConfigFlag(PlayerPedId(), 32, true)
+	end
+	if vehicle ~= nil and vehicle ~= 0 and config.enableseatbeltfunc and not config.seatbelt_2 then
 		Creation(function()
 			local Session = {}
 			local Velocity = {}
@@ -1442,7 +1449,7 @@ function SendNuiSeatBelt()
 				if Session[1] > 30 then
 					sleep = 50
 				end
-				if HasEntityCollidedWithAnything(vehicle) and Session[2] ~= nil and not belt and GetEntitySpeedVector(vehicle,true).y > 1.2 and Session[1] > 15.25 and (Session[2] - Session[1]) > (Session[1] * 0.105) then
+				if speed > config.seatbeltminspeed and HasEntityCollidedWithAnything(vehicle) and Session[2] ~= nil and not belt and GetEntitySpeedVector(vehicle,true).y > 5.2 and Session[1] > 15.25 and (Session[2] - Session[1]) > (Session[1] * 0.105) then
 					local coord = GetEntityCoords(ped)
 					local ahead = forwardvect(Session[1])
 					if config.reducepedhealth then
@@ -2706,7 +2713,7 @@ function WeaponStatus()
 	end
 end
 
---NOS -- very old style nitro, will redo soon..
+--NOS --
 
 function EnableNitro()
 	Creation(function()
@@ -2718,13 +2725,15 @@ function EnableNitro()
 					if veh_stats[plate].nitro > 5 and RCP(0, 21) and not RCR2(0, 21) then
 						SetVehicleEngineHealth(vehicle, GetVehicleEngineHealth(vehicle) - 0.05)
 						if veh_stats[plate].nitro - 0.02 > 0 then
-							if speed > 5 and not pressed then
+							if not pressed then
 								pressed = true
-								SetTimecycleModifier("ship_explosion_underwater")
-								SetExtraTimecycleModifier("StreetLightingJunction")
-								SetExtraTimecycleModifierStrength(0.1)
-								SetTimecycleModifierStrength(0.1)
-								--StartScreenEffect('MP_Celeb_Preload_Fade', 0, true)
+								if speed > 5 then
+									SetTimecycleModifier("ship_explosion_underwater")
+									SetExtraTimecycleModifier("StreetLightingJunction")
+									SetExtraTimecycleModifierStrength(0.1)
+									SetTimecycleModifierStrength(0.1)
+									--StartScreenEffect('MP_Celeb_Preload_Fade', 0, true)
+								end
 								TriggerServerEvent("renzu_hud:nitro_flame", VehToNet(vehicle), GetEntityCoords(vehicle))
 							end
 							SetVehicleEngineTorqueMultiplier(vehicle, config.nitroboost * 2 * rpm)
@@ -2747,6 +2756,7 @@ function EnableNitro()
 					end
 					if pressed and IsControlJustReleased(0, 21) and not RCP(0, 21) then
 						Wait(100)
+						TriggerServerEvent("renzu_hud:nitro_flame_stop", VehToNet(vehicle), GetEntityCoords(vehicle))
 						pressed = false
 						ClearExtraTimecycleModifier()
 						ClearTimecycleModifier()
@@ -2754,23 +2764,9 @@ function EnableNitro()
 						RemoveParticleFxFromEntity(vehicle)
 						local vehcoords = GetEntityCoords(vehicle)
 						Citizen.Wait(1)
-						RemoveParticleFxInRange(vehcoords.x,vehcoords.y,vehcoords.z,100.0)
+						--RemoveParticleFxInRange(vehcoords.x,vehcoords.y,vehcoords.z,100.0)
 						light_trail_isfuck = false
-						for k,v in pairs(lightshit) do
-							StopParticleFxLooped(k, 1)
-							RemoveParticleFx(k, true)
-							k = nil
-						end
-						purgefuck = false
-						Creation(function()
-							Wait(500)
-							for k,v in pairs(purgeshit) do
-								StopParticleFxLooped(k, 1)
-								RemoveParticleFx(k, true)
-								k = nil
-							end
-							return
-						end)
+						purgefuck[VehToNet(vehicle)] = false
 						collectgarbage()
 					end
 				end
@@ -2806,7 +2802,7 @@ function NuiWheelSystem()
 			local numwheel = GetVehicleNumberOfWheels(vehicle)
 			sleep = 500
 			for i = 0, numwheel - 1 do
-				--Wait(1)
+				Wait(10)
 				if plate ~= nil and rpm > config.minrpm_wheelspin_detect and speed > 1 and (rpm * 100.0) < (tractioncontrol(WheelSpeed(vehicle,i) * 3.6,GetGear(vehicle), true) * 85.0) then
 					if veh_stats[plate][tostring(i)] ~= nil and veh_stats[plate][tostring(i)].tirehealth > 0 then
 						veh_stats[plate][tostring(i)].tirehealth = veh_stats[plate][tostring(i)].tirehealth - config.tirestress
@@ -2819,6 +2815,7 @@ function NuiWheelSystem()
 			end
 			if speed ~= nil and speed > config.minspeed_curving and angle(vehicle) >= config.minimum_angle_for_curving and angle(vehicle) <= 18 and GetEntityHeightAboveGround(vehicle) <= 1.5 then
 				for i = 0, numwheel - 1 do
+					Wait(10)
 					if veh_stats[plate][tostring(i)] ~= nil and veh_stats[plate][tostring(i)].tirehealth > 0 then
 						veh_stats[plate][tostring(i)].tirehealth = veh_stats[plate][tostring(i)].tirehealth - config.tirestress
 					end
@@ -2904,29 +2901,35 @@ function TireFunction(type)
 	end
 end
 
+carjacking = false
+keyless = true
 function Carlock()
+	if not keyless then return end
+	print("carlock shit")
 	while veh_stats == nil do
 		Wait(100)
 	end
 	if not veh_stats_loaded then
 		get_veh_stats()
 	end
-	keyless = not keyless
+	print("carlock shit 2")
 	local foundveh = false
 	if keyless then
+		keyless = not keyless
 		----print("inside loop")
+		print("carlock shit3")
 		local vehicles = {}
 		local checkindentifier, myidentifier = nil, nil
-		local mycoords = GetEntityCoords(ped, false)
+		local mycoords = GetEntityCoords(PlayerPedId(), false)
 		local foundvehicle = {}
 		local min = -1
 		for k,v in pairs(GetGamePool('CVehicle')) do
 			if #(mycoords - GetEntityCoords(v, false)) < config.carlock_distance then
 				----print("dis loop")
 				local plate = string.gsub(GetVehicleNumberPlateText(v), "%s+", "")
-				plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
-				--print(plate,veh_stats[tostring(plate)],veh_stats[tostring(plate)].owner,identifier)
-				if veh_stats[tostring(plate)] ~= nil and veh_stats[tostring(plate)].owner ~= nil and identifier ~= nil then
+				print(plate)
+				print(plate,veh_stats[tostring(plate)],veh_stats[tostring(plate)].owner,identifier)
+				if veh_stats[plate] ~= nil and veh_stats[plate].owner ~= nil and identifier ~= nil then
 					----print("identifier loop")
 					checkindentifier = string.gsub(veh_stats[plate].owner, 'Char5', '')
 					checkindentifier = string.gsub(checkindentifier, 'Char4', '')
@@ -2953,18 +2956,22 @@ function Carlock()
 		local nearestveh = nil
 		local nearestplate = nil
 		for k,v in pairs(foundvehicle) do
+			print("carlock shit4")
 			----print(near)
 			----print(v.distance,v.plate)
 			if near == -1 or near > v.distance then
 				near = v.distance
 				nearestveh = v.entity
 				nearestplate = v.plate
-				if v.owner ~= nil then
+				if v.owner ~= nil and near < 20 then
 					nearestowner = v.owner
+					print(nearestowner,myidentifier)
 				end
 			end
 		end
-		if near <= 20 and nearestowner ~= nil and myidentifier ~= nil and nearestowner == myidentifier then
+		if near ~= -1 and near <= 20 and nearestowner ~= nil and myidentifier ~= nil and nearestowner == myidentifier then
+			print("carlock shit5")
+			print(nearestowner,myidentifier,nearestowner,myidentifier)
 			local table = {
 				['type'] = 'connect',
 				['bool'] = true,
@@ -2981,43 +2988,51 @@ function Carlock()
 			Wait(200)
 			SetNuiFocus(true,true)
 		end
+		keyless = not keyless
+		print("carlock shit6")
+		Wait(500)
+		if foundveh then
+			print("carlock shit7")
+			print(keyless)
+			RenzuSendUI({
+				type = "setShowKeyless",
+				content = keyless
+			})
+		elseif config.enable_carjacking and not carjacking then
+			keyless = true
+			carjacking = true
+			local bone = GetEntityBoneIndexByName(getveh(),'door_dside_f')
+			if getveh() ~= 0 and #(GetEntityCoords(ped) - GetWorldPositionOfEntityBone(getveh(),bone)) < config.carjackdistance and GetVehicleDoorLockStatus(getveh()) ~= 1 then
+				playanimation('creatures@rottweiler@tricks@','petting_franklin')
+				local carnap = exports["cd_keymaster"]:StartKeyMaster()
+				--print(carnap)
+				if carnap then
+					--print("good")
+					SetVehicleNeedsToBeHotwired(getveh(),true)
+					TaskEnterVehicle(ped, getveh(), 10.0, -1, 2.0, 0)
+					TriggerServerEvent("renzu_hud:synclock", VehToNet(getveh()), 'carjack', GetEntityCoords(ped))
+				else
+					SetVehicleNeedsToBeHotwired(getveh(),true)
+					TaskEnterVehicle(ped, getveh(), 10.0, -1, 2.0, 0)
+					SetVehicleAlarm(getveh(), 1)
+					StartVehicleAlarm(getveh())
+					SetVehicleAlarmTimeLeft(getveh(), 180000)
+					CreateIncidentWithEntity(7,ped,3,100.0)
+					PlayPoliceReport("SCRIPTED_SCANNER_REPORT_CAR_STEAL_2_01",0.0)
+					TriggerServerEvent("renzu_hud:synclock", VehToNet(getveh()), 'force', GetEntityCoords(ped))
+				end
+			elseif GetVehicleDoorLockStatus(getveh()) == 1 then
+				SetVehicleNeedsToBeHotwired(getveh(),true)
+				TaskEnterVehicle(ped, getveh(), 10.0, -1, 2.0, 0)
+			end
+			ClearPedTasks(ped)
+			carjacking = false
+		else
+			keyless = true
+			Notify('error','Vehicle Lock System',' No Vehicle in area')
+		end
 	else
 		SetNuiFocus(false,false)
-	end
-	Wait(500)
-	if foundveh then
-		RenzuSendUI({
-			type = "setShowKeyless",
-			content = keyless
-		})
-	elseif config.enable_carjacking then
-		local bone = GetEntityBoneIndexByName(getveh(),'door_dside_f')
-		if getveh() ~= 0 and #(GetEntityCoords(ped) - GetWorldPositionOfEntityBone(getveh(),bone)) < config.carjackdistance and GetVehicleDoorLockStatus(getveh()) ~= 1 then
-			playanimation('creatures@rottweiler@tricks@','petting_franklin')
-			local carnap = exports["cd_keymaster"]:StartKeyMaster()
-			--print(carnap)
-			if carnap then
-				--print("good")
-				SetVehicleDoorsLocked(getveh(),1)
-				SetVehicleNeedsToBeHotwired(getveh(),true)
-				TaskEnterVehicle(ped, getveh(), 10.0, -1, 2.0, 0)
-			else
-				SetVehicleNeedsToBeHotwired(getveh(),true)
-				SetVehicleDoorsLocked(getveh(),7)
-				TaskEnterVehicle(ped, getveh(), 10.0, -1, 2.0, 0)
-				SetVehicleAlarm(getveh(), 1)
-				StartVehicleAlarm(getveh())
-				SetVehicleAlarmTimeLeft(getveh(), 180000)
-				CreateIncidentWithEntity(7,ped,3,100.0)
-				PlayPoliceReport("SCRIPTED_SCANNER_REPORT_CAR_STEAL_2_01",0.0)
-			end
-		elseif GetVehicleDoorLockStatus(getveh()) == 1 then
-			SetVehicleNeedsToBeHotwired(getveh(),true)
-			TaskEnterVehicle(ped, getveh(), 10.0, -1, 2.0, 0)
-		end
-		ClearPedTasks(ped)
-	else
-		Notify('error','Vehicle Lock System',' No Vehicle in area')
 	end
 end
 
@@ -3087,9 +3102,8 @@ function checkaccesories(accessory, changes) -- being used if ESX ACCESORIES IS 
 	while ESX == nil do
 		Wait(100)
 	end
-	ESX.TriggerServerCallback('esx_accessories:get', function(hasAccessory, accessorySkin)
+	ESX.TriggerServerCallback('esx_accessories:get2', function(hasAccessory, accessorySkin)
 		local _accessory = string.lower(accessory)
-
 		if hasAccessory then
 			local skin = changes
 			local mAccessory = -1
@@ -3099,15 +3113,15 @@ function checkaccesories(accessory, changes) -- being used if ESX ACCESORIES IS 
 				mAccessory = 0
 			end
 
-			if skin[_accessory .. '_1'] == mAccessory then
-				mAccessory = accessorySkin[_accessory .. '_1']
-				mColor = accessorySkin[_accessory .. '_2']
+			if _accessory == "mask" or _accessory == "helmet" then
+				mAccessory = accessorySkin[''.._accessory.. '_1']
+				mColor = accessorySkin[''.._accessory.. '_2']
 			end
 
-			oldclothes[_accessory .. '_1'] = mAccessory
-			oldclothes[_accessory .. '_2'] = mColor
+			oldclothes[''.._accessory.. '_1'] = mAccessory
+			oldclothes[''.._accessory.. '_2'] = mColor
 			state = true
-			Notify("success","Clothe System","Variant Loaded "..accessory.."")
+			Notify("success","Clothe System","Variant Loaded "..accessory.." "..mColor.." "..mAccessory.."")
 		else
 			state = false
 			Notify("warning","Clothe System","No Variant for this type "..accessory.."")
@@ -3124,42 +3138,40 @@ end
 function SaveCurrentClothes(firstload)
 	TriggerEvent('skinchanger:getSkin', function(current)
 		oldclothes = current
+		Wait(100)
 		if config.use_esx_accesories and firstload then
-			if oldclothes['mask_1'] == -1 or oldclothes['mask_1'] == 0 then
-				--check if there is a mask from datastore
-				if checkaccesories('Mask', oldclothes) then
-					hasmask = true
-				end
+			if checkaccesories('Mask', oldclothes) then
+				hasmask = true
 			end
-			if oldclothes['helmet_1'] == -1 then
-				--check if there is a helmet from datastore
-				if checkaccesories('Helmet', oldclothes) then
-					hashelmet = true
-				end
+			Wait(1000)
+			--check if there is a helmet from datastore
+			if checkaccesories('Helmet', oldclothes) then
+				hashelmet = true
 			end
 		end
-		while oldclothes == nil do
-			--print("OLDCLOTHESNIL")
-			Wait(0)
-		end
-		ClotheState()
+		Wait(1000)
 	end)
+	while oldclothes == nil do
+		print("OLDCLOTHESNIL")
+		Wait(0)
+	end
+	ClotheState()
 end
 
 function ClotheState()
 	if oldclothes == nil then return end
 	for k,v in pairs(oldclothes) do
-		if config.clothing[tostring(k)] then
-			if oldclothes[tostring(k)] == config.clothing[tostring(k)]['default'] then
-				clothestate[tostring(k)] = false
+		if config.clothing[k] then
+			if oldclothes[k] == config.clothing[k]['default'] then
+				clothestate[k] = false
 			else
-				clothestate[tostring(k)] = true
+				clothestate[k] = true
 			end
 			if k == 'mask_1' and hasmask and oldclothes['mask_1'] ~= config.clothing['mask_1']['default'] then
-				clothestate[tostring(k)] = false
+				clothestate[k] = false
 			end
 			if k == 'helmet_1' and  hashelmet and oldclothes['helmet_1'] ~= config.clothing['helmet_1']['default'] then
-				clothestate[tostring(k)] = false
+				clothestate[k] = false
 			end
 		end
 	end
@@ -3538,6 +3550,7 @@ function SyncWheelSetting()
 			end
 			nearstancer[plate].dist = dist
 			nearstancer[plate].entity = vv
+			nearstancer[plate].speed = GetEntitySpeed(vv) * 3.6
 			-- if nearstancer[vv] ~= nil and nearstancer[vv].plate ~= nil and nearstancer[vv].plate == plate and dist > 140 then
 			-- 	nearstancer[vv] = nil
 			-- end
