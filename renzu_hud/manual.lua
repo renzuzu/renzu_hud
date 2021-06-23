@@ -520,7 +520,7 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                 if correctgears < 0 then
                     correctgears = 1
                 end
-                ShowHelpNotification(tostring(savegear,correctgears,tonumber(GetHandling(GetPlate(vehicle)).maxgear)), true, 1, 5)
+                --ShowHelpNotification(tostring(savegear,correctgears,tonumber(GetHandling(GetPlate(vehicle)).maxgear)), true, 1, 5)
                 if tonumber(savegear) > 1 and tonumber(correctgears) <= tonumber(GetHandling(GetPlate(vehicle)).maxgear) then
                     local speedgearlimit = tonumber((vehicletopspeed * config.gears[maxgear][correctgears]) * 0.88)
                     if correctgears < 1 then

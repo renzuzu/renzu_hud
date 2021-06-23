@@ -1,6 +1,6 @@
 ---------------------------------------------------------https://github.com/renzuzu/renzu_hud------------------------------------------
 config = {}
-config.gamebuild = 2189 -- if 2189 pedshot transparent and 1604 or < 2000 = Enter vehicle game event will not work, we will use normal pedshot ( gamebuild is what you set on your server start example: +set sv_enforceGameBuild 2189, available build 1604, 2060, 2189 and more.) this is important if you are using UI Normal with Ped Face.
+config.gamebuild = 'auto' -- if 2189 pedshot transparent and 1604 or < 2000 = Enter vehicle game event will not work, we will use normal pedshot ( gamebuild is what you set on your server start example: +set sv_enforceGameBuild 2189, available build 1604, 2060, 2189 and more.) this is important if you are using UI Normal with Ped Face.
 config.framework = 'ESX' -- ESX | VRP | STANDALONE (VRP not supported yet, but you can use standalone, it will work!)
 config.weight_type = false -- ESX item weight or limit type
 config.ESX_Items = { -- important to change job, weight. (job = false means its available to use for everyone) -- do not change the array name ex. ['nitro'], you can change the name = 'nitro'
@@ -87,6 +87,7 @@ config.uidesign = 'octagon' -- octagon (default), circle, square
 config.centercarhud = 'map' -- Feature of Car hud - MAP , MP3 (IF YOU CHOOSE MP3 you need renzu_mp3 as dependency, and renzu_mp3 need xsound) (MP3 not implemented yet..lazy..)
 config.mapversion = 'satellite' -- available ( satellite, atlas, oldschool )
 config.usecustomlink = false -- use custom url of image map
+config.push_start = false -- disable for now
 config.mapurl = 'https://github.com/jgardner117/gtav-interactive-map/blob/master/images/gtav.png?raw=true' -- if use custom url define it
 --atlas link https://github.com/jgardner117/gtav-interactive-map/blob/master/images/gtav.png?raw=true
 --satellite link https://github.com/jgardner117/gtav-interactive-map/blob/master/images/GTAV_SATELLITE_8192x8192.png?raw=true
@@ -201,17 +202,11 @@ config.statusordering = { -- SET enable = false to disable the status (the statu
 	[2] = {enable = true, status = 'hunger', rpuidiv = 'hunger', hideifmax = false, custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'block', id = 'uisimplehunger', offset = '275', i_id_1 = 'food2', i_id_1_color = 'rgb(221, 144, 0)', i_id_1_class = 'fad fa-cheeseburger fa-stack-1x', i_id_2 = 'food2bg', i_id_2_color = 'rgb(114, 68, 0)', i_id_2_class = 'fad fa-cheeseburger fa-stack-1x', id_3 = 'hunger_blink'},
 	[3] = {enable = true, status = 'thirst', rpuidiv = 'thirst', hideifmax = false, custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very thirsty', notify_value = 20, display = 'block', id = 'uisimplethirst', offset = '275', i_id_1 = 'water2', i_id_1_color = 'rgb(36, 113, 255)', i_id_1_class = 'fad fa-glass fa-stack-1x', i_id_2 = 'water2bg', i_id_2_color = 'rgb(0, 11, 112)', i_id_2_class = 'fad fa-glass fa-stack-1x', id_3 = 'thirst_blink'},
 	[4] = {enable = true, status = 'sanity', rpuidiv = 'stressbar', hideifmax = false, custom = true, value = 0, notify_lessthan = true, notify_message = 'i see some dragons', notify_value = 80, display = 'block', id = 'uisimplesanity', offset = '275', i_id_1 = 'stress2', i_id_1_color = 'rgb(255, 16, 68)', i_id_1_class = 'fad fa-head-side-brain fa-stack-1x', i_id_2 = 'stress2bg', i_id_2_color = 'rgba(35, 255, 101, 0.842)', i_id_2_class = 'fad fa-head-side-brain fa-stack-1x', id_3 = 'stress_blink'},
-	[5] = {enable = true, status = 'stamina', rpuidiv = 'staminabar', hideifmax = false, custom = false, value = 0, notify_lessthan = false, notify_message = 'running makes me thirsty', notify_value = 20, display = 'block', id = 'uisimplestamina', offset = '275', i_id_1 = 'stamina2', i_id_1_color = 'rgb(16, 255, 136)', i_id_1_class = 'fad fa-running fa-stack-1x', i_id_2 = 'stamina2bg', i_id_2_color = 'rgba(0, 119, 57, 0.945)', i_id_2_class = 'fad fa-running fa-stack-1x', id_3 = 'stamina_blink'},
-	[6] = {enable = true, status = 'oxygen', rpuidiv = 'oxygenbar', hideifmax = false, custom = false, value = 0, notify_lessthan = false, notify_message = 'my oxygen is almost gone', notify_value = 20, display = 'block', id = 'uisimpleoxygen', offset = '275', i_id_1 = 'oxygen2', i_id_1_color = 'rgb(15, 227, 255)', i_id_1_class = 'fad fa-lungs fa-stack-1x', i_id_2 = 'oxygen2bg', i_id_2_color = 'rgba(8, 76, 85, 0.788)', i_id_2_class = 'fad fa-lungs fa-stack-1x', id_3 = 'oxygen_blink'},
+	[5] = {enable = true, status = 'stamina', rpuidiv = 'staminabar', hideifmax = true, custom = false, value = 0, notify_lessthan = false, notify_message = 'running makes me thirsty', notify_value = 20, display = 'block', id = 'uisimplestamina', offset = '275', i_id_1 = 'stamina2', i_id_1_color = 'rgb(16, 255, 136)', i_id_1_class = 'fad fa-running fa-stack-1x', i_id_2 = 'stamina2bg', i_id_2_color = 'rgba(0, 119, 57, 0.945)', i_id_2_class = 'fad fa-running fa-stack-1x', id_3 = 'stamina_blink'},
+	[6] = {enable = true, status = 'oxygen', rpuidiv = 'oxygenbar', hideifmax = true, custom = false, value = 0, notify_lessthan = false, notify_message = 'my oxygen is almost gone', notify_value = 20, display = 'block', id = 'uisimpleoxygen', offset = '275', i_id_1 = 'oxygen2', i_id_1_color = 'rgb(15, 227, 255)', i_id_1_class = 'fad fa-lungs fa-stack-1x', i_id_2 = 'oxygen2bg', i_id_2_color = 'rgba(8, 76, 85, 0.788)', i_id_2_class = 'fad fa-lungs fa-stack-1x', id_3 = 'oxygen_blink'},
 	[7] = {enable = true, status = 'energy', rpuidiv = 'energybar', hideifmax = false, custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very tired', notify_value = 20, display = 'block', id = 'uisimpleenergy', offset = '275', i_id_1 = 'energy2', i_id_1_color = 'rgb(233, 233, 233)', i_id_1_class = 'fas fa-snooze fa-stack-1x', i_id_2 = 'energy2bg', i_id_2_color = 'color:rgb(243, 57, 0)', i_id_2_class = 'fas fa-snooze fa-stack-1x', id_3 = 'energy_blink'},
 	[8] = {enable = true, status = 'voip', rpuidiv = 'null', hideifmax = false, custom = false, value = 0, notify_lessthan = false, notify_message = 'silent mode', notify_value = 0, display = 'block', id = 'voip_2', offset = '275', i_id_1 = 'microphone', i_id_1_color = 'rgb(251, 29, 9)', i_id_1_class = 'fas fa-microphone fa-stack-1x', i_id_2 = 'voipsimplebg', i_id_2_color = 'rgba(251, 29, 9, 0.3)', i_id_2_class = 'fas fa-microphone fa-stack-1x', id_3 = 'voip_blink'},
 }
---UTILS UI SETTINGS -- the default settings is optimized for CPU usage, (DEFAULT: false,false,0ms,'') Use this if you know else leave default.
-config.acceleration = 'none' -- (none,gpu,hardware) use hardware acceleration = cpu / gpu = gpu resource to some UI animation and effects?, option = hardware,gpu (looks like this is the same result)
-config.animation_ms = '0ms' -- animation delay ( this affects cpu usage of animations )
-config.transition = 'unset' -- ease, linear, or leave it like = '' (blank) or unset
--- DEFAULT UTIL SETTING is the optimize for CPU in task manager not in resmon!, but the animation or transition is sucks, you may want to configure the transition and animation_ms to your desire settings and desire beautiful transition of circlebars,carhud etc.
-config.uiconfig = {acceleration = config.acceleration, animation_ms = config.animation_ms, transition = config.transition}
 -- BODY STATUS
 config.bodystatus = true -- ENABLE BODY STATUS FUNCTION AND UI?
 config.checkbodycommandjob = 'ambulance' -- allowed jobs to use the bodysystem treatment
@@ -701,10 +696,17 @@ config.NuiCarhpandGas_sleep = 2500
 config.car_mainloop_sleep = 1500
 config.rpm_speed_loop = 52
 config.idle_rpm_speed_sleep = 151
-config.Rpm_sleep = 250
-config.Rpm_sleep_2 = 52
+config.Rpm_sleep = 200
+config.Rpm_sleep_2 = 22
 config.Speed_sleep = 151
-config.Speed_sleep_2 = 52
+config.Speed_sleep_2 = 11
+
+--UTILS UI SETTINGS -- the default settings is optimized for CPU usage, (DEFAULT: false,false,0ms,'') Use this if you know else leave default.
+config.acceleration = 'gpu' -- (none,gpu,hardware) use hardware acceleration = cpu / gpu = gpu resource to some UI animation and effects?, option = hardware,gpu (looks like this is the same result)
+config.animation_ms = '250ms' -- animation delay ( this affects cpu usage of animations )
+config.transition = 'linear' -- ease, linear, or leave it like = '' (blank) or unset
+-- DEFAULT UTIL SETTING is the optimize for CPU in task manager not in resmon!, but the animation or transition is sucks, you may want to configure the transition and animation_ms to your desire settings and desire beautiful transition of circlebars,carhud etc.
+config.uiconfig = {acceleration = config.acceleration, animation_ms = config.animation_ms, transition = config.transition}
 -- GEAR FUNCTION
 nextgearhash = `SET_VEHICLE_NEXT_GEAR`
 setcurrentgearhash = `SET_VEHICLE_CURRENT_GEAR`
@@ -772,6 +774,8 @@ end
 function GetGear(vehicle)
 	return Renzu_Hud(0xB4F4E566, vehicle, ReturnInt)
 end
+function build() ver = 1604 if IsModelInCdimage(`italirsx`) then ver = 2189 elseif IsModelInCdimage(`everon`) then ver = 2060 end return ver end
+--config.gamebuild = build()
 -------------------------------------------https://github.com/renzuzu/renzu_hud----------------------------------------------------------
 --------------------------------------------------------------VARIABLES------------------------------------------------------------------
 identifier=nil;lastveh = nil;newdate = nil;healing=nil;alreadyblackout = false;regdecor=false;busy = false;nearstancer = {};wheelsettings = {};wheeledit = false;turbosound = 0;oldgear = 0;newgear = 0;rpm2 = 0;propturbo = nil;boost = 1.0;old_diff = nil;togglediff = false;cruising = false;lastdamage = nil;oldlife = 200;windowbones = {[0] = 'window_rf',[1] = 'window_lf',[2] = 'window_rr',[3] = 'window_lr'};carcontrol = false;isbusy = false;oldweapon = nil;weaponui = false;wstatus = {};trail = {};nitromode = false;lightshit = {};light_trail_isfuck = false;purgefuck = {};purgeshit = {};pressed = false;proptire = nil;keyless = false;hasmask=false;hashelmet = false;imbusy = true;carstatus = false;enginelist = {};syncengine = {};syncveh = {};ped = nil;playerNamesDist = 3;key_holding = false;particlesfire = {};particleslight = {};charslot = nil;pedshot = false;lastped = nil;dummyskin = {};show = false;notifycd = {};statuses = {};vitals = {};statusloop = -1;garbage = 0;start = false;breakstart = false;lastplate = nil;notloaded = true;minimap=nil;shooting = false;busyplate = {};busyairsus = false;crosshair = 1;flametable = {};spool = false;shouldUpdateSkin = false;pedSkin = {};oldclothes = nil;clothestate = {};dummyskin1 = {};sounded = false;left = false;right = false;hazard = false;state = false;turbo = config.boost;newstreet = nil;newmic = nil;newhealth = 1111;newarmor = 1111;triggered = false;cansmoke = true;refresh = false;veh_stats_loaded = false;finaldrive = 0;flywheel = 0;maxspeed = 0;currentengine={};headshot = nil;enginespec=false;handlings={};vehiclehandling={};boost=1.0;correctgears=1;gear=1;plate=nil;loadedplate=false;maxgear=5;pid=nil;veh_stats=nil;Renzuzu=Citizen;entering=false;mode='NORMAL'ismapopen=false;date="00:00"plate=nil;degrade=1.0;playerloaded=false;manual=false;vehicletopspeed=nil;uimove=false;reverse=false;savegear=0;rpm=0.2;hour=0;vali=false;minute=0;globaltopspeed=nil;segundos=0;month=""dayOfMonth=0;voice=2;voiceDisplay=2;proximity=25.0;belt=false;ExNoCarro=false;sBuffer={}vBuffer={}displayValue=true;gasolina=0;street=nil;vehicle=nil;hp=0;shifter=false;hasNitro=true;k_nitro=70;n_boost=15.0;boost=1.0;nitro_state=100;isBlack="false"invehicle=false;topspeedmodifier=1.0;switch=false;life=100;receive='new'bodystatus={}bonecategory={}parts={}bodyui=false;body=false;arm=false;armbone=0;armbone2=0;leg=false;head=false;shooting=false;manualstatus=false;traction=nil;traction2=nil;alreadyturbo=false;Creation=Renzuzu.CreateThread;Renzu_Hud=Renzuzu.InvokeNative;ClientEvent=TriggerEvent;RenzuNetEvent=RegisterNetEvent;RenzuEventHandler=AddEventHandler;RenzuCommand=RegisterCommand;RenzuSendUI=SendNUIMessage;RenzuKeybinds=RegisterKeyMapping;RenzuNuiCallback=RegisterNUICallback;ReturnFloat=Renzuzu.ResultAsFloat();ReturnInt=Renzuzu.ResultAsInteger()

@@ -1,4 +1,4 @@
-Creation(function()
+CreateThread(function()
     Wait(1000)
     if config.customengine then
         local f = LoadResourceFile("hud","handling.min.json")

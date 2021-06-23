@@ -80,23 +80,27 @@ end)
 RegisterServerEvent("renzu_hud:savedata")
 AddEventHandler("renzu_hud:savedata", function(plate,table)
 	local source = source
-	local plate = string.gsub(plate, "%s+", "")
-	local foundplate = false
 	if plate ~= nil then
-		print("SAVING")
-		adv_table[tostring(plate)] = table
-		local results = MySQL.Sync.fetchAll("SELECT adv_stats,plate,owner FROM owned_vehicles WHERE plate=@plate", {['@plate'] = plate})
-		if #results > 0 then
-			foundplate = true
-			MySQL.Sync.execute("UPDATE owned_vehicles SET adv_stats = @adv_stats WHERE plate = @plate", {
-				['@adv_stats'] = json.encode(adv_table[tostring(plate)]),
-				['@plate'] = plate
-			})
+		local plate = string.gsub(plate, "%s+", "")
+		local foundplate = false
+		if plate ~= nil then
+			print("SAVING")
+			adv_table[tostring(plate)] = table
+			local results = MySQL.Sync.fetchAll("SELECT adv_stats,plate,owner FROM owned_vehicles WHERE plate=@plate", {['@plate'] = plate})
+			if #results > 0 then
+				foundplate = true
+				MySQL.Sync.execute("UPDATE owned_vehicles SET adv_stats = @adv_stats WHERE plate = @plate", {
+					['@adv_stats'] = json.encode(adv_table[tostring(plate)]),
+					['@plate'] = plate
+				})
+			end
+			if not foundplate then
+				adv_table[tostring(plate)].owner = nil
+			end
+			TriggerClientEvent('renzu_hud:receivedata', -1, adv_table)
 		end
-		if not foundplate then
-			adv_table[tostring(plate)].owner = nil
-		end
-		TriggerClientEvent('renzu_hud:receivedata', -1, adv_table)
+	else
+		print('plate is nil')
 	end
 end)
 

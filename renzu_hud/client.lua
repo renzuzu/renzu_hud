@@ -411,7 +411,7 @@ Creation(function()
 		if invehicle and vehicle == 0 then
 			local EV1 <const> = Renzu_Function(EnterVehicleEvent(false))
 		end
-		if config.enable_carui and config.gamebuild < 2000 and not invehicle and vehicle ~= 0 then
+		if config.enable_carui and build() < 2000 and not invehicle and vehicle ~= 0 then
 			local EV2 <const> = Renzu_Function(EnterVehicleEvent(true,vehicle))
 		end
 		Renzuzu.Wait(config.car_mainloop_sleep)
@@ -992,6 +992,7 @@ end)
 
 RegisterNetEvent('renzu_hud:bodystatus')
 AddEventHandler('renzu_hud:bodystatus', function(status,other)
+	checkingpatient = other
 	while not playerloaded do Wait(100) end
 	RenzuSendUI({type = "setBodyParts",content = config.healtype})
 	local status = status
@@ -1387,7 +1388,7 @@ Creation(function()
 			local sleep = 2000
 			for k,v in pairs(nearstancer) do
 				if v.speed > 1 and not v.wheeledit and v.dist < 100 and veh_stats[v.plate] ~= nil and veh_stats[v.plate]['wheelsetting'] ~= nil then
-					sleep = 0
+					sleep = 50
 					SetVehicleWheelWidth(v.entity,0.7) -- trick to avoid stance bug
 					SetVehicleWheelXOffset(v.entity,0,tonumber(veh_stats[v.plate]['wheelsetting']['wheeloffsetfront'].wheel0))
 					SetVehicleWheelXOffset(v.entity,1,tonumber(veh_stats[v.plate]['wheelsetting']['wheeloffsetfront'].wheel1))
@@ -1398,10 +1399,10 @@ Creation(function()
 					SetVehicleWheelYRotation(v.entity,1,tonumber(veh_stats[v.plate]['wheelsetting']['wheelrotationfront'].wheel1))
 					SetVehicleWheelYRotation(v.entity,2,tonumber(veh_stats[v.plate]['wheelsetting']['wheelrotationrear'].wheel2))
 					SetVehicleWheelYRotation(v.entity,3,tonumber(veh_stats[v.plate]['wheelsetting']['wheelrotationrear'].wheel3))
-					SetVehicleWheelTireColliderWidth(v.entity,0,0.4)
-					SetVehicleWheelTireColliderWidth(v.entity,1,0.4)
-					SetVehicleWheelTireColliderWidth(v.entity,2,0.1)
-					SetVehicleWheelTireColliderWidth(v.entity,3,0.1)
+					-- SetVehicleWheelTireColliderWidth(v.entity,0,0.4)
+					-- SetVehicleWheelTireColliderWidth(v.entity,1,0.4)
+					-- SetVehicleWheelTireColliderWidth(v.entity,2,0.1)
+					-- SetVehicleWheelTireColliderWidth(v.entity,3,0.1)
 				end
 			end
 			Wait(sleep)
@@ -2311,7 +2312,7 @@ RenzuCommand(config.commands['uiconfig'], function(source, args, raw)
 	local set = nil
 	if args[1] == 'transition' then
 		set = args[2] or 'ease'
-		config.transition = args[2] or 'ease'
+		config.transition = args[2] or 'unset'
 	end
 	if args[1] == 'ms' then
 		set = args[2] or '0ms'
@@ -2319,7 +2320,7 @@ RenzuCommand(config.commands['uiconfig'], function(source, args, raw)
 	end
 	if args[1] == 'acceleration' then
 		set = args[2] or 'none'
-		config.acceleration = args[2] or 'none'
+		config.acceleration = args[2] or 'unset'
 	end
 	config.uiconfig = {acceleration = config.acceleration, animation_ms = config.animation_ms, transition = config.transition}
 	RenzuSendUI({
