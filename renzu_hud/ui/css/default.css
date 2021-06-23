@@ -197,6 +197,7 @@ a {
 }
 
 .progress-ring__circle {
+  will-change: height;
   transition: height 2s ease-in-out;
   transform: rotatex(180deg);
   transform-origin: top;
@@ -212,9 +213,9 @@ a {
   -webkit-transition: var(--animation) 0ms;
   -o-transition: var(--animation) 0ms;
   transition: var(--animation) 0ms;
+  will-change: stroke-dashoffset;
   backface-visibility: hidden;
   perspective: 1000;
-  will-change: transform;
 }
 .hardware_acce {
   -webkit-transform: translateZ(0) !important;
@@ -226,9 +227,9 @@ a {
   -webkit-transition: var(--animation) 0ms;
   -o-transition: var(--animation) 0ms;
   transition: var(--animation) 0ms;
+  will-change: stroke-dashoffset;
   backface-visibility: hidden;
   perspective: 1000;
-  will-change: transform;
 }
 .turbo_boost {
   position: absolute;
@@ -491,6 +492,7 @@ a {
   display: block;
 }
 .chest_progress {
+  will-change: width;
   transition: width 1s;
   background: rgba(1, 110, 204, 0.8);
   #background: radial-gradient(
@@ -529,6 +531,7 @@ a {
 }
 
 .armor_progress {
+  will-change: width;
   transition: width 1s;
   background: rgba(1, 110, 204, 0.8);
   #background: radial-gradient(
@@ -564,6 +567,7 @@ a {
 }
 
 .health_progress {
+  will-change: width;
   transition: width 1s;
   background: rgba(199, 24, 18, 0.8);
   color: #fff;
@@ -825,30 +829,36 @@ a {
   font-size: 8px !important;
   color: rgb(9, 222, 1, 0.9);
 }
+.notransition {
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -o-transition: none !important;
+  transition: none !important;
+}
 svg path {
-  will-change: auto;
+  will-change: stroke-dashoffset;
   stroke-width: 20px;
   stroke-miterlimit: round;
   transition: stroke-dashoffset 0ms ease;
 }
 svg .rpm {
-  will-change: auto;
+  will-change: stroke-dashoffset;
   stroke-width: 20px;
   stroke-miterlimit: round;
-  transition: stroke-dashoffset var(--ms) var(--trans) 0ms;
+  transition: stroke-dashoffset 0ms var(--trans) 0ms;
 }
 svg .boost {
-  will-change: transform;
+  will-change: auto;
   transition: stroke-dashoffset var(--ms) var(--trans) 0ms;
 }
 svg .carhud {
-  will-change: auto;
+  will-change: stroke-dashoffset;
   stroke-width: 20px;
   stroke-miterlimit: round;
   transition: stroke-dashoffset var(--ms) var(--trans) 0ms;
 }
 svg .statushud {
-  will-change: auto;
+  will-change: stroke-dashoffset;
   stroke-width: 20px;
   stroke-miterlimit: round;
   transition: stroke-dashoffset var(--ms) var(--trans) 0ms;
@@ -859,6 +869,7 @@ svg .statushud {
   inherits: false;
 }
 #speedmeter {
+  will-change: --num;
   text-shadow: 2px 2px 5px rgb(4, 40, 117);
   font-size: 25px;
   color: #d8d2d4;
@@ -1190,6 +1201,7 @@ svg .statushud {
 }
 
 #oillevel {
+  will-change: transform;
   transform: rotate(0deg) scaleX(-1);
   z-index: 1005;
   font-size: 15px;

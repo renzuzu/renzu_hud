@@ -507,7 +507,7 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
 
                 --main loop manual system
                 if highgear ~= maxgear then
-                    SetVehicleHighGear(vehicle,round(GetVehStats(vehicle, "CHandlingData","nInitialDriveGears")))
+                    SetVehicleHighGear(vehicle,GetVehicleHandlingInt(vehicle, "CHandlingData","nInitialDriveGears"))
                     maxgear = tonumber(GetHandling(GetPlate(vehicle)).maxgear)
                 end
 
@@ -552,6 +552,7 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                             SetVehicleHandlingField(vehicle, "CHandlingData", "fTractionCurveLateral", GetHandling(GetPlate(vehicle)).traction2 * 0.7)
                             SetVehicleHandlingField(vehicle, "CHandlingData", "fLowSpeedTractionLossMult", GetHandling(GetPlate(vehicle)).traction3 * 1.7)
                         end
+                        print('notraction')
                         notraction = true
                         Wait(0)
                     end
@@ -569,6 +570,7 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                         if speed > 5 and (rpm * 100.0) > (tractioncontrol(WheelSpeed(vehicle,wheelindex) * 3.6,savegear) * tcs) and not clutchpressed then
                             SetRpm(vehicle, speedtable(speed,savegear))
                             if notraction then
+                                print('notraction')
                                 --SetVehicleBurnout(vehicle, false)
                                 --SetVehicleReduceGrip(vehicle,false)
                                 if veh_stats[plate].tirespec ~= nil then
@@ -600,17 +602,17 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                             elseif not clutchpressed then
                                 SetRpm(vehicle, r)
                             end
-                            SetVehicleBurnout(vehicle, true)
-                            SetVehicleWheelieState(vehicle, 65)
+                            --SetVehicleBurnout(vehicle, true)
+                            --SetVehicleWheelieState(vehicle, 65)
                             -- --Wait(1)
                             -- --SetLaunchControlEnabled(true)
                             -- SetVehicleWheelieState(vehicle, 129)
                             -- --LockSpeed(vehicle,oldspeed)
                             --Wait(11)
-                            SetVehicleWheelieState(vehicle, 65)
+                            --SetVehicleWheelieState(vehicle, 65)
                             -- --Wait(11)
-                            SetVehicleWheelieState(vehicle, 0)
-                            SetVehicleBurnout(vehicle, false)
+                            --SetVehicleWheelieState(vehicle, 0)
+                            --SetVehicleBurnout(vehicle, false)
                             -- SetRpm(vehicle, r)
                             if not clutchpressed and speed > 20 and rpm < 0.6 then
                                 SetRpm(vehicle, speedtable(speed,savegear))

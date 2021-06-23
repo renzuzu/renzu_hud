@@ -5,6 +5,7 @@ Creation(function()
 		while ESX.GetPlayerData().job == nil do Renzuzu.Wait(0) end
 		ESX.PlayerData = ESX.GetPlayerData()
 		xPlayer = ESX.GetPlayerData()
+		RenzuSendUI({type = "isAmbulance",content = xPlayer.job.name == config.checkbodycommandjob})
 		Renzuzu.Wait(5000)
 	else
 		ESX = true
@@ -14,7 +15,6 @@ Creation(function()
 	DecorRegister("PLAYERLOADED", 1);DecorRegister("CHARSLOT", 1)
 	while not playerloaded do Wait(1000) end
 	while not receive do Wait(1000) end
-	RenzuSendUI({type = "isAmbulance",content = xPlayer.job.name == config.checkbodycommandjob})
 	for type,val in pairs(config.buto) do if bodystatus then  bonecategory[type] = bodystatus[type] else bonecategory[type] = 0.0 or 0.0 end if not other then parts[type] = {} for bone,val in pairs(val) do parts[type][bone] = 0.0 end end end
 	RenzuSendUI({type = "setUpdateBodyStatus",content = bonecategory})
 end)
@@ -1612,16 +1612,18 @@ RegisterNetEvent("renzu_hud:addnitro")
 AddEventHandler("renzu_hud:addnitro", function(amount)
 		local lib, anim = 'mini@repair', 'fixing_a_car'
         local playerPed = PlayerPedId()
-		ESX.Streaming.RequestAnimDict(lib, function()
-            TaskPlayAnim(playerPed, lib, anim, 8.0, -8.0, 5555, 0, 0, false, false, false)
-            Citizen.Wait(500)
-			Makeloading('Installing Nitro',5000)
-            while IsEntityPlayingAnim(playerPed, lib, anim, 3) do
-                Citizen.Wait(0)
-                DisableAllControlActions(0)
-            end
-            ESX.ShowNotification("Nitro has been reloaded")
-		end)
+		playanimation('mini@repair','fixing_a_car')
+		Wait(5000)
+		-- ESX.Streaming.RequestAnimDict(lib, function()
+        --     TaskPlayAnim(playerPed, lib, anim, 8.0, -8.0, 5555, 0, 0, false, false, false)
+        --     Citizen.Wait(500)
+		-- 	Makeloading('Installing Nitro',5000)
+        --     while IsEntityPlayingAnim(playerPed, lib, anim, 3) do
+        --         Citizen.Wait(0)
+        --         DisableAllControlActions(0)
+        --     end
+        --     ESX.ShowNotification("Nitro has been reloaded")
+		-- end)
 		veh_stats[GetPlate(getveh())].nitro = 100
 end)
 

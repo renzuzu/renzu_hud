@@ -276,16 +276,60 @@ function setShowstatusv2(bool) {
     }
 }
 
+var oldrpm = 0, cntSi = 0;
+var newrpm = 0
+var oldp = 0
+function doStuffwTimeout(rpm){
+    var val = rpm / 200
+    setTimeout(function(){
+        if(oldrpm<200){
+        oldrpm++
+        p = (val * oldrpm)
+        console.log('setTimeout() executed, cntSt=' + p);
+        setRpm(p)
+        doStuffwTimeout(rpm);
+        } else {
+            oldrpm = 0
+            oldp = p
+        }
+    },1);
+}
+
+var r = 0
+var run = false
+function animateValue(start, end, duration) {
+    if (run) { return }
+    if (start >= 1) return;
+    var range = end - start;
+    var current = r;
+    var increment = end / 200
+    var c = 0
+    var stepTime = Math.abs(Math.floor(duration / range));
+    //var obj = document.getElementById(id);
+    var timer = setInterval(function() {
+        run = true
+        c++
+        current += increment;
+        //console.log(current,increment,c)
+        //obj.innerHTML = current;
+        setRpm(current)
+        if (c >= 200 || current >= 1) { 
+            run = false
+            r = current
+            clearInterval(timer);
+        }
+    }, 1);
+}
+
 function setRpm(percent) {
-    var type = carui
     var rpm = (percent * 100);
     rpm2 = rpm.toFixed(0) * 100
     document.getElementById("rpmmeter").innerHTML = ""+rpm2+"";
+    $(".rpm").addClass('notransition');
+    $(".rpm").removeClass("notransition");
     var e = document.getElementById("rpmpath");
     let length = e.getTotalLength();
-    let value = rpm;
-    let to = length * ((100 - value) / 100);
-    val = to / 1000
+    let to = length * ((100 - rpm) / 100);
     e.style.strokeDashoffset = to;
     if (percent > 0.9) {
         e.style.stroke = 'red';
@@ -315,6 +359,8 @@ function setSpeed(s) {
     var right = '47%'
     speed = bilis * 100;
     takbo = takbo.toFixed(0)
+    $(".carhud").addClass('notransition');
+    $(".carhud").removeClass("notransition");
     if (type == 'minimal' && document.getElementById("speedmeter").style.right !== "20%") {
         // document.getElementById("speed_minimal").style.display = "block";
         // document.getElementById("speed").style.display = "none";

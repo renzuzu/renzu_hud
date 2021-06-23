@@ -340,11 +340,11 @@ function SavevehicleHandling()
 	end
 
 	if not DecorExistOn(vehicle, "MAXGEAR") then
-		maxgear = GetVehStats(vehicle, "CHandlingData","nInitialDriveGears")
-		DecorSetFloat(vehicle, "MAXGEAR", maxgear)
+		maxgear = GetVehicleHandlingInt(vehicle, "CHandlingData","nInitialDriveGears")
+		DecorSetInt(vehicle, "MAXGEAR", maxgear)
 	else
-		SetVehicleHandlingField(vehicle, "CHandlingData", "nInitialDriveGears", DecorGetFloat(vehicle,"MAXGEAR"))
-		maxgear = DecorGetFloat(vehicle,"MAXGEAR")
+		SetVehicleHandlingField(vehicle, "CHandlingData", "nInitialDriveGears", DecorGetInt(vehicle,"MAXGEAR"))
+		maxgear = DecorGetInt(vehicle,"MAXGEAR")
 		--print(maxgear)
 	end
 
@@ -3364,7 +3364,7 @@ function SetEngineSpecs(veh, model)
 			multiplier = (handling['fMass'] / getcurrentvehicleweight)
 			enginespec = true
 			Wait(10)
-			if tonumber(handling['nInitialDriveGears']) > GetVehStats(vehicle, "CHandlingData","nInitialDriveGears") then
+			if tonumber(handling['nInitialDriveGears']) > GetVehicleHandlingInt(vehicle, "CHandlingData","nInitialDriveGears") then
 				-- another anti weird bug ( if the new engine gears is > the existing one, the existing old max gear persist, so we use this native below to cheat the bug)
 				SetVehicleHighGear(vehicle,tonumber(handling['nInitialDriveGears']) )
 				Citizen.InvokeNative(0x8923dd42, vehicle, tonumber(handling['nInitialDriveGears']) )

@@ -300,6 +300,9 @@ function Standalone(playerId, identifier, name, slot)
 end
 
 function CreatePlayer(source)
+	if charslot[source] == nil or charslot[source] == 0 then
+		charslot[source] = 1
+	end
 	local xPlayer = Standalone(source, GetSteam(source), GetPlayerName(source), charslot[source] or 1)
 	Renzu[tonumber(source)] = xPlayer
 end
@@ -329,7 +332,9 @@ function firstToUpper(str)
     return (str:gsub("^%l", string.upper))
 end
 
+print("engine system")
 Citizen.CreateThread(function()
+	Wait(1000)
 	if config.enable_engine_item then
 		Wait(1000)
 		local c = 0
@@ -364,24 +369,26 @@ Citizen.CreateThread(function()
 				end
 			end)
 		end
-
-		for v, k in pairs(config.engine) do
-			local enginename = string.lower(v)
-			--print("register item")
-			ESX.RegisterUsableItem("engine_"..enginename.."", function(source)
-				local xPlayer = ESX.GetPlayerFromId(source)
-				if config.engine_jobonly and xPlayer.job.name ~= tostring(config.engine_job) then xPlayer.showNotification('You are not a '..config.engine_job..'', false, false, 130) return end
-				xPlayer.removeInventoryItem("engine_"..enginename.."", 1)
-				TriggerClientEvent('renzu_hud:change_engine', xPlayer.source, enginename)
-			end)
+		if config.framework == 'ESX' then
+			for v, k in pairs(config.engine) do
+				local enginename = string.lower(v)
+				--print("register item")
+				ESX.RegisterUsableItem("engine_"..enginename.."", function(source)
+					local xPlayer = ESX.GetPlayerFromId(source)
+					if config.engine_jobonly and xPlayer.job.name ~= tostring(config.engine_job) then xPlayer.showNotification('You are not a '..config.engine_job..'', false, false, 130) return end
+					xPlayer.removeInventoryItem("engine_"..enginename.."", 1)
+					TriggerClientEvent('renzu_hud:change_engine', xPlayer.source, enginename)
+				end)
+			end
 		end
-
+		print("commands")
 		if config.enable_commands then
 			RenzuCommand('installengine', function(source,args)
-				if args[1] ~= nil and config.ESX_Items[args[1]] ~= nil then
+				if args[1] ~= nil and config.engine[args[1]] ~= nil then
 					if havePermission(GetPlayerIdentifier(source, 0)) then
 						for v, k in pairs(config.engine) do
 							if v == args[1] then
+								print("install")
 								TriggerClientEvent('renzu_hud:change_engine', source, v)
 							end
 						end
