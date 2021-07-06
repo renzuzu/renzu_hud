@@ -389,6 +389,9 @@ function SavevehicleHandling()
 	end
 
 	handlings[plate] = {finaldrive = tonumber(finaldrive), flywheel = tonumber(flywheel), maxspeed = tonumber(maxspeed), maxgear = tonumber(maxgear), traction = tonumber(traction), traction2 = tonumber(traction2), traction3 = tonumber(traction3), traction4 = tonumber(traction4), traction5 = tonumber(traction5)}
+	for k,v in pairs(handlings) do
+		print(k,v)
+	end
 end
 
 --ASYNC FUNCTION CALL VEHICLE LOOPS
@@ -453,7 +456,7 @@ function SetVehicleOnline() -- for vehicle loop
 	local plate = GetPlate(vehicle)
 	if veh_stats[plate] ~= nil then
 		veh_stats[plate].entity = VehToNet(vehicle)
-		TriggerServerEvent('renzu_hud:savedata', plate, veh_stats[tostring(plate)])
+		TriggerServerEvent('renzu_hud:savedata', plate, veh_stats[tostring(plate)],true)
 	end
 end
 
@@ -767,6 +770,7 @@ function get_veh_stats(v,p)
 	if veh_stats[plate].engine ~= nil and veh_stats[plate].engine ~= 'default' and currentengine[plate] ~= GetHashKey(tostring(veh_stats[plate].engine)) then
 		SetEngineSpecs(vehicle, GetHashKey(tostring(veh_stats[plate].engine)))
 		print("new ENGINE")
+		Citizen.Wait(1500)
 	end
 	if veh_stats[plate].tires ~= nil and veh_stats[plate].tires ~= 'default' then
 		TireFunction(veh_stats[plate].tires)
@@ -1438,7 +1442,7 @@ end
 function SendNuiSeatBelt()
 	Citizen.Wait(300)
 	if config.seatbelt_2 then
-		SetFlyThroughWindscreenParams(config.seatbeltminspeed, 2.2352, 0.0, 0.0)
+		SetFlyThroughWindscreenParams(config.seatbeltminspeed, 12.2352, 0.0, 0.0)
 		SetPedConfigFlag(PlayerPedId(), 32, true)
 	end
 	if vehicle ~= nil and vehicle ~= 0 and config.enableseatbeltfunc and not config.seatbelt_2 then
@@ -1560,6 +1564,7 @@ function entervehicle()
 			end
 		end
 	elseif start and IsPedInAnyVehicle(p) and GetVehicleDoorLockStatus(v) ~= 2 or manual and IsPedInAnyVehicle(p) and GetVehicleDoorLockStatus(v) ~= 2 then
+		Wait(500)
 		if start then
 			RenzuSendUI({
 				type = "setStart",
@@ -2688,10 +2693,12 @@ end
 
 --WEAPONS
 function WeaponStatus()
+	weapon = GetSelectedPedWeapon(ped)
 	if wstatus['armed'] then return end
 	local weapon = nil
+	oldweapon = nil
 	if IsPedArmed(ped, 7) and not invehicle then
-		while IsPedArmed(ped, 7) and not invehicle do
+		while IsPedArmed(ped, 7) and not invehicle and oldweapon == weapon do
 			sleep = config.ammoupdatedelay
 			weapon = GetSelectedPedWeapon(ped)
 			local ammoTotal = GetAmmoInPedWeapon(ped,weapon)
@@ -2726,6 +2733,7 @@ function WeaponStatus()
 				})
 				weaponui = true
 			end
+
 			Wait(sleep)
 		end
 		wstatus['armed'] = false
@@ -3155,9 +3163,24 @@ function checkaccesories(accessory, changes) -- being used if ESX ACCESORIES IS 
 	return state
 end
 
+local buclothes = nil
 function SaveCurrentClothes(firstload)
 	TriggerEvent('skinchanger:getSkin', function(current)
-		oldclothes = current
+		if oldclothes == nil then
+			oldclothes = current
+		else
+			for k,v in pairs(current) do
+				if buclothes ~= nil and current[k] ~= buclothes[k] and config.clothing[k] ~= nil and config.clothing[k]['default'] ~= v then -- check if old clothes is changed
+					oldclothes[k] = v
+					buclothes[k] = v
+				end
+			end
+		end
+		if buclothes == nil then
+			buclothes = {}
+			buclothes = current
+		end
+		--oldclothes = current
 		Wait(100)
 		if config.use_esx_accesories and firstload then
 			if checkaccesories('Mask', oldclothes) then
@@ -3190,7 +3213,9 @@ function SaveCurrentClothes(firstload)
 		print("OLDCLOTHESNIL")
 		Wait(0)
 	end
-	ClotheState()
+	if firstload then
+		ClotheState()
+	end
 end
 
 function ClotheState()
@@ -3205,7 +3230,7 @@ function ClotheState()
 			if k == 'mask_1' and hasmask and oldclothes['mask_1'] ~= config.clothing['mask_1']['default'] then
 				clothestate[k] = false
 			end
-			if k == 'helmet_1' and  hashelmet and oldclothes['helmet_1'] ~= config.clothing['helmet_1']['default'] then
+			if k == 'helmet_1' and hashelmet and oldclothes['helmet_1'] ~= config.clothing['helmet_1']['default'] then
 				clothestate[k] = false
 			end
 		end
@@ -3312,7 +3337,7 @@ end
 
 function closestveh(coords)
     --for k,vv in pairs(GetGamePool('CVehicle')) do
-        for k,v in pairs(veh_stats) do
+        for k,v in pairs(onlinevehicles) do
 			if v.entity ~= nil and NetworkDoesEntityExistWithNetworkId(v.entity) then
 				local vv = NetToVeh(v.entity)
 				local vehcoords = GetEntityCoords(vv)
@@ -3398,7 +3423,9 @@ function SetEngineSpecs(veh, model)
 					elseif k == 'fInitialDriveForce' then
 						--multiplier is on everytime, this will produce realistic result, ex. Sanchez Engine to vehicle. sanchez is a bike/motorcycle, it have a less weight compare to sedan vehicles, so sanchez will produce very low acceleration on sedan cars
 						GetHandling(GetPlate(vehicle)).flywheel = v
-						SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", v * multiplier)
+						if not manual2 then
+							SetVehStats(vehicle, "CHandlingData", "fInitialDriveForce", v * multiplier)
+						end
 					elseif k == 'fInitialDriveMaxFlatVel' then
 						GetHandling(GetPlate(vehicle)).maxspeed = v
 						if not manual then
@@ -3406,7 +3433,9 @@ function SetEngineSpecs(veh, model)
 							if tonumber(GetVehicleMod(vehicle,13)) > 0 then
 								mult = 1.25
 							end
-							SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", v * mult)
+							if not manual2 then
+								SetVehicleHandlingField(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", v * mult)
+							end
 						end
 					elseif k ~= 'fMass' then
 						SetVehStats(vehicle, "CHandlingData", tostring(k), v * 1.0)
@@ -3573,7 +3602,7 @@ end
 
 function SyncWheelSetting()
 	local coords = GetEntityCoords(PlayerPedId())
-	for k,v in pairs(veh_stats) do
+	for k,v in pairs(onlinevehicles) do
 		if v.entity ~= nil and NetworkDoesEntityExistWithNetworkId(v.entity) and v.plate == tostringplate(GetVehicleNumberPlateText(NetToVeh(v.entity))) then
 			local vv = NetToVeh(v.entity)
 			local vehcoords = GetEntityCoords(vv)

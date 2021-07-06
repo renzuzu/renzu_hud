@@ -1,8 +1,9 @@
 ---------------------------------------------------------https://github.com/renzuzu/renzu_hud------------------------------------------
 config = {}
 config.gamebuild = 'auto' -- if 2189 pedshot transparent and 1604 or < 2000 = Enter vehicle game event will not work, we will use normal pedshot ( gamebuild is what you set on your server start example: +set sv_enforceGameBuild 2189, available build 1604, 2060, 2189 and more.) this is important if you are using UI Normal with Ped Face.
-config.framework = 'STANDALONE' -- ESX | VRP | STANDALONE (VRP not supported yet, but you can use standalone, it will work!)
+config.framework = 'ESX' -- ESX | VRP | STANDALONE (VRP not supported yet, but you can use standalone, it will work!)
 config.weight_type = false -- ESX item weight or limit type
+config.vehicle_table = 'owned_vehicles', -- change this if you use different sql table for player vehicles (note identifier steam is always being used here)
 config.ESX_Items = { -- important to change job, weight. (job = false means its available to use for everyone) -- do not change the array name ex. ['nitro'], you can change the name = 'nitro'
 	['nitro'] = {name = 'nitro', event = 'renzu_hud:addnitro', value = false, weight = 1, label = 'Nitro', job = false},
 	['coolant'] = {name = 'coolant', event = 'renzu_hud:coolant', value = false, weight = 1, label = 'Coolant', job = false},
@@ -29,7 +30,7 @@ config.commanditem_permission = { -- item command permission -- standalone purpo
 }
 config.identifier = 'steam:' -- standalone purpose, ignore if using framework
 --MULTI CHARACTER START -- set config.multichar = false if you are not using any multi character ( configuring this is needed to avoid problems saving to database )
-config.multichar = true -- KASHACTERS, cd_multicharacter, etc...
+config.multichar = false -- KASHACTERS, cd_multicharacter, etc...
 --IMPORTANT PART IF USING Multicharacter
 -- if multichar_advanced is false == using steam: format or the config.identifier
 config.multichar_advanced = true -- Using Permanent Char1,Char2 up to Char5 identifier from database. ( This means the identifier reads by ESX or other framework will have Char1:BLAHBLAHBLAH instead of steam:BLAHBLAHBLAH ( from xPlayer.identifier for example))
@@ -162,12 +163,12 @@ config.driving_status_radius = 200 -- driving distance to add status
 config.firing_affect_status = true -- Firing Weapons affects status?
 config.firing_affected_status = 'sanity' -- Affected Status during gunplay
 config.firing_status_mode = 'add' -- Status Function (add,remove) add will add a value to status, remove will remove a status value.
-config.firing_statusaddval = 10000 -- value to add when firing a weapons
+config.firing_statusaddval = 500 -- value to add when firing a weapons
 config.firing_bullets = 100 -- number of bullets or firing events to trigger the status function.
 config.killing_affect_status = true -- do you want the status to be affected when you kill some player , ped, animals.
 config.killing_affected_status = 'sanity'
 config.killing_status_mode = 'add' -- (add,remove) add will add a value to status, remove will remove a status value.
-config.killing_status_val = 5000 -- status value to add/remove per kill
+config.killing_status_val = 100 -- status value to add/remove per kill
 config.running_affect_status = true -- if player is running (not sprint) status will affected?
 config.running_affected_status = 'thirst' -- change this to whatever status you wanted to be affected
 config.running_status_mode = 'remove' -- should add or remove? its up to you. affected status if running
@@ -197,15 +198,15 @@ config.status_animation = {
 --advanced usage if you want to add more status and reorder it.
 --the config have the div id's, offsets, colors, classes per status.
 config.statusordering = { -- SET enable = false to disable the status (the status must be registered from your esx_status) i highly suggest to use my standalone_status (https://github.com/renzuzu/renzu_status) so you wont have to edit the special events and exports needed for the status System!
-	[0] = {enable = true, status = 'health', rpuidiv = 'null', hideifmax = false, custom = false, value = 0, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'none', id = 'uisimplehp', offset = '275', i_id_1 = 'healthsimple', i_id_1_color = 'rgb(251, 29, 9)', i_id_1_class = 'fas fa-heartbeat fa-stack-1x', i_id_2 = 'healthsimplebg', i_id_2_color = 'rgba(251, 29, 9, 0.3)', i_id_2_class = 'fas fa-heartbeat fa-stack-1x', id_3 = 'health_blink'},
-	[1] = {enable = true, status = 'armor', rpuidiv = 'null', hideifmax = true, custom = false, value = 0, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'none', id = 'uisimplearmor', offset = '275', i_id_1 = 'armorsimple', i_id_1_color = 'rgb(1, 103, 255)', i_id_1_class = 'far fa-shield-alt fa-stack-1x', i_id_2 = 'armorsimplebg', i_id_2_color = 'rgb(0, 41, 129)', i_id_2_class = 'far fa-shield-alt fa-stack-1x', id_3 = 'armor_blink'},
-	[2] = {enable = true, status = 'hunger', rpuidiv = 'hunger', hideifmax = false, custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'block', id = 'uisimplehunger', offset = '275', i_id_1 = 'food2', i_id_1_color = 'rgb(221, 144, 0)', i_id_1_class = 'fad fa-cheeseburger fa-stack-1x', i_id_2 = 'food2bg', i_id_2_color = 'rgb(114, 68, 0)', i_id_2_class = 'fad fa-cheeseburger fa-stack-1x', id_3 = 'hunger_blink'},
-	[3] = {enable = true, status = 'thirst', rpuidiv = 'thirst', hideifmax = false, custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very thirsty', notify_value = 20, display = 'block', id = 'uisimplethirst', offset = '275', i_id_1 = 'water2', i_id_1_color = 'rgb(36, 113, 255)', i_id_1_class = 'fad fa-glass fa-stack-1x', i_id_2 = 'water2bg', i_id_2_color = 'rgb(0, 11, 112)', i_id_2_class = 'fad fa-glass fa-stack-1x', id_3 = 'thirst_blink'},
-	[4] = {enable = true, status = 'sanity', rpuidiv = 'stressbar', hideifmax = false, custom = true, value = 0, notify_lessthan = true, notify_message = 'i see some dragons', notify_value = 80, display = 'block', id = 'uisimplesanity', offset = '275', i_id_1 = 'stress2', i_id_1_color = 'rgb(255, 16, 68)', i_id_1_class = 'fad fa-head-side-brain fa-stack-1x', i_id_2 = 'stress2bg', i_id_2_color = 'rgba(35, 255, 101, 0.842)', i_id_2_class = 'fad fa-head-side-brain fa-stack-1x', id_3 = 'stress_blink'},
-	[5] = {enable = true, status = 'stamina', rpuidiv = 'staminabar', hideifmax = true, custom = false, value = 0, notify_lessthan = false, notify_message = 'running makes me thirsty', notify_value = 20, display = 'block', id = 'uisimplestamina', offset = '275', i_id_1 = 'stamina2', i_id_1_color = 'rgb(16, 255, 136)', i_id_1_class = 'fad fa-running fa-stack-1x', i_id_2 = 'stamina2bg', i_id_2_color = 'rgba(0, 119, 57, 0.945)', i_id_2_class = 'fad fa-running fa-stack-1x', id_3 = 'stamina_blink'},
-	[6] = {enable = true, status = 'oxygen', rpuidiv = 'oxygenbar', hideifmax = true, custom = false, value = 0, notify_lessthan = false, notify_message = 'my oxygen is almost gone', notify_value = 20, display = 'block', id = 'uisimpleoxygen', offset = '275', i_id_1 = 'oxygen2', i_id_1_color = 'rgb(15, 227, 255)', i_id_1_class = 'fad fa-lungs fa-stack-1x', i_id_2 = 'oxygen2bg', i_id_2_color = 'rgba(8, 76, 85, 0.788)', i_id_2_class = 'fad fa-lungs fa-stack-1x', id_3 = 'oxygen_blink'},
-	[7] = {enable = true, status = 'energy', rpuidiv = 'energybar', hideifmax = false, custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very tired', notify_value = 20, display = 'block', id = 'uisimpleenergy', offset = '275', i_id_1 = 'energy2', i_id_1_color = 'rgb(233, 233, 233)', i_id_1_class = 'fas fa-snooze fa-stack-1x', i_id_2 = 'energy2bg', i_id_2_color = 'color:rgb(243, 57, 0)', i_id_2_class = 'fas fa-snooze fa-stack-1x', id_3 = 'energy_blink'},
-	[8] = {enable = true, status = 'voip', rpuidiv = 'null', hideifmax = false, custom = false, value = 0, notify_lessthan = false, notify_message = 'silent mode', notify_value = 0, display = 'block', id = 'voip_2', offset = '275', i_id_1 = 'microphone', i_id_1_color = 'rgb(251, 29, 9)', i_id_1_class = 'fas fa-microphone fa-stack-1x', i_id_2 = 'voipsimplebg', i_id_2_color = 'rgba(251, 29, 9, 0.3)', i_id_2_class = 'fas fa-microphone fa-stack-1x', id_3 = 'voip_blink'},
+	[0] = {type = 1, enable = true, status = 'health', rpuidiv = 'null', hideifmax = false, custom = false, value = 0, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'none', id = 'uisimplehp', offset = '275', i_id_1 = 'healthsimple', i_id_1_color = 'rgb(251, 29, 9)', i_id_1_class = 'fas fa-heartbeat fa-stack-1x', i_id_3_class = 'fas fa-heartbeat', i_id_2 = 'healthsimplebg', i_id_2_color = 'rgba(251, 29, 9, 0.3)', i_id_2_class = 'fas fa-heartbeat fa-stack-1x', id_3 = 'health_blink'},
+	[1] = {type = 1, enable = true, status = 'armor', rpuidiv = 'null', hideifmax = true, custom = false, value = 0, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'none', id = 'uisimplearmor', offset = '275', i_id_1 = 'armorsimple', i_id_1_color = 'rgb(1, 103, 255)', i_id_1_class = 'far fa-shield-alt fa-stack-1x', i_id_3_class = 'far fa-shield-alt', i_id_2 = 'armorsimplebg', i_id_2_color = 'rgb(0, 41, 129)', i_id_2_class = 'far fa-shield-alt fa-stack-1x', id_3 = 'armor_blink'},
+	[2] = {type = 0, enable = true, status = 'hunger', rpuidiv = 'hunger', hideifmax = false, custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'block', id = 'uisimplehunger', offset = '275', i_id_1 = 'food2', i_id_1_color = 'rgb(221, 144, 0)', i_id_1_class = 'fad fa-cheeseburger fa-stack-1x', i_id_3_class = 'fad fa-cheeseburger', i_id_2 = 'food2bg', i_id_2_color = 'rgb(114, 68, 0)', i_id_2_class = 'fad fa-cheeseburger fa-stack-1x', id_3 = 'hunger_blink'},
+	[3] = {type = 0, enable = true, status = 'thirst', rpuidiv = 'thirst', hideifmax = false, custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very thirsty', notify_value = 20, display = 'block', id = 'uisimplethirst', offset = '275', i_id_1 = 'water2', i_id_1_color = 'rgb(36, 113, 255)', i_id_1_class = 'fad fa-glass fa-stack-1x', i_id_3_class = 'fad fa-glass', i_id_2 = 'water2bg', i_id_2_color = 'rgb(0, 11, 112)', i_id_2_class = 'fad fa-glass fa-stack-1x', id_3 = 'thirst_blink'},
+	[4] = {type = 0, enable = true, status = 'sanity', rpuidiv = 'stressbar', hideifmax = false, custom = true, value = 0, notify_lessthan = true, notify_message = 'i see some dragons', notify_value = 80, display = 'block', id = 'uisimplesanity', offset = '275', i_id_1 = 'stress2', i_id_1_color = 'rgb(255, 16, 68)', i_id_1_class = 'fad fa-head-side-brain fa-stack-1x', i_id_3_class = 'fad fa-head-side-brain', i_id_2 = 'stress2bg', i_id_2_color = 'rgba(35, 255, 101, 0.842)', i_id_2_class = 'fad fa-head-side-brain fa-stack-1x', id_3 = 'stress_blink'},
+	[5] = {type = 0, enable = true, status = 'stamina', rpuidiv = 'staminabar', hideifmax = true, custom = false, value = 0, notify_lessthan = false, notify_message = 'running makes me thirsty', notify_value = 20, display = 'block', id = 'uisimplestamina', offset = '275', i_id_1 = 'stamina2', i_id_1_color = 'rgb(16, 255, 136)', i_id_1_class = 'fad fa-running fa-stack-1x', i_id_3_class = 'fad fa-running', i_id_2 = 'stamina2bg', i_id_2_color = 'rgba(0, 119, 57, 0.945)', i_id_2_class = 'fad fa-running fa-stack-1x', id_3 = 'stamina_blink'},
+	[6] = {type = 0, enable = true, status = 'oxygen', rpuidiv = 'oxygenbar', hideifmax = true, custom = false, value = 0, notify_lessthan = false, notify_message = 'my oxygen is almost gone', notify_value = 20, display = 'block', id = 'uisimpleoxygen', offset = '275', i_id_1 = 'oxygen2', i_id_1_color = 'rgb(15, 227, 255)', i_id_1_class = 'fad fa-lungs fa-stack-1x', i_id_3_class = 'fad fa-lungs', i_id_2 = 'oxygen2bg', i_id_2_color = 'rgba(8, 76, 85, 0.788)', i_id_2_class = 'fad fa-lungs fa-stack-1x', id_3 = 'oxygen_blink'},
+	[7] = {type = 0, enable = true, status = 'energy', rpuidiv = 'energybar', hideifmax = false, custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very tired', notify_value = 20, display = 'block', id = 'uisimpleenergy', offset = '275', i_id_1 = 'energy2', i_id_1_color = 'rgb(233, 233, 233)', i_id_1_class = 'fas fa-snooze fa-stack-1x', i_id_3_class = 'fas fa-snooze', i_id_2 = 'energy2bg', i_id_2_color = 'color:rgb(243, 57, 0)', i_id_2_class = 'fas fa-snooze fa-stack-1x', id_3 = 'energy_blink'},
+	[8] = {type = 1, enable = true, status = 'voip', rpuidiv = 'null', hideifmax = false, custom = false, value = 0, notify_lessthan = false, notify_message = 'silent mode', notify_value = 0, display = 'block', id = 'voip_2', offset = '275', i_id_1 = 'microphone', i_id_1_color = 'rgb(251, 29, 9)', i_id_1_class = 'fas fa-microphone fa-stack-1x', i_id_2 = 'voipsimplebg', i_id_3_class = 'fas fa-microphone', i_id_2_color = 'rgba(251, 29, 9, 0.3)', i_id_2_class = 'fas fa-microphone fa-stack-1x', id_3 = 'voip_blink'},
 }
 -- BODY STATUS
 config.bodystatus = true -- ENABLE BODY STATUS FUNCTION AND UI?
@@ -225,7 +226,7 @@ config.disabledsprint = true -- disable sprint while chest is in pain
 config.bodyinjury_status_affected = true
 config.headbone_status = 'sanity' -- Each time the Player Head Bone is damaged, status should be affected? , Select a status name: eg. stress, sanity, etc. poop!
 config.headbone_status_mode = 'add' -- should we add or remove? (remove/add)
-config.headbone_status_value = 40000 -- value to add or remove
+config.headbone_status_value = 1000 -- value to add or remove
 config.armdamage_invehicle_effect = 1.0 -- If Arm is in injury, Steering lock is reduce? its like the player will be having a hardtime of steering the vehicle wheel.
 config.melee_decrease_damage = true -- decrease damage of melee attacks if arm is injured
 config.melee_damage_decrease = 0.1 -- float value, 1.0 = 100%
@@ -383,6 +384,7 @@ config.clothing = {
 		['default'] = -1, -- the default variation
 		['taskplay'] = {dictionary = "mp_masks@standard_car@ds@", name = "put_on_mask", speed = 51, duration = 800} -- animation settings
 	},
+	['helmet_2'] = {},
 	['glasses_1'] = {
 		['skin'] = {
 			['glasses_1'] = 0, ['glasses_2'] = 0
@@ -390,6 +392,7 @@ config.clothing = {
 		['default'] = 0,
 		['taskplay'] = {dictionary = "mp_masks@standard_car@ds@", name = "put_on_mask", speed = 51, duration = 800}
 	},
+	['glasses_2'] = {},
 	['chain_1'] = {
 		['skin'] = {
 			['chain_1'] = 0, ['chain_2'] = 0
@@ -397,6 +400,7 @@ config.clothing = {
 		['default'] = 0,
 		['taskplay'] = {dictionary = "clothingtie", name = "try_tie_positive_a", speed = 51, duration = 2100}
 	},
+	['chain_1'] = {},
 	['watches_1'] = {
 		['skin'] = {
 			['watches_1'] = -1, ['watches_2'] = 0
@@ -404,6 +408,7 @@ config.clothing = {
 		['default'] = -1,
 		['taskplay'] = {dictionary = "nmt_3_rcm-10", name = "cs_nigel_dual-10", speed = 51, duration = 1200}
 	},
+	['watches_2'] = {},
 	--right
 	['torso_1'] = {
 		['skin'] = {
@@ -413,6 +418,7 @@ config.clothing = {
 		['default'] = 15,
 		['taskplay'] = {dictionary = "missmic4", name = "michael_tux_fidget", speed = 51, duration = 1500}
 	},
+	['torso_2'] = {},
 	['tshirt_1'] = {
 		['skin'] = {
 			['tshirt_1'] = 15, ['tshirt_2'] = 0,
@@ -421,6 +427,7 @@ config.clothing = {
 		['default'] = 15,
 		['taskplay'] = {dictionary = "missmic4", name = "michael_tux_fidget", speed = 51, duration = 1500}
 	},
+	['tshirt_2'] = {},
 	['bproof_1'] = {
 		['skin'] = {
 			['bproof_1'] = 0, ['bproof_2'] = 0
@@ -428,6 +435,7 @@ config.clothing = {
 		['default'] = 0,
 		['taskplay'] = {dictionary = "clothingtie", name = "try_tie_positive_a", speed = 51, duration = 2100}
 	},
+	['bproof_2'] = {},
 	['pants_1'] = {
 		['skin'] = {
 			['pants_1'] = 14, ['pants_2'] = 0
@@ -442,6 +450,7 @@ config.clothing = {
 		['default'] = 49,
 		['taskplay'] = {dictionary = "random@domestic", name = "pickup_low", speed = 51, duration = 1200}
 	},
+	['shoes_2'] = {},
 	--top
 	['mask_1'] = {
 		['skin'] = {
@@ -450,6 +459,7 @@ config.clothing = {
 		['default'] = 0,
 		['taskplay'] = {dictionary = "mp_masks@standard_car@ds@", name = "put_on_mask", speed = 51, duration = 800}
 	},
+	['mask_2'] = {},
 	--reset 
 	['reset'] = {
 		['taskplay'] = {dictionary = "missmic4", name = "michael_tux_fidget", speed = 51, duration = 1500}
@@ -488,7 +498,7 @@ config.custom_engine = { -- advanced usage, Custom Engine, customsounds, custom 
 	-- label = label of the item
 	-- you can add as many custom engine as you want
 	-- important that the arrayname should have a backtick like this [`customengine`]
-	[`b16b`] = {custom = true, turboinstall = false, handlingName = 'b16b', label = 'Ek9 B16b Type R', soundname = 'ruston', fMass = '800.000000', nInitialDriveGears = 5, fInitialDriveForce = 0.425000, fDriveInertia = 1.200000, fClutchChangeRateScaleUpShift = 8.200000, fClutchChangeRateScaleDownShift = 8.200000, fInitialDriveMaxFlatVel = 178.000000, },
+	[`b16b`] = {custom = true, turboinstall = false, handlingName = 'b16b', label = 'Ek9 B16b Type R', soundname = 'ruston', fMass = '800.000000', nInitialDriveGears = 5, fInitialDriveForce = 0.425000, fDriveInertia = 1.200000, fClutchChangeRateScaleUpShift = 8.200000, fClutchChangeRateScaleDownShift = 8.200000, fInitialDriveMaxFlatVel = 148.000000, },
 	[`rb26dett`] = {custom = true, turboinstall = true, handlingName = 'rb26dett', label = 'BNR34 RB26DE Twin Turbo', soundname = 'elegyx', fMass = '1500.000000', nInitialDriveGears = 6, fInitialDriveForce = 0.525000, fDriveInertia = 1.120000, fClutchChangeRateScaleUpShift = 7.200000, fClutchChangeRateScaleDownShift = 7.200000, fInitialDriveMaxFlatVel = 198.000000, },
 	[`supra2jzgtett`] = {custom = true, turboinstall = true, handlingName = 'supra2jzgtett', label = 'Supra 2JZ GTE Twin Turbo', soundname = 'toysupmk4', fMass = '1600.000000', nInitialDriveGears = 5, fInitialDriveForce = 0.475000, fDriveInertia = 0.950000, fClutchChangeRateScaleUpShift = 7.400000, fClutchChangeRateScaleDownShift = 7.500000, fInitialDriveMaxFlatVel = 189.000000, },
 	[`rx713b`] = {custom = true, turboinstall = true, handlingName = 'rx713b', label = 'RX7 13B-REW twin-rotor Twin Turbo', soundname = 'rotary7', fMass = '1340.000000', nInitialDriveGears = 5, fInitialDriveForce = 0.425000, fDriveInertia = 1.090000, fClutchChangeRateScaleUpShift = 7.700000, fClutchChangeRateScaleDownShift = 7.100000, fInitialDriveMaxFlatVel = 182.000000, },
@@ -605,6 +615,33 @@ config.vehicleCheck = true;
 
 --MANUAL TRANNY Gear Ratio ( Do not Edit if you know what you are doing ) This is not the actual Gear Ratio numbers/settings in real life!
 config.gears = {
+	[1.0] = {
+        [0] = 0.00,
+        [1] = 0.33,
+        [2] = 0.60,
+        [3] = 0.84,
+        [4] = 1.17,
+        [5] = 1.45,
+        [6] = 1.60
+    },
+	[2.0] = {
+        [0] = 0.00,
+        [1] = 0.33,
+        [2] = 0.60,
+        [3] = 0.84,
+        [4] = 1.17,
+        [5] = 1.45,
+        [6] = 1.60
+    },
+	[3.0] = {
+        [0] = 0.00,
+        [1] = 0.33,
+        [2] = 0.60,
+        [3] = 0.84,
+        [4] = 1.17,
+        [5] = 1.45,
+        [6] = 1.60
+    },
     [4.0] = {
         [0] = 0.00,
         [1] = 0.33,
@@ -645,21 +682,18 @@ config.gears = {
     [8.0] = { -- some cars is 8 gears like jugular (mpheist3)
         [0] = 0.00,
         [1] = 0.33,
-        [2] = 0.57,
+        [2] = 0.60,
         [3] = 0.84,
         [4] = 1.08,
         [5] = 1.28,
         [6] = 1.42,
-        [7] = 1.75,
-        [8] = 1.97
+        [7] = 1.70,
+        [8] = 1.91
     }
 }
-config.firstgear = 0.33 -- DEFAULT 0.33
-config.secondgear = 0.57 -- DEFAULT 0.57
-config.thirdgear = 0.84 -- DEFAULT 0.84
-config.fourthgear = 1.22 -- DEFAULT 1.22
-config.fifthgear = 1.45 -- DEFAULT 1.45
-config.sixthgear = 1.60 -- DEFAULT 1.60
+config.upshift = 172 -- UP ARROW (SHIFT TO HIGHER GEAR)
+config.downshift = 173 -- DOWN ARROW (SHIFT TO LOWER GEAR)
+config.clutch = 20 -- Z -- Activate Clutch Mode
 config.finaldrive = 'default' -- will use the default settings from handling.meta
 config.blacklistvehicle = {
 	'13', -- cycles
@@ -778,5 +812,5 @@ function build() ver = 1604 if IsModelInCdimage(`italirsx`) then ver = 2189 else
 --config.gamebuild = build()
 -------------------------------------------https://github.com/renzuzu/renzu_hud----------------------------------------------------------
 --------------------------------------------------------------VARIABLES------------------------------------------------------------------
-identifier=nil;lastveh = nil;newdate = nil;healing=nil;alreadyblackout = false;regdecor=false;busy = false;nearstancer = {};wheelsettings = {};wheeledit = false;turbosound = 0;oldgear = 0;newgear = 0;rpm2 = 0;propturbo = nil;boost = 1.0;old_diff = nil;togglediff = false;cruising = false;lastdamage = nil;oldlife = 200;windowbones = {[0] = 'window_rf',[1] = 'window_lf',[2] = 'window_rr',[3] = 'window_lr'};carcontrol = false;isbusy = false;oldweapon = nil;weaponui = false;wstatus = {};trail = {};nitromode = false;lightshit = {};light_trail_isfuck = false;purgefuck = {};purgeshit = {};pressed = false;proptire = nil;keyless = false;hasmask=false;hashelmet = false;imbusy = true;carstatus = false;enginelist = {};syncengine = {};syncveh = {};ped = nil;playerNamesDist = 3;key_holding = false;particlesfire = {};particleslight = {};charslot = nil;pedshot = false;lastped = nil;dummyskin = {};show = false;notifycd = {};statuses = {};vitals = {};statusloop = -1;garbage = 0;start = false;breakstart = false;lastplate = nil;notloaded = true;minimap=nil;shooting = false;busyplate = {};busyairsus = false;crosshair = 1;flametable = {};spool = false;shouldUpdateSkin = false;pedSkin = {};oldclothes = nil;clothestate = {};dummyskin1 = {};sounded = false;left = false;right = false;hazard = false;state = false;turbo = config.boost;newstreet = nil;newmic = nil;newhealth = 1111;newarmor = 1111;triggered = false;cansmoke = true;refresh = false;veh_stats_loaded = false;finaldrive = 0;flywheel = 0;maxspeed = 0;currentengine={};headshot = nil;enginespec=false;handlings={};vehiclehandling={};boost=1.0;correctgears=1;gear=1;plate=nil;loadedplate=false;maxgear=5;pid=nil;veh_stats=nil;Renzuzu=Citizen;entering=false;mode='NORMAL'ismapopen=false;date="00:00"plate=nil;degrade=1.0;playerloaded=false;manual=false;vehicletopspeed=nil;uimove=false;reverse=false;savegear=0;rpm=0.2;hour=0;vali=false;minute=0;globaltopspeed=nil;segundos=0;month=""dayOfMonth=0;voice=2;voiceDisplay=2;proximity=25.0;belt=false;ExNoCarro=false;sBuffer={}vBuffer={}displayValue=true;gasolina=0;street=nil;vehicle=nil;hp=0;shifter=false;hasNitro=true;k_nitro=70;n_boost=15.0;boost=1.0;nitro_state=100;isBlack="false"invehicle=false;topspeedmodifier=1.0;switch=false;life=100;receive='new'bodystatus={}bonecategory={}parts={}bodyui=false;body=false;arm=false;armbone=0;armbone2=0;leg=false;head=false;shooting=false;manualstatus=false;traction=nil;traction2=nil;alreadyturbo=false;Creation=Renzuzu.CreateThread;Renzu_Hud=Renzuzu.InvokeNative;ClientEvent=TriggerEvent;RenzuNetEvent=RegisterNetEvent;RenzuEventHandler=AddEventHandler;RenzuCommand=RegisterCommand;RenzuSendUI=SendNUIMessage;RenzuKeybinds=RegisterKeyMapping;RenzuNuiCallback=RegisterNUICallback;ReturnFloat=Renzuzu.ResultAsFloat();ReturnInt=Renzuzu.ResultAsInteger()
+identifier=nil;lastveh = nil;newdate = nil;healing=nil;manual2 = false;alreadyblackout = false;regdecor=false;busy = false;onlinevehicles = {};nearstancer = {};wheelsettings = {};wheeledit = false;turbosound = 0;oldgear = 0;newgear = 0;rpm2 = 0;propturbo = nil;boost = 1.0;old_diff = nil;togglediff = false;cruising = false;lastdamage = nil;oldlife = 200;windowbones = {[0] = 'window_rf',[1] = 'window_lf',[2] = 'window_rr',[3] = 'window_lr'};carcontrol = false;isbusy = false;oldweapon = nil;weaponui = false;wstatus = {};trail = {};nitromode = false;lightshit = {};light_trail_isfuck = false;purgefuck = {};purgeshit = {};pressed = false;proptire = nil;keyless = false;hasmask=false;hashelmet = false;imbusy = true;carstatus = false;enginelist = {};syncengine = {};syncveh = {};ped = nil;playerNamesDist = 3;key_holding = false;particlesfire = {};particleslight = {};charslot = nil;pedshot = false;lastped = nil;dummyskin = {};show = false;notifycd = {};statuses = {};vitals = {};statusloop = -1;garbage = 0;start = false;breakstart = false;lastplate = nil;notloaded = true;minimap=nil;shooting = false;busyplate = {};busyairsus = false;crosshair = 1;flametable = {};spool = false;shouldUpdateSkin = false;pedSkin = {};oldclothes = nil;clothestate = {};dummyskin1 = {};sounded = false;left = false;right = false;hazard = false;state = false;turbo = config.boost;newstreet = nil;newmic = nil;newhealth = 1111;newarmor = 1111;triggered = false;cansmoke = true;refresh = false;veh_stats_loaded = false;finaldrive = 0;flywheel = 0;maxspeed = 0;currentengine={};headshot = nil;enginespec=false;handlings={};vehiclehandling={};boost=1.0;correctgears=1;gear=1;plate=nil;loadedplate=false;maxgear=5;pid=nil;veh_stats=nil;Renzuzu=Citizen;entering=false;mode='NORMAL'ismapopen=false;date="00:00"plate=nil;degrade=1.0;playerloaded=false;manual=false;vehicletopspeed=nil;uimove=false;reverse=false;savegear=0;rpm=0.2;hour=0;vali=false;minute=0;globaltopspeed=nil;segundos=0;month=""dayOfMonth=0;voice=2;voiceDisplay=2;proximity=25.0;belt=false;ExNoCarro=false;sBuffer={}vBuffer={}displayValue=true;gasolina=0;street=nil;vehicle=nil;hp=0;shifter=false;hasNitro=true;k_nitro=70;n_boost=15.0;boost=1.0;nitro_state=100;isBlack="false"invehicle=false;topspeedmodifier=1.0;switch=false;life=100;receive='new'bodystatus={}bonecategory={}parts={}bodyui=false;body=false;arm=false;armbone=0;armbone2=0;leg=false;head=false;shooting=false;manualstatus=false;traction=nil;traction2=nil;alreadyturbo=false;Creation=Renzuzu.CreateThread;Renzu_Hud=Renzuzu.InvokeNative;ClientEvent=TriggerEvent;RenzuNetEvent=RegisterNetEvent;RenzuEventHandler=AddEventHandler;RenzuCommand=RegisterCommand;RenzuSendUI=SendNUIMessage;RenzuKeybinds=RegisterKeyMapping;RenzuNuiCallback=RegisterNUICallback;ReturnFloat=Renzuzu.ResultAsFloat();ReturnInt=Renzuzu.ResultAsInteger()
 -----------------------------------------------------------------------------------------------------------------------------------------

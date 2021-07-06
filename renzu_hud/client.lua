@@ -7,6 +7,10 @@ Creation(function()
 		xPlayer = ESX.GetPlayerData()
 		RenzuSendUI({type = "isAmbulance",content = xPlayer.job.name == config.checkbodycommandjob})
 		Renzuzu.Wait(5000)
+	elseif config.framework == 'VRP' then
+		local Tunnel = module("vrp","lib/Tunnel")
+		local Proxy = module("vrp","lib/Proxy")
+		vRP = Proxy.getInterface("vRP")
 	else
 		ESX = true
 	end
@@ -124,19 +128,7 @@ RenzuEventHandler('renzu_hud:charslot', function(charid)
 end)
 
 Creation(function()
-	Wait(1000)
-	if charslot == nil and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0.0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= nil then
-		charslot = round(DecorGetFloat(PlayerPedId(),"CHARSLOT"))
-		----print("CHARSLOT")
-	else
-		Citizen.Wait(4000)
-	end
-	if DecorExistOn(PlayerPedId(), "PLAYERLOADED") and charslot ~= nil then
-		----print("PLAYERLOADED")
-		TriggerServerEvent("renzu_hud:getdata",charslot)
-		playerloaded = true
-	end
-	--print('ismp?', playerloaded, isplayer())
+	Wait(10)
 	if config.framework == 'ESX' then
 		RenzuNetEvent('esx:playerLoaded')
 		RenzuEventHandler('esx:playerLoaded', function(xPlayer)
@@ -161,6 +153,19 @@ Creation(function()
 			RenzuSendUI({content = true, type = 'pedface'})	
 		end)
 	end
+	Wait(1000)
+	if charslot == nil and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0.0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= nil then
+		charslot = round(DecorGetFloat(PlayerPedId(),"CHARSLOT"))
+		----print("CHARSLOT")
+	else
+		Citizen.Wait(4000)
+	end
+	if DecorExistOn(PlayerPedId(), "PLAYERLOADED") and charslot ~= nil then
+		----print("PLAYERLOADED")
+		TriggerServerEvent("renzu_hud:getdata",charslot)
+		playerloaded = true
+	end
+	--print('ismp?', playerloaded, isplayer())
 	Wait(500)
 	if DecorExistOn(PlayerPedId(), "PLAYERLOADED") and config.loadedasmp and isplayer() then
 		--print("ISMP")
@@ -294,12 +299,12 @@ Creation(function()
 				end)
 			end
 
-			if bs and not invehicle then
-				Creation(function()
-					BodyLoop()
-					return
-				end)
-			end
+			-- if bs and not invehicle then
+			-- 	Creation(function()
+			-- 		BodyLoop()
+			-- 		return
+			-- 	end)
+			-- end
 
 			if va then
 				SyncVehicleSound()
@@ -425,6 +430,21 @@ AddEventHandler("renzu_hud:receivedata", function(data,i)
 		identifier = i
 	end
 	veh_stats_loaded = true
+	for k,v in pairs(data) do
+		if v.entity ~= nil then
+			if onlinevehicles[k] == nil then
+				onlinevehicles[k] = {}
+			end
+			onlinevehicles[k].entity = v.entity
+			onlinevehicles[k].plate = k
+			if v.height ~= nil then
+				onlinevehicles[k].height = v.height
+			end
+			if v.engine ~= nil then
+				onlinevehicles[k].engine = v.engine
+			end
+		end
+	end
 end)
 
 Creation(function() -- lets use space as a signal to handbrake NUI more effective and optimize. disable it if you are using it on other scripts.
@@ -473,6 +493,10 @@ AddEventHandler('gameEventTriggered', function (name, args)
 					updateplayer(true)
 					shockcount = shockcount - 1
 					Wait(100)
+				end
+				Wait(100)
+				if config.bodystatus then
+					BodyLoop()
 				end
 			end
 			inshock = false
@@ -1088,6 +1112,7 @@ AddEventHandler('renzu_hud:healpart', function(part)
 	end
 	ClearPedTasks(ped)
 	busyheal = false
+	BodyLoop()
 end)
 
 RegisterNetEvent('renzu_hud:healbody')
@@ -1123,6 +1148,8 @@ AddEventHandler('renzu_hud:healbody', function(bodypart, patient)
 	if damage <= 0 then
 		ClearPedBloodDamage(ped)
 	end
+	Wait(500)
+	BodyLoop()
 end)
 
 Creation(function()
@@ -1832,10 +1859,7 @@ AddEventHandler("renzu_hud:installtire", function(type)
 						veh_stats[plate].tires = type
 					end
 					TriggerServerEvent('renzu_hud:savedata', plate, veh_stats[tostring(plate)])
-					SetEntityAlpha(proptire, 0.0, true)
-					SetEntityAsMissionEntity(proptire, true, true)
-					SetEntityAsNoLongerNeeded(proptire)
-					DeleteEntity(proptire)
+					ReqAndDelete(proptire,true)
 					break
 				else
 					playanimation('anim@amb@clubhouse@tutorial@bkr_tut_ig3@','machinic_loop_mechandplayer')
@@ -1875,10 +1899,7 @@ AddEventHandler("renzu_hud:installtire", function(type)
 					end
 					TriggerServerEvent('renzu_hud:savedata', plate, veh_stats[tostring(plate)])
 					Notify('success','Tire System',"New Tire #"..i.." has been Successfully Install")
-					SetEntityAlpha(proptire, 0.0, true)
-					SetEntityAsMissionEntity(proptire, true, true)
-					SetEntityAsNoLongerNeeded(proptire)
-					DeleteEntity(proptire)
+					ReqAndDelete(proptire,true)
 					break
 				end
 				ClearPedTasks(ped)
@@ -2019,7 +2040,6 @@ Creation(function()
 				break
 			end
 			--print("Playerloaded")
-			print("PL")
 		end
 		Wait(4000) -- wait 4 sec after the playerloaded event to get ped skin
 		TriggerEvent('skinchanger:getSkin', function(current)
@@ -2052,13 +2072,14 @@ RegisterNUICallback('ChangeClothes', function(data)
 		clothebusy = true
 		if clothestate[tostring(data.variant)] then
 			TaskAnimation(config.clothing[data.variant]['taskplay'])
-			Notify("success","Clothe System",""..data.variant.." is put on")
+			Notify("success","Clothe System",""..data.variant.." is put off")
 			local st = nil
 			TriggerEvent('skinchanger:getSkin', function(current)
 				TriggerEvent('skinchanger:loadClothes', current, config.clothing[data.variant].skin)
 			end)
 			PlaySoundFrontend(PlayerId(), 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 1)
 			clothestate[tostring(data.variant)] = false
+			print(clothestate[tostring(data.variant)])
 			if data.variant == 'mask_1' or data.variant == 'helmet_1' then
 				RenzuSendUI({content = true, type = 'pedface'})
 			end
@@ -2075,7 +2096,7 @@ RegisterNUICallback('ChangeClothes', function(data)
 				Notify("warning","Clothe System","No Variant for this type")
 			else 
 				TaskAnimation(config.clothing[data.variant]['taskplay'])
-				Notify("success","Clothe System",""..data.variant.." is put off")
+				Notify("success","Clothe System",""..data.variant.." is put on")
 				local Changes = {}
 				if data.variant == 'mask_1' or data.variant == 'helmet_1' then
 					RenzuSendUI({content = true, type = 'pedface'})
@@ -2088,6 +2109,7 @@ RegisterNUICallback('ChangeClothes', function(data)
 					TriggerEvent('skinchanger:loadClothes', current, Changes)
 				end)
 				clothestate[tostring(data.variant)] = true
+				print(clothestate[tostring(data.variant)])
 				PlaySoundFrontend(PlayerId(), 'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 1)
 				local table = {
 					['bool'] = clothestate[data.variant],

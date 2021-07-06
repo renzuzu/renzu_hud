@@ -2,13 +2,12 @@ local adv_table = {}
 Renzu = {}
 charslot = {}
 ESX = nil
-SetConvar("game_enableFlyThroughWindscreen", true)
 Citizen.CreateThread(function()
 	Wait(1000)
 	if config.framework == 'ESX' then
 		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 	end
-	MySQL.Async.fetchAll("SELECT adv_stats,plate,owner FROM owned_vehicles", {}, function(results)
+	MySQL.Async.fetchAll("SELECT adv_stats,plate,owner FROM "..config.vehicle_table.."", {}, function(results)
 		if #results > 0 then
 			for k,v in pairs(results) do
 				if v.adv_stats and v.plate ~= nil then
@@ -78,7 +77,7 @@ Citizen.CreateThread(function()
 end)
 
 RegisterServerEvent("renzu_hud:savedata")
-AddEventHandler("renzu_hud:savedata", function(plate,table)
+AddEventHandler("renzu_hud:savedata", function(plate,table,updatevehicles)
 	local source = source
 	if plate ~= nil then
 		local plate = string.gsub(plate, "%s+", "")
@@ -86,10 +85,10 @@ AddEventHandler("renzu_hud:savedata", function(plate,table)
 		if plate ~= nil then
 			print("SAVING")
 			adv_table[tostring(plate)] = table
-			local results = MySQL.Sync.fetchAll("SELECT adv_stats,plate,owner FROM owned_vehicles WHERE plate=@plate", {['@plate'] = plate})
+			local results = MySQL.Sync.fetchAll("SELECT adv_stats,plate,owner FROM "..config.vehicle_table.." WHERE plate=@plate", {['@plate'] = plate})
 			if #results > 0 then
 				foundplate = true
-				MySQL.Sync.execute("UPDATE owned_vehicles SET adv_stats = @adv_stats WHERE plate = @plate", {
+				MySQL.Sync.execute("UPDATE "..config.vehicle_table.." SET adv_stats = @adv_stats WHERE plate = @plate", {
 					['@adv_stats'] = json.encode(adv_table[tostring(plate)]),
 					['@plate'] = plate
 				})
@@ -156,17 +155,14 @@ AddEventHandler('renzu_hud:checkbody', function(target)
 	end
 	local xPlayer = GetPlayerFromId(source)
 	local done = false
-	print(source,target)
 	while xPlayer == nil do
 		CreatePlayer(source)
 		Citizen.Wait(500)
 		xPlayer = GetPlayerFromId(source)
-		print("nil")
-		print(source)
-		print(charslot[source])
+		print("xPlayer is nil, trying to create...")
 	end
 	MySQL.Async.fetchAll("SELECT bodystatus FROM users WHERE identifier=@identifier",{['@identifier'] = xPlayer.identifier},	function(res)
-		if res[1].bodystatus and json.decode(res[1].bodystatus) ~= nil then 
+		if res[1] ~= nil and res[1].bodystatus and json.decode(res[1].bodystatus) ~= nil then
 			done = json.decode(res[1].bodystatus)
 		end
 		if target == nil then
@@ -179,12 +175,16 @@ AddEventHandler('renzu_hud:checkbody', function(target)
 	end)
 end)
 
+function UpdateBodySql(bodystatus,identifier)
+	bodytable[identifier] = bodystatus
+	MySQL.Async.execute('UPDATE users SET bodystatus=@bodystatus WHERE identifier=@identifier',{['@bodystatus'] = json.encode(bodystatus),['@identifier'] = identifier})
+end
+
 RegisterServerEvent('renzu_hud:savebody')
 AddEventHandler('renzu_hud:savebody', function(bodystatus)
 	local xPlayer = GetPlayerFromId(source)
 	local identifier = xPlayer.identifier
-	bodytable[identifier] = bodystatus
-	MySQL.Async.execute('UPDATE users SET bodystatus=@bodystatus WHERE identifier=@identifier',{['@bodystatus'] = json.encode(bodystatus),['@identifier'] = identifier})
+	UpdateBodySql(bodystatus,identifier)
 end)
 
 RegisterServerEvent('renzu_hud:healbody')
@@ -199,15 +199,6 @@ AddEventHandler('renzu_hud:healbody', function(target,part)
 		TriggerClientEvent('renzu_hud:healbody', target, part, true)
 	end
 end)
-
-function bandages(part)
-	local b = nil
-	if part == 'ped_body' then b = config.ESX_Items['body_bandage']
-	elseif part == 'left_leg' or part == 'right_leg' then b = config.ESX_Items['arm_bandage']
-	elseif part == 'ped_head' then b = config.ESX_Items['leg_bandage']
-	elseif part == 'right_hand' or part == 'left_hand' then b = config.ESX_Items['head_brace'] end
-	return b
-end
 
 RegisterServerEvent('renzu_hud:checkitem')
 AddEventHandler('renzu_hud:checkitem', function(part)
@@ -323,6 +314,8 @@ end)
 
 RegisterServerEvent('playerDropped')
 AddEventHandler('playerDropped', function(reason)
+	local bodystatus = bodytable[GetSteam(source)]
+	UpdateBodySql(bodystatus,GetSteam(source))
 	Renzu[tonumber(source)] = nil
 end)
 
@@ -332,10 +325,9 @@ function firstToUpper(str)
     return (str:gsub("^%l", string.upper))
 end
 
-print("engine system")
 Citizen.CreateThread(function()
 	Wait(1000)
-	if config.enable_engine_item then
+	if config.enable_engine_item and config.framework == 'ESX' then
 		Wait(1000)
 		local c = 0
 		if config.custom_engine_enable then
@@ -381,7 +373,8 @@ Citizen.CreateThread(function()
 				end)
 			end
 		end
-		print("commands")
+	end
+	print("commands")
 		if config.enable_commands then
 			RenzuCommand('installengine', function(source,args)
 				if args[1] ~= nil and config.engine[args[1]] ~= nil then
@@ -396,17 +389,16 @@ Citizen.CreateThread(function()
 				end
 			end, false)
 		end
-	end
 end)
 
 RegisterServerEvent('renzu_hud:change_engine')
 AddEventHandler('renzu_hud:change_engine', function(plate, stats)
 	local plate = plate
 	adv_table[tostring(plate)] = stats
-	MySQL.Async.fetchAll("SELECT adv_stats,plate,owner FROM owned_vehicles WHERE plate=@plate", {['@plate'] = plate}, function(results)
+	MySQL.Async.fetchAll("SELECT adv_stats,plate,owner FROM "..config.vehicle_table.." WHERE plate=@plate", {['@plate'] = plate}, function(results)
 		if #results > 0 then
 			foundplate = true
-			MySQL.Sync.execute("UPDATE owned_vehicles SET adv_stats = @adv_stats WHERE plate = @plate", {
+			MySQL.Sync.execute("UPDATE "..config.vehicle_table.." SET adv_stats = @adv_stats WHERE plate = @plate", {
 				['@adv_stats'] = json.encode(adv_table[tostring(plate)]),
 				['@plate'] = plate
 			})
@@ -414,6 +406,13 @@ AddEventHandler('renzu_hud:change_engine', function(plate, stats)
 	end)
 	TriggerClientEvent("renzu_hud:syncengine", -1, plate, stats)
 	print("syncing to all")
+end)
+
+RegisterServerEvent('renzu_hud:manualsync')
+AddEventHandler('renzu_hud:manualsync', function(vehicle, gear, plate)
+	local vehicle = vehicle
+	TriggerClientEvent("renzu_hud:manualtrigger", -1, vehicle, gear, plate)
+	print("syncing gears")
 end)
 
 function havePermission(i)

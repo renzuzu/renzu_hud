@@ -1,4 +1,4 @@
-fx_version 'bodacious'
+fx_version 'cerulean'
 -- Renzu HUD 
 -- https://github.com/renzuzu/renzu_hud
 -- YOU ARE NOT ALLOWED TO SELL THIS
@@ -6,8 +6,8 @@ fx_version 'bodacious'
 game 'gta5'
 
 lua54 'on'
-is_cfxv2 'yes'
-use_fxv2_oal 'true'
+--is_cfxv2 'yes'
+--use_fxv2_oal 'true'
 
 ui_page {
     'ui/index.html',

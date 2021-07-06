@@ -517,7 +517,7 @@ a {
   z-index: 1;
 }
 .bar {
-  background: rgba(0, 0, 0, 0.075);
+  background: rgba(1, 17, 49, 0.699);
 }
 
 .armor-bar {
@@ -583,6 +583,34 @@ a {
   height: 18px;
   width: 140px;
   z-index: 1;
+}
+
+.prog-bar {
+  transform: rotate(180deg);
+  #border-radius: 88% 22% 89% 22% / 0% 100% 0% 100%;
+  overflow: hidden;
+}
+.prog-bar span {
+  display: block;
+}
+
+.prog_progress {
+  transition: width 1s;
+  background: orange;
+  color: #fff;
+  z-index: 888 !important;
+  padding: 5px;
+  height: 50px;
+}
+
+.prog-bar {
+  right: -15px;
+  max-width: 61%;
+  position: relative;
+  top: 30px;
+  height: 17px;
+  width: 155px;
+  z-index: 888 !important;
 }
 
 .food-bar {
@@ -845,7 +873,7 @@ svg .rpm {
   will-change: stroke-dashoffset;
   stroke-width: 20px;
   stroke-miterlimit: round;
-  transition: stroke-dashoffset 0ms var(--trans) 0ms;
+  transition: stroke-dashoffset var(--ms) var(--trans) 0ms;
 }
 svg .boost {
   will-change: auto;

@@ -216,14 +216,14 @@ function setStatus(t) {
             document.getElementById(table[i].rpuidiv).style.width = ''+table[i].value+'%'
             if (type == 'icons') {
                 document.getElementById(table[i].i_id_1).style.clip = 'rect('+toclip(table[i].value)+', 100px, 100px, 0)'
-            } else {
+            } else if (table[i].type == 1) {
                 setNoobCircle(table[i].i_id_1, table[i].value)
             }
         }
         if (table[i].value >= 80 && table[i].status == 'sanity') {
             document.getElementById(table[i].id_3).style.setProperty("-webkit-filter", "drop-shadow(5px 5px 5px rgba(255, 5, 5, 1.0)");
             document.getElementById(table[i].id_3).style.color = "rgb(255, 5, 5)";
-        } else if (table[i].value <= 40 && table[i].status !== 'sanity' && table[i].status !== 'voip') {
+        } else if (table[i].value <= 40 && table[i].status !== 'sanity' && table[i].status !== 'voip' && table[i].type == 1) {
             document.getElementById(table[i].id_3).style.color = "rgb(255, 5, 5)";
             document.getElementById(table[i].id_3).style.setProperty("-webkit-filter", "drop-shadow(5px -1px 5px rgba(255, 5, 5, 1.0)");
         } else if (document.getElementById(table[i].id_3)) {
@@ -231,9 +231,9 @@ function setStatus(t) {
             document.getElementById(table[i].id_3).style.setProperty("-webkit-filter", "drop-shadow(15px -1px 22px rgba(255, 5, 5, 0.0)");
         }
         if (table[i].hideifmax) {
-            if (table[i].value == 100 && table[i].status !== 'armor') {
+            if (table[i].value == 100 && table[i].status !== 'armor' && table[i].type == 1) {
                 document.getElementById(table[i].id).style.display = 'none'
-            } else {
+            } else if (table[i].type == 1) {
                 document.getElementById(table[i].id).style.display = 'block'
                 if (table[i].status == 'armor' && statusui !== 'simple' || table[i].status == 'armor' && statusui == 'simple' && table[i].value == 0) {
                     document.getElementById(table[i].id).style.display = 'none'
@@ -361,7 +361,7 @@ function setSpeed(s) {
     takbo = takbo.toFixed(0)
     $(".carhud").addClass('notransition');
     $(".carhud").removeClass("notransition");
-    if (type == 'minimal' && document.getElementById("speedmeter").style.right !== "20%") {
+    if (type == 'minimal') {
         // document.getElementById("speed_minimal").style.display = "block";
         // document.getElementById("speed").style.display = "none";
         document.getElementById("speedmeter").style.right = "20%";
@@ -374,7 +374,7 @@ function setSpeed(s) {
         } else {
             right = '47%'
         }
-    } else if (type == 'modern' && document.getElementById("speedmeter").style.right !== "268px") {
+    } else if (type == 'modern') {
         document.getElementById("speedmeter").style.right = "268px";
         document.getElementById("speedmeter").style.bottom = "85px";
         if (takbo >= 100) {
@@ -384,7 +384,7 @@ function setSpeed(s) {
         } else {
             right = '268px'
         }
-    } else if (type == 'simple' && document.getElementById("speedmeter").style.right !== "20%") {
+    } else if (type == 'simple') {
         document.getElementById("speedmeter").style.right = "20%";
         document.getElementById("speedmeter").style.fontSize  = "1.5vw";
         document.getElementById("speedmeter").style.bottom = "50%";
@@ -396,6 +396,7 @@ function setSpeed(s) {
             right = '47%'
         }  
     }
+    //console.log(right)
     document.getElementById("speedmeter").style.right = right;
     //document.getElementById("speedmeter").innerHTML = ""+takbo+"";
     //$("#speedmeter").text(""+takbo+"");
@@ -1379,7 +1380,9 @@ function setNitro(nitro) {
 function setWheelHealth(table) {
         var index = table[['index']]
         var val = 1 - table[['tirehealth']] / 1000
-        document.getElementById("wheel"+index+"").style.opacity = ''+val+'';  
+        if (carui == 'minimal') {
+            document.getElementById("wheel"+index+"").style.opacity = ''+val+'';
+        }
 }
 
 function setShowKeyless(bool) {
@@ -1682,13 +1685,13 @@ function SetNotify(table) {
     }
 
     function CallbackCLothing(variant,variant2) {
-        $.post('http://hud/ChangeClothes', JSON.stringify({
+        $.post('https://hud/ChangeClothes', JSON.stringify({
             variant : variant, variant2: variant2, state: state[variant]
         }))
     }
 
     function ResetClothes() {
-        $.post('http://hud/resetclothing', JSON.stringify({}))
+        $.post('https://hud/resetclothing', JSON.stringify({}))
     }
 
     function hasClass(element, className) {
@@ -1745,10 +1748,23 @@ function SetNotify(table) {
                 } else {
                     float = 'right'
                 }
-                if (status_type == 'icons') {
-                    $("#statusv3").prepend('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:17px;position:relative;color:rgba(144, 144, 144, 0.876);float:right; margin-top:-25px;margin-left:-7px;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:17px;color:rgba(11, 39, 63, 0.707)"></i> <i id="'+statuses[i].id_3+'" class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+class1+'" style="font-size:19px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+class2+'" style="font-size:19px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
+                if (statuses[i].type == 1) {
+                    if (status_type == 'icons') {
+                        $("#statusv3").prepend('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:17px;position:relative;color:rgba(144, 144, 144, 0.876);float:right; margin-top:-25px;margin-left:-7px;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:17px;color:rgba(11, 39, 63, 0.707)"></i> <i id="'+statuses[i].id_3+'" class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+class1+'" style="font-size:19px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+class2+'" style="font-size:19px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
+                    } else {
+                        $("#statusv3").prepend('<div id="'+divid+'" style="float:'+float+';height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;left:3.5vw;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:1.25vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;"></i> <i id="'+statuses[i].id_3+'" class="fal fa-octagon fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i> <i id="'+statuses[i].i_id_2+'" class="'+statuses[i].i_id_1_class+'" style="font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.14vw;bottom:-0.53vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.9vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="'+statuses[i].i_id_1+'" class="meter statushud" stroke="'+statuses[i].i_id_1_color+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
+                    }
                 } else {
-                    $("#statusv3").prepend('<div id="'+divid+'" style="float:'+float+';height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;left:3.5vw;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:1.25vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;"></i> <i id="'+statuses[i].id_3+'" class="fal fa-octagon fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i> <i id="'+statuses[i].i_id_2+'" class="'+statuses[i].i_id_1_class+'" style="font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.14vw;bottom:-0.53vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.9vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="'+statuses[i].i_id_1+'" class="meter statushud" stroke="'+statuses[i].i_id_1_color+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
+                    $("#status_progress").append('<li style="height: 40px;position:relative;">\
+                    <div class="prog-bar">\
+                      <span class="bar">\
+                        <span style="background: '+statuses[i].i_id_1_color+';" class="prog_progress" id="'+statuses[i].rpuidiv+'"></span>\
+                      </span>\
+                    </div>\
+                    <i style="position:absolute;right:23px;top:27px;z-index: 1350;color:white;font-size:20px;" class="tikol '+statuses[i].i_id_3_class+'"></i>\
+                    <img style="position:relative;z-index:1205 !important;height:40px;" src="img/status_bar.png" />\
+                </li>');
+                $("tikol").removeClass("fa-stack-1x");
                 }
             }
         }
