@@ -584,6 +584,7 @@ end
             manual2 = true
             while manual and invehicle do
                 local sleep = 100
+                DisableControlAction(0,73,true)
                 while tonumber(rpm) >= 1.0 and not clutchpressed do
                     if IsControlJustReleased(0, config.clutch) then
                         break
@@ -668,20 +669,21 @@ end
                 ForceVehicleGear(vehicle, 0)
                 SetVehicleHandbrake(vehicle,true)
             end
-            if savegear == 0 and RCP(1, 73) and RCR(1, 173) or savegear == 0 and clutch and RCR(1, 173) then
+            if savegear == 0 and IsDisabledControlPressed(1, 73) and RCR(1, 173) or savegear == 0 and clutch and RCR(1, 173) then
                 --ShowHelpNotification('REVERSE', true, 1, 5)
                 marcha = "R"
                 savegear = 0
                 reverse = true
             end
             
-            while IsControlPressed(0, 73) do -- if still pressed
+            while IsDisabledControlPressed(0, 73) do -- if still pressed
                 clutchpressed = true
                 Citizen.Wait(0)
                 --LockSpeed(vehicle,speed)
                 SetVehicleClutch(vehicle, 1.0)
                 clutch = true
                 sleep = 1000
+                DisableControlAction(0,73,true)
             end
             clutchpressed = false
             Wait(sleep)
@@ -812,6 +814,7 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                     Renzu_Hud(setcurrentgearhash & 0xFFFFFFFF, vehicle, correctgears)
                     Renzu_Hud(nextgearhash & 0xFFFFFFFF, vehicle, correctgears)
                 end
+                DisableControlAction(0,73,true)
                 local reving = false
                 --SetVehicleHighGear(vehicle,currentgear)
 
@@ -999,7 +1002,7 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                 --sleep if not in vehicle and reset gears
                 savegear = 0
             end
-            Renzuzu.Wait(10)
+            Renzuzu.Wait(1)
         end
         manual = false
         newmanual = nil
