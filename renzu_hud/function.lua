@@ -78,7 +78,7 @@ function getawsomeface()
 		headshot = headshotTxd
 	end
 
-	if headshotTxd == 'none' then
+	if headshotTxd == 'none' or headshotTxd == 0 or tempHandle == 0 then
 		tempHandle = RegisterPedheadshot_3(PlayerPedId())
 		timer = 2000
 		while ((not tempHandle or not IsPedheadshotReady(tempHandle) or not IsPedheadshotValid(tempHandle)) and timer > 0) do
@@ -90,7 +90,6 @@ function getawsomeface()
 			headshot = headshotTxd
 		end
 	end
-
 	return headshotTxd
 end
 
@@ -113,7 +112,12 @@ function UpdateStatus(export,vitals)
 			v1.value = (100 - GetPlayerSprintStaminaRemaining(pid))
 		end
 		if v1.status == 'oxygen' then
-			v1.value = GetPlayerUnderwaterTimeRemaining(pid) * 10
+			v1.value = (underwatertime / 30) * 100
+			if underwatertime == 0 then
+				SetPedDiesInWater(ped,true)
+				SetPlayerUnderwaterTimeRemaining(pid,0)
+				SetPedMaxTimeUnderwater(ped,0)
+			end
 			--print(v1.value)
 		end
 		if v1.custom and statusloop <= 1  then
@@ -719,6 +723,11 @@ function NuiDistancetoWaypoint()
 	end)
 end
 
+function GetVehicleStat(plate)
+	local stat = veh_stats[string.gsub(tostring(plate), '^%s*(.-)%s*$', '%1')]
+	if stat ~= nil then return stat end
+end
+
 function get_veh_stats(v,p)
 	--if veh_stats[plate] ~= nil then return end
 	while not veh_stats_loaded do
@@ -767,18 +776,18 @@ function get_veh_stats(v,p)
 	if veh_stats[plate].engine == nil then
 		veh_stats[plate].engine = 'default'
 	end
-	if veh_stats[plate].engine ~= nil and veh_stats[plate].engine ~= 'default' and currentengine[plate] ~= GetHashKey(tostring(veh_stats[plate].engine)) then
+	if veh_stats[plate].engine ~= nil and veh_stats[plate].engine ~= 'default' and currentengine[plate] ~= GetHashKey(tostring(veh_stats[plate].engine)) and invehicle then
 		SetEngineSpecs(vehicle, GetHashKey(tostring(veh_stats[plate].engine)))
 		print("new ENGINE")
 		Citizen.Wait(1500)
 	end
-	if veh_stats[plate].tires ~= nil and veh_stats[plate].tires ~= 'default' then
+	if veh_stats[plate].tires ~= nil and veh_stats[plate].tires ~= 'default' and invehicle then
 		TireFunction(veh_stats[plate].tires)
 	end
-	if veh_stats[plate].manual and not manual then
+	if veh_stats[plate].manual and not manual and invehicle then
 		TriggerEvent('renzu_hud:manual', veh_stats[plate].manual)
 	end
-	if veh_stats[plate].turbo ~= nil and veh_stats[plate].turbo ~= 'default' and not alreadyturbo then
+	if veh_stats[plate].turbo ~= nil and veh_stats[plate].turbo ~= 'default' and not alreadyturbo and invehicle then
 		TriggerEvent('renzu_hud:hasturbo', veh_stats[plate].turbo)
 		alreadyturbo = true
 	end
@@ -1695,7 +1704,7 @@ end
 function turboboost(gear)
 	local engineload = 0.05
 	if gear == 1 then
-		engineload = 0.11
+		engineload = 0.21
 	elseif gear == 2 then
 		engineload = 0.25
 	elseif gear == 3 then
@@ -1703,9 +1712,9 @@ function turboboost(gear)
 	elseif gear == 4 then
 		engineload = 0.45
 	elseif gear == 5 then
-		engineload = 0.55
+		engineload = 0.45
 	elseif gear == 6 then
-		engineload = 0.65
+		engineload = 0.45
 	end
 	return engineload 
 end
@@ -1739,13 +1748,14 @@ function Boost(hasturbo)
 	Creation(function()
 		--print("starting boost func")
 		local turbo_type = tostring(veh_stats[plate].turbo or 'default')
+		local lag = 0
 		while hasturbo and invehicle do
 			local sleep = 2000
 			--local ply = PlayerPedId()
 			local reset = true
 			local vehicle = vehicle
 			if vehicle ~= 0 then
-				sleep = 7
+				sleep = 50
 				boost = 1.0
 				newgear = gear
 				local vehicleSpeed = 0
@@ -1760,8 +1770,8 @@ function Boost(hasturbo)
 				if rpm2 < 0.0 then
 					rpm2 = 0.2
 				end
-				--print(rpm)
-				if tonumber(rpm) > 0.3 then
+				--print("RPM",rpm,"LAG",lag)
+				if tonumber(rpm2) > 0.3 then
 					--local speed = VehicleSpeed(vehicle) * 3.6
 					if sound and IsControlJustReleased(1, 32) then
 						StopSound(soundofnitro)
@@ -1769,8 +1779,10 @@ function Boost(hasturbo)
 						sound = false
 					end
 
-					local lag = 1
 					local pressure = 0.5
+					if not IsControlPressed(0, 32) then
+						lag = 0
+					end
 					if IsControlPressed(1, 32) and plate ~= nil and veh_stats[plate] ~= nil then
 						if not sound then
 							soundofnitro = PlaySoundFromEntity(GetSoundId(), "Flare", vehicle, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
@@ -1783,34 +1795,81 @@ function Boost(hasturbo)
 						if maxspeed > 200 then
 							maxspeed = 200
 						end
-						while veh_stats[plate] ~= nil and lag < (config.lagamount[turbo_type] * config.turbo_boost[turbo_type]) and (engineload / ((maxspeed) / (config.lagamount[turbo_type] * lag))) < turboboost(gear) and IsControlPressed(1, 32) do
-							engineload = tonumber((rpm * (gear / turbolag)))
+						local lag = 0
+						while veh_stats[plate] ~= nil and IsControlPressed(1, 32) do
+							--while veh_stats[plate] ~= nil and lag < (config.lagamount[turbo_type] * config.turbo_boost[turbo_type]) and (engineload / ((maxspeed) / (config.lagamount[turbo_type] * lag))) < turboboost(gear) and IsControlPressed(1, 32) do
+							local localrpm = GetVehicleCurrentRpm(vehicle)
+							local load = (gear * localrpm) * ((flywheel + finaldrive))
+							engineload = tonumber((localrpm * (gear / turbolag)))
 							--ShowHelpNotification(tostring(engineload), true, 1, 5)
 							if tonumber(engineload) then
-							--engineload =  tonumber(maxnum(((rpm2 + 0.1) * config.turbo_boost[tostring(veh_stats[plate].turbo)])) * (1 + engineload))
-							if engineload > 0.0 and engineload < 10.0 and tonumber(engineload) then
-								pressure = (tonumber(rpm * config.turbo_boost[turbo_type]) + (engineload))
-								if turbo_type == 'sports' then -- temporary to correct sports value
-									pressure = pressure * 1.4
+								--engineload =  tonumber(maxnum(((rpm2 + 0.1) * config.turbo_boost[tostring(veh_stats[plate].turbo)])) * (1 + engineload))
+								lag = (lag + (10.08 * localrpm)) * (localrpm * load)
+								if lag > config.lagamount[turbo_type] then
+									lag = config.lagamount[turbo_type]
 								end
-							end
-							lag = lag + 0.05
+								power_percent = lag / config.lagamount[turbo_type]
+								--print("RPM2",rpm,"PERCENT",power_percent)
+								if engineload > 0.0 and engineload < 10.0 and tonumber(engineload) then
+									pressure = ((tonumber(config.turbo_boost[turbo_type] * power_percent)) + engineload) * power_percent
+									if turbo_type == 'sports' then -- temporary to correct sports value
+										pressure = pressure * 1.4
+									end
+									SetVehicleTurboPressure(vehicle, pressure)
+									boost_pressure = GetVehicleTurboPressure(vehicle)
+									if boost_pressure > config.turbo_boost[turbo_type] then
+										boost_pressure = config.turbo_boost[turbo_type]
+									end
+								end
 							end
 							local boosttemp = 0.1 + (rpm2 / 2)
 							if boosttemp < 0.3 then
 								boosttemp = 0.3
 							end
 							--SetVehicleBoost(vehicle, boosttemp)
-							Renzuzu.Wait(1)
+							Renzuzu.Wait(10)
 							--Notify('success',"PRESSURE",lag)
-							--drawTxt("BOOST lag:  "..(config.lagamount[turbo_type] * lag).."",4,0.5,0.93,0.50,255,255,255,180)
-							--drawTxt("BOOST engineload:  "..(engineload / (DecorGetFloat(vehicle,"TOPSPEED") / (config.lagamount[turbo_type] * lag))).."",4,0.5,0.83,0.50,255,255,255,180)
+							--drawTxt("BOOST lag:  "..lag.."",4,0.5,0.93,0.50,255,255,255,180)
+							--drawTxt("BOOST engineload:  "..boost_pressure.."",4,0.5,0.83,0.50,255,255,255,180)
+							if IsControlPressed(1, 32) and rpm > 0.4 and not RCR(1, 32) then
+								pressed = true
+								if boost < 1.0 then
+									boost = 1.0
+								end
+								if boost < 0.0 or boost > 45.0 then
+									boost = 1.0
+								end
+								--boost_pressure = GetVehicleTurboPressure(vehicle)
+								boost = (boost_pressure)
+								if config.turbogauge and turbo ~= nil and boost_pressure ~= nil and boost_pressure > 0 then
+									RenzuSendUI({
+										type = "setTurboBoost",
+										content = {
+											['speed'] = boost_pressure,
+											['max'] = turbo
+										}
+									})
+									Wait(1)
+								end
+								--Notify('success',"PRESSURE",lag)
+								print(rpm2 > 0.65 , rpm2 < 0.95 , turbosound < 500 , gear ~= oldgear , power_percent <= 1.0)
+								if config.boost_sound and rpm2 > 0.65 and rpm2 < 0.95 and turbosound < 500 and gear == oldgear and power_percent < 1.0 then
+									turbosound = turbosound + 1
+									SetVehicleBoostActive(vehicle, 1, 0)
+									Wait(10)
+									SetVehicleBoostActive(vehicle, 0, 0)
+								else
+									turbosound = 0
+								end
+								oldgear = gear
+							end
 						end
 						--drawTxt("BOOST pressure:  "..pressure.."",4,0.5,0.79,0.50,255,255,255,180)
-						if config.boost_sound and rpm2 > 0.65 and rpm2 < 0.95 and turbosound < 5 and gear == oldgear and engineload > turboboost(gear) then
+						if config.boost_sound and rpm2 > 0.65 and rpm2 < 0.95 and turbosound < 500 and gear == oldgear and power_percent <= 1.0 then
 							turbosound = turbosound + 1
-							SetVehicleBoostActive(vehicle, 1, 0)
-							SetVehicleBoostActive(vehicle, 0, 0)
+							SetVehicleBoostActive(vehicle, true, false)
+							Wait(5)
+							SetVehicleBoostActive(vehicle, false, false)
 						else
 							turbosound = 0
 						end
@@ -1831,28 +1890,29 @@ function Boost(hasturbo)
 					if gear == 0 then
 						gear = 1
 					end
-					boost = (boost_pressure * 7)
-					if IsControlPressed(1, 32) and rpm > 0.4 and not RCR(1, 32) then
-						pressed = true
-						if boost < 1.0 then
-							boost = 1.0
-						end
-						if boost < 0.0 or boost > 45.0 then
-							boost = 1.0
-						end
-						if config.turbogauge and turbo ~= nil and boost_pressure ~= nil and boost_pressure > 0 then
-							RenzuSendUI({
-								type = "setTurboBoost",
-								content = {
-									['speed'] = boost_pressure / 2.65,
-									['max'] = turbo
-								}
-							})
-							Wait(1)
-						end
-					else
-						Wait(100)
-					end
+					boost = (boost_pressure * 1)
+					print(boost)
+					-- if IsControlPressed(1, 32) and rpm > 0.4 and not RCR(1, 32) then
+					-- 	pressed = true
+					-- 	if boost < 1.0 then
+					-- 		boost = 1.0
+					-- 	end
+					-- 	if boost < 0.0 or boost > 45.0 then
+					-- 		boost = 1.0
+					-- 	end
+					-- 	if config.turbogauge and turbo ~= nil and boost_pressure ~= nil and boost_pressure > 0 then
+					-- 		RenzuSendUI({
+					-- 			type = "setTurboBoost",
+					-- 			content = {
+					-- 				['speed'] = boost_pressure / 2.65,
+					-- 				['max'] = turbo
+					-- 			}
+					-- 		})
+					-- 		Wait(1)
+					-- 	end
+					-- else
+					-- 	Wait(100)
+					-- end
 					if GetVehicleThrottleOffset(vehicle) <= 0.0 then
 						Wait(200)
 						pressed = false
@@ -1927,10 +1987,11 @@ function Boost(hasturbo)
 
 	Creation(function()
 		local pressed = false
+		local turbo_type = tostring(veh_stats[plate].turbo or 'default')
 		while invehicle do
 			local sleep = 100
 			if IsControlPressed(1, 32) and rpm > 0.4 and not RCR(1, 32) then
-				sleep = 7
+				sleep = 5
 				pressed = true
 				if boost < 1.0 then
 					boost = 1.0
@@ -1941,7 +2002,7 @@ function Boost(hasturbo)
 				if mode == 'SPORTS' and not hasturbo then
 					SetVehicleBoost(vehicle, 1.0 + config.boost)
 				else
-					SetVehicleBoost(vehicle, boost*1.01)
+					SetVehicleBoost(vehicle, 1+boost * (config.turbo_boost[turbo_type] + maxgear - gear))
 				end
 			else
 				Wait(100)
@@ -2257,7 +2318,15 @@ function setStatusEffect()
 		end
 	end
 	if IsPedSwimmingUnderWater(ped) then
+		if underwatertime >= 1 then
+			SetPedDiesInWater(ped,false)
+			SetPlayerUnderwaterTimeRemaining(PlayerId(),300)
+			SetPedMaxTimeUnderwater(PlayerPedId(),300)
+			underwatertime = underwatertime - 2
+		end
 		UpdateStatus(true)
+	elseif not IsPedSwimmingUnderWater(ped) and underwatertime < 30 then
+		underwatertime = 30
 	end
 end
 

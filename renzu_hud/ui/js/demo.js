@@ -939,11 +939,7 @@ function setShowCarcontrol(bool) {
 function post(name,data){
 	var name = name;
 	var data = data;
-	$.post("https://hud/"+name,JSON.stringify(data),function(datab){
-		if (datab != "ok"){
-			////////console.log(datab);
-		}
-	});
+	$.post("https://hud/"+name,JSON.stringify(data));
 }
 function indexname(index) {
     if (index == 0) {
@@ -1479,9 +1475,9 @@ document.onkeyup = function (data) {
             //////console.log('pressed')
             $.post(`https://${GetParentResourceName()}/closecarcontrol`, {}, function(data) {});
         }
-        if (!pressedkey2) {
-            pressedkey2 = true
-        }
+        // if (!pressedkey2) {
+        //     pressedkey2 = true
+        // }
     }
     if (data.keyCode == '75' || data.keyCode == '76') {
         if (pressedkey3) {
@@ -1862,11 +1858,13 @@ function SetNotify(table) {
     }
     
     function setShooting(sleep) {
-        setInterval(function(){ post("setShooting",{}) }, sleep);
+        //setInterval(function(){ post("setShooting",{}) }, sleep);
     }
 
     function NuiLoop() {
-        setInterval(function(){ post("NuiLoop",{}) }, 2000);
+        setInterval(function(){ 
+            post("NuiLoop",{})
+        }, 2000);
     }
 
     function Drag(bool) {

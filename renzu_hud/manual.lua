@@ -291,6 +291,10 @@ function Nuimanualtranny()
             modifyt = nil
             Renzuzu.Wait(sleep)
         end
+        RenzuSendUI({
+            type = "setManual",
+            content = false
+        })
     end)
 end
 
@@ -984,7 +988,7 @@ function NuiMainmanualLoop() -- Dont edit unless you know the system how it work
                             else
                                 SetRpm(vehicle, r)
                             end
-                            if boost > 2 then
+                            if boost > 1 then
                                 Wait(500)
                             end
                         end

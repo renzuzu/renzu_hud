@@ -38,10 +38,10 @@ end)
 --PMA VOICE LISTENER
 RenzuNetEvent("pma-voice:setTalkingMode")
 RenzuEventHandler("pma-voice:setTalkingMode", function(prox)
-	voiceDisplay = prox + 1
+	voiceDisplay = prox
 	RenzuSendUI({
 		type = "setMic",
-		content = prox + 1
+		content = prox
 	})
 end)
 
@@ -172,6 +172,7 @@ Creation(function()
 		TriggerServerEvent("renzu_hud:getdata",0, true)
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 		playerloaded = true
+		RenzuSendUI({content = true, type = 'pedface'})
 	end
 	while not playerloaded do
 		Wait(1000)
@@ -233,6 +234,8 @@ end)
 
 Creation(function()
 	Renzuzu.Wait(2000)
+	SetPlayerUnderwaterTimeRemaining(pid,9999)
+	SetPedMaxTimeUnderwater(ped,99999)
 	for k,v in pairs(config.statusordering) do
 		if v.custom and v.enable then
 			statuses[k] = v.status
@@ -306,19 +309,19 @@ Creation(function()
 			-- 	end)
 			-- end
 
-			if va then
-				SyncVehicleSound()
+			if va or wa then
+				SyncWheelAndSound(va,wa)
 			end
-
-			if wa then
-				SyncWheelSetting()
-			end
+			-- if wa then
+			-- 	SyncWheelSetting()
+			-- end
 			if garbage > 200 then
 				collectgarbage()
 				garbage = 0
 			end
 			garbage = garbage + 1
 			--print(garbage,"Garbage")
+			cb(true)
 		end)
 	end
 	if config.enablestatus or not config.enablestatus and config.statusui == 'normal' then
@@ -344,6 +347,7 @@ end)
 RenzuNuiCallback('pushtostart', function(data, cb)
 	start = true
 	breakstart = false
+	cb(true)
 end)
 
 RenzuNuiCallback('getoutvehicle', function(data, cb)
@@ -351,6 +355,7 @@ RenzuNuiCallback('getoutvehicle', function(data, cb)
 	breakstart = false
 	SetNuiFocus(false,false)
 	TaskLeaveVehicle(ped,vehicle,0)
+	cb(true)
 end)
 
 Creation(function()
@@ -667,22 +672,24 @@ end)
 
 RenzuNetEvent('renzu_hud:hasturbo')
 RenzuEventHandler('renzu_hud:hasturbo', function(type)
-	alreadyturbo = true
-	Wait(1000)
-	--print("TURBO ACTIVATE")
-	if config.turbogauge then
-		RenzuSendUI({
-			type = "setShowTurboBoost",
-			content = true
-		})
+	if invehicle then
+		alreadyturbo = true
+		Wait(1000)
+		--print("TURBO ACTIVATE")
+		if invehicle and config.turbogauge then
+			RenzuSendUI({
+				type = "setShowTurboBoost",
+				content = true
+			})
+		end
+		plate = string.gsub(GetVehicleNumberPlateText(vehicle), "%s+", "")
+		plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+		Creation(function()
+			turboanimation(type)
+			Boost(true)
+			return
+		end)
 	end
-	plate = string.gsub(GetVehicleNumberPlateText(vehicle), "%s+", "")
-	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
-	Creation(function()
-		turboanimation(type)
-		Boost(true)
-		return
-	end)
 end)
 
 RenzuNetEvent('renzu_hud:install_turbo')
@@ -944,58 +951,58 @@ Creation(function()
 		--Citizen.Wait(2000) -- 2 seconds wait to check if player is aiming, more optimized 100x than to loop wait(0) just to check if player is firing or not
 		RenzuNuiCallback('setShooting', function(data, cb)
 			--print("ishooting",shooting)
-			if not shooting then
-				--print("not shooting")
-				Creation(function()
-					local count = 0
-					local killed = {}
-					local lastent = nil
-					local pid = pid
-					while IsPlayerFreeAiming(pid) do
-						if IsPedShooting(ped) then
-							--print("shooting")
-							shooting = true
-							if config.enablestatus and config.killing_affect_status then
-								val, ent = GetEntityPlayerIsFreeAimingAt(pid)
-								----print("shooting")
-								if lastent ~= nil and lastent ~= 0 then
-									if not killed[lastent] and IsEntityDead(lastent) and GetPedSourceOfDeath(lastent) == ped then
-										killed[lastent] = true
-										--print("LAST ENTITY IS DEAD "..lastent.."")
-										lastent = nil
-										TriggerEvent('esx_status:'..config.killing_status_mode..'', config.killing_affected_status, config.killing_status_val)
-										Citizen.Wait(100)
-									end
-								end
-								if ent ~= lastent then
-									lastent = nil
-								end
-							end
-							if config.enablestatus and count > config.firing_bullets then
-								count = 0
-								TriggerEvent('esx_status:'..config.firing_status_mode..'', config.firing_affected_status, config.firing_statusaddval)
-								----print("STATUS ADDED")
-							end
-							count = count + 1
-							----print(count)
-							lastent = ent
-							shooting = true
-							if config.bodystatus then
-								if armbone > armbone2 then
-									recoil(armbone / 5.0)
-								else
-									recoil(armbone2 / 5.0)
-								end
-							end
-							Citizen.Wait(5)
-						end
-						----print("aiming")
-						Citizen.Wait(5)
-					end
-					shooting = false
-					return
-				end)
-			end
+			-- if not shooting then
+			-- 	--print("not shooting")
+			-- 	Creation(function()
+			-- 		local count = 0
+			-- 		local killed = {}
+			-- 		local lastent = nil
+			-- 		local pid = pid
+			-- 		while IsPlayerFreeAiming(pid) do
+			-- 			if IsPedShooting(ped) then
+			-- 				--print("shooting")
+			-- 				shooting = true
+			-- 				if config.enablestatus and config.killing_affect_status then
+			-- 					val, ent = GetEntityPlayerIsFreeAimingAt(pid)
+			-- 					----print("shooting")
+			-- 					if lastent ~= nil and lastent ~= 0 then
+			-- 						if not killed[lastent] and IsEntityDead(lastent) and GetPedSourceOfDeath(lastent) == ped then
+			-- 							killed[lastent] = true
+			-- 							--print("LAST ENTITY IS DEAD "..lastent.."")
+			-- 							lastent = nil
+			-- 							TriggerEvent('esx_status:'..config.killing_status_mode..'', config.killing_affected_status, config.killing_status_val)
+			-- 							Citizen.Wait(100)
+			-- 						end
+			-- 					end
+			-- 					if ent ~= lastent then
+			-- 						lastent = nil
+			-- 					end
+			-- 				end
+			-- 				if config.enablestatus and count > config.firing_bullets then
+			-- 					count = 0
+			-- 					TriggerEvent('esx_status:'..config.firing_status_mode..'', config.firing_affected_status, config.firing_statusaddval)
+			-- 					----print("STATUS ADDED")
+			-- 				end
+			-- 				count = count + 1
+			-- 				----print(count)
+			-- 				lastent = ent
+			-- 				shooting = true
+			-- 				if config.bodystatus then
+			-- 					if armbone > armbone2 then
+			-- 						recoil(armbone / 5.0)
+			-- 					else
+			-- 						recoil(armbone2 / 5.0)
+			-- 					end
+			-- 				end
+			-- 			end
+			-- 			----print("aiming")
+			-- 			Citizen.Wait(5)
+			-- 		end
+			-- 		shooting = false
+			-- 		return
+			-- 	end)
+			-- end
+			cb(true)
 		end)
 	end
 	return
@@ -1091,6 +1098,7 @@ RenzuNuiCallback('healpart', function(data, cb)
 	if not busyheal then
 		TriggerServerEvent('renzu_hud:checkitem',data.part)
 	end
+	cb(true)
 end)
 
 RegisterNetEvent('renzu_hud:healpart')
@@ -1187,6 +1195,7 @@ RenzuNuiCallback('closecarcontrol', function(data, cb)
 		content = carcontrol
 	})
 	SetNuiFocus(false,false)
+	cb(true)
 end)
 
 RenzuNuiCallback('setVehicleDoor', function(data, cb)
@@ -1196,6 +1205,7 @@ RenzuNuiCallback('setVehicleDoor', function(data, cb)
     else     
         SetVehicleDoorShut(vehicle,tonumber(data.index),false,false)
     end
+	cb(true)
 end)
 
 RenzuNuiCallback('setVehicleSeat1', function(data, cb)
@@ -1205,6 +1215,7 @@ RenzuNuiCallback('setVehicleSeat1', function(data, cb)
 	elseif IsVehicleSeatFree(vehicle,0) then
 		shuffleseat(0)
     end
+	cb(true)
 end)
 
 RenzuNuiCallback('setVehicleSeat2', function(data, cb)
@@ -1214,6 +1225,7 @@ RenzuNuiCallback('setVehicleSeat2', function(data, cb)
 	elseif IsVehicleSeatFree(vehicle,2) then
 		shuffleseat(2)
     end
+	cb(true)
 end)
 
 RenzuNuiCallback('setVehicleEnginestate', function(data, cb)
@@ -1244,6 +1256,7 @@ RenzuNuiCallback('setVehicleEnginestate', function(data, cb)
 		})
     end
 	SetNuiFocus(false,false)
+	cb(true)
 end)
 
 RegisterNetEvent("renzu_hud:airsuspension")
@@ -1253,6 +1266,9 @@ AddEventHandler("renzu_hud:airsuspension", function(vehicle,val,coords)
 		Wait(math.random(1,500))
 		if vehicle ~= 0 and #(coords - GetEntityCoords(ped)) < 50 and not busyplate[GetPlate(v)] then
 			busyplate[GetPlate(v)] = true
+			if nearstancer[GetPlate(v)] ~= nil then
+				nearstancer[GetPlate(v)].wheeledit = true
+			end
 			playsound(GetEntityCoords(v),20,'suspension',1.0)
 			local max = 0
 			local data = {}
@@ -1315,6 +1331,7 @@ RenzuNuiCallback('setvehicleheight', function(data, cb)
 		busyairsus = true
 		TriggerServerEvent("renzu_hud:airsuspension",VehToNet(vehicle), data.val, GetEntityCoords(vehicle))
     end
+	cb(true)
 end)
 
 RenzuNuiCallback('setvehiclewheeloffsetfront', function(data, cb)
@@ -1337,6 +1354,7 @@ RenzuNuiCallback('setvehiclewheeloffsetfront', function(data, cb)
 		end
 		RenzuSendUI({type = "unsetradio",content = false})
     end
+	cb(true)
 end)
 
 RenzuNuiCallback('setvehiclewheeloffsetrear', function(data, cb)
@@ -1359,6 +1377,7 @@ RenzuNuiCallback('setvehiclewheeloffsetrear', function(data, cb)
 		end
 		RenzuSendUI({type = "unsetradio",content = false})
     end
+	cb(true)
 end)
 
 RenzuNuiCallback('setvehiclewheelrotationfront', function(data, cb)
@@ -1381,6 +1400,7 @@ RenzuNuiCallback('setvehiclewheelrotationfront', function(data, cb)
 		end
 		RenzuSendUI({type = "unsetradio",content = false})
     end
+	cb(true)
 end)
 
 RenzuNuiCallback('setvehiclewheelrotationrear', function(data, cb)
@@ -1403,6 +1423,7 @@ RenzuNuiCallback('setvehiclewheelrotationrear', function(data, cb)
 		end
 		RenzuSendUI({type = "unsetradio",content = false})
     end
+	cb(true)
 end)
 
 Creation(function()
@@ -1488,6 +1509,7 @@ RenzuNuiCallback('wheelsetting', function(data, cb)
 	end
 	Wait(1000)
 	nearstancer[plate].wheeledit = false
+	cb(true)
 end)
 
 RenzuNuiCallback('setvehicleneon', function(data, cb)
@@ -1500,6 +1522,7 @@ RenzuNuiCallback('setvehicleneon', function(data, cb)
 			Citizen.Wait(500)
 		end
 	end
+	cb(true)
 end)
 
 local neoneffect1 = false
@@ -1536,6 +1559,7 @@ RenzuNuiCallback('setneoneffect1', function(data, cb)
 			return
 		end)
 	end
+	cb(true)
 end)
 
 local neoneffect2 = false
@@ -1576,6 +1600,7 @@ RenzuNuiCallback('setneoneffect2', function(data, cb)
 			return
 		end)
 	end
+	cb(true)
 end)
 
 RenzuNuiCallback('setVehicleWindow1', function(data, cb)
@@ -1587,6 +1612,7 @@ RenzuNuiCallback('setVehicleWindow1', function(data, cb)
         RollUpWindow(vehicle,1)
 		RollUpWindow(vehicle,0)
     end
+	cb(true)
 end)
 
 RenzuNuiCallback('setVehicleWindow2', function(data, cb)
@@ -1598,6 +1624,7 @@ RenzuNuiCallback('setVehicleWindow2', function(data, cb)
         RollUpWindow(vehicle,3)
 		RollUpWindow(vehicle,2)
     end
+	cb(true)
 end)
 
 Creation(function()
@@ -1640,28 +1667,18 @@ AddEventHandler("renzu_hud:addnitro", function(amount)
 		local lib, anim = 'mini@repair', 'fixing_a_car'
         local playerPed = PlayerPedId()
 		playanimation('mini@repair','fixing_a_car')
+		ClearPedTasks(playerPed)
 		Wait(5000)
-		-- ESX.Streaming.RequestAnimDict(lib, function()
-        --     TaskPlayAnim(playerPed, lib, anim, 8.0, -8.0, 5555, 0, 0, false, false, false)
-        --     Citizen.Wait(500)
-		-- 	Makeloading('Installing Nitro',5000)
-        --     while IsEntityPlayingAnim(playerPed, lib, anim, 3) do
-        --         Citizen.Wait(0)
-        --         DisableAllControlActions(0)
-        --     end
-        --     ESX.ShowNotification("Nitro has been reloaded")
-		-- end)
+		Notify('success','Nitro System',"Nitro is Max")
 		veh_stats[GetPlate(getveh())].nitro = 100
 end)
 
 RegisterNetEvent("renzu_hud:nitro_flame_stop")
 AddEventHandler("renzu_hud:nitro_flame_stop", function(c_veh,coords)
-		print("CHUPA")
 		if purgefuck[c_veh] ~= nil then
 			purgefuck[c_veh] = false
 		end
 		for k,v in pairs(purgeshit) do
-			print("remove")
 			if k == c_veh then
 				for k2,v2 in pairs(v) do
 					StopParticleFxLooped(k2, 1)
@@ -1963,7 +1980,8 @@ RenzuNuiCallback('hidecarlock', function(data, cb)
 		type = "setShowKeyless",
 		content = false
 	})
-	keyless = false
+	keyless = true
+	cb(true)
 end)
 
 RenzuNuiCallback('setvehiclelock', function(data, cb)
@@ -1973,6 +1991,7 @@ RenzuNuiCallback('setvehiclelock', function(data, cb)
 		Notify('success','Vehicle Lock System','Lock Plate # '..GetVehicleNumberPlateText(data.vehicle)..'')
 		TriggerServerEvent("renzu_hud:synclock", VehToNet(data.vehicle), 'lock', GetEntityCoords(ped))
     end
+	cb(true)
 end)
 
 RenzuNuiCallback('setvehicleunlock', function(data, cb)
@@ -1982,6 +2001,7 @@ RenzuNuiCallback('setvehicleunlock', function(data, cb)
 		Notify('success','Vehicle Lock System','Unlock Plate # '..GetVehicleNumberPlateText(data.vehicle)..'')
 		TriggerServerEvent("renzu_hud:synclock", VehToNet(data.vehicle), 'unlock', GetEntityCoords(ped))
     end
+	cb(true)
 end)
 
 RenzuNuiCallback('setvehicleopendoors', function(data, cb)
@@ -2006,6 +2026,7 @@ RenzuNuiCallback('setvehicleopendoors', function(data, cb)
 		Wait(500)
 		ClearPedTasks(ped)
     end
+	cb(true)
 end)
 
 RenzuNuiCallback('setvehiclealarm', function(data, cb)
@@ -2025,6 +2046,7 @@ RenzuNuiCallback('setvehiclealarm', function(data, cb)
 		Wait(500)
 		ClearPedTasks(ped)
     end
+	cb(true)
 end)
 
 --clothes
