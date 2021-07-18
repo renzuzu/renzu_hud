@@ -1,3 +1,11 @@
+-- Copyright (c) Renzuzu
+-- All rights reserved.
+-- Even if 'All rights reserved' is very clear :
+-- You shall not use any piece of this software in a commercial product / service
+-- You shall not resell this software
+-- You shall not provide any facility to install this particular software in a commercial product / service
+-- If you redistribute this software, you must link to ORIGINAL repository at https://github.com/renzuzu/renzu_hud
+-- This copyright should appear in every part of the project code
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- RENZU HUD FUNCTION  https://github.com/renzuzu/renzu_hud
 -----------------------------------------------------------------------------------------------------------------------------------------
@@ -2767,6 +2775,61 @@ function WeaponStatus()
 	local weapon = nil
 	oldweapon = nil
 	if IsPedArmed(ped, 7) and not invehicle then
+		if not shooting then
+			--print("not shooting")
+			Creation(function()
+				local count = 0
+				local killed = {}
+				local lastent = nil
+				local pid = pid
+				local sleep = 1000
+				while IsPedArmed(ped, 7) do
+					while IsPedShooting(ped) do
+						print("firing")
+						sleep = 5
+						--print("shooting")
+						shooting = true
+						if config.enablestatus and config.killing_affect_status then
+							val, ent = GetEntityPlayerIsFreeAimingAt(pid)
+							----print("shooting")
+							if lastent ~= nil and lastent ~= 0 then
+								if not killed[lastent] and IsEntityDead(lastent) and GetPedSourceOfDeath(lastent) == ped then
+									killed[lastent] = true
+									--print("LAST ENTITY IS DEAD "..lastent.."")
+									lastent = nil
+									TriggerEvent('esx_status:'..config.killing_status_mode..'', config.killing_affected_status, config.killing_status_val)
+									Citizen.Wait(100)
+								end
+							end
+							if ent ~= lastent then
+								lastent = nil
+							end
+						end
+						if config.enablestatus and count > config.firing_bullets then
+							count = 0
+							TriggerEvent('esx_status:'..config.firing_status_mode..'', config.firing_affected_status, config.firing_statusaddval)
+							----print("STATUS ADDED")
+						end
+						count = count + 1
+						----print(count)
+						lastent = ent
+						shooting = true
+						if config.bodystatus then
+							if armbone > armbone2 then
+								recoil(armbone / 5.0)
+							else
+								recoil(armbone2 / 5.0)
+							end
+						end
+						Wait(sleep)
+					end
+					----print("aiming")
+					Citizen.Wait(sleep)
+				end
+				shooting = false
+				return
+			end)
+		end
 		while IsPedArmed(ped, 7) and not invehicle and oldweapon == weapon do
 			sleep = config.ammoupdatedelay
 			weapon = GetSelectedPedWeapon(ped)
@@ -3404,45 +3467,45 @@ function tostringplate(plate)
     end
 end
 
-function closestveh(coords)
-    --for k,vv in pairs(GetGamePool('CVehicle')) do
-        for k,v in pairs(onlinevehicles) do
-			if v.entity ~= nil and NetworkDoesEntityExistWithNetworkId(v.entity) then
-				local vv = NetToVeh(v.entity)
-				local vehcoords = GetEntityCoords(vv)
-				local dist = #(coords-vehcoords)
-				local plate = GetVehicleNumberPlateText(vv)
-				--anti desync
-				if k ~= nil and v.engine ~= nil and v.engine ~= 'default' then
-					if not syncveh[vv] and tostringplate(plate) == tostringplate(k) and syncengine[tostringplate(k)] ~= nil then
-						syncengine[tostringplate(k)] = nil
-					end
-					if dist < 100 and syncengine[tostringplate(k)] ~= v.engine and vv ~= nil then
-						if tostringplate(plate) == tostringplate(k) then
-							--print("engine sound",v.engine,vv)
-							if config.custom_engine_enable and config.custom_engine[GetHashKey(v.engine)] ~= nil then
-								ForceVehicleEngineAudio(vv, config.custom_engine[GetHashKey(v.engine)].soundname)
-							else
-								ForceVehicleEngineAudio(vv, tostring(v.engine))
-							end
-							syncengine[tostringplate(k)] = v.engine
-							syncveh[vv] = v.engine
-						end
-					end
-				end
-			end
-        end
-    --end
-end
+-- function closestveh(coords)
+--     --for k,vv in pairs(GetGamePool('CVehicle')) do
+--         for k,v in pairs(onlinevehicles) do
+-- 			if v.entity ~= nil and NetworkDoesEntityExistWithNetworkId(v.entity) then
+-- 				local vv = NetToVeh(v.entity)
+-- 				local vehcoords = GetEntityCoords(vv)
+-- 				local dist = #(coords-vehcoords)
+-- 				local plate = GetVehicleNumberPlateText(vv)
+-- 				--anti desync
+-- 				if k ~= nil and v.engine ~= nil and v.engine ~= 'default' then
+-- 					if not syncveh[vv] and tostringplate(plate) == tostringplate(k) and syncengine[tostringplate(k)] ~= nil then
+-- 						syncengine[tostringplate(k)] = nil
+-- 					end
+-- 					if dist < 100 and syncengine[tostringplate(k)] ~= v.engine and vv ~= nil then
+-- 						if tostringplate(plate) == tostringplate(k) then
+-- 							--print("engine sound",v.engine,vv)
+-- 							if config.custom_engine_enable and config.custom_engine[GetHashKey(v.engine)] ~= nil then
+-- 								ForceVehicleEngineAudio(vv, config.custom_engine[GetHashKey(v.engine)].soundname)
+-- 							else
+-- 								ForceVehicleEngineAudio(vv, tostring(v.engine))
+-- 							end
+-- 							syncengine[tostringplate(k)] = v.engine
+-- 							syncveh[vv] = v.engine
+-- 						end
+-- 					end
+-- 				end
+-- 			end
+--         end
+--     --end
+-- end
 
-function SyncVehicleSound()
-	if veh_stats == nil then return end
-	Citizen.CreateThread(function()
-		Wait(1000)
-		closestveh(GetEntityCoords(ped))
-		return
-	end)
-end
+-- function SyncVehicleSound()
+-- 	if veh_stats == nil then return end
+-- 	Citizen.CreateThread(function()
+-- 		Wait(1000)
+-- 		closestveh(GetEntityCoords(ped))
+-- 		return
+-- 	end)
+-- end
 
 function SetEngineSpecs(veh, model)
 	if GetPedInVehicleSeat(veh, -1) == ped then
@@ -3669,7 +3732,7 @@ function repairengine(plate)
 	SetEntityCollision(carryModel2, false, true)
 end
 
-function SyncWheelSetting()
+function SyncWheelAndSound(sounds,wheels)
 	local coords = GetEntityCoords(PlayerPedId())
 	for k,v in pairs(onlinevehicles) do
 		if v.entity ~= nil and NetworkDoesEntityExistWithNetworkId(v.entity) and v.plate == tostringplate(GetVehicleNumberPlateText(NetToVeh(v.entity))) then
@@ -3678,14 +3741,33 @@ function SyncWheelSetting()
 			local dist = #(coords-vehcoords)
 			local plate = GetVehicleNumberPlateText(vv)
 			plate = string.gsub(plate, "%s+", "")
-			if nearstancer[plate] == nil then
-				nearstancer[plate] = {entity = vv, dist = dist, plate = plate}
+			if wheels then
+				if nearstancer[plate] == nil then
+					nearstancer[plate] = {entity = vv, dist = dist, plate = plate}
+				end
+				nearstancer[plate].dist = dist
+				nearstancer[plate].entity = vv
+				nearstancer[plate].speed = GetEntitySpeed(vv) * 3.6
+				if v.height ~= nil and not nearstancer[plate].wheeledit then
+					SetVehicleSuspensionHeight(vv,v.height)
+				end
 			end
-			nearstancer[plate].dist = dist
-			nearstancer[plate].entity = vv
-			nearstancer[plate].speed = GetEntitySpeed(vv) * 3.6
-			if v.height ~= nil and not nearstancer[plate].wheeledit then
-				SetVehicleSuspensionHeight(vv,v.height)
+			if sounds and k ~= nil and v.engine ~= nil and v.engine ~= 'default' then
+				if not syncveh[vv] and tostringplate(plate) == tostringplate(k) and syncengine[tostringplate(k)] ~= nil then
+					syncengine[tostringplate(k)] = nil
+				end
+				if dist < 100 and syncengine[tostringplate(k)] ~= v.engine and vv ~= nil then
+					if tostringplate(plate) == tostringplate(k) then
+						--print("engine sound",v.engine,vv)
+						if config.custom_engine_enable and config.custom_engine[GetHashKey(v.engine)] ~= nil then
+							ForceVehicleEngineAudio(vv, config.custom_engine[GetHashKey(v.engine)].soundname)
+						else
+							ForceVehicleEngineAudio(vv, tostring(v.engine))
+						end
+						syncengine[tostringplate(k)] = v.engine
+						syncveh[vv] = v.engine
+					end
+				end
 			end
 		end
 	end

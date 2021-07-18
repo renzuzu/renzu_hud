@@ -1,3 +1,11 @@
+-- Copyright (c) Renzuzu
+-- All rights reserved.
+-- Even if 'All rights reserved' is very clear :
+-- You shall not use any piece of this software in a commercial product / service
+-- You shall not resell this software
+-- You shall not provide any facility to install this particular software in a commercial product / service
+-- If you redistribute this software, you must link to ORIGINAL repository at https://github.com/renzuzu/renzu_hud
+-- This copyright should appear in every part of the project code
 ---------------------------------------------------------https://github.com/renzuzu/renzu_hud------------------------------------------
 config = {}
 config.gamebuild = 'auto' -- if 2189 pedshot transparent and 1604 or < 2000 = Enter vehicle game event will not work, we will use normal pedshot ( gamebuild is what you set on your server start example: +set sv_enforceGameBuild 2189, available build 1604, 2060, 2189 and more.) this is important if you are using UI Normal with Ped Face.
