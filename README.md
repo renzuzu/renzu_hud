@@ -98,3 +98,11 @@ Hazard = Backspace
 - ESX ( OPTIONAL )
 - renzu_fuel https://github.com/renzuzu/renzu_fuel
 - renzu_status ( Standalone Status Function ) https://github.com/renzuzu/renzu_status
+
+# TODOS
+- Settings UI
+- Fix Css
+- Translation
+- Other Framework integration
+- More Optimisation
+- Bug Fixing if any
