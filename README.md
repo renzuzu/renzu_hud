@@ -49,10 +49,12 @@ Status V1 (with rp UI) (TOGGLE Version - Default Key is Insert ) (can be disable
 # Status V2 PREVIEWS
 # Normal UI
 ![alt text](https://i.imgur.com/nddxuL8.png)
+![image](https://user-images.githubusercontent.com/82306584/126660402-e5b3d18f-6f0a-47ee-883f-3a18fd37d52e.png)
+
 # Normal UI All status is showed
 ![alt text](https://i.imgur.com/bXtGhy2.png)
 # Simple UI
-![alt text](https://i.imgur.com/sJKmZ9P.png)
+![image](https://user-images.githubusercontent.com/82306584/126660275-b70c77df-8283-44a3-806f-7c71b22000de.png)
 ![image](https://user-images.githubusercontent.com/82306584/126660118-6ad0507f-7613-4149-a7de-cc6072744bbc.png)
 
 # Simple UI hide max status in config
