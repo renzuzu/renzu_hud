@@ -12,14 +12,33 @@ charslot = {}
 ESX = nil
 Citizen.CreateThread(function()
 	Wait(1000)
+	MySQL.Sync.execute([[
+		CREATE TABLE IF NOT EXISTS `vehicle_status` (
+			`stats` LONGTEXT NULL DEFAULT '[]' COLLATE 'utf8mb4_general_ci',
+			`plate` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
+			`owner` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
+			PRIMARY KEY (`plate`) USING BTREE
+		)
+		COLLATE='utf8mb4_general_ci'
+		ENGINE=InnoDB
+		;
+		CREATE TABLE IF NOT EXISTS `body_status` (
+			`status` LONGTEXT NULL DEFAULT '[]' COLLATE 'utf8mb4_general_ci',
+			`identifier` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
+			PRIMARY KEY (`identifier`) USING BTREE
+		)
+		COLLATE='utf8mb4_general_ci'
+		ENGINE=InnoDB
+		;
+	]])
 	if config.framework == 'ESX' then
 		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 	end
-	MySQL.Async.fetchAll("SELECT adv_stats,plate,owner FROM "..config.vehicle_table.."", {}, function(results)
+	MySQL.Async.fetchAll("SELECT stats,plate,owner FROM vehicle_status", {}, function(results)
 		if #results > 0 then
 			for k,v in pairs(results) do
-				if v.adv_stats and v.plate ~= nil then
-					local stats = json.decode(v.adv_stats)
+				if v.stats and v.plate ~= nil then
+					local stats = json.decode(v.stats)
 					stats.plate = string.gsub(v.plate, "%s+", "")
 					stats.owner = v.owner
 					stats.entity = nil
@@ -84,20 +103,38 @@ Citizen.CreateThread(function()
 	end
 end)
 
+function isVehicleOwned(plate)
+	local owner = MySQL.Sync.fetchAll("SELECT "..config.Owner_column.." FROM "..config.vehicle_table.." WHERE plate=@plate", {['@plate'] = plate})
+	return owner
+end
+
 RegisterServerEvent("renzu_hud:savedata")
 AddEventHandler("renzu_hud:savedata", function(plate,table,updatevehicles)
 	local source = source
 	if plate ~= nil then
 		local plate = string.gsub(plate, "%s+", "")
 		local foundplate = false
+		local newcreated = false
 		if plate ~= nil then
 			print("SAVING")
 			adv_table[tostring(plate)] = table
-			local results = MySQL.Sync.fetchAll("SELECT adv_stats,plate,owner FROM "..config.vehicle_table.." WHERE plate=@plate", {['@plate'] = plate})
+			local results = MySQL.Sync.fetchAll("SELECT stats,plate,owner FROM vehicle_status WHERE plate=@plate", {['@plate'] = plate})
+			if #results <= 0 then
+				local owner = isVehicleOwned(plate)
+				if #owner > 0 then
+					MySQL.Sync.execute("INSERT INTO vehicle_status (stats, plate, owner) VALUES (@stats, @plate, @owner)", {
+						['@stats'] = json.encode(adv_table[tostring(plate)]),
+						['@plate'] = plate,
+						['@owner'] = owner[1][config.Owner_column]
+					})
+					foundplate = true
+					adv_table[tostring(plate)].owner = owner[1][config.Owner_column]
+				end
+			end
 			if #results > 0 then
 				foundplate = true
-				MySQL.Sync.execute("UPDATE "..config.vehicle_table.." SET adv_stats = @adv_stats WHERE plate = @plate", {
-					['@adv_stats'] = json.encode(adv_table[tostring(plate)]),
+				MySQL.Sync.execute("UPDATE vehicle_status SET stats = @stats WHERE plate = @plate", {
+					['@stats'] = json.encode(adv_table[tostring(plate)]),
 					['@plate'] = plate
 				})
 			end
@@ -166,12 +203,20 @@ AddEventHandler('renzu_hud:checkbody', function(target)
 	while xPlayer == nil do
 		CreatePlayer(source)
 		Citizen.Wait(500)
+		while xPlayer.identifier == nil do Wait(1) end
 		xPlayer = GetPlayerFromId(source)
 		print("xPlayer is nil, trying to create...")
+		local results = MySQL.Sync.fetchAll("SELECT status FROM body_status WHERE identifier=@identifier", {['@identifier'] = xPlayer.identifier})
+		if #results <= 0 then
+			MySQL.Sync.execute("INSERT INTO body_status (status,identifier) VALUES (@status,@identifier)", {
+				['@status'] = '[]',
+				['@identifier'] = xPlayer.identifier
+			})
+		end
 	end
-	MySQL.Async.fetchAll("SELECT bodystatus FROM users WHERE identifier=@identifier",{['@identifier'] = xPlayer.identifier},	function(res)
-		if res[1] ~= nil and res[1].bodystatus and json.decode(res[1].bodystatus) ~= nil then
-			done = json.decode(res[1].bodystatus)
+	MySQL.Async.fetchAll("SELECT status FROM body_status WHERE identifier=@identifier",{['@identifier'] = xPlayer.identifier},	function(res)
+		if res[1] ~= nil and res[1].status and json.decode(res[1].status) ~= nil then
+			done = json.decode(res[1].status)
 		end
 		if target == nil then
 			target = false
@@ -185,7 +230,7 @@ end)
 
 function UpdateBodySql(bodystatus,identifier)
 	bodytable[identifier] = bodystatus
-	MySQL.Async.execute('UPDATE users SET bodystatus=@bodystatus WHERE identifier=@identifier',{['@bodystatus'] = json.encode(bodystatus),['@identifier'] = identifier})
+	MySQL.Async.execute('UPDATE body_status SET status=@status WHERE identifier=@identifier',{['@status'] = json.encode(bodystatus),['@identifier'] = identifier})
 end
 
 RegisterServerEvent('renzu_hud:savebody')
@@ -383,31 +428,31 @@ Citizen.CreateThread(function()
 		end
 	end
 	print("commands")
-		if config.enable_commands then
-			RenzuCommand('installengine', function(source,args)
-				if args[1] ~= nil and config.engine[args[1]] ~= nil then
-					if havePermission(GetPlayerIdentifier(source, 0)) then
-						for v, k in pairs(config.engine) do
-							if v == args[1] then
-								print("install")
-								TriggerClientEvent('renzu_hud:change_engine', source, v)
-							end
+	if config.enable_commands then
+		RenzuCommand('installengine', function(source,args)
+			if args[1] ~= nil and config.engine[args[1]] ~= nil then
+				if havePermission(GetPlayerIdentifier(source, 0)) then
+					for v, k in pairs(config.engine) do
+						if v == args[1] then
+							print("install")
+							TriggerClientEvent('renzu_hud:change_engine', source, v)
 						end
 					end
 				end
-			end, false)
-		end
+			end
+		end, false)
+	end
 end)
 
 RegisterServerEvent('renzu_hud:change_engine')
 AddEventHandler('renzu_hud:change_engine', function(plate, stats)
 	local plate = plate
 	adv_table[tostring(plate)] = stats
-	MySQL.Async.fetchAll("SELECT adv_stats,plate,owner FROM "..config.vehicle_table.." WHERE plate=@plate", {['@plate'] = plate}, function(results)
+	MySQL.Async.fetchAll("SELECT stats,plate FROM vehicle_status WHERE plate=@plate", {['@plate'] = plate}, function(results)
 		if #results > 0 then
 			foundplate = true
-			MySQL.Sync.execute("UPDATE "..config.vehicle_table.." SET adv_stats = @adv_stats WHERE plate = @plate", {
-				['@adv_stats'] = json.encode(adv_table[tostring(plate)]),
+			MySQL.Sync.execute("UPDATE vehicle_status SET stats = @status WHERE plate = @plate", {
+				['@status'] = json.encode(adv_table[tostring(plate)]),
 				['@plate'] = plate
 			})
 		end

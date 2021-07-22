@@ -449,6 +449,7 @@ function setShow(table) {
     document.getElementById(""+carui+"").style.display = 'none'
     //clearInterval(loopfuck);
   }
+  RestoreCarPosition()
 }
 
 function setHeadlights(v) {
@@ -1219,7 +1220,7 @@ function setCarui(ver) {
         document.getElementById("right").style.bottom = '75%';
         document.getElementById("left").style.right = '69%';
         document.getElementById("left").style.bottom = '75%';
-        document.getElementById("milediv").style.right = '39.0%';
+        document.getElementById("milediv").style.right = '12.5vw';
         document.getElementById("milediv").style.bottom = '30.5%';
         document.getElementById("milediv").style.margin = '1% 1% 1% 1%';
         document.getElementById("milediv").style.background = '#000000';
@@ -1352,6 +1353,7 @@ function setStatusUILocation(table) {
         //////console.log(table['left'])
         document.getElementById("statusv3").style.left = ''+table['left']+'';
     }
+    RestoreStatusPosition()
 }
 
 function setMoveStatusUi(bool) {
@@ -1772,6 +1774,7 @@ function SetNotify(table) {
                 }
             }
         }
+        RestoreStatusPosition()
     }
 
     function setShowTurboBoost(bool) {
@@ -1870,9 +1873,9 @@ function SetNotify(table) {
     }
 
     function NuiLoop() {
-        setInterval(function(){ 
-            post("NuiLoop",{})
-        }, 2000);
+        // setInterval(function(){ 
+        //     post("NuiLoop",{})
+        // }, 2000);
     }
 
     function Drag(bool) {
@@ -1885,12 +1888,29 @@ function SetNotify(table) {
                 },
                 stop: function(event, ui) {
                   //////console.log($(event.target).width() + " x " + $(event.target).height());
-                  //////console.log(ui.position.top + " x " + ui.position.left);
+                  console.log(ui.position.top + " x " + ui.position.left);
+                  localStorage.setItem("statustop", ui.position.top);
+                  localStorage.setItem("statusleft", ui.position.left);
                 },
                 scroll: false
               }).draggable('enable');
         } else {
             $('#statusv3').draggable().draggable('disable');
+        }
+    }
+    function RestoreStatusPosition() {
+        if (localStorage.getItem("statusleft") !== undefined) {
+            console.log(localStorage.getItem("statusleft"),"POSITION")
+            $('#statusv3').css('left', ''+localStorage.getItem("statusleft")+'px');
+            $('#statusv3').css('top', ''+localStorage.getItem("statustop")+'px');
+        }
+    }
+
+    function RestoreCarPosition() {
+        if (localStorage.getItem("carleft") !== undefined) {
+            console.log(localStorage.getItem("statusleft"),"POSITION")
+            $('#'+carui+'').css('left', ''+localStorage.getItem("carleft")+'px');
+            $('#'+carui+'').css('top', ''+localStorage.getItem("cartop")+'px');
         }
     }
 
@@ -1905,6 +1925,8 @@ function SetNotify(table) {
             stop: function(event, ui) {
                 //////console.log($(event.target).width() + " x " + $(event.target).height());
                 //////console.log(ui.position.top + " x " + ui.position.left);
+                localStorage.setItem("cartop", ui.position.top);
+                localStorage.setItem("carleft", ui.position.left);
             },
             scroll: false
             }).draggable('enable');
@@ -1917,6 +1939,8 @@ function SetNotify(table) {
             stop: function(event, ui) {
                 //////console.log($(event.target).width() + " x " + $(event.target).height());
                 //////console.log(ui.position.top + " x " + ui.position.left);
+                localStorage.setItem("cartop", ui.position.top);
+                localStorage.setItem("carleft", ui.position.left);
             },
             scroll: false
             }).draggable('enable');
@@ -1929,6 +1953,8 @@ function SetNotify(table) {
             stop: function(event, ui) {
                 //////console.log($(event.target).width() + " x " + $(event.target).height());
                 //////console.log(ui.position.top + " x " + ui.position.left);
+                localStorage.setItem("cartop", ui.position.top);
+                localStorage.setItem("carleft", ui.position.left);
             },
             scroll: false
             }).draggable('enable');
