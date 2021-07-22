@@ -1,6 +1,13 @@
 # renzu_hud
 Fivem HUD - Advanced FIVEM HUD (SEMI ALL IN ONE UI) (idle 0.01ms - 0.02ms)
 # Features
+- Advanced Player Status System
+- Draggable UI Status,Car HUD (position will restore upon reconnect)
+- Multiple Status UI version (icons,circle progressbars, flat progressbars)
+- Multi CarHUD Version (Simple, Minimal, Modernized)
+- Weapon HUD
+- Street HUD
+- Advanced Fuel System (required renzu_fuel to disable your current fuel management)
 - Engine Overheat System
 - Engine Swap System (Performance and sound)
 - Car Status
