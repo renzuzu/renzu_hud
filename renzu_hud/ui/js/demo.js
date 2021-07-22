@@ -948,7 +948,7 @@ function setShowCarcontrol(bool) {
 function post(name,data){
 	var name = name;
 	var data = data;
-	$.post("https://hud/"+name,JSON.stringify(data));
+	$.post("https://renzu_hud/"+name,JSON.stringify(data));
 }
 function indexname(index) {
     if (index == 0) {
@@ -1691,13 +1691,13 @@ function SetNotify(table) {
     }
 
     function CallbackCLothing(variant,variant2) {
-        $.post('https://hud/ChangeClothes', JSON.stringify({
+        $.post('https://renzu_hud/ChangeClothes', JSON.stringify({
             variant : variant, variant2: variant2, state: state[variant]
         }))
     }
 
     function ResetClothes() {
-        $.post('https://hud/resetclothing', JSON.stringify({}))
+        $.post('https://renzu_hud/resetclothing', JSON.stringify({}))
     }
 
     function hasClass(element, className) {
