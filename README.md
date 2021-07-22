@@ -1,5 +1,5 @@
 # renzu_hud
-Fivem HUD - Advanced FIVEM HUD (SEMI ALL IN ONE UI) (idle 0.01ms - 0.02ms)
+Fivem HUD - Advanced FIVEM HUD (SEMI ALL IN ONE UI) (idle 0.01ms - 0.02ms (i9-9900k))
 # Features
 - Advanced Player Status System
 - Draggable UI Status,Car HUD (position will restore upon reconnect)
