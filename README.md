@@ -1,5 +1,39 @@
 # renzu_hud
 Fivem HUD - Advanced FIVEM HUD (SEMI ALL IN ONE UI) (idle 0.01ms - 0.02ms)
+# Features
+- Engine Overheat System
+- Engine Swap System (Performance and sound)
+- Car Status
+- Car Control
+- Clothing System
+- Vehicle Keyless System
+- Body Status System
+- WheelStancer
+- AirSuspension
+- Neon Color Control
+- Neon Color Multiple Effects
+- Seatbelt System
+- Drive Mode - Sports or Eco or Normal
+- Built in Car GPS
+- Mileage System
+- Nitro System
+- Advanced Tire System with items
+- Advanced Turbo System with items
+- Water and Engine Oil System (WIP)
+- Manual Transmission
+- Waypoint Large Marker
+- Distance to Waypoint Calculation to UI
+- Clock
+- Gear
+- RPM Text and Radial Bar
+- Speedometer Text and Radialbar
+- Fuel tank meter
+- Vehicle Health Meter
+
+-much more not included yet..
+
+#Maximum Possible Optimisation
+Client Side Lua and Javascript Side
 # Main UI preview
 ![alt text](https://i.imgur.com/if4xS9L.png)
 # Status UI with RP UI preview
@@ -48,40 +82,6 @@ Hazard = Backspace
 
 # ROUND MINIMAP
 ![alt text](https://i.imgur.com/7c0jN4i.png)
-
-- Engine Overheat System
-- Engine Swap System (Performance and sound)
-- Car Status
-- Car Control
-- Clothing System
-- Vehicle Keyless System
-- Body Status System
-- WheelStancer
-- AirSuspension
-- Neon Color Control
-- Neon Color Multiple Effects
-- Seatbelt System
-- Drive Mode - Sports or Eco or Normal
-- Built in Car GPS
-- Mileage System
-- Nitro System
-- Advanced Tire System with items
-- Advanced Turbo System with items
-- Water and Engine Oil System (WIP)
-- Manual Transmission
-- Waypoint Large Marker
-- Distance to Waypoint Calculation to UI
-- Clock
-- Gear
-- RPM Text and Radial Bar
-- Speedometer Text and Radialbar
-- Fuel tank meter
-- Vehicle Health Meter
-
--much more not included yet..
-
-#Maximum Possible Optimisation
-Client Side Lua and Javascript Side
 
 # Dependency
 ESX ( OPTIONAL )
