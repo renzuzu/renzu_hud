@@ -42,7 +42,7 @@ Fivem HUD - Advanced FIVEM HUD (SEMI ALL IN ONE UI) (idle 0.01ms - 0.02ms)
 #Maximum Possible Optimisation
 Client Side Lua and Javascript Side
 # Main UI preview
-![alt text](https://i.imgur.com/if4xS9L.png)
+![image](https://user-images.githubusercontent.com/82306584/126662006-e6c14cdc-e8dd-4350-9f2e-9f9f74f0a649.png)
 # Status UI with RP UI preview
 Status V1 (with rp UI) (TOGGLE Version - Default Key is Insert ) (can be disabled in config and use v2 only)
 ![alt text](https://i.imgur.com/pwWiGF6.png)
@@ -69,7 +69,7 @@ Hazard = Backspace
 # CAR HUD SIMPLE
 ![alt text](https://i.imgur.com/kJdCIqT.png)
 # CAR HUD MINIMAL (RACING)
-![alt text](https://i.imgur.com/3Ck9njA.png)
+![image](https://user-images.githubusercontent.com/82306584/126660665-7042cb87-0aaa-4af7-9431-238a3dd7f239.png)
 # CAR HUD MODERN
 ![alt text](https://i.imgur.com/8MlJG4H.png)
 
@@ -86,7 +86,7 @@ Hazard = Backspace
 ![alt text](https://i.imgur.com/KjyLPMb.png)
 
 # Vehicle Control System 
-![alt text](https://i.imgur.com/eniMcyR.png)
+![image](https://user-images.githubusercontent.com/82306584/126660967-4c2b4bc8-0220-4c30-adc3-6504334989d7.png)
 
 # Compass System (STREET NAME AND LABEL)
 ![alt text](https://i.imgur.com/ucC1bw5.png)
@@ -95,6 +95,6 @@ Hazard = Backspace
 ![alt text](https://i.imgur.com/7c0jN4i.png)
 
 # Dependency
-ESX ( OPTIONAL )
-renzu_fuel
-renzu_status ( Standalone Status Function )
+- ESX ( OPTIONAL )
+- renzu_fuel https://github.com/renzuzu/renzu_fuel
+- renzu_status ( Standalone Status Function ) https://github.com/renzuzu/renzu_status
