@@ -1,6 +1,17 @@
-
-ALTER TABLE `users`
-	ADD `bodystatus` LONGTEXT NOT NULL DEFAULT '{}';
-
-ALTER TABLE `owned_vehicles` -- change this if you use custom vehicles table
-	ADD `adv_stats` LONGTEXT NOT NULL DEFAULT '{"plate":"nil","mileage":0.0}';
+CREATE TABLE IF NOT EXISTS `vehicle_status` (
+	`stats` LONGTEXT NULL DEFAULT '[]' COLLATE 'utf8mb4_general_ci',
+	`plate` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
+	`owner` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
+	PRIMARY KEY (`plate`) USING BTREE
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+;
+CREATE TABLE IF NOT EXISTS `body_status` (
+	`status` LONGTEXT NULL DEFAULT '[]' COLLATE 'utf8mb4_general_ci',
+	`identifier` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
+	PRIMARY KEY (`identifier`) USING BTREE
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+;
