@@ -737,9 +737,9 @@ config.lights_sleep = 1000
 config.direction_sleep = 2500
 config.NuiCarhpandGas_sleep = 2500
 config.car_mainloop_sleep = 1500
-config.rpm_speed_loop = 52
+config.rpm_speed_loop = 10
 config.idle_rpm_speed_sleep = 151
-config.Rpm_sleep = 50 -- around 10-20-50-200 is a good value (depends on UTILS animation ms)
+config.Rpm_sleep = 65 -- around 10-20-50-200 is a good value (depends on UTILS animation ms)
 config.Rpm_sleep_2 = 5
 config.Speed_sleep = 151
 config.Speed_sleep_2 = 11
@@ -752,8 +752,8 @@ config.animation_ms = '250ms' -- animation delay ( this affects cpu usage of ani
 config.transition = 'linear' -- ease, linear, or leave it like = '' (blank) or unset DEFAULT 'unset'
 -- VEHICLE CSS ANIMATION
 config.accelerationcar = 'unset' -- (none,gpu,hardware) use hardware acceleration = cpu / gpu = gpu resource to some UI animation and effects?, option = hardware,gpu (looks like this is the same result)
-config.animation_mscar = '20ms' -- animation delay ( this affects cpu usage of animations ) DEFAULT '0ms'
-config.transitioncar = 'ease-in-out' -- ease, linear, or leave it like = '' (blank) or unset DEFAULT 'unset'
+config.animation_mscar = '15ms' -- animation delay ( this affects cpu usage of animations ) DEFAULT '0ms'
+config.transitioncar = 'linear' -- ease, linear, or leave it like = '' (blank) or unset DEFAULT 'unset'
 -- DEFAULT UTIL SETTING is the optimize for CPU in task manager not in resmon!, but the animation or transition is sucks, you may want to configure the transition and animation_ms to your desire settings and desire beautiful transition of circlebars,carhud etc.
 config.uiconfig = {acceleration = config.acceleration, animation_ms = config.animation_ms, transition = config.transition,accelerationcar = config.accelerationcar, animation_mscar = config.animation_mscar, transitioncar = config.transitioncar}
 -- GEAR FUNCTION

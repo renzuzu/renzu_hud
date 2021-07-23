@@ -2282,7 +2282,7 @@ RegisterCommand(config.commands['uiconfig'], function(source, args, raw)
 		set = args[2] or 'none'
 		config.acceleration = args[2] or 'unset'
 	end
-	config.uiconfig = {acceleration = config.acceleration, animation_ms = config.animation_ms, transition = config.transition}
+	config.uiconfig = {acceleration = config.acceleration, animation_ms = config.animation_ms, transition = config.transition, accelerationcar = config.accelerationcar, animation_mscar = config.animation_mscar, transitioncar = config.transitioncar}
 	SendNUIMessage({
 		type = "uiconfig",
 		content = config.uiconfig
