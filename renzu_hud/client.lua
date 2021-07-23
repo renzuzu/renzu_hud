@@ -163,7 +163,7 @@ CreateThread(function()
 	end
 	Wait(1000)
 	if Hud.charslot == nil and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0.0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= nil then
-		Hud.charslot = round(DecorGetFloat(PlayerPedId(),"CHARSLOT"))
+		Hud.charslot = Hud:round(DecorGetFloat(PlayerPedId(),"CHARSLOT"))
 		----print("CHARSLOT")
 	else
 		Citizen.Wait(4000)
