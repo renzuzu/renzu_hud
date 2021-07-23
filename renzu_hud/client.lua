@@ -307,54 +307,10 @@ CreateThread(function()
 					Hud.garbage = 0
 				end
 				Hud.garbage = Hud.garbage + 1
+				--print("TEST")
+				Hud:updateplayer()
 				Wait(2500)
 			end
-		end)
-		RegisterNUICallback('NuiLoop', function(data, cb)
-			--updateplayer()
-			-- if se and not Hud.invehicle then
-			-- 	CreateThread(function()
-			-- 		Wait(1000)
-			-- 		Hud:setStatusEffect()
-			-- 		return
-			-- 	end)
-			-- end
-			-- if wui and not Hud.invehicle then
-			-- 	CreateThread(function()
-			-- 		Wait(1500)
-			-- 		Hud:WeaponStatus()
-			-- 		return
-			-- 	end)
-			-- end
-
-			-- if ec then
-			-- 	CreateThread(function()
-			-- 		Wait(2000)
-			-- 		Hud:Compass()
-			-- 		return
-			-- 	end)
-			-- end
-
-			-- -- if bs and not Hud.invehicle then
-			-- -- 	CreateThread(function()
-			-- -- 		BodyLoop()
-			-- -- 		return
-			-- -- 	end)
-			-- -- end
-
-			-- if va or wa then
-			-- 	Hud:SyncWheelAndSound(va,wa)
-			-- end
-			-- -- if wa then
-			-- -- 	SyncWheelSetting()
-			-- -- end
-			-- if Hud.garbage > 200 then
-			-- 	collectgarbage()
-			-- 	Hud.garbage = 0
-			-- end
-			-- Hud.garbage = Hud.garbage + 1
-			--print(Hud.garbage,"Garbage")
-			cb(true)
 		end)
 	end
 	if config.enablestatus or not config.enablestatus and config.statusui == 'normal' then
