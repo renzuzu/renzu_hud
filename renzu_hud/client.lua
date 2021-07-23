@@ -22,8 +22,8 @@ CreateThread(function()
 	elseif config.framework == 'QBCORE' then
 		QBCore = exports['qb-core']:GetSharedObject()
 		while QBCore == nil do Wait(0) end
-		QBCore.Functions.getPlayerData(function(PlayerData)
-            if PlayerData ~= nil then
+		QBCore.Functions.GetPlayerData(function(PlayerData)
+            if PlayerData ~= nil and PlayerData.job ~= nil then
 				SendNUIMessage({type = "isAmbulance",content = PlayerData.job.name == config.checkbodycommandjob})
             end
         end)
@@ -262,13 +262,13 @@ CreateThread(function()
 			Hud:UpdateStatus(false,vitals)
 		end)
 		if config.framework == 'QBCORE' then
-			local hunger = newHunger * 10000 -- someone correct this is the max value is 100?
-			local thirst = newThirst * 10000
+			local hunger = 0
+			local thirst = 0
 			local stress = 0
 			RegisterNetEvent('hud:client:UpdateNeeds')
 			AddEventHandler('hud:client:UpdateNeeds', function(newHunger, newThirst)
-				hunger = newHunger
-				thirst = newThirst
+				hunger = newHunger * 10000 -- someone correct this is the max value is 100?
+				thirst = newThirst * 10000
 				stress = nil
 				local statusqb = {
 					['hunger'] = hunger,
@@ -281,8 +281,8 @@ CreateThread(function()
 			Citizen.SetTimeout(2500, function()
 				TriggerEvent("QBCore:GetObject", function(obj) QBCore = obj end)
 				Citizen.Wait(250)
-				QBCore.Functions.getPlayerData(function(PlayerData)
-					if PlayerData ~= nil then
+				QBCore.Functions.GetPlayerData(function(PlayerData)
+					if PlayerData ~= nil and PlayerData.metadata ~= nil then
 						hunger, thirst, stress = PlayerData.metadata["hunger"] * 10000, PlayerData.metadata["thirst"] * 10000, PlayerData.metadata["stress"] * 10000
 					end
 				end)
