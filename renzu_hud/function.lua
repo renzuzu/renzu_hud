@@ -879,7 +879,7 @@ function Hud:NuiMileAge()
 				savemile = true
 				lastve = GetVehiclePedIsIn(self.ped, false)
 				if self.plate ~= nil then
-					--saveplate = string.match(GetVehicleNumberPlateText(self.vehicle ), '%f[%d]%d[,.%d]*%f[%D]')
+					saveplate = self.plate
 					if self.veh_stats[self.plate] == nil then
 						self:get_veh_stats()
 					end

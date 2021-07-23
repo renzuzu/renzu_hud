@@ -11,46 +11,68 @@ Renzu = {}
 charslot = {}
 ESX = nil
 QBCore = nil
+
+function SQLQuery(plugin,type,query,var)
+    if type == 'fetchAll' and plugin == 'mysql-async' then
+        return MySQL.Sync.fetchAll(query, var)
+    end
+    if type == 'execute' and plugin == 'mysql-async' then
+        MySQL.Sync.execute(query,var) 
+    end
+    if type == 'execute' and plugin == 'ghmattisql' then
+        exports['ghmattimysql']:execute(query, var)
+    end
+    if type == 'fetchAll' and plugin == 'ghmattisql' then
+        local data = nil
+        exports.ghmattimysql:execute(query, var, function(result)
+            data = result
+        end)
+        while data == nil do Wait(0) end
+        return data
+    end
+end
+
 Citizen.CreateThread(function()
 	Wait(1000)
-	MySQL.Sync.execute([[
-		CREATE TABLE IF NOT EXISTS `vehicle_status` (
-			`stats` LONGTEXT NULL DEFAULT '[]' COLLATE 'utf8mb4_general_ci',
-			`plate` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
-			`owner` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
-			PRIMARY KEY (`plate`) USING BTREE
-		)
-		COLLATE='utf8mb4_general_ci'
-		ENGINE=InnoDB
-		;
-		CREATE TABLE IF NOT EXISTS `body_status` (
-			`status` LONGTEXT NULL DEFAULT '[]' COLLATE 'utf8mb4_general_ci',
-			`identifier` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
-			PRIMARY KEY (`identifier`) USING BTREE
-		)
-		COLLATE='utf8mb4_general_ci'
-		ENGINE=InnoDB
-		;
-	]])
+	if config.Mysql == 'mysql-async' then
+		MySQL.Sync.execute([[
+			CREATE TABLE IF NOT EXISTS `vehicle_status` (
+				`stats` LONGTEXT NULL DEFAULT '[]' COLLATE 'utf8mb4_general_ci',
+				`plate` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
+				`owner` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
+				PRIMARY KEY (`plate`) USING BTREE
+			)
+			COLLATE='utf8mb4_general_ci'
+			ENGINE=InnoDB
+			;
+			CREATE TABLE IF NOT EXISTS `body_status` (
+				`status` LONGTEXT NULL DEFAULT '[]' COLLATE 'utf8mb4_general_ci',
+				`identifier` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
+				PRIMARY KEY (`identifier`) USING BTREE
+			)
+			COLLATE='utf8mb4_general_ci'
+			ENGINE=InnoDB
+			;
+		]])
+	end
 	if config.framework == 'ESX' then
 		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 	end
 	if config.framework == 'QBCORE' then
 		QBCore = exports['qb-core']:GetSharedObject()
 	end
-	MySQL.Async.fetchAll("SELECT stats,plate,owner FROM vehicle_status", {}, function(results)
-		if #results > 0 then
-			for k,v in pairs(results) do
-				if v.stats and v.plate ~= nil then
-					local stats = json.decode(v.stats)
-					stats.plate = string.gsub(v.plate, "%s+", "")
-					stats.owner = v.owner
-					stats.entity = nil
-					adv_table[v.plate] = stats
-				end
+	results = SQLQuery(config.Mysql,'fetchAll',"SELECT stats,plate,owner FROM vehicle_status", {})
+	if #results > 0 then
+		for k,v in pairs(results) do
+			if v.stats and v.plate ~= nil then
+				local stats = json.decode(v.stats)
+				stats.plate = string.gsub(v.plate, "%s+", "")
+				stats.owner = v.owner
+				stats.entity = nil
+				adv_table[v.plate] = stats
 			end
 		end
-	end)
+	end
 	print("^g RENZU HUD STARTED!")
 	if config.enable_commands_as_item then
 		RenzuCommand('useitem', function(source,args)
@@ -63,27 +85,26 @@ Citizen.CreateThread(function()
 	end
 	if config.framework == 'ESX' then
 		for k,v in pairs(config.ESX_Items) do
-			MySQL.Async.fetchAll('SELECT * FROM items WHERE name = @name', {
+			results = SQLQuery(config.Mysql,'fetchAll',"SELECT * FROM items WHERE name = @name", {
 				['@name'] = v.name
-			}, function(foundRow)
-				if foundRow[1] == nil then
-					local weight = 'limit'
-					if config.weight_type then
-						MySQL.Sync.execute('INSERT INTO items (name, label, weight) VALUES (@name, @label, @weight)', {
-							['@name'] = v.name,
-							['@label'] = ""..firstToUpper(v.label).."",
-							['@weight'] = v.weight
-						})
-						print("Inserting "..v.name.." new item")
-					else
-						MySQL.Sync.execute('INSERT INTO items (name, label) VALUES (@name, @label)', {
-							['@name'] = v.name,
-							['@label'] = ""..firstToUpper(v.label).."",
-						})
-						print("Inserting "..v.item.." new item")
-					end
+			})
+			if results[1] == nil then
+				local weight = 'limit'
+				if config.weight_type then
+					SQLQuery(config.Mysql,'execute',"INSERT INTO items (name, label, weight) VALUES (@name, @label, @weight)", {
+						['@name'] = v.name,
+						['@label'] = ""..firstToUpper(v.label).."",
+						['@weight'] = v.weight
+					})
+					print("Inserting "..v.name.." new item")
+				else
+					SQLQuery(config.Mysql,'execute',"INSERT INTO items (name, label) VALUES (@name, @label)", {
+						['@name'] = v.name,
+						['@label'] = ""..firstToUpper(v.label).."",
+					})
+					print("Inserting "..v.item.." new item")
 				end
-			end)
+			end
 			ESX.RegisterUsableItem(v.name, function(source)
 				local xPlayer = GetPlayerFromId(source)
 				if v.job and xPlayer.job.name ~= tostring(v.job) then xPlayer.showNotification('You are not a '..v.job..'', false, false, 130) return end
@@ -117,7 +138,7 @@ Citizen.CreateThread(function()
 end)
 
 function isVehicleOwned(plate)
-	local owner = MySQL.Sync.fetchAll("SELECT "..config.Owner_column.." FROM "..config.vehicle_table.." WHERE plate=@plate", {['@plate'] = plate})
+	local owner = SQLQuery(config.Mysql,'fetchAll',"SELECT "..config.Owner_column.." FROM "..config.vehicle_table.." WHERE UPPER(plate)=@plate", {['@plate'] = plate:upper()})
 	return owner
 end
 
@@ -131,13 +152,14 @@ AddEventHandler("renzu_hud:savedata", function(plate,table,updatevehicles)
 		if plate ~= nil then
 			print("SAVING")
 			adv_table[tostring(plate)] = table
-			local results = MySQL.Sync.fetchAll("SELECT stats,plate,owner FROM vehicle_status WHERE plate=@plate", {['@plate'] = plate})
+			local results = SQLQuery(config.Mysql,'fetchAll',"SELECT stats,plate,owner FROM vehicle_status WHERE UPPER(plate)=@plate", {['@plate'] = plate:upper()})
 			if #results <= 0 then
 				local owner = isVehicleOwned(plate)
+				print(owner,#owner)
 				if #owner > 0 then
-					MySQL.Sync.execute("INSERT INTO vehicle_status (stats, plate, owner) VALUES (@stats, @plate, @owner)", {
+					SQLQuery(config.Mysql,'execute',"INSERT INTO vehicle_status (stats, plate, owner) VALUES (@stats, @plate, @owner)", {
 						['@stats'] = json.encode(adv_table[tostring(plate)]),
-						['@plate'] = plate,
+						['@plate'] = plate:upper(),
 						['@owner'] = owner[1][config.Owner_column]
 					})
 					foundplate = true
@@ -146,10 +168,13 @@ AddEventHandler("renzu_hud:savedata", function(plate,table,updatevehicles)
 			end
 			if #results > 0 then
 				foundplate = true
-				MySQL.Sync.execute("UPDATE vehicle_status SET stats = @stats WHERE plate = @plate", {
+				local owner = isVehicleOwned(plate)
+				SQLQuery(config.Mysql,'execute',"UPDATE vehicle_status SET stats = @stats WHERE UPPER(plate) = @plate", {
 					['@stats'] = json.encode(adv_table[tostring(plate)]),
-					['@plate'] = plate
+					['@plate'] = plate:upper(),
+					['owner'] = owner[1][config.Owner_column]
 				})
+				adv_table[tostring(plate)].owner = owner[1][config.Owner_column]
 			end
 			if not foundplate then
 				adv_table[tostring(plate)].owner = nil
@@ -162,13 +187,12 @@ AddEventHandler("renzu_hud:savedata", function(plate,table,updatevehicles)
 end)
 
 function getlastcharslot(source)
-	MySQL.Async.fetchAll("SELECT charid FROM user_lastcharacter WHERE steamid=@steamid", {['@steamid'] = GetPlayerIdentifiers(source)[1]}, function(results)
-		if #results > 0 then
-			print("OK")
-			return results[1].charid
-		end
-		return false
-	end)
+	local results = SQLQuery(config.Mysql,'fetchAll',"SELECT charid FROM user_lastcharacter WHERE steamid=@steamid", {['@steamid'] = GetPlayerIdentifiers(source)[1]})
+	if #results > 0 then
+		print("OK")
+		return results[1].charid
+	end
+	return false
 end
 
 RegisterServerEvent("renzu_hud:getdata")
@@ -221,32 +245,31 @@ AddEventHandler('renzu_hud:checkbody', function(target)
 		while xPlayer == nil do Wait(100) xPlayer = GetPlayerFromId(source) end
 		xPlayer = GetPlayerFromId(source)
 		print("Player Created...")
-		local results = MySQL.Sync.fetchAll("SELECT status FROM body_status WHERE identifier=@identifier", {['@identifier'] = xPlayer.identifier})
+		local results = SQLQuery(config.Mysql,'fetchAll',"SELECT status FROM body_status WHERE identifier=@identifier", {['@identifier'] = xPlayer.identifier})
 		if #results <= 0 then
-			MySQL.Sync.execute("INSERT INTO body_status (status,identifier) VALUES (@status,@identifier)", {
+			SQLQuery(config.Mysql,'execute',"INSERT INTO body_status (status,identifier) VALUES (@status,@identifier)", {
 				['@status'] = '[]',
 				['@identifier'] = xPlayer.identifier
 			})
 		end
 	end
-	MySQL.Async.fetchAll("SELECT status FROM body_status WHERE identifier=@identifier",{['@identifier'] = xPlayer.identifier},	function(res)
-		if res[1] ~= nil and res[1].status and json.decode(res[1].status) ~= nil then
-			done = json.decode(res[1].status)
-		end
-		if target == nil then
-			target = false
-		else
-			target = true
-		end
-		print(target,source)
-		TriggerClientEvent('renzu_hud:bodystatus', originalsource, done, target)
-	end)
+	local res = SQLQuery(config.Mysql,'fetchAll',"SELECT status FROM body_status WHERE identifier=@identifier", {['@identifier'] = xPlayer.identifier})
+	if res[1] ~= nil and res[1].status and json.decode(res[1].status) ~= nil then
+		done = json.decode(res[1].status)
+	end
+	if target == nil then
+		target = false
+	else
+		target = true
+	end
+	print(target,source)
+	TriggerClientEvent('renzu_hud:bodystatus', originalsource, done, target)
 end)
 
 function UpdateBodySql(bodystatus,identifier)
 	bodytable[identifier] = bodystatus
 	if json.encode(bodystatus) ~= 'null' then
-		MySQL.Async.execute('UPDATE body_status SET status=@status WHERE identifier=@identifier',{['@status'] = json.encode(bodystatus),['@identifier'] = identifier})
+		SQLQuery(config.Mysql,'execute',"UPDATE body_status SET status=@status WHERE identifier=@identifier", {['@status'] = json.encode(bodystatus),['@identifier'] = identifier})
 	end
 end
 
@@ -413,27 +436,26 @@ Citizen.CreateThread(function()
 			c = c + 1
 			local enginename = string.lower(v)
 			local label = string.upper(v)
-			MySQL.Async.fetchAll('SELECT * FROM items WHERE name = @name', {
+			foundRow = SQLQuery(config.Mysql,'fetchAll',"SELECT * FROM items WHERE name = @name", {
 				['@name'] = "engine_"..enginename..""
-			}, function(foundRow)
-				if foundRow[1] == nil then
-					local weight = 'limit'
-					if config.weight_type then
-						MySQL.Sync.execute('INSERT INTO items (name, label, weight) VALUES (@name, @label, @weight)', {
-							['@name'] = "engine_"..enginename.."",
-							['@label'] = ""..firstToUpper(enginename).." Engine",
-							['@weight'] = config.weight
-						})
-						print("Inserting "..enginename.."")
-					else
-						MySQL.Sync.execute('INSERT INTO items (name, label) VALUES (@name, @label)', {
-							['@name'] = "engine_"..enginename.."",
-							['@label'] = ""..firstToUpper(enginename).." Engine",
-						})
-						print("Inserting "..enginename.."")
-					end
+			})
+			if foundRow[1] == nil then
+				local weight = 'limit'
+				if config.weight_type then
+					SQLQuery(config.Mysql,'execute',"INSERT INTO items (name, label, weight) VALUES (@name, @label, @weight)", {
+						['@name'] = "engine_"..enginename.."",
+						['@label'] = ""..firstToUpper(enginename).." Engine",
+						['@weight'] = config.weight
+					})
+					print("Inserting "..enginename.."")
+				else
+					SQLQuery(config.Mysql,'execute',"INSERT INTO items (name, label) VALUES (@name, @label)", {
+						['@name'] = "engine_"..enginename.."",
+						['@label'] = ""..firstToUpper(enginename).." Engine",
+					})
+					print("Inserting "..enginename.."")
 				end
-			end)
+			end
 		end
 		if config.framework == 'ESX' then
 			for v, k in pairs(config.engine) do
@@ -490,15 +512,14 @@ RegisterServerEvent('renzu_hud:change_engine')
 AddEventHandler('renzu_hud:change_engine', function(plate, stats)
 	local plate = plate
 	adv_table[tostring(plate)] = stats
-	MySQL.Async.fetchAll("SELECT stats,plate FROM vehicle_status WHERE plate=@plate", {['@plate'] = plate}, function(results)
-		if #results > 0 then
-			foundplate = true
-			MySQL.Sync.execute("UPDATE vehicle_status SET stats = @status WHERE plate = @plate", {
-				['@status'] = json.encode(adv_table[tostring(plate)]),
-				['@plate'] = plate
-			})
-		end
-	end)
+	results = SQLQuery(config.Mysql,'fetchAll',"SELECT stats,plate FROM vehicle_status WHERE UPPER(plate)=@plate", {['@plate'] = plate:upper()})
+	if #results > 0 then
+		foundplate = true
+		SQLQuery(config.Mysql,'execute',"UPDATE vehicle_status SET stats = @status WHERE UPPER(plate) = @plate", {
+			['@status'] = json.encode(adv_table[tostring(plate)]),
+			['@plate'] = plate:upper()
+		})
+	end
 	TriggerClientEvent("renzu_hud:syncengine", -1, plate, stats)
 	print("syncing to all")
 end)
