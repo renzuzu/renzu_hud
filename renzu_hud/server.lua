@@ -160,9 +160,9 @@ end
 
 RegisterServerEvent("renzu_hud:getdata")
 AddEventHandler("renzu_hud:getdata", function(slot, fetchslot)
-	print(slot)
-	print("SLOT")
-	print(fetchslot)
+	-- print(slot)
+	-- print("SLOT")
+	-- print(fetchslot)
 	local source = source
 	if slot ~= nil and charslot[source] == nil then
 		charslot[source] = slot
@@ -200,12 +200,14 @@ AddEventHandler('renzu_hud:checkbody', function(target)
 	end
 	local xPlayer = GetPlayerFromId(source)
 	local done = false
+	print(xPlayer,"PLAYERLOADED",xPlayer)
 	while xPlayer == nil do
+		print("Creating Player")
 		CreatePlayer(source)
 		Citizen.Wait(500)
-		while xPlayer.identifier == nil do Wait(1) end
+		while xPlayer == nil do Wait(100) xPlayer = GetPlayerFromId(source) end
 		xPlayer = GetPlayerFromId(source)
-		print("xPlayer is nil, trying to create...")
+		print("Player Created...")
 		local results = MySQL.Sync.fetchAll("SELECT status FROM body_status WHERE identifier=@identifier", {['@identifier'] = xPlayer.identifier})
 		if #results <= 0 then
 			MySQL.Sync.execute("INSERT INTO body_status (status,identifier) VALUES (@status,@identifier)", {
@@ -230,7 +232,9 @@ end)
 
 function UpdateBodySql(bodystatus,identifier)
 	bodytable[identifier] = bodystatus
-	MySQL.Async.execute('UPDATE body_status SET status=@status WHERE identifier=@identifier',{['@status'] = json.encode(bodystatus),['@identifier'] = identifier})
+	if json.encode(bodystatus) ~= 'null' then
+		MySQL.Async.execute('UPDATE body_status SET status=@status WHERE identifier=@identifier',{['@status'] = json.encode(bodystatus),['@identifier'] = identifier})
+	end
 end
 
 RegisterServerEvent('renzu_hud:savebody')
