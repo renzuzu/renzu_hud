@@ -2004,6 +2004,8 @@ function SetNotify(table) {
         }
         r.style.setProperty('--ms', table.animation_ms);
         r.style.setProperty('--trans', table.transition);
+        r.style.setProperty('--mscar', table.animation_mscar);
+        r.style.setProperty('--transcar', table.transitioncar);
     }
 
 //FUNCTIONS

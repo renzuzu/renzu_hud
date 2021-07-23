@@ -1,5 +1,5 @@
 @import url("reset.css");
-:root { --trans: unset; --ms: 0ms;--d-g: calc(var(--m_f) + 2*var(--m_l) + var(--h_lg)); --h_lg: 5px; --m_l: 10px; --m_f: 15px; --mr-b: 10px; --h-bs: 1vh; --d-bsa: 32px; --l-m: 200px; --h-f1a: calc((4 - 0.08*4)*var(--d-bsa) + 4px); --f_sr: 0.3vh; --b_fd2: calc(var(--d-bsa) + var(--h-f1a) + var(--f_sr)); --f_a_b1: #1862ad; --bt_mp1: calc(var(--d-bsa) + var(--h-f1a) + var(--f_sr)); --h_mpz: 170px; --bt_mp1: calc(var(--b_fd2) + 2*var(--d-bsa) + 4px + var(--f_sr)); --m_zm: 7; --pw1z: calc(32); --w_imp: calc(var(--pw1z)*var(--w_mprt)); --w_mprt: 30vmin; --m_x0z: calc(0.4586 - 0.0002); --m_y0z: calc(0.3259 - 0.0007); --m_bx1: calc(var(--w_imp)*(1 - var(--m_x0z))); --m_byzz: calc(var(--w_imp)*(1 - var(--m_y0z))); --X: 394.97; --Y: 6585.32; --dviuy: 12435; --cyhux: calc(var(--w_imp) / var(--dviuy)); --cdx_dc21: calc(var(--X)*var(--cyhux)); --cy_dc2: calc(var(--Y)*var(--cyhux)); --w_oppa1: 0; --w_oppa2: 1; --mprcz: 0; }
+:root { --transcar: unset; --mscar: 0ms;--trans: unset; --ms: 0ms;--d-g: calc(var(--m_f) + 2*var(--m_l) + var(--h_lg)); --h_lg: 5px; --m_l: 10px; --m_f: 15px; --mr-b: 10px; --h-bs: 1vh; --d-bsa: 32px; --l-m: 200px; --h-f1a: calc((4 - 0.08*4)*var(--d-bsa) + 4px); --f_sr: 0.3vh; --b_fd2: calc(var(--d-bsa) + var(--h-f1a) + var(--f_sr)); --f_a_b1: #1862ad; --bt_mp1: calc(var(--d-bsa) + var(--h-f1a) + var(--f_sr)); --h_mpz: 170px; --bt_mp1: calc(var(--b_fd2) + 2*var(--d-bsa) + 4px + var(--f_sr)); --m_zm: 7; --pw1z: calc(32); --w_imp: calc(var(--pw1z)*var(--w_mprt)); --w_mprt: 30vmin; --m_x0z: calc(0.4586 - 0.0002); --m_y0z: calc(0.3259 - 0.0007); --m_bx1: calc(var(--w_imp)*(1 - var(--m_x0z))); --m_byzz: calc(var(--w_imp)*(1 - var(--m_y0z))); --X: 394.97; --Y: 6585.32; --dviuy: 12435; --cyhux: calc(var(--w_imp) / var(--dviuy)); --cdx_dc21: calc(var(--X)*var(--cyhux)); --cy_dc2: calc(var(--Y)*var(--cyhux)); --w_oppa1: 0; --w_oppa2: 1; --mprcz: 0; }
 /* ------ layout
 -----------------------------------------------*/
 @font-face {
@@ -873,17 +873,17 @@ svg .rpm {
   will-change: stroke-dashoffset;
   stroke-width: 20px;
   stroke-miterlimit: round;
-  transition: stroke-dashoffset var(--ms) var(--trans) 0ms;
+  transition: stroke-dashoffset var(--mscar) var(--transcar) 0ms;
 }
 svg .boost {
   will-change: auto;
-  transition: stroke-dashoffset var(--ms) var(--trans) 0ms;
+  transition: stroke-dashoffset var(--mscar) var(--transcar) 0ms;
 }
 svg .carhud {
   will-change: stroke-dashoffset;
   stroke-width: 20px;
   stroke-miterlimit: round;
-  transition: stroke-dashoffset var(--ms) var(--trans) 0ms;
+  transition: stroke-dashoffset var(--mscar) var(--transcar) 0ms;
 }
 svg .statushud {
   will-change: stroke-dashoffset;
@@ -905,7 +905,7 @@ svg .statushud {
   position: absolute;
   right: 908px;
   bottom: 115px;
-  transition: --num 1s;
+  transition: --num 0.5ms;
   counter-set: num var(--num);
 }
 #speedmeter::after {

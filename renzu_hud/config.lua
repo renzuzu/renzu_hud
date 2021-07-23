@@ -739,17 +739,23 @@ config.NuiCarhpandGas_sleep = 2500
 config.car_mainloop_sleep = 1500
 config.rpm_speed_loop = 52
 config.idle_rpm_speed_sleep = 151
-config.Rpm_sleep = 200
-config.Rpm_sleep_2 = 22
+config.Rpm_sleep = 50
+config.Rpm_sleep_2 = 5
 config.Speed_sleep = 151
 config.Speed_sleep_2 = 11
 
 --UTILS UI SETTINGS -- the default settings is optimized for CPU usage, (DEFAULT: false,false,0ms,'') Use this if you know else leave default.
-config.acceleration = 'gpu' -- (none,gpu,hardware) use hardware acceleration = cpu / gpu = gpu resource to some UI animation and effects?, option = hardware,gpu (looks like this is the same result)
+-- THIS PART AFFECT OVERALL CPU USAGE FROM TASK MANAGER
+-- NON VEHICLE CSS ANIMATION
+config.acceleration = 'unset' -- (none,gpu,hardware) use hardware acceleration = cpu / gpu = gpu resource to some UI animation and effects?, option = hardware,gpu (looks like this is the same result)
 config.animation_ms = '250ms' -- animation delay ( this affects cpu usage of animations )
 config.transition = 'linear' -- ease, linear, or leave it like = '' (blank) or unset
+-- VEHICLE CSS ANIMATION
+config.accelerationcar = 'unset' -- (none,gpu,hardware) use hardware acceleration = cpu / gpu = gpu resource to some UI animation and effects?, option = hardware,gpu (looks like this is the same result)
+config.animation_mscar = '20ms' -- animation delay ( this affects cpu usage of animations )
+config.transitioncar = 'ease-in-out' -- ease, linear, or leave it like = '' (blank) or unset
 -- DEFAULT UTIL SETTING is the optimize for CPU in task manager not in resmon!, but the animation or transition is sucks, you may want to configure the transition and animation_ms to your desire settings and desire beautiful transition of circlebars,carhud etc.
-config.uiconfig = {acceleration = config.acceleration, animation_ms = config.animation_ms, transition = config.transition}
+config.uiconfig = {acceleration = config.acceleration, animation_ms = config.animation_ms, transition = config.transition,accelerationcar = config.accelerationcar, animation_mscar = config.animation_mscar, transitioncar = config.transitioncar}
 -- GEAR FUNCTION
 nextgearhash = `SET_VEHICLE_NEXT_GEAR`
 setcurrentgearhash = `SET_VEHICLE_CURRENT_GEAR`
