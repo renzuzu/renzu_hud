@@ -10,6 +10,7 @@ local adv_table = {}
 Renzu = {}
 charslot = {}
 ESX = nil
+QBCore = nil
 Citizen.CreateThread(function()
 	Wait(1000)
 	MySQL.Sync.execute([[
@@ -33,6 +34,9 @@ Citizen.CreateThread(function()
 	]])
 	if config.framework == 'ESX' then
 		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+	end
+	if config.framework == 'QBCORE' then
+		QBCore = exports['qb-core']:GetSharedObject()
 	end
 	MySQL.Async.fetchAll("SELECT stats,plate,owner FROM vehicle_status", {}, function(results)
 		if #results > 0 then
@@ -98,6 +102,15 @@ Citizen.CreateThread(function()
 
 					cb(hasAccessory, skin)
 				end)
+			end)
+		end
+	elseif config.framework == 'QBCORE' then
+		for k,v in pairs(config.ESX_Items) do
+			QBCore.Functions.CreateUseableItem(v.name, function(source, item)
+				local xPlayer = QBCore.Functions.GetPlayer(source)
+				if v.job and xPlayer.PlayerData.job.name ~= tostring(v.job) then TriggerClientEvent('QBCore:Notify', source, 'You are not a '..v.job..'', 'error') return end
+				TriggerClientEvent(v.event, source, v.value)
+				xPlayer.Functions.RemoveItem(v.name, 1)
 			end)
 		end
 	end
@@ -249,7 +262,7 @@ AddEventHandler('renzu_hud:healbody', function(target,part)
 	print("1",part)
 	local xPlayer = GetPlayerFromId(source)
 	local identifier = xPlayer.identifier
-	if config.framework ~= 'ESX' or config.framework == 'ESX' and xPlayer.job.name == config.checkbodycommandjob then
+	if config.framework == 'Standalone' or config.framework == 'ESX' and xPlayer.job.name == config.checkbodycommandjob or config.framework == 'QBCORE' and xPlayer.PlayerData.job.name == config.checkbodycommandjob then
 		if target == nil then
 			target = source
 		end
@@ -273,10 +286,12 @@ AddEventHandler('renzu_hud:checkitem', function(part)
 		b = config.ESX_Items['head_brace'] 
 	end
 	local bandage = b.name
-	if config.framework ~= 'ESX' or config.framework == 'ESX' and xPlayer.job.name == config.checkbodycommandjob and xPlayer.getInventoryItem(bandage).count >= 1 then
+	if config.framework == 'Standalone' or config.framework == 'ESX' and xPlayer.job.name == config.checkbodycommandjob and xPlayer.getInventoryItem(bandage).count >= 1 or config.framework == 'QBCORE' and xPlayer.PlayerData.job.name == config.checkbodycommandjob and xPlayer.Functions.GetItemByName(bandage) ~= nil then
 		TriggerClientEvent('renzu_hud:healpart', source, part)
 		if config.framework == 'ESX' then
 			xPlayer.removeInventoryItem(bandage, 1)
+		elseif config.framework == 'QBCORE' then
+			xPlayer.Functions.RemoveItem(bandage, 1)
 		end
 	else
 		xPlayer.showNotification('You are not a '..config.checkbodycommandjob..' or you dont have a item', false, false, 130)
@@ -358,6 +373,8 @@ end
 function GetPlayerFromId(source)
 	if config.framework == 'ESX' then
 		return ESX.GetPlayerFromId(tonumber(source))
+	elseif config.framework == 'QBCORE' then
+		return QBCore.Functions.GetPlayer(tonumber(source))
 	end
 	return Renzu[tonumber(source)]
 end
@@ -426,6 +443,27 @@ Citizen.CreateThread(function()
 					local xPlayer = ESX.GetPlayerFromId(source)
 					if config.engine_jobonly and xPlayer.job.name ~= tostring(config.engine_job) then xPlayer.showNotification('You are not a '..config.engine_job..'', false, false, 130) return end
 					xPlayer.removeInventoryItem("engine_"..enginename.."", 1)
+					TriggerClientEvent('renzu_hud:change_engine', xPlayer.source, enginename)
+				end)
+			end
+		end
+	end
+	if config.enable_engine_item and config.framework == 'QBCORE' then
+		Wait(1000)
+		local c = 0
+		if config.custom_engine_enable then
+			for k, v in pairs(config.custom_engine) do
+				config.engine[tostring(v.handlingName)] = true
+			end
+		end
+		if config.framework == 'QBCORE' then
+			for v, k in pairs(config.engine) do
+				local enginename = string.lower(v)
+				--print("register item")
+				QBCore.Functions.CreateUseableItem("engine_"..enginename.."", function(source, item)
+					local xPlayer = QBCore.Functions.GetPlayer(source)
+					if config.engine_jobonly and xPlayer.PlayerData.job.name ~= tostring(config.engine_job) then TriggerClientEvent('QBCore:Notify', source, 'You are not a '..config.engine_job..'', 'error') return end
+					xPlayer.Functions.RemoveItem("engine_"..enginename.."", 1)
 					TriggerClientEvent('renzu_hud:change_engine', xPlayer.source, enginename)
 				end)
 			end

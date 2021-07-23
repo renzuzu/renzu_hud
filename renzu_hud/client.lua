@@ -19,6 +19,16 @@ CreateThread(function()
 		local Tunnel = module("vrp","lib/Tunnel")
 		local Proxy = module("vrp","lib/Proxy")
 		vRP = Proxy.getInterface("vRP")
+	elseif config.framework == 'QBCORE' then
+		QBCore = exports['qb-core']:GetSharedObject()
+		while QBCore == nil do Wait(0) end
+		QBCore.Functions.getPlayerData(function(PlayerData)
+            if PlayerData ~= nil then
+				SendNUIMessage({type = "isAmbulance",content = PlayerData.job.name == config.checkbodycommandjob})
+            end
+        end)
+		Wait(5000)
+		ESX = true
 	else
 		ESX = true
 	end
@@ -35,6 +45,14 @@ RegisterNetEvent('esx:setJob')
 AddEventHandler('esx:setJob', function(job)
 	xPlayer.job = job
 	SendNUIMessage({type = "isAmbulance",content = xPlayer.job.name == config.checkbodycommandjob})
+	for type,val in pairs(config.buto) do if Hud.bodystatus then  Hud.bonecategory[type] = Hud.bodystatus[type] else Hud.bonecategory[type] = 0.0 or 0.0 end if not other then Hud.parts[type] = {} for bone,val in pairs(val) do Hud.parts[type][bone] = 0.0 end end end
+	SendNUIMessage({type = "setUpdateBodyStatus",content = Hud.bonecategory})
+end)
+
+RegisterNetEvent('QBCore:Client:OnJobUpdate')
+AddEventHandler('QBCore:Client:OnJobUpdate', function(JobInfo)
+    PlayerJob = JobInfo
+    SendNUIMessage({type = "isAmbulance",content = PlayerJob.job.name == config.checkbodycommandjob})
 	for type,val in pairs(config.buto) do if Hud.bodystatus then  Hud.bonecategory[type] = Hud.bodystatus[type] else Hud.bonecategory[type] = 0.0 or 0.0 end if not other then Hud.parts[type] = {} for bone,val in pairs(val) do Hud.parts[type][bone] = 0.0 end end end
 	SendNUIMessage({type = "setUpdateBodyStatus",content = Hud.bonecategory})
 end)
@@ -149,6 +167,18 @@ CreateThread(function()
 			Wait(5000)
 			SendNUIMessage({content = true, type = 'pedface'})
 		end)
+	elseif config.framework == 'QBCORE' then
+		RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
+		AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
+			Hud.playerloaded = true
+			Wait(2000)
+			----print("ESX")
+			Hud.lastped = PlayerPedId()
+			TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
+			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
+			Wait(5000)
+			SendNUIMessage({content = true, type = 'pedface'})
+		end)
 	else
 		RegisterNetEvent('playerSpawned')
 		AddEventHandler('playerSpawned', function(spawn)
@@ -231,6 +261,33 @@ CreateThread(function()
 		AddEventHandler("esx_status:onTick", function(vitals)
 			Hud:UpdateStatus(false,vitals)
 		end)
+		if config.framework == 'QBCORE' then
+			local hunger = newHunger * 10000 -- someone correct this is the max value is 100?
+			local thirst = newThirst * 10000
+			local stress = 0
+			RegisterNetEvent('hud:client:UpdateNeeds')
+			AddEventHandler('hud:client:UpdateNeeds', function(newHunger, newThirst)
+				hunger = newHunger
+				thirst = newThirst
+				stress = nil
+				local statusqb = {
+					['hunger'] = hunger,
+					['thirst'] = thirst,
+					['stress'] = stress -- this should be registered at config
+				}
+				Hud:UpdateStatus(false,statusqb)
+			end)
+
+			Citizen.SetTimeout(2500, function()
+				TriggerEvent("QBCore:GetObject", function(obj) QBCore = obj end)
+				Citizen.Wait(250)
+				QBCore.Functions.getPlayerData(function(PlayerData)
+					if PlayerData ~= nil then
+						hunger, thirst, stress = PlayerData.metadata["hunger"] * 10000, PlayerData.metadata["thirst"] * 10000, PlayerData.metadata["stress"] * 10000
+					end
+				end)
+			end)
+		end
 	else
 		for k,v in pairs(config.statusordering) do
 			v.enable = false

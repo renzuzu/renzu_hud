@@ -530,21 +530,21 @@ function Hud:NuiRpm()
 						type = "SetVehData",
 						content = vtable
 					})
-					Wait(config.Rpm_sleep_2)
-					SendNUIMessage({
-						type = "SetVehData",
-						content = vtable
-					})
-					Wait(config.Rpm_sleep_2)
-					SendNUIMessage({
-						type = "SetVehData",
-						content = vtable
-					})
-					Wait(config.Rpm_sleep_2)
-					SendNUIMessage({
-						type = "SetVehData",
-						content = vtable
-					})
+					-- Wait(config.Rpm_sleep_2)
+					-- SendNUIMessage({
+					-- 	type = "SetVehData",
+					-- 	content = vtable
+					-- })
+					-- Wait(config.Rpm_sleep_2)
+					-- SendNUIMessage({
+					-- 	type = "SetVehData",
+					-- 	content = vtable
+					-- })
+					-- Wait(config.Rpm_sleep_2)
+					-- SendNUIMessage({
+					-- 	type = "SetVehData",
+					-- 	content = vtable
+					-- })
 				end
 			end
 			Wait(sleep)
@@ -1334,6 +1334,25 @@ function Hud:Myinfo()
 			content = info
 		})
 		collectgarbage()
+	elseif config.framework == 'QBCORE' then
+		QBCore.Functions.GetPlayerData(function(PlayerData)
+			local money = PlayerData.money['cash']
+			local black = 0
+			local bank = PlayerData.money['bank']
+            info = {
+				job = PlayerData.job.name or PlayerData.gang.name,
+				joblabel = PlayerData.job.label or PlayerData.gang.label,
+				money = money,
+				black = black,
+				bank = bank,
+				id = GetPlayerServerId(PlayerId())
+			}
+			SendNUIMessage({
+				hud = "setInfo",
+				content = info
+			})
+			collectgarbage()
+        end)
 	end
 end
 
@@ -1343,20 +1362,20 @@ function Hud:updateplayer(instant)
 	self.pid = PlayerId()
 	config.statusordering[1].value = armor
 	config.statusordering[0].value = health
-if self.newarmor ~= armor or self.newarmor == nil then
-	SendNUIMessage({
-		hud = "setArmor",
-		content = armor
-	})
-	self.newarmor = armor
-end
-if self.newhealth ~= health or self.newhealth == nil then
-	SendNUIMessage({
-		hud = "setHp",
-		content = health
-	})
-	self.newhealth = health
-end
+	if self.newarmor ~= armor or self.newarmor == nil then
+		SendNUIMessage({
+			hud = "setArmor",
+			content = armor
+		})
+		self.newarmor = armor
+	end
+	if self.newhealth ~= health or self.newhealth == nil then
+		SendNUIMessage({
+			hud = "setHp",
+			content = health
+		})
+		self.newhealth = health
+	end
 end
 
 function Hud:haveseatbelt()

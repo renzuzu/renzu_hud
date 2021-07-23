@@ -9,7 +9,7 @@
 ---------------------------------------------------------https://github.com/renzuzu/renzu_hud------------------------------------------
 config = {}
 config.gamebuild = 'auto' -- if 2189 pedshot transparent and 1604 or < 2000 = Enter vehicle game event will not work, we will use normal pedshot ( gamebuild is what you set on your server start example: +set sv_enforceGameBuild 2189, available build 1604, 2060, 2189 and more.) this is important if you are using UI Normal with Ped Face.
-config.framework = 'STANDALONE' -- ESX | VRP | STANDALONE (VRP not supported yet, but you can use standalone, it will work!)
+config.framework = 'STANDALONE' -- ESX | QBCORE | VRP | STANDALONE (VRP not supported yet, but you can use standalone, it will work!)
 config.weight_type = false -- ESX item weight or limit type
 config.vehicle_table = 'owned_vehicles' -- change this if you use different sql table for player vehicles (note identifier steam is always being used here)
 config.Owner_column = 'owner' -- owner column name for identifier eg.steam hex,licensed
