@@ -1566,6 +1566,7 @@ function Hud:sendsignaltoNUI()
 end
 
 function Hud:entervehicle()
+	if not config.push_start then return end
 	CreateThread(function()
 		local p = PlayerPedId()
 		local mycoords = GetEntityCoords(p)
@@ -1589,7 +1590,7 @@ function Hud:entervehicle()
 					v = GetVehiclePedIsTryingToEnter(p)
 				end
 			end
-			if config.enable_carui_perclass and config.carui_perclass[GetVehicleClass(v)] ~= 'modern' or not config.enable_carui_perclass and config.carui ~= 'modern' then self.entering = false return end
+			if config.enable_carui_perclass and config.carui_perclass[GetVehicleClass(v)] ~= 'modern' or not config.enable_carui_perclass and config.carui ~= 'modern' then self.entering = false SetVehicleEngineOn(self:getveh(),false,true,false) return end
 			if GetPedInVehicleSeat(v, -1) == p and not GetIsVehicleEngineRunning(v) and config.enable_carui_perclass and config.carui_perclass[GetVehicleClass(v)]  == 'modern' or GetPedInVehicleSeat(v, -1) == p and not GetIsVehicleEngineRunning(v) and not config.enable_carui_perclass and config.carui == 'modern' then
 				self.entering = true
 				--print("Disable auto self.start")
