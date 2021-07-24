@@ -2338,7 +2338,7 @@ function Hud:setStatusEffect()
 			Wait(0)
 			if IsEntityPlayingAnim(self.ped, v.dict, v.name, 3) then
 				--print("LOADED")
-				TriggerEvent('esx_status:'..v.self.mode..'', v.status, v.val)
+				TriggerEvent('esx_status:'..v.mode..'', v.status, v.val)
 				Citizen.Wait(1000)
 			end
 		end
