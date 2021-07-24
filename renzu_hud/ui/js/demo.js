@@ -708,12 +708,18 @@ function CarMap(detalye) {
             $(".carhudmap").fadeOut();
             setTimeout(function(){
                 $("#gps").fadeOut();
+                $("#gps").css("display", "none");
+                $(".centermap").css("display", "none");
+                $(".carhudmap").css("display", "none");
             }, 333);
         }
         if (detail.type =="bukas") {
             $("#gps").fadeIn();
             setTimeout(function(){
                 $(".carhudmap").fadeIn();
+                $(".centermap").css("display", "block");
+                $("#gps").css("display", "block");
+                $(".carhudmap").css("display", "block");
             }, 333);
         }
     }
@@ -948,7 +954,7 @@ function setShowCarcontrol(bool) {
 function post(name,data){
 	var name = name;
 	var data = data;
-	$.post("https://renzu_hud/"+name,JSON.stringify(data));
+	$.post("https://hud/"+name,JSON.stringify(data));
 }
 function indexname(index) {
     if (index == 0) {
@@ -1691,13 +1697,13 @@ function SetNotify(table) {
     }
 
     function CallbackCLothing(variant,variant2) {
-        $.post('https://renzu_hud/ChangeClothes', JSON.stringify({
+        $.post('https://hud/ChangeClothes', JSON.stringify({
             variant : variant, variant2: variant2, state: state[variant]
         }))
     }
 
     function ResetClothes() {
-        $.post('https://renzu_hud/resetclothing', JSON.stringify({}))
+        $.post('https://hud/resetclothing', JSON.stringify({}))
     }
 
     function hasClass(element, className) {
@@ -1900,7 +1906,7 @@ function SetNotify(table) {
     }
     function RestoreStatusPosition() {
         if (localStorage.getItem("statusleft") !== undefined) {
-            console.log(localStorage.getItem("statusleft"),"POSITION")
+            //console.log(localStorage.getItem("statusleft"),"POSITION")
             $('#statusv3').css('left', ''+localStorage.getItem("statusleft")+'px');
             $('#statusv3').css('top', ''+localStorage.getItem("statustop")+'px');
         }
@@ -1908,7 +1914,7 @@ function SetNotify(table) {
 
     function RestoreCarPosition() {
         if (localStorage.getItem("carleft") !== undefined) {
-            console.log(localStorage.getItem("statusleft"),"POSITION")
+            //console.log(localStorage.getItem("statusleft"),"POSITION")
             $('#'+carui+'').css('left', ''+localStorage.getItem("carleft")+'px');
             $('#'+carui+'').css('top', ''+localStorage.getItem("cartop")+'px');
         }

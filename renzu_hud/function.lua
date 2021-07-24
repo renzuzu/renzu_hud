@@ -163,8 +163,6 @@ function Hud:UpdateStatus(export,vitals)
 end
 
 function Hud:EnterVehicleEvent(state,vehicle)
-	print("Enter",NetworkGetEntityIsNetworked(vehicle))
-	--print(state,vehicle,"enter veh")
 	if state and vehicle ~= nil and vehicle ~= 0 then
 		if not NetworkGetEntityIsNetworked(vehicle) then return end -- do not show in non network entity, ex. vehicle shop, garage etc..
 		if config.enable_carui_perclass then
@@ -195,13 +193,16 @@ function Hud:EnterVehicleEvent(state,vehicle)
 			if GetPedInVehicleSeat(vehicle, -1) == self.ped and self.entering then
 				self.breakstart = false
 				SetNuiFocus(true, true)
-				while not self.start and not self.breakstart and config.carui == 'modern' do
+				while not self.start and not self.breakstart and config.enable_carui_perclass and config.carui_perclass[GetVehicleClass(vehicle)]  == 'modern' and config.push_start or not self.start and not self.breakstart and not config.enable_carui_perclass and config.carui == 'modern' and config.push_start do
 					SetVehicleEngineOn(vehicle,false,true,true)
 					if GetVehiclePedIsIn(self.ped) == 0 then
 						self.start = false
 						self.breakstart = true
 					end
 					Wait(1)
+				end
+				if config.carui_perclass[GetVehicleClass(vehicle)] == 'modern' and not config.push_start then
+					SendNUIMessage({type = "bukas",content = true})
 				end
 				self.start = true
 				SetNuiFocus(false,false)
@@ -1024,7 +1025,7 @@ function Hud:NuiShowMap()
 						}
 						--print("send coords map ui")
 						SendNUIMessage({map = true, type = "updatemapa",content = table})
-						SendNUIMessage({map = true, type = 'bukas'})
+						--SendNUIMessage({map = true, type = 'bukas'})
 					end
 				end
 				Wait(sleep)
@@ -1565,71 +1566,75 @@ function Hud:sendsignaltoNUI()
 end
 
 function Hud:entervehicle()
-	if config.carui ~= 'modern' then return end
-	local p = PlayerPedId()
-	v = GetVehiclePedIsEntering(p)
-	local mycoords = GetEntityCoords(p)
-	if not IsPedInAnyVehicle(p) and IsAnyVehicleNearPoint(mycoords.x,mycoords.y,mycoords.z,10.0) then
-		--print("ENTERING")
-		while GetVehiclePedIsTryingToEnter(p) == 0 do
-			v = GetVehiclePedIsTryingToEnter(p)
-			Wait(0)
-		end
-		local count = 0
-		while not IsPedInAnyVehicle(p) and not self.start and count < 400 and config.carui == 'modern' do
-			Wait(1)
-			count = count + 1
-			--print(count)
-			SetVehicleEngineOn(v,false,true,true)
-			--print("waiting to get in")
-			if GetVehiclePedIsTryingToEnter(p) ~= 0 then
+	CreateThread(function()
+		local p = PlayerPedId()
+		local mycoords = GetEntityCoords(p)
+		if not IsPedInAnyVehicle(p) and IsAnyVehicleNearPoint(mycoords.x,mycoords.y,mycoords.z,10.0) then
+			--print("ENTERING")
+			v = GetVehiclePedIsEntering(p)
+			while not GetVehiclePedIsTryingToEnter(p) or GetVehiclePedIsTryingToEnter(p) == 0 do
 				v = GetVehiclePedIsTryingToEnter(p)
-			end
-		end
-		if GetPedInVehicleSeat(v, -1) == p and not GetIsVehicleEngineRunning(v) and config.carui == 'modern' then
-			self.entering = true
-			--print("Disable auto self.start")
-			SetVehicleEngineOn(v,false,true,true)
-			while not self.start and IsPedInAnyVehicle(p) do
-				if not self.start and IsVehicleEngineStarting(v) then
-					SetVehicleEngineOn(v,false,true,true)
-					--print("not started yet")
-				end
+				print(GetVehiclePedIsTryingToEnter(p))
 				Wait(0)
 			end
-		end
-	elseif self.start and IsPedInAnyVehicle(p) and GetVehicleDoorLockStatus(v) ~= 2 or self.manual and IsPedInAnyVehicle(p) and GetVehicleDoorLockStatus(v) ~= 2 then
-		Wait(500)
-		if self.start then
+			local count = 0
+			while not IsPedInAnyVehicle(p) and not self.start and count < 400 and config.enable_carui_perclass and config.carui_perclass[GetVehicleClass(v)]  == 'modern' or not IsPedInAnyVehicle(p) and not self.start and count < 400 and not config.enable_carui_perclass and config.carui  == 'modern' do
+				self.entering = true
+				Wait(1)
+				count = count + 1
+				--print(count)
+				SetVehicleEngineOn(self:getveh(),false,true,true)
+				--print("waiting to get in")
+				if GetVehiclePedIsTryingToEnter(p) ~= 0 then
+					v = GetVehiclePedIsTryingToEnter(p)
+				end
+			end
+			if config.enable_carui_perclass and config.carui_perclass[GetVehicleClass(v)] ~= 'modern' or not config.enable_carui_perclass and config.carui ~= 'modern' then return end
+			if GetPedInVehicleSeat(v, -1) == p and not GetIsVehicleEngineRunning(v) and config.enable_carui_perclass and config.carui_perclass[GetVehicleClass(v)]  == 'modern' or GetPedInVehicleSeat(v, -1) == p and not GetIsVehicleEngineRunning(v) and not config.enable_carui_perclass and config.carui == 'modern' then
+				self.entering = true
+				--print("Disable auto self.start")
+				SetVehicleEngineOn(v,false,true,true)
+				while not self.start and IsPedInAnyVehicle(p) do
+					if not self.start and IsVehicleEngineStarting(v) then
+						SetVehicleEngineOn(v,false,true,true)
+						--print("not started yet")
+					end
+					Wait(0)
+				end
+			end
+		elseif self.start and IsPedInAnyVehicle(p) and GetVehicleDoorLockStatus(v) ~= 2 or self.manual and IsPedInAnyVehicle(p) and GetVehicleDoorLockStatus(v) ~= 2 then
+			Wait(500)
+			if self.start then
+				SendNUIMessage({
+					type = "setStart",
+					content = false
+				})
+			end
+			if self.manual then
+				SendNUIMessage({
+					type = "setManual",
+					content = false
+				})
+				self.manual = false
+			end
+			local content = {
+				['bool'] = false,
+				['type'] = config.carui
+			}
+			if self.ismapopen then
+				SendNUIMessage({map = true, type = 'sarado'})
+				self.ismapopen = false
+			end
+			while IsPedInAnyVehicle(self.ped, false) do
+				Wait(11)
+			end
+			Wait(1000)
 			SendNUIMessage({
-				type = "setStart",
-				content = false
+				type = "setShow",
+				content = content
 			})
 		end
-		if self.manual then
-			SendNUIMessage({
-				type = "setManual",
-				content = false
-			})
-			self.manual = false
-		end
-		local content = {
-			['bool'] = false,
-			['type'] = config.carui
-		}
-		if self.ismapopen then
-			SendNUIMessage({map = true, type = 'sarado'})
-			self.ismapopen = false
-		end
-		while IsPedInAnyVehicle(self.ped, false) do
-			Wait(11)
-		end
-		Wait(1000)
-		SendNUIMessage({
-			type = "setShow",
-			content = content
-		})
-	end
+	end)
 end
 
 function Hud:drawTxt(text,font,x,y,scale,r,g,b,a)
@@ -3706,26 +3711,32 @@ function Hud:ReqAndDelete(object, detach)
 end
 
 function Hud:DefineCarUI(ver)
-	if config.available_carui[tostring(ver)] ~= nil then
-		SendNUIMessage({type = 'setCarui', content = tostring(ver)})
-		config.carui = ver
-		if GetVehiclePedIsIn(PlayerPedId()) ~= 0 and ver == 'modern' then
-			Wait(300)
-			self.start = true
-			SendNUIMessage({
-				type = "setStart",
-				content = self.start
-			})
-			self.vehicle  = GetVehiclePedIsIn(PlayerPedId())
-			if self.ismapopen then
-				SendNUIMessage({map = true, type = 'sarado'})
-				self.ismapopen = false
-			end
-			if ver == 'modern' then
-				self:NuiShowMap()
+	CreateThread(function()
+		if config.available_carui[tostring(ver)] ~= nil then
+			SendNUIMessage({type = 'setCarui', content = tostring(ver)})
+			config.carui = ver
+			if GetVehiclePedIsIn(PlayerPedId()) ~= 0 and ver == 'modern' then
+				Wait(300)
+				while config.push_start and not self.start do
+					Wait(100)
+				end
+				self.start = true
+				SendNUIMessage({
+					type = "setStart",
+					content = self.start
+				})
+				self.vehicle  = GetVehiclePedIsIn(PlayerPedId())
+				if self.ismapopen then
+					SendNUIMessage({map = true, type = 'sarado'})
+					self.ismapopen = false
+				end
+				if ver == 'modern' then
+					self:NuiShowMap()
+				end
 			end
 		end
-	end
+		return
+	end)
 end
 
 standmodel , enginemodel = nil, nil

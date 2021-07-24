@@ -98,7 +98,7 @@ config.uidesign = 'circle' -- octagon (default), circle, square
 config.centercarhud = 'map' -- Feature of Car hud - MAP , MP3 (IF YOU CHOOSE MP3 you need renzu_mp3 as dependency, and renzu_mp3 need xsound) (MP3 not implemented yet..lazy..)
 config.mapversion = 'satellite' -- available ( satellite, atlas, oldschool )
 config.usecustomlink = false -- use custom url of image map
-config.push_start = false -- disable for now
+config.push_start = true -- enable/disable push to start for modern UI
 config.mapurl = 'https://github.com/jgardner117/gtav-interactive-map/blob/master/images/gtav.png?raw=true' -- if use custom url define it
 --atlas link https://github.com/jgardner117/gtav-interactive-map/blob/master/images/gtav.png?raw=true
 --satellite link https://github.com/jgardner117/gtav-interactive-map/blob/master/images/GTAV_SATELLITE_8192x8192.png?raw=true

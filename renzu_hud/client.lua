@@ -467,7 +467,7 @@ CreateThread(function()
 		if Hud.invehicle and Hud.vehicle == 0 then
 			Hud:EnterVehicleEvent(false)
 		end
-		if config.enable_carui and build() < 2000 and not Hud.invehicle and Hud.vehicle ~= 0 then
+		if config.enable_carui and build() < 2000 and not Hud.invehicle and Hud.vehicle ~= 0 or config.gamebuild ~= 'auto' and build() > 2000 then
 			Hud:EnterVehicleEvent(true,Hud.vehicle)
 		end
 		Wait(config.car_mainloop_sleep)
