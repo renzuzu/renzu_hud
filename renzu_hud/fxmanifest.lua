@@ -23,15 +23,15 @@ ui_page {
 server_scripts {
 	'@mysql-async/lib/MySQL.lua',
 	"config.lua",
-	"server.lua"
+	"server/server.lua"
 }
 client_scripts {
 	"config.lua",
-	'handling.lua',
-	'function.lua',
-	"client.lua",
-	"street.lua",
-	"manual.lua",
+	'client/handling.lua',
+	'client/function.lua',
+	"client/client.lua",
+	"client/street.lua",
+	"client/manual.lua",
 }
 files {
 	'ui/index.html',
@@ -51,11 +51,7 @@ files {
 	'ui/shifter/*.png',
 	'stream/*.ydr',
 	'handling.min.json',
-	'popgroups.ymt',
-	--"turbo.ytyp"
+	"turbo.ytyp"
 }
 
---data_file 'DLC_ITYP_REQUEST' 'turbo.ytyp'
---data_file 'FIVEM_LOVES_YOU_341B23A2F0E0F131' 'popgroups'
---data_file 'FIVEM_LOVES_YOU_341B23A2F0E0F131' 'popgroups.ymt'
---data_file 'DLC_POP_GROUPS' 'popgroups.ymt'
+data_file 'DLC_ITYP_REQUEST' 'turbo.ytyp'

@@ -413,7 +413,9 @@ RegisterServerEvent('playerDropped')
 AddEventHandler('playerDropped', function(reason)
 	local bodystatus = bodytable[GetSteam(source)]
 	UpdateBodySql(bodystatus,GetSteam(source))
-	Renzu[tonumber(source)] = nil
+	if Renzu[tonumber(source)] then
+		Renzu[tonumber(source)] = nil
+	end
 end)
 
 --ENGINE SYSTEM :D
