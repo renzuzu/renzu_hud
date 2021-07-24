@@ -1589,7 +1589,7 @@ function Hud:entervehicle()
 					v = GetVehiclePedIsTryingToEnter(p)
 				end
 			end
-			if config.enable_carui_perclass and config.carui_perclass[GetVehicleClass(v)] ~= 'modern' or not config.enable_carui_perclass and config.carui ~= 'modern' then return end
+			if config.enable_carui_perclass and config.carui_perclass[GetVehicleClass(v)] ~= 'modern' or not config.enable_carui_perclass and config.carui ~= 'modern' then self.entering = false return end
 			if GetPedInVehicleSeat(v, -1) == p and not GetIsVehicleEngineRunning(v) and config.enable_carui_perclass and config.carui_perclass[GetVehicleClass(v)]  == 'modern' or GetPedInVehicleSeat(v, -1) == p and not GetIsVehicleEngineRunning(v) and not config.enable_carui_perclass and config.carui == 'modern' then
 				self.entering = true
 				--print("Disable auto self.start")
