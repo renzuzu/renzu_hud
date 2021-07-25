@@ -1573,9 +1573,14 @@ function Hud:entervehicle()
 		if not IsPedInAnyVehicle(p) and IsAnyVehicleNearPoint(mycoords.x,mycoords.y,mycoords.z,10.0) then
 			--print("ENTERING")
 			v = GetVehiclePedIsEntering(p)
+			local c = 0
 			while not GetVehiclePedIsTryingToEnter(p) or GetVehiclePedIsTryingToEnter(p) == 0 do
 				v = GetVehiclePedIsTryingToEnter(p)
-				print(GetVehiclePedIsTryingToEnter(p))
+				if c > 2000 then
+					break
+				end
+				c = c + 10
+				--print(GetVehiclePedIsTryingToEnter(p))
 				Wait(0)
 			end
 			local count = 0
