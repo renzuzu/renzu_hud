@@ -1889,7 +1889,7 @@ function Hud:Boost(hasturbo)
 									Wait(1)
 								end
 								--self.Notify('success',"PRESSURE",lag)
-								print(self.rpm2 > 0.65 , self.rpm2 < 0.95 , self.turbosound < 500 , self.gear ~= self.oldgear , power_percent <= 1.0)
+								--print(self.rpm2 > 0.65 , self.rpm2 < 0.95 , self.turbosound < 500 , self.gear ~= self.oldgear , power_percent <= 1.0)
 								if config.boost_sound and self.rpm2 > 0.65 and self.rpm2 < 0.95 and self.turbosound < 500 and self.gear == self.oldgear and power_percent < 1.0 then
 									self.turbosound = self.turbosound + 1
 									SetVehicleBoostActive(self.vehicle , 1, 0)
@@ -1928,7 +1928,7 @@ function Hud:Boost(hasturbo)
 						self.gear = 1
 					end
 					self.boost = (boost_pressure * 1)
-					print(self.boost)
+					--print(self.boost)
 					-- if IsControlPressed(1, 32) and self.rpm > 0.4 and not RCR(1, 32) then
 					-- 	self.pressed = true
 					-- 	if self.boost < 1.0 then
@@ -3668,16 +3668,17 @@ function Hud:GetHandlingfromModel(model)
 		}
 		return table
 	else
-		for k,v in pairs(self.vehiclehandling['Item']) do
-			if GetHashKey(v.handlingName) == model then
+		for k,v in pairs(self.vehiclehandling) do
+			--print(v.VehicleModels[1],model)
+			if GetHashKey(v.VehicleModels[1]) == model then
 				local table = {
-					['fDriveInertia'] = tonumber(v.fDriveInertia['_value']),
-					['nInitialDriveGears'] = tonumber(v.nInitialDriveGears['_value']),
-					['fInitialDriveForce'] = tonumber(v.fInitialDriveForce['_value']),
-					['fClutchChangeRateScaleUpShift'] = tonumber(v.fClutchChangeRateScaleUpShift['_value']),
-					['fClutchChangeRateScaleDownShift'] = tonumber(v.fClutchChangeRateScaleDownShift['_value']),
-					['fInitialDriveMaxFlatVel'] = tonumber(v.fInitialDriveMaxFlatVel['_value']),
-					['fMass'] = tonumber(v.fMass['_value']),
+					['fDriveInertia'] = tonumber(v.DriveInertia),
+					['nInitialDriveGears'] = tonumber(v.InitialDriveGears),
+					['fInitialDriveForce'] = tonumber(v.InitialDriveForce),
+					['fClutchChangeRateScaleUpShift'] = tonumber(v.ClutchChangeRateScaleUpShift),
+					['fClutchChangeRateScaleDownShift'] = tonumber(v.ClutchChangeRateScaleDownShift),
+					['fInitialDriveMaxFlatVel'] = tonumber(v.InitialDriveMaxFlatVel),
+					['fMass'] = tonumber(v.Mass),
 				}
 				return table
 			end

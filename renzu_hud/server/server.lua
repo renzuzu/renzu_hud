@@ -14,7 +14,12 @@ QBCore = nil
 
 function SQLQuery(plugin,type,query,var)
     if type == 'fetchAll' and plugin == 'mysql-async' then
-        return MySQL.Sync.fetchAll(query, var)
+		local q = nil
+		MySQL.Async.fetchAll(query, var, function(result)
+            q = result
+        end)
+		while q == nil do Wait(0) end
+		return q
     end
     if type == 'execute' and plugin == 'mysql-async' then
         MySQL.Sync.execute(query,var) 
