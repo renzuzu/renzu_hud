@@ -111,7 +111,7 @@ function Hud:UpdateStatus(export,vitals)
 	self.vitals = vitals
 	if self.notloaded then return end
 	if export then
-	self.vitals = exports['renzu_status']:GetStatus(self.statuses)
+		self.vitals = exports['renzu_status']:GetStatus(self.statuses)
 	end
 	self.statusloop = 0
 	sleep = 11
@@ -174,6 +174,7 @@ function Hud:EnterVehicleEvent(state,vehicle)
 		self.hp = GetVehicleEngineHealth(vehicle)
 		self.gasolina = GetVehicleFuelLevel(vehicle)
 		self.lastplate = self:GetPlate(vehicle)
+		SendNUIMessage({type = "SetMetrics", content = config.carui_metric})
 		if self.uimove and config.enable_carui then
 			Wait(500)
 			local content = {
@@ -479,6 +480,10 @@ function Hud:RpmandSpeedLoop()
 		while self.ped == nil do
 			Wait(1000)
 		end
+		SendNUIMessage({
+			type = "SetMetrics",
+			content = config.carui_metric
+		})
 		while self.invehicle do
 			local sleep = 2000
 			if self.vehicle  ~= nil and self.vehicle  ~= 0 then
@@ -609,57 +614,56 @@ function Hud:NuiCarhpandGas()
 				end
 				self:CalculateTimeToDisplay()
 				self:timeformat()
+				SendNUIMessage({type = "SetMetrics", content = config.carui_metric})
 				local sleep = 2000
-			
-			
-			local door = true
-			local hood = 0
-			local trunk = 0
-			if self.vehicle  ~= nil and self.vehicle  ~= 0 then
-				----print(GetVehicleDoorStatus(self.vehicle ))
-				for i = 0, 6 do
-					Wait(100)
-					if GetVehicleDoorAngleRatio(self.vehicle ,i) ~= 0.0 then
-						door = false
-						break
+				local door = true
+				local hood = 0
+				local trunk = 0
+				if self.vehicle  ~= nil and self.vehicle  ~= 0 then
+					----print(GetVehicleDoorStatus(self.vehicle ))
+					for i = 0, 6 do
+						Wait(100)
+						if GetVehicleDoorAngleRatio(self.vehicle ,i) ~= 0.0 then
+							door = false
+							break
+						end
+					end
+					if door then
+						doorstatus = 0
+					else
+						doorstatus = 2
+					end
+					if newdoorstatus ~= doorstatus or newdoorstatus == nil then
+						newdoorstatus = doorstatus
+						SendNUIMessage({
+						type = "setDoor",
+						content = doorstatus
+						})
+					end
+					if GetVehicleDoorAngleRatio(self.vehicle ,4) ~= 0.0 then
+						hood = 2
+					end
+
+					if newhood ~= hood or newhood == nil then
+						newhood = hood
+						SendNUIMessage({
+						type = "setHood",
+						content = hood
+						})
+					end
+
+					if GetVehicleDoorAngleRatio(self.vehicle ,5) ~= 0.0 then
+						trunk = 2
+					end
+					if newtrunk ~= trunk or newtrunk == nil then
+						newtrunk = trunk
+						SendNUIMessage({
+						type = "setTrunk",
+						content = trunk
+						})
 					end
 				end
-				if door then
-					doorstatus = 0
-				else
-					doorstatus = 2
-				end
-				if newdoorstatus ~= doorstatus or newdoorstatus == nil then
-					newdoorstatus = doorstatus
-					SendNUIMessage({
-					type = "setDoor",
-					content = doorstatus
-					})
-				end
-				if GetVehicleDoorAngleRatio(self.vehicle ,4) ~= 0.0 then
-					hood = 2
-				end
-
-				if newhood ~= hood or newhood == nil then
-					newhood = hood
-					SendNUIMessage({
-					type = "setHood",
-					content = hood
-					})
-				end
-
-				if GetVehicleDoorAngleRatio(self.vehicle ,5) ~= 0.0 then
-					trunk = 2
-				end
-				if newtrunk ~= trunk or newtrunk == nil then
-					newtrunk = trunk
-					SendNUIMessage({
-					type = "setTrunk",
-					content = trunk
-					})
-				end
-			end
-				--SetVehicleHighGear(self.vehicle ,self.maxgear)
+					--SetVehicleHighGear(self.vehicle ,self.maxgear)
 			end
 			Wait(wait)
 		end
@@ -3845,7 +3849,7 @@ function Hud:SyncWheelAndSound(sounds,wheels)
 	end
 	for k,v in pairs(self.nearstancer) do
 		if v.dist > 250 or not DoesEntityExist(v.entity) then
-			print(v.plate,"deleted")
+			--print(v.plate,"deleted")
 			self.nearstancer[k] = nil
 		end
 	end

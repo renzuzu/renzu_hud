@@ -832,7 +832,7 @@ function Hud:gearspeed(sg, wheel)
             else
                 self.vehicletopspeed = Hud:GetHandling(Hud:GetPlate(self.vehicle)).maxspeed * 1.5
             end
-        else
+        elseif Hud:GetPlate(self.vehicle) ~= nil then
             self.vehicletopspeed = Hud:GetHandling(Hud:GetPlate(self.vehicle)).maxspeed * 1.0
         end
     end

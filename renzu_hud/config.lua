@@ -54,6 +54,7 @@ config.enablestatus = true -- enable/disable status v1 ( icons,progress status )
 config.enablecompass = true -- enable/disable compass
 config.enable_carui = true -- enable/disable the car UI (THIS WILL DISABLE ALL VEHICLE FUNCTION AS WELL)
 config.carui = 'simple' -- Choose a Carui Version ( simple, minimal, modern )
+config.carui_metric = 'mph' -- Speed Metrics to Use 'kmh' or 'mph'
 config.available_carui = {
 	['simple'] = true,
 	['minimal'] = true,
