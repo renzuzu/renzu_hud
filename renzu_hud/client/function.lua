@@ -3175,6 +3175,7 @@ function Hud:Carlock()
 					checkindentifier = string.gsub(checkindentifier, 'Char3', '')
 					checkindentifier = string.gsub(checkindentifier, 'Char2', '')
 					checkindentifier = string.gsub(checkindentifier, 'Char1', '')
+					checkindentifier = string.gsub(checkindentifier, 'steam', '')
 					myidentifier = string.gsub(self.identifier, 'steam', '')
 					if self.veh_stats[self.plate] ~= nil and checkindentifier == myidentifier then
 						foundvehicle[self.plate] = {}
