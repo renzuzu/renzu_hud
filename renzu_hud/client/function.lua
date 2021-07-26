@@ -111,7 +111,7 @@ function Hud:UpdateStatus(export,vitals)
 	self.vitals = vitals
 	if self.notloaded then return end
 	if export then
-	self.vitals = exports['standalone_status']:GetStatus(self.statuses)
+	self.vitals = exports['renzu_status']:GetStatus(self.statuses)
 	end
 	self.statusloop = 0
 	sleep = 11
