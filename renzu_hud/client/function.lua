@@ -2823,9 +2823,9 @@ function Hud:WeaponStatus()
 					if self.invehicle then
 						break
 					end
-					while IsPedShooting(self.ped) do
-						print("firing")
-						sleep = 5
+					while IsPedShooting(self.ped) or IsPlayerFreeAiming(self.pid) do
+						--print("firing")
+						sleep = 100
 						--print("self.shooting")
 						self.shooting = true
 						if config.enablestatus and config.killing_affect_status then
