@@ -1422,7 +1422,7 @@ function Hud:accidentsound()
 	if not self.sounded then
 		self.sounded = true
 		Citizen.CreateThread(function()
-			PlaySoundFrontend(-1, "SCREEN_FLASH", "CELEBRATION_SOUNDSET", 1)
+			PlaySoundFrontend(-1, "SCREEN_FLASH", "CELEBRATION_SOUNDSET", 0)
 			Citizen.Wait(1)
 			self.sounded = false
 			return
@@ -2092,7 +2092,7 @@ function Hud:Boost(hasturbo)
 end
 
 function Hud:vehiclemode()
-	PlaySoundFrontend(PlayerId(), 'NAV_UP_DOWN', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 1)
+	PlaySoundFrontend(-1, 'NAV_UP_DOWN', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 0)
 	if self.mode == 'NORMAL' then
 		self.mode = 'SPORTS'
 		SendNUIMessage({
@@ -2236,9 +2236,9 @@ function Hud:differential()
 		self:Notify('success','Vehicle Differential',"AWD Activated")
 	end
 	if self.togglediff then
-		PlaySoundFrontend(PlayerId(), 'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 1)
+		PlaySoundFrontend(-1, 'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 0)
 	else
-		PlaySoundFrontend(PlayerId(), 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 1)
+		PlaySoundFrontend(-1, 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 0)
 	end
 	SendNUIMessage({
 		type = "setDifferential",
@@ -2289,7 +2289,7 @@ function Hud:playanimation(animDict,name)
 end
 
 function Hud:Cruisecontrol()
-	PlaySoundFrontend(PlayerId(), "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", true )
+	PlaySoundFrontend(-1, "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", 0 )
 	self.cruising = not self.cruising
 	Citizen.Wait(500)
 	Citizen.CreateThread(function()

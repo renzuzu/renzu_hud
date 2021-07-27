@@ -378,7 +378,7 @@ end)
 RegisterCommand(config.commands['showstatus'], function()
 	Hud.show = not Hud.show
 	Hud:Myinfo(true)
-    PlaySoundFrontend(PlayerId(), "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", true )
+    PlaySoundFrontend(-1, "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", 0 )
 	SendNUIMessage({
 		type = "setShowstatus",
 		content = {['bool'] = Hud.show, ['enable'] = config.enablestatus}
@@ -2070,7 +2070,7 @@ RegisterNUICallback('ChangeClothes', function(data)
 			TriggerEvent('skinchanger:getSkin', function(current)
 				TriggerEvent('skinchanger:loadClothes', current, config.clothing[data.variant].skin)
 			end)
-			PlaySoundFrontend(PlayerId(), 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 1)
+			PlaySoundFrontend(-1, 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 0)
 			Hud.clothestate[tostring(data.variant)] = false
 			print(Hud.clothestate[tostring(data.variant)])
 			if data.variant == 'mask_1' or data.variant == 'helmet_1' then
@@ -2103,7 +2103,7 @@ RegisterNUICallback('ChangeClothes', function(data)
 				end)
 				Hud.clothestate[tostring(data.variant)] = true
 				print(Hud.clothestate[tostring(data.variant)])
-				PlaySoundFrontend(PlayerId(), 'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 1)
+				PlaySoundFrontend(-1, 'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 0)
 				local table = {
 					['bool'] = Hud.clothestate[data.variant],
 					['variant'] = data.variant
@@ -2164,7 +2164,7 @@ AddEventHandler('renzu_hud:change_engine', function(engine)
 		local handling = Hud:GetHandlingfromModel(GetHashKey(engine))
 		local getcurrentvehicleweight = GetVehStats(Hud:getveh(), "CHandlingData","fMass")
 		print(getcurrentvehicleweight,handling['fMass'])
-		if getcurrentvehicleweight <= config.motorcycle_weight_check and handling['fMass'] > 600 then
+		if getcurrentvehicleweight <= config.motorcycle_weight_check and handling['Mass'] > 600 then
 			Hud:Notify('warning','Engine System',"this engine is not fit to this vehicle")
 		else
 			local bone = GetEntityBoneIndexByName(Hud:getveh(),'engine')
