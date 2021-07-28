@@ -119,8 +119,8 @@ end
 
 RenzuNetEvent('renzu_hud:manual')
 RenzuEventHandler('renzu_hud:manual', function(bool)
-    plate = string.gsub(GetVehicleNumberPlateText(Hud:getveh()), "%s+", "")
-	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+    plate = GetVehicleNumberPlateText(Hud:getveh())
+	--plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
     if DecorExistOn(Hud:getveh(), "MANUAL") then
 		DecorRemove(Hud:getveh(), "MANUAL")
 	end

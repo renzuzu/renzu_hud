@@ -71,7 +71,7 @@ Citizen.CreateThread(function()
 		for k,v in pairs(results) do
 			if v.stats and v.plate ~= nil then
 				local stats = json.decode(v.stats)
-				stats.plate = string.gsub(v.plate, "%s+", "")
+				stats.plate = v.plate
 				stats.owner = v.owner
 				stats.entity = nil
 				adv_table[v.plate] = stats
@@ -151,7 +151,7 @@ RegisterServerEvent("renzu_hud:savedata")
 AddEventHandler("renzu_hud:savedata", function(plate,table,updatevehicles)
 	local source = source
 	if plate ~= nil then
-		local plate = string.gsub(plate, "%s+", "")
+		--local plate = string.gsub(plate, "%s+", "")
 		local foundplate = false
 		local newcreated = false
 		if plate ~= nil then

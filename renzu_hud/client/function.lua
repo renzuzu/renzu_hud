@@ -313,7 +313,7 @@ function Hud:EnterVehicleEvent(state,vehicle)
 end
 
 function Hud:GetPlate(v)
-	self.plate = string.gsub(tostring(GetVehicleNumberPlateText(v)), '^%s*(.-)%s*$', '%1')
+	self.plate = GetVehicleNumberPlateText(v)
 	return self.plate
 end
 
@@ -578,7 +578,7 @@ function Hud:NuiCarhpandGas()
 		newhood = nil
 		newtrunk = nil
 		while self.invehicle do
-			self.plate = string.gsub(tostring(GetVehicleNumberPlateText(self.vehicle )), '^%s*(.-)%s*$', '%1')
+			self.plate = GetVehicleNumberPlateText(self.vehicle )
 			if self.vehicle  ~= nil and self.vehicle  ~= 0 then
 				self.hp = GetVehicleEngineHealth(self.vehicle )
 				--print(self.hp)
@@ -738,7 +738,7 @@ function Hud:NuiDistancetoWaypoint()
 end
 
 function Hud:GetVehicleStat(plate)
-	local stat = self.veh_stats[string.gsub(tostring(plate), '^%s*(.-)%s*$', '%1')]
+	local stat = self.veh_stats[tostring(plate)]
 	if stat ~= nil then return stat end
 end
 
@@ -2143,8 +2143,8 @@ function Hud:vehiclemode()
 				end
 				SetVehicleHandlingField(self.vehicle , "CHandlingData", "fInitialDriveMaxFlatVel", self.globaltopspeed)
 			end
-			self.plate = string.gsub(GetVehicleNumberPlateText(self.vehicle ), "%s+", "")
-			self.plate = string.gsub(self.plate, '^%s*(.-)%s*$', '%1')
+			self.plate = GetVehicleNumberPlateText(self.vehicle)
+			--self.plate = string.gsub(self.plate, '^%s*(.-)%s*$', '%1')
 			while self.mode == 'SPORTS' and config.turbo_boost[self.veh_stats[self.plate].turbo] > config.boost and self.invehicle do
 				Citizen.Wait(1000) -- do nothing turbo torque is more higher
 			end
@@ -3168,7 +3168,7 @@ function Hud:Carlock()
 		local min = -1
 		for k,v in pairs(GetGamePool('CVehicle')) do
 			if #(mycoords - GetEntityCoords(v, false)) < config.carlock_distance then
-				self.plate = string.gsub(GetVehicleNumberPlateText(v), "%s+", "")
+				self.plate = GetVehicleNumberPlateText(v)
 				if self.veh_stats[self.plate] ~= nil and self.veh_stats[self.plate].owner ~= nil and self.identifier ~= nil then
 					checkindentifier = string.gsub(self.veh_stats[self.plate].owner, 'Char5', '')
 					checkindentifier = string.gsub(checkindentifier, 'Char4', '')
@@ -3467,7 +3467,7 @@ function Hud:CarStatus()
 	local dis = #(GetEntityCoords(self.ped) - GetEntityCoords(self.vehicle ))
 	if dis > 10 then return end
 	self.plate = tostring(GetVehicleNumberPlateText(self.vehicle ))
-	self.plate = string.gsub(self.plate, '^%s*(.-)%s*$', '%1')
+	--self.plate = string.gsub(self.plate, '^%s*(.-)%s*$', '%1')
 	self:get_veh_stats(self.vehicle , self.plate)
 	self.carstatus = not self.carstatus
 	local turbolevel = self.veh_stats[self.plate].turbo
@@ -3533,7 +3533,7 @@ end
 
 function Hud:tostringplate(plate)
     if plate ~= nil then
-    return string.gsub(tostring(plate), '^%s*(.-)%s*$', '%1')
+    return tostring(plate)
     else
     return 123454
     end
@@ -3819,7 +3819,7 @@ function Hud:SyncWheelAndSound(sounds,wheels)
 			local vehcoords = GetEntityCoords(vv)
 			local dist = #(coords-vehcoords)
 			local plate = GetVehicleNumberPlateText(vv)
-			plate = string.gsub(plate, "%s+", "")
+			--plate = string.gsub(plate, "%s+", "")
 			if wheels then
 				if self.nearstancer[plate] == nil then
 					self.nearstancer[plate] = {entity = vv, dist = dist, plate = plate}

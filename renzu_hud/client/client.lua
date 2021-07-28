@@ -725,8 +725,8 @@ AddEventHandler('renzu_hud:hasturbo', function(type)
 				content = true
 			})
 		end
-		plate = string.gsub(GetVehicleNumberPlateText(Hud.vehicle), "%s+", "")
-		plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+		plate = GetVehicleNumberPlateText(Hud.vehicle)
+		--plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
 		CreateThread(function()
 			Hud:turboanimation(type)
 			Hud:Boost(true)
@@ -741,8 +741,8 @@ AddEventHandler('renzu_hud:install_turbo', function(type)
 	local veh = Hud:getveh()
 	Hud:turboanimation(type)
 	while veh == 0 do veh = Hud:getveh() Wait(100) end
-	local plate = string.gsub(GetVehicleNumberPlateText(veh), "%s+", "")
-	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+	local plate = GetVehicleNumberPlateText(veh)
+	--plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
 	if Hud.veh_stats[plate] == nil then
 		Hud:get_veh_stats(veh, plate)
 	end
@@ -1322,7 +1322,7 @@ end)
 RegisterNUICallback('setvehiclewheeloffsetfront', function(data, cb)
 	Hud.vehicle = Hud:getveh()
 	plate = tostring(GetVehicleNumberPlateText(Hud.vehicle))
-	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+	--plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
     if Hud.vehicle ~= nil and Hud.vehicle ~= 0 then
 		if Hud.wheelsettings[plate] == nil then Hud.wheelsettings[plate] = {} end
 		local val = Hud:round(data.val * 100)
@@ -1343,7 +1343,7 @@ end)
 RegisterNUICallback('setvehiclewheeloffsetrear', function(data, cb)
 	Hud.vehicle = Hud:getveh()
 	plate = tostring(GetVehicleNumberPlateText(Hud.vehicle))
-	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+	--plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
     if Hud.vehicle ~= nil and Hud.vehicle ~= 0 then
 		if Hud.wheelsettings[plate] == nil then Hud.wheelsettings[plate] = {} end
 		local val = Hud:round(data.val * 100)
@@ -1364,7 +1364,7 @@ end)
 RegisterNUICallback('setvehiclewheelrotationfront', function(data, cb)
 	Hud.vehicle = Hud:getveh()
 	plate = tostring(GetVehicleNumberPlateText(Hud.vehicle))
-	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+	--plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
     if Hud.vehicle ~= nil and Hud.vehicle ~= 0 then
 		if Hud.wheelsettings[plate] == nil then Hud.wheelsettings[plate] = {} end
 		local val = Hud:round(data.val * 100)
@@ -1385,7 +1385,7 @@ end)
 RegisterNUICallback('setvehiclewheelrotationrear', function(data, cb)
 	Hud.vehicle = Hud:getveh()
 	plate = tostring(GetVehicleNumberPlateText(Hud.vehicle))
-	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+	--plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
     if Hud.vehicle ~= nil and Hud.vehicle ~= 0 then
 		if Hud.wheelsettings[plate] == nil then Hud.wheelsettings[plate] = {} end
 		local val = Hud:round(data.val * 100)
@@ -1440,7 +1440,7 @@ RegisterNUICallback('wheelsetting', function(data, cb)
 	Hud.vehicle = Hud:getveh()
 	Hud.wheeledit = false
 	plate = tostring(GetVehicleNumberPlateText(Hud.vehicle))
-	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+	--plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
 	Hud:get_veh_stats(Hud:getveh(), plate)
 	if Hud.veh_stats[plate]['wheelsetting'] == nil then
 		Hud.veh_stats[plate]['wheelsetting'] = {}
@@ -1787,8 +1787,8 @@ AddEventHandler("renzu_hud:installtire", function(type)
 			local tirepos = GetWorldPositionOfEntityBone(vehicle, GetEntityBoneIndexByName(vehicle, bones[i]))
 			local distance = #(coords - tirepos)
 			local currentindex = bones[bones[i]]
-			local plate = string.gsub(GetVehicleNumberPlateText(vehicle), "%s+", "")
-			plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+			local plate = GetVehicleNumberPlateText(vehicle)
+			--plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
 			if Hud.veh_stats == nil then
 				Hud.veh_stats = {}
 			end
@@ -1808,7 +1808,7 @@ AddEventHandler("renzu_hud:installtire", function(type)
 				end
 			end
 			if distance < 3 and Hud.veh_stats ~= nil and Hud.veh_stats[plate] ~= nil then
-				tireanimation()
+				Hud:tireanimation()
 				Wait(1000)
 				if config.repairalltires then
 					Hud:playanimation('anim@amb@clubhouse@tutorial@bkr_tut_ig3@','machinic_loop_mechandplayer')
@@ -2173,7 +2173,7 @@ AddEventHandler('renzu_hud:change_engine', function(engine)
 				busy_install = true
 				SetVehicleFixed(Hud:getveh())
 				plate = tostring(GetVehicleNumberPlateText(Hud:getveh()))
-				plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+				--plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
 				Hud:get_veh_stats(Hud:getveh(), plate)
 				Hud.veh_stats[plate].engine = engine
 				--print("loop item")
