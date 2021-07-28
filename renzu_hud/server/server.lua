@@ -376,7 +376,7 @@ function GetSteam(source)
 		end
 	end
 	if config.multichar and config.multichar_advanced then
-		license = string.gsub(license, "steam", ""..config.charprefix..""..charslot[source].."")
+		license = string.gsub(license, config.identifier, ""..config.charprefix..""..charslot[source].."")
 	end
 	return license
 end
