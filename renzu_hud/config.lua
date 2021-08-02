@@ -93,6 +93,7 @@ config.status_type = 'progressbar' -- circle progress bar = progressbar, fontaws
 config.statusv2 = true -- enable this if you want the status toggle mode (TOGGLE VIA INSERT) (THIS INCLUDE RP PURPOSE HUD like job,money,etc.)
 config.statusplace = 'bottom-left' -- available option top-right,top-left,bottom-right,bottom-left,top-center,bottom-center
 config.uidesign = 'circle' -- octagon (default), circle, square
+config.QbcoreStatusDefault = true -- if true will use metadatas as default you can stop renzu_status
 --CHANGE ACCORDING TO YOUR STATUS ESX STATUS OR ANY STATUS MOD
 --UI CONFIG END
 --start car map

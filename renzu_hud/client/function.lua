@@ -110,8 +110,22 @@ end
 function Hud:UpdateStatus(export,vitals)
 	self.vitals = vitals
 	if self.notloaded then return end
-	if export then
+	if export and not config.QbcoreStatusDefault and config.framework == 'QBCORE' or export and config.framework ~= 'QBCORE' then
 		self.vitals = exports['renzu_status']:GetStatus(self.statuses)
+		--print("STATUS 1")
+	elseif export and config.framework == 'QBCORE' and config.QbcoreStatusDefault then
+		QBCore.Functions.GetPlayerData(function(PlayerData)
+			if PlayerData ~= nil and PlayerData.metadata ~= nil then
+				hunger, thirst, stress = PlayerData.metadata["hunger"] * 10000, PlayerData.metadata["thirst"] * 10000, PlayerData.metadata["stress"] * 10000
+				vitals = {
+					['hunger'] = hunger,
+					['thirst'] = thirst,
+					['stress'] = stress -- this should be registered at config
+				}
+				self.vitals = vitals
+				--print("GAGO",vitals,vitals.hunger,vitals.thirst,vitals.stress)
+			end
+		end)
 	end
 	self.statusloop = 0
 	sleep = 11

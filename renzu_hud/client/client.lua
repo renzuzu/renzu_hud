@@ -210,6 +210,15 @@ CreateThread(function()
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 		Hud.playerloaded = true
 		SendNUIMessage({content = true, type = 'pedface'})
+	elseif Hud:isplayer() then
+		Wait(10000)
+		Hud.playerloaded = true
+		Wait(2000)
+		Hud.lastped = PlayerPedId()
+		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
+		TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
+		Wait(5000)
+		SendNUIMessage({content = true, type = 'pedface'})	
 	end
 	while not Hud.playerloaded do
 		Wait(1000)
@@ -257,36 +266,38 @@ CreateThread(function()
 		end
 	end
 	if config.enablestatus then
-		RegisterNetEvent("esx_status:onTick")
-		AddEventHandler("esx_status:onTick", function(vitals)
-			Hud:UpdateStatus(false,vitals)
-		end)
+		if not config.QbcoreStatusDefault and config.framework == 'QBCORE' or config.framework == 'STANDALONE' or config.framework == 'ESX' then
+			RegisterNetEvent("esx_status:onTick")
+			AddEventHandler("esx_status:onTick", function(vitals) -- use renzu_status
+				Hud:UpdateStatus(false,vitals)
+				--print("STATUS ONTICK")
+			end)
+		end
 		if config.framework == 'QBCORE' then
 			local hunger = 0
 			local thirst = 0
 			local stress = 0
-			RegisterNetEvent('hud:client:UpdateNeeds')
-			AddEventHandler('hud:client:UpdateNeeds', function(newHunger, newThirst)
-				hunger = newHunger * 10000 -- someone correct this is the max value is 100?
-				thirst = newThirst * 10000
-				stress = nil
-				local statusqb = {
-					['hunger'] = hunger,
-					['thirst'] = thirst,
-					['stress'] = stress -- this should be registered at config
-				}
-				Hud:UpdateStatus(false,statusqb)
-			end)
-
-			Citizen.SetTimeout(2500, function()
-				TriggerEvent("QBCore:GetObject", function(obj) QBCore = obj end)
-				Citizen.Wait(250)
-				QBCore.Functions.GetPlayerData(function(PlayerData)
-					if PlayerData ~= nil and PlayerData.metadata ~= nil then
-						hunger, thirst, stress = PlayerData.metadata["hunger"] * 10000, PlayerData.metadata["thirst"] * 10000, PlayerData.metadata["stress"] * 10000
+			if config.QbcoreStatusDefault then -- use qbcore builtin meta data status
+				CreateThread(function()
+					while true do
+						TriggerEvent("QBCore:GetObject", function(obj) QBCore = obj end)
+						Citizen.Wait(250)
+						QBCore.Functions.GetPlayerData(function(PlayerData)
+							if PlayerData ~= nil and PlayerData.metadata ~= nil then
+								hunger, thirst, stress = PlayerData.metadata["hunger"] * 10000, PlayerData.metadata["thirst"] * 10000, PlayerData.metadata["stress"] * 10000
+								local statusqb = {
+									['hunger'] = hunger,
+									['thirst'] = thirst,
+									['stress'] = stress -- this should be registered at config
+								}
+								--print("BUILD IN",statusqb,statusqb.hunger,statusqb.thirst,statusqb.stress)
+								Hud:UpdateStatus(false,statusqb)
+							end
+						end)
+						Wait(2500)
 					end
 				end)
-			end)
+			end
 		end
 	else
 		for k,v in pairs(config.statusordering) do
