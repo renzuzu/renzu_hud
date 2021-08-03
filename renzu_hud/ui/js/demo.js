@@ -142,10 +142,12 @@ function setFuelLevel(value) {
     document.getElementById("gasbar").style.width = ''+gas+'%'
     } else if (carui == 'minimal') {
         var e = document.getElementById("gasbar");
-        let length = e.getTotalLength();
-        ////////console.log(gas)
-        let to = length * ((93 - gas) / 100);
-        e.style.strokeDashoffset = to;
+        if (e) {
+            let length = e.getTotalLength();
+            ////////console.log(gas)
+            let to = length * ((93 - gas) / 100);
+            e.style.strokeDashoffset = to;
+        }
     } else if (carui == 'simple') {
         var opacity = 1.0 - (gas * 0.01)
         document.getElementById("gasbar").style.clip = 'rect('+toclip(gas)+', 100px, 100px, 0)'
@@ -157,10 +159,12 @@ function setCarhp(value) {
     var hp = value * 0.1
     if (carui == 'minimal') {
         var e = document.getElementById("carhealthbar");
-        let length = e.getTotalLength();
-        ////////console.log(hp)
-        let to = length * ((100 - hp) / 100);
-        e.style.strokeDashoffset = to;
+        if (e) {
+            let length = e.getTotalLength();
+            ////////console.log(hp)
+            let to = length * ((100 - hp) / 100);
+            e.style.strokeDashoffset = to;
+        }
     } else if(carui == 'modern') {
         document.getElementById("carhealthbar").style.width = ''+hp+'%'
     } else if (carui == 'simple') {
@@ -232,8 +236,10 @@ function setStatus(t) {
             document.getElementById(table[i].id_3).style.setProperty("-webkit-filter", "drop-shadow(5px 5px 5px rgba(255, 5, 5, 1.0)");
             document.getElementById(table[i].id_3).style.color = "rgb(255, 5, 5)";
         } else if (table[i].value <= 40 && table[i].status !== 'sanity' && table[i].status !== 'voip' && table[i].type == 1) {
-            document.getElementById(table[i].id_3).style.color = "rgb(255, 5, 5)";
-            document.getElementById(table[i].id_3).style.setProperty("-webkit-filter", "drop-shadow(5px -1px 5px rgba(255, 5, 5, 1.0)");
+            if (document.getElementById(table[i].id_3)) {
+                document.getElementById(table[i].id_3).style.color = "rgb(255, 5, 5)";
+                document.getElementById(table[i].id_3).style.setProperty("-webkit-filter", "drop-shadow(5px -1px 5px rgba(255, 5, 5, 1.0)");
+            }
         } else if (document.getElementById(table[i].id_3)) {
             document.getElementById(table[i].id_3).style.color = "rgba(151, 147, 147, 0.623)";
             document.getElementById(table[i].id_3).style.setProperty("-webkit-filter", "drop-shadow(15px -1px 22px rgba(255, 5, 5, 0.0)");
@@ -359,9 +365,15 @@ function SetVehData(table) {
     }
 }
 
+var metrics = 'kmh'
 function setSpeed(s) {
     var type = carui
-    var takbo = (s * 3.6)
+    var takbo = s
+    if (metrics == 'kmh') {
+        takbo = (s * 3.6)
+    } else {
+        takbo = (s * 2.236936)
+    }
     var max = 350
     var bilis = takbo / max
     var right = '47%'
@@ -427,11 +439,13 @@ function setCoolant(percent) {
     ////console.log(rpm2)
     //document.getElementById("rpmmeter").innerHTML = ""+rpm2+"";
     var e = document.getElementById("coolantpath");
-    let length = e.getTotalLength();
-    let value = water;
-    let to = length * ((100 - value) / 100);
-    val = to / 1000
-    e.style.strokeDashoffset = to;
+    if (e) {
+        let length = e.getTotalLength();
+        let value = water;
+        let to = length * ((100 - value) / 100);
+        val = to / 1000
+        e.style.strokeDashoffset = to;
+    }
 }
 
 var manual = false
@@ -732,17 +746,19 @@ function setTemp(temp) {
         document.getElementById("cartempbar").style.width = ''+temp+'%'
     } else {
         var e = document.getElementById("cartempbar");
-        let length = e.getTotalLength();
-        let to = length * ((91 - temp) / 100);
-        e.style.strokeDashoffset = to;
-        if (temp > 80) {
-            e.style.stroke = 'red';
-        } else if (temp > 70) {
-            e.style.stroke = 'orange';
-        } else if (temp > 50) {
-            e.style.stroke = 'blue';
-        } else {
-            e.style.stroke = 'skyblue';
+        if (e) {
+            let length = e.getTotalLength();
+            let to = length * ((91 - temp) / 100);
+            e.style.strokeDashoffset = to;
+            if (temp > 80) {
+                e.style.stroke = 'red';
+            } else if (temp > 70) {
+                e.style.stroke = 'orange';
+            } else if (temp > 50) {
+                e.style.stroke = 'blue';
+            } else {
+                e.style.stroke = 'skyblue';
+            }
         }
     }
 }
@@ -1163,12 +1179,14 @@ function setAmmo(table) {
     var bullets = percent;
     //rpm2 = bullets.toFixed(0) * 100
     var e = document.getElementById("weaponpath");
-    let length = e.getTotalLength();
-    let value = bullets;
-    let to = length * ((100 - value) / 100);
-    val = to / 1000
-    e.style.strokeDashoffset = to;
-    document.getElementById("ammotext").innerHTML = ''+table['ammo']+'';
+    if (e) {
+        let length = e.getTotalLength();
+        let value = bullets;
+        let to = length * ((100 - value) / 100);
+        val = to / 1000
+        e.style.strokeDashoffset = to;
+        document.getElementById("ammotext").innerHTML = ''+table['ammo']+'';
+    }
 }
 
 function setWeaponUi(bool) {
@@ -1208,6 +1226,10 @@ function setCarui(ver) {
     //console.log(carui_element[ver])
     carui = ver
     if (ver == 'minimal') {
+        document.getElementById("speedtext").style.fontWeight = '100';
+        document.getElementById("speedtext").style.right = '47.5%';
+        document.getElementById("speedtext").style.bottom = '45%';
+        document.getElementById("speedtext").style.fontSize = '8px';
         document.getElementById("minimal").style.display = 'block';
         document.getElementById("rpmtext").style.right = '68%';
         document.getElementById("rpmtext").style.bottom = '55%';
@@ -1220,7 +1242,7 @@ function setCarui(ver) {
         document.getElementById("gasicon").style.opacity = '0.6';
         document.getElementById("tempicon").style.opacity = '0.6';
         document.getElementById("geardiv").style.right = '13.7vw';
-        document.getElementById("geardiv").style.bottom = '42%';
+        document.getElementById("geardiv").style.bottom = '40%';
         document.getElementById("geardiv").style.fontSize = '0.4vw';
         document.getElementById("right").style.right = '27%';
         document.getElementById("right").style.bottom = '75%';
@@ -1253,6 +1275,10 @@ function setCarui(ver) {
     } else if (ver == 'modern') {
         document.getElementById("modern").style.display = 'block';
     } else if (ver == 'simple') {
+        document.getElementById("speedtext").style.fontWeight = '100';
+        document.getElementById("speedtext").style.right = '47.5%';
+        document.getElementById("speedtext").style.bottom = '45%';
+        document.getElementById("speedtext").style.fontSize = '8px';
         document.getElementById("simple").style.display = 'block';
         document.getElementById("rpmtext").style.right = '68%';
         document.getElementById("rpmtext").style.bottom = '55%';
@@ -1265,7 +1291,7 @@ function setCarui(ver) {
         document.getElementById("gasicon").style.opacity = '0.6';
         document.getElementById("tempicon").style.opacity = '0.6';
         document.getElementById("geardiv").style.right = '45%';
-        document.getElementById("geardiv").style.bottom = '42%';
+        document.getElementById("geardiv").style.bottom = '40%';
         document.getElementById("geardiv").style.fontSize = '0.4vw';
         document.getElementById("right").style.right = '37%';
         document.getElementById("right").style.bottom = '30%';
@@ -1733,9 +1759,11 @@ function SetNotify(table) {
     function setNoobCircle(id,percent) {
         var rpm = (percent);
         var e = document.getElementById(id);
-        let length = e.getTotalLength();
-        let to = length * ((100 - percent) / 100);
-        e.style.strokeDashoffset = to;
+        if (e) {
+            let length = e.getTotalLength();
+            let to = length * ((100 - percent) / 100);
+            e.style.strokeDashoffset = to;
+        }
     }
     
     function SetStatusOrder(t) {
@@ -2014,6 +2042,11 @@ function SetNotify(table) {
         r.style.setProperty('--transcar', table.transitioncar);
     }
 
+    function SetMetrics(v) {
+        metrics = v
+        document.getElementById("speedtext").innerHTML = v;
+    }
+
 //FUNCTIONS
 var renzu_hud = {
     setArmor,
@@ -2090,6 +2123,7 @@ var renzu_hud = {
     setShowTurboBoost,
     setShowCarStatus,
     DragCar,
+    SetMetrics,
 
 };
 
