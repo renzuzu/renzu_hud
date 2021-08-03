@@ -52,7 +52,6 @@ files {
 	'ui/fonts/Azonix.otf',
 	'ui/assets/icons.svg',
 	'ui/css/*.css',
-	'ui/css/fontawsome/*.css',
 	'ui/js/*.js',
 	'ui/img/*.png',
 	'ui/img/*.webp',

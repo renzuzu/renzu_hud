@@ -1,5 +1,6 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport"><title>Renzu HUD</title><link href="https://fonts.googleapis.com/css?family=Cabin+Sketch:bold" rel="stylesheet" type="text/css" /><script src="js/listener.js" type="text/javascript"></script><script defer src="fontawsome/js/all.min.js"></script>
-  <!--load all styles -->
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+  <meta name="viewport"><title>Renzu HUD</title><link href="https://fonts.googleapis.com/css?family=Cabin+Sketch:bold" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
   <script src="https://kit.fontawesome.com/44e6403392.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="css/compass.css" />
   <link rel="stylesheet" href="css/map.css" type="text/css">
@@ -21,33 +22,6 @@
       </div>
       <div id="status_bars" style="position:absolute;top:120px;right:10px;">
         <ul style="list-style: none;" id="status_progress">
-          <!-- <li style="height: 40px;position:relative;">
-              <div class="prog-bar">
-                <span class="bar">
-                  <span class="prog_progress" id="hunger"></span>
-                </span>
-              </div>
-              <i style="position:absolute;right:23px;top:27px;z-index: 1350;color:white;font-size:20px;" class="fad fa-cheeseburger"></i>
-              <img style="position:relative;z-index:1205 !important;height:40px;" src="img/status_bar.png" />
-          </li>
-          <li style="height: 40px;position:relative;">
-            <div class="prog-bar">
-              <span class="bar">
-                <span class="prog_progress" id="thirst"></span>
-              </span>
-            </div>
-            <i style="position:absolute;right:23px;top:27px;z-index: 1350;color:white;font-size:20px;" class="fad fa-cheeseburger"></i>
-            <img style="position:relative;z-index:1005;height:40px;" src="img/status_bar.png" />
-          </li>
-          <li style="height: 40px;position:relative;">
-            <div class="prog-bar">
-              <span class="bar">
-                <span class="prog_progress" id="stressbar"></span>
-              </span>
-            </div>
-            <i style="position:absolute;right:23px;top:27px;z-index: 1350;color:white;font-size:20px;" class="fad fa-cheeseburger"></i>
-            <img style="position:relative;z-index:1005;height:40px;" src="img/status_bar.png" />
-          </li> -->
         </ul>
       </div>
       <div id="status">
@@ -282,6 +256,7 @@
                                         <path id="speedpath" class="meter carhud" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
                                       </svg>
                                       <div id="speedmeter"></div>
+                                      <div id="speedtext">kMH</div>
                                       <svg id="cartemp" style="display:none;z-index:1005;position:absolute;right:13.7%;bottom:56.5%;opacity:0.65;height:23%;width:20%;transform: rotate(-200deg) scaleX(1) scaleY(-1);;"
                                         xmlns="http://www.w3.org/2000/svg" height="84" width="84" viewBox="0 0 140 140" data-value="1">
                                         <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 170.93 0"  fill="none"/>
@@ -422,6 +397,7 @@
                                         <path id="rpmpath" class="meter rpm" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="filter:url(#dropshadow)" stroke-dasharray="280" stroke-dashoffset="280"/>
                                       </svg>
                                       <div id="rpmmeter" style="display:none;">1000</div>
+                                      <div id="speedtext">kMH</div>
                                       <svg id="speed" style="z-index:1005;position:absolute;right:22%;bottom:26%;opacity:0.65;;width:54%;height:47%;transform: rotate(0deg)"
                                         xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
                                         <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 111.93 0"  fill="none"/>
@@ -611,7 +587,7 @@
                                     </div>
                                     <div id="modern" style="display:none;">
                                       <a id="start"></a>
-                                      <div class="carhudmap">
+                                      <div class="carhudmap" style="display: none;">
                                         <div class="fadeout"></div>
                                         <img src="img/carblip.png" alt="you" id="carblip" />
                                         <div class="centermap">
