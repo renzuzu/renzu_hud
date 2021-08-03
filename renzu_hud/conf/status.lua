@@ -64,3 +64,20 @@ config.statusordering = { -- SET enable = false to disable the status (the statu
 	[7] = {type = 1, enable = true, status = 'energy', rpuidiv = 'energybar', hideifmax = false, custom = true, value = 0, notify_lessthan = false, notify_message = 'i am very tired', notify_value = 20, display = 'block', id = 'uisimpleenergy', offset = '275', i_id_1 = 'energy2', i_id_1_color = 'rgb(233, 233, 233)', i_id_1_class = 'fas fa-snooze fa-stack-1x', i_id_3_class = 'fas fa-snooze', i_id_2 = 'energy2bg', i_id_2_color = 'color:rgb(243, 57, 0)', i_id_2_class = 'fas fa-snooze fa-stack-1x', id_3 = 'energy_blink'},
 	[8] = {type = 1, enable = true, status = 'voip', rpuidiv = 'null', hideifmax = false, custom = false, value = 0, notify_lessthan = false, notify_message = 'silent mode', notify_value = 0, display = 'block', id = 'voip_2', offset = '275', i_id_1 = 'microphone', i_id_1_color = 'rgb(251, 29, 9)', i_id_1_class = 'fas fa-microphone fa-stack-1x', i_id_2 = 'voipsimplebg', i_id_3_class = 'fas fa-microphone', i_id_2_color = 'rgba(251, 29, 9, 0.3)', i_id_2_class = 'fas fa-microphone fa-stack-1x', id_3 = 'voip_blink'},
 }
+
+-- GUIDE status ordering (variables needs to edit if your gonna reconfigure it)
+-- type = 1 use icons/circle status -- type = 0 use WIP progressbars (longbars)
+-- enable = true/false -- enable/disable the status
+-- hideifmax = true/false -- eg. if stamina is max hide the icons, show it if you are currently sprinting
+-- custom = true/false -- this define if the status is registered to esx_status/renzu_status/ -- if false its a native status example: oxygen,stamina
+-- notify_lessthan = true/false -- if true notify only if status is max else notify if status is nearly 20%
+-- value = do not edit, this is automatic
+-- notify_message = a message to notify if condition is met
+-- notify_value = the percentage of total status to trigger the notify system
+-- id = the divid of uistatus v1 the toggable version
+-- offset = unused and deprecated
+-- i_id_1 = the id of div, rename this to a unique one.
+-- i_id_1_color = color of circle status bar
+-- i_id_1_class = the fontawsome icon to use
+-- i_id_3_class = fontawsome icons to use
+-- others are relative to fontawsome and other not mention here is might be deprecated
