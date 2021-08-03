@@ -20,13 +20,23 @@ lua54 'on'
 ui_page {
     'ui/index.html',
 }
+
+shared_scripts {
+	'conf/main.lua',
+	'conf/status.lua',
+	'conf/bodystatus.lua',
+	'conf/keybinds.lua',
+	'conf/optimizing.lua',
+	'conf/clothing.lua',
+	'conf/voice.lua',
+	'conf/vehicle.lua',
+	'conf/weapon.lua',
+}
 server_scripts {
 	'@mysql-async/lib/MySQL.lua',
-	"config.lua",
 	"server/server.lua"
 }
 client_scripts {
-	"config.lua",
 	'client/handling.lua',
 	'client/function.lua',
 	"client/client.lua",
