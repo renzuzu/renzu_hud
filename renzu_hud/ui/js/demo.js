@@ -13,6 +13,8 @@ var class_icon = 'octagon'
 var statleft = false
 var isambulance = false
 var loopfuck = false
+var rpmanimation = false
+var speedanimation = false
 function pedface() {
     ////////console.log("REQUESTING")
     $.post(`https://${GetParentResourceName()}/requestface`, {}, function(data) {
@@ -146,7 +148,8 @@ function setFuelLevel(value) {
             let length = e.getTotalLength();
             ////////console.log(gas)
             let to = length * ((93 - gas) / 100);
-            e.style.strokeDashoffset = to;
+            //e.style.strokeDashoffset = to;
+            $('#gasbar').velocity({ 'stroke-dashoffset': to }, {duration: 230, delay: 60})
         }
     } else if (carui == 'simple') {
         var opacity = 1.0 - (gas * 0.01)
@@ -163,7 +166,8 @@ function setCarhp(value) {
             let length = e.getTotalLength();
             ////////console.log(hp)
             let to = length * ((100 - hp) / 100);
-            e.style.strokeDashoffset = to;
+            //e.style.strokeDashoffset = to;
+            $('#carhealthbar').velocity({ 'stroke-dashoffset': to }, {duration: 450, delay: 60})
         }
     } else if(carui == 'modern') {
         document.getElementById("carhealthbar").style.width = ''+hp+'%'
@@ -218,6 +222,7 @@ function toclip(val) {
 var status_move = []
 var move_count = []
 
+var statuscache = {}
 function setStatus(t) {
     var table = t['data']
     var type = t['type']
@@ -228,7 +233,8 @@ function setStatus(t) {
             document.getElementById(table[i].rpuidiv).style.width = ''+table[i].value+'%'
             if (type == 'icons') {
                 document.getElementById(table[i].i_id_1).style.clip = 'rect('+toclip(table[i].value)+', 100px, 100px, 0)'
-            } else if (table[i].type == 1) {
+            } else if (table[i].type == 1 && statuscache[table[i].i_id_1] !== table[i].value || table[i].type == 1 && statuscache[table[i].i_id_1] == undefined) {
+                statuscache[table[i].i_id_1] = table[i].value
                 setNoobCircle(table[i].i_id_1, table[i].value)
             }
         }
@@ -293,58 +299,21 @@ function setShowstatusv2(bool) {
 var oldrpm = 0, cntSi = 0;
 var newrpm = 0
 var oldp = 0
-function doStuffwTimeout(rpm){
-    var val = rpm / 200
-    setTimeout(function(){
-        if(oldrpm<200){
-        oldrpm++
-        p = (val * oldrpm)
-        console.log('setTimeout() executed, cntSt=' + p);
-        setRpm(p)
-        doStuffwTimeout(rpm);
-        } else {
-            oldrpm = 0
-            oldp = p
-        }
-    },1);
-}
 
 var r = 0
 var run = false
-function animateValue(start, end, duration) {
-    if (run) { return }
-    if (start >= 1) return;
-    var range = end - start;
-    var current = r;
-    var increment = end / 200
-    var c = 0
-    var stepTime = Math.abs(Math.floor(duration / range));
-    //var obj = document.getElementById(id);
-    var timer = setInterval(function() {
-        run = true
-        c++
-        current += increment;
-        //console.log(current,increment,c)
-        //obj.innerHTML = current;
-        setRpm(current)
-        if (c >= 200 || current >= 1) { 
-            run = false
-            r = current
-            clearInterval(timer);
-        }
-    }, 1);
-}
 
 function setRpm(percent) {
+    if (rpmanimation) { return }
     var rpm = (percent * 100);
     rpm2 = rpm.toFixed(0) * 100
-    document.getElementById("rpmmeter").innerHTML = ""+rpm2+"";
-    $(".rpm").addClass('notransition');
-    $(".rpm").removeClass("notransition");
+    if (carui == 'modern') {
+        document.getElementById("rpmmeter").innerHTML = ""+rpm2+"";
+    }
     var e = document.getElementById("rpmpath");
     let length = e.getTotalLength();
     let to = length * ((100 - rpm) / 100);
-    e.style.strokeDashoffset = to;
+    //e.style.strokeDashoffset = to;
     if (percent > 0.9) {
         e.style.stroke = 'red';
     } else if (percent > 0.7) {
@@ -354,6 +323,9 @@ function setRpm(percent) {
     } else {
         e.style.stroke = 'white';
     }
+    //$('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 15, delay: 20}).velocity({ 'stroke-dashoffset': to }, {duration: 20, delay: 20}).velocity({ 'stroke-dashoffset': to }, {duration: 20, delay: 20})
+    //$('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 15, delay: 20}).velocity({ 'stroke-dashoffset': to }, {duration: 15, delay: 21}).velocity({ 'stroke-dashoffset': to }, {duration: 20, delay: 23})
+    $('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15}).velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15}).velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15})
 }
 
 function SetVehData(table) {
@@ -366,7 +338,9 @@ function SetVehData(table) {
 }
 
 var metrics = 'kmh'
+var settingcarui = 'none'
 function setSpeed(s) {
+    if (speedanimation) { return }
     var type = carui
     var takbo = s
     if (metrics == 'kmh') {
@@ -379,9 +353,7 @@ function setSpeed(s) {
     var right = '47%'
     speed = bilis * 100;
     takbo = takbo.toFixed(0)
-    $(".carhud").addClass('notransition');
-    $(".carhud").removeClass("notransition");
-    if (type == 'minimal') {
+    if (type == 'minimal' && settingcarui !== 'minimal') {
         // document.getElementById("speed_minimal").style.display = "block";
         // document.getElementById("speed").style.display = "none";
         document.getElementById("speedmeter").style.right = "20%";
@@ -394,7 +366,7 @@ function setSpeed(s) {
         } else {
             right = '47%'
         }
-    } else if (type == 'modern') {
+    } else if (type == 'modern' && settingcarui !== 'modern') {
         document.getElementById("speedmeter").style.right = "268px";
         document.getElementById("speedmeter").style.bottom = "85px";
         if (takbo >= 100) {
@@ -404,7 +376,7 @@ function setSpeed(s) {
         } else {
             right = '268px'
         }
-    } else if (type == 'simple') {
+    } else if (type == 'simple' && settingcarui !== 'simple') {
         document.getElementById("speedmeter").style.right = "20%";
         document.getElementById("speedmeter").style.fontSize  = "1.5vw";
         document.getElementById("speedmeter").style.bottom = "50%";
@@ -418,19 +390,16 @@ function setSpeed(s) {
     }
     //console.log(right)
     document.getElementById("speedmeter").style.right = right;
-    //document.getElementById("speedmeter").innerHTML = ""+takbo+"";
-    //$("#speedmeter").text(""+takbo+"");
-    // document.getElementById("speedmeter").classList.add('move')
-    //     setTimeout(function () {
-    //     document.getElementById("speedmeter").classList.remove('move')
-    //   }, 250)
     document.getElementById("speedmeter").style.setProperty('--num', takbo);
     var e = document.getElementById("speedpath");
     let length = e.getTotalLength();
     let value = speed;
     let to = length * ((100 - value) / 100);
     val = to / 1000
-    e.style.strokeDashoffset = to;
+    //e.style.strokeDashoffset = to;
+    //$('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 20, delay: 20}).velocity({ 'stroke-dashoffset': to }, {duration: 15, delay: 23}).velocity({ 'stroke-dashoffset': to }, {duration: 20, delay: 23})
+    $('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15}).velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15}).velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15})
+    //$('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 30, delay: 60})
 }
 
 function setCoolant(percent) {
@@ -444,7 +413,8 @@ function setCoolant(percent) {
         let value = water;
         let to = length * ((100 - value) / 100);
         val = to / 1000
-        e.style.strokeDashoffset = to;
+        //e.style.strokeDashoffset = to;
+        $('#coolantpath').velocity({ 'stroke-dashoffset': to }, {duration: 450, delay: 60})
     }
 }
 
@@ -748,8 +718,8 @@ function setTemp(temp) {
         var e = document.getElementById("cartempbar");
         if (e) {
             let length = e.getTotalLength();
-            let to = length * ((91 - temp) / 100);
-            e.style.strokeDashoffset = to;
+            let to = length * ((71 - temp) / 100);
+            //e.style.strokeDashoffset = to;
             if (temp > 80) {
                 e.style.stroke = 'red';
             } else if (temp > 70) {
@@ -759,6 +729,7 @@ function setTemp(temp) {
             } else {
                 e.style.stroke = 'skyblue';
             }
+            $('#cartempbar').velocity({ 'stroke-dashoffset': to }, {duration: 250, delay: 60})
         }
     }
 }
@@ -1171,6 +1142,7 @@ function setWeapon(weapon) {
     }, 333);
 }
 
+oldto = 0
 function setAmmo(table) {
     var max = table['max'];
     var ammo = table['clip'];
@@ -1184,7 +1156,10 @@ function setAmmo(table) {
         let value = bullets;
         let to = length * ((100 - value) / 100);
         val = to / 1000
-        e.style.strokeDashoffset = to;
+        //e.style.strokeDashoffset = to;
+        if (to == oldto) { return }
+        oldto = to
+        $('#weaponpath').velocity({ 'stroke-dashoffset': to }, {duration: 50, delay: 10})
         document.getElementById("ammotext").innerHTML = ''+table['ammo']+'';
     }
 }
@@ -1319,6 +1294,26 @@ function setCarui(ver) {
     }
     setMode('NORMAL',carui)
     changeallclass(class_icon)
+    const el = document.querySelector('.rpm');
+    el.addEventListener('animationstart', function() {
+        console.log('transition start')
+        rpmanimation = true
+    });
+
+    el.addEventListener('animationend', function() {
+        rpmanimation = false
+        //console.log('transition end')
+    });
+    const el2 = document.querySelector('.carhud');
+    el2.addEventListener('transitionrun', function() {
+        //console.log('transition start')
+        speedanimation = true
+    });
+
+    el2.addEventListener('transitionend', function() {
+        speedanimation = false
+        //console.log('transition end')
+    });
 }
 function setCompass(bool) {
     if (bool) {
@@ -1412,7 +1407,8 @@ function setNitro(nitro) {
     let value = nitro;
     let to = length * ((100 - value) / 100);
     val = to / 1000
-    e.style.strokeDashoffset = to;
+    //e.style.strokeDashoffset = to;
+    $('#nitropath').velocity({ 'stroke-dashoffset': to }, {duration: 15, delay: 5})
 }
 
 function setWheelHealth(table) {
@@ -1762,7 +1758,8 @@ function SetNotify(table) {
         if (e) {
             let length = e.getTotalLength();
             let to = length * ((100 - percent) / 100);
-            e.style.strokeDashoffset = to;
+            //e.style.strokeDashoffset = to;
+            $('#'+id+'').velocity({ 'stroke-dashoffset': to }, {duration: 850, delay: 60})
         }
     }
     

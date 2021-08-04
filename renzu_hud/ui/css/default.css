@@ -873,7 +873,7 @@ svg .rpm {
   will-change: stroke-dashoffset;
   stroke-width: 20px;
   stroke-miterlimit: round;
-  transition: stroke-dashoffset var(--mscar) var(--transcar) 0ms;
+  transition: stroke-dashoffset var(--mscar) var(--transcar) var(--mscar);
 }
 svg .boost {
   will-change: auto;
@@ -883,7 +883,7 @@ svg .carhud {
   will-change: stroke-dashoffset;
   stroke-width: 20px;
   stroke-miterlimit: round;
-  transition: stroke-dashoffset var(--mscar) var(--transcar) 0ms;
+  transition: stroke-dashoffset 0ms var(--transcar) 0ms;
 }
 svg .statushud {
   will-change: stroke-dashoffset;

@@ -591,6 +591,7 @@ function Hud:NuiCarhpandGas()
 		newdoorstatus = nil
 		newhood = nil
 		newtrunk = nil
+		metric = nil
 		while self.invehicle do
 			self.plate = GetVehicleNumberPlateText(self.vehicle )
 			if self.vehicle  ~= nil and self.vehicle  ~= 0 then
@@ -628,7 +629,10 @@ function Hud:NuiCarhpandGas()
 				end
 				self:CalculateTimeToDisplay()
 				self:timeformat()
-				SendNUIMessage({type = "SetMetrics", content = config.carui_metric})
+				if metric == nil then
+					metric = config.carui_metric
+					SendNUIMessage({type = "SetMetrics", content = config.carui_metric})
+				end
 				local sleep = 2000
 				local door = true
 				local hood = 0
@@ -681,6 +685,7 @@ function Hud:NuiCarhpandGas()
 			end
 			Wait(wait)
 		end
+		metric = nil
 		--TerminateThisThread()
 		return
 	end)
@@ -886,6 +891,8 @@ function Hud:NuiMileAge()
 			end
 		end)
 		--print("NUI DATA")
+		tirecache = {}
+		newmileage = nil
 		while self.invehicle do
 			Wait(config.mileage_update)
 			
@@ -923,6 +930,7 @@ function Hud:NuiMileAge()
 						end
 						if config.enabletiresystem then
 							local dist3 = #(newPos-oldPos3)
+							local ct = GetGameTimer()
 							if dist3 > config.driving_status_radius then
 								oldPos3 = newPos
 								local numwheel = GetVehicleNumberOfWheels(self.vehicle )
@@ -948,10 +956,13 @@ function Hud:NuiMileAge()
 										['index'] = i,
 										['tirehealth'] = self.veh_stats[self.plate][tostring(i)].tirehealth
 									}
-									SendNUIMessage({
-										type = "setWheelHealth",
-										content = wheeltable
-									})
+									if tirecache[i] == nil or tirecache[i] < ct then
+										tirecache[i] = ct + 5000
+										SendNUIMessage({
+											type = "setWheelHealth",
+											content = wheeltable
+										})
+									end
 								end
 							end
 						end
@@ -962,8 +973,9 @@ function Hud:NuiMileAge()
 								TriggerEvent('esx_status:'..config.driving_status_mode..'', config.driving_affected_status, config.driving_status_val)
 							end
 						end
-						if newmileage ~= self.veh_stats[self.plate].mileage or newmileage == nil then
+						if newmileage ~= nil and newmileage+0.5 < Round(self.veh_stats[self.plate].mileage) or newmileage == nil then
 							newmileage = self.veh_stats[self.plate].mileage
+							print(newmileage)
 							SendNUIMessage({
 								type = "setMileage",
 								content = self.veh_stats[self.plate].mileage
@@ -981,6 +993,7 @@ function Hud:NuiMileAge()
 				Wait(1000)
 			end
 		end
+		tirecache = nil
 		--TerminateThisThread()
 		return
 	end)
@@ -1189,7 +1202,7 @@ function Hud:NuiEngineTemp()
 			newtemp = nil
 			if self.vehicle  ~= nil and self.vehicle  ~= 0 then
 				--print(self.veh_stats[self.plate].coolant)
-				sleep = 2000
+				sleep = 4000
 				local temp = GetVehicleEngineTemperature(self.vehicle )
 				local overheat = false
 				while self.rpm > config.dangerrpm and config.engineoverheat and not config.driftcars[vehiclemodel] do
@@ -1258,7 +1271,7 @@ function Hud:NuiEngineTemp()
 					--print(temp)
 				end
 				--print(temp)
-				if newtemp ~= temp or newtemp == nil then
+				if newtemp ~= nil and newtemp + 2 < temp or newtemp ~= nil and newtemp > temp + 2 or newtemp == nil then
 					newtemp = temp
 					SendNUIMessage({
 						type = "setTemp",
@@ -3674,7 +3687,6 @@ end
 function Hud:GetHandlingfromModel(model)
 	local model = model
 	if config.custom_engine_enable and config.custom_engine[model] ~= nil then
-		print("custom engine")
 		if config.custom_engine[model].turboinstall then
 			ToggleVehicleMod(self.vehicle , 18, true)
 		end
