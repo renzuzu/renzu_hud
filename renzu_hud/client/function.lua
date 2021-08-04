@@ -1110,7 +1110,7 @@ function Hud:StartSmoke(ent)
 			end
 			Wait(400)
 			table.insert(smokes, {handle = Smoke})
-			removeFCK()
+			self:RemoveParticles()
 			Wait(500)
 		end
 		self.refresh = false
@@ -1119,7 +1119,7 @@ function Hud:StartSmoke(ent)
     end)
 end
 
-function Hud:removeFCK()
+function Hud:RemoveParticles()
 	CreateThread(function()
 		for _,parts in pairs(smokes) do
 			--print("removing "..parts.handle.."")
