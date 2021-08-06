@@ -71,9 +71,9 @@ function setArmor(s) {
     ////////console.log("time",time)
     if (statusui == 'simple') {
         if (status_type == 'icons') {
-            document.getElementById("armorsimple").style.clip = 'rect('+toclip(s)+', 100px, 100px, 0)'
+            document.getElementById("armorval").style.clip = 'rect('+toclip(s)+', 100px, 100px, 0)'
         } else {
-            setNoobCircle('armorsimple', s)
+            setNoobCircle('armorval', s)
         }
     } else {
         document.getElementById("armor").style.width = ''+s+'%'
@@ -83,9 +83,9 @@ function setArmor(s) {
 function setHp(s) {
     if (statusui == 'simple') {
         if (status_type == 'icons') {
-            document.getElementById("healthsimple").style.clip = 'rect('+toclip(s)+', 100px, 100px, 0)'
+            document.getElementById("healthval").style.clip = 'rect('+toclip(s)+', 100px, 100px, 0)'
         } else {
-            setNoobCircle('healthsimple', s)
+            setNoobCircle('healthval', s)
         }
     } else {
         document.getElementById("health").style.width = ''+s+'%'
@@ -94,25 +94,25 @@ function setHp(s) {
 
 function setMic(type) {
     if (status_type == 'icons') {
-        did = 'microphone'
+        did = 'voip'
     } else if (statusui == 'simple') {
         did = 'voipsimplebg'
         if (type == 1) {
             val = 20
             //$("#microphone").css("color", 'rgb(227, 250, 22)');
-            $("#microphone").attr('style', "stroke:rgb(227, 250, 22)")
+            $("#voipval").attr('style', "stroke:rgb(227, 250, 22)")
         } else if (type == 2) {
             val = 50
-            $("#microphone").attr('style', "stroke:rgb(23, 255, 15)")
+            $("#voipval").attr('style', "stroke:rgb(23, 255, 15)")
             //$("#microphone").css("color", 'rgb(255, 35, 6)');
         } else if (type == 3) {
             val = 100
-            $("#microphone").attr('style', "rgb(255, 35, 6)")
+            $("#voipval").attr('style', "rgb(255, 35, 6)")
             //$("#microphone").css("color", 'rgb(23, 255, 15)');
         }
-        setNoobCircle('microphone', val)
+        setNoobCircle('voipval', val)
     } else {
-        did = 'microphone'
+        did = 'voip'
     }
     switch (type) {
         case 1:
@@ -229,36 +229,39 @@ function setStatus(t) {
     status_type = type
     for (const i in table) {
         move_count[i] = i
-        if (table[i].rpuidiv !== 'null') {
+        if (table[i].rpuidiv == undefined) { table[i].rpuidiv = table[i].status+'bar' }
+        if (document.getElementById(table[i].rpuidiv)) {
             document.getElementById(table[i].rpuidiv).style.width = ''+table[i].value+'%'
-            if (type == 'icons') {
-                document.getElementById(table[i].i_id_1).style.clip = 'rect('+toclip(table[i].value)+', 100px, 100px, 0)'
-            } else if (table[i].type == 1 && statuscache[table[i].i_id_1] !== table[i].value || table[i].type == 1 && statuscache[table[i].i_id_1] == undefined) {
-                statuscache[table[i].i_id_1] = table[i].value
-                setNoobCircle(table[i].i_id_1, table[i].value)
-            }
         }
-        if (table[i].value >= 80 && table[i].status == 'sanity') {
-            document.getElementById(table[i].id_3).style.setProperty("-webkit-filter", "drop-shadow(5px 5px 5px rgba(255, 5, 5, 1.0)");
-            document.getElementById(table[i].id_3).style.color = "rgb(255, 5, 5)";
-        } else if (table[i].value <= 40 && table[i].status !== 'sanity' && table[i].status !== 'voip' && table[i].type == 1) {
-            if (document.getElementById(table[i].id_3)) {
-                document.getElementById(table[i].id_3).style.color = "rgb(255, 5, 5)";
-                document.getElementById(table[i].id_3).style.setProperty("-webkit-filter", "drop-shadow(5px -1px 5px rgba(255, 5, 5, 1.0)");
+        if (type == 'icons') {
+            document.getElementById(table[i].status).style.clip = 'rect('+toclip(table[i].value)+', 100px, 100px, 0)'
+        } else if (table[i].type == 1 && statuscache[table[i].status] !== table[i].value || table[i].type == 1 && statuscache[table[i].status] == undefined) {
+            statuscache[table[i].status] = table[i].value
+            setNoobCircle(table[i].status+'val', table[i].value)
+            //console.log(table[i].status,table[i].value)
+        }
+        if (table[i].value >= 80 && table[i].status == 'stress') {
+            document.getElementById(table[i].status+'blink').style.setProperty("-webkit-filter", "drop-shadow(5px 5px 5px rgba(255, 5, 5, 1.0)");
+            document.getElementById(table[i].status+'blink').style.color = "rgb(255, 5, 5)";
+        } else if (table[i].value <= 40 && table[i].status !== 'stress' && table[i].status !== 'voip' && table[i].type == 1) {
+            if (document.getElementById(table[i].status+'blink')) {
+                document.getElementById(table[i].status+'blink').style.color = "rgb(255, 5, 5)";
+                document.getElementById(table[i].status+'blink').style.setProperty("-webkit-filter", "drop-shadow(5px -1px 5px rgba(255, 5, 5, 1.0)");
             }
-        } else if (document.getElementById(table[i].id_3)) {
-            document.getElementById(table[i].id_3).style.color = "rgba(151, 147, 147, 0.623)";
-            document.getElementById(table[i].id_3).style.setProperty("-webkit-filter", "drop-shadow(15px -1px 22px rgba(255, 5, 5, 0.0)");
+        } else if (document.getElementById(table[i].status+'blink')) {
+            document.getElementById(table[i].status+'blink').style.color = "rgba(151, 147, 147, 0.623)";
+            document.getElementById(table[i].status+'blink').style.setProperty("-webkit-filter", "drop-shadow(15px -1px 22px rgba(255, 5, 5, 0.0)");
         }
         if (table[i].hideifmax) {
-            if (table[i].value == 100 && table[i].status !== 'armor' && table[i].type == 1) {
-                document.getElementById(table[i].id).style.display = 'none'
+            if(table[i].min_val_hide == undefined) { table[i].min_val_hide = 100 }
+            if (table[i].value >= table[i].min_val_hide && table[i].status !== 'armor' && table[i].status !== 'stress' && table[i].type == 1 || table[i].value <= table[i].min_val_hide && table[i].status !== 'armor' && table[i].status == 'stress' && table[i].type == 1) {
+                document.getElementById(table[i].status+'div').style.display = 'none'
             } else if (table[i].type == 1) {
-                document.getElementById(table[i].id).style.display = 'block'
+                document.getElementById(table[i].status+'div').style.display = 'block'
                 if (table[i].status == 'armor' && statusui !== 'simple' || table[i].status == 'armor' && statusui == 'simple' && table[i].value == 0) {
-                    document.getElementById(table[i].id).style.display = 'none'
+                    document.getElementById(table[i].status+'div').style.display = 'none'
                 } else if (table[i].status == 'armor' && statusui == 'simple' && table[i].value > 0) {
-                    document.getElementById(table[i].id).style.display = 'block'
+                    document.getElementById(table[i].status+'div').style.display = 'block'
                 }
             }
         }
@@ -1339,9 +1342,9 @@ function setStatusUI(t) {
     }
     if (ver == 'simple' && t['enable']) {
         statusui = 'simple'
-        document.getElementById("uisimplehp").style.display = 'block';
-        document.getElementById("armorsimple").style.display = 'block';
-        document.getElementById("uisimplearmor").style.display = 'block';
+        document.getElementById("healthdiv").style.display = 'block';
+        document.getElementById("armor").style.display = 'block';
+        document.getElementById("armordiv").style.display = 'block';
         if (type == 'icons') {
             document.getElementById("armorsimplebg").style.display = 'block';
         }
@@ -1773,13 +1776,16 @@ function SetNotify(table) {
                 var offset = statuses[0].offset
                 offsetplus = offsetplus + 35
                 offset = (+offset - +offsetplus)
+                var fa = statuses[i].fa
                 var class1 = statuses[i].i_id_1_class
                 var class2 = statuses[i].i_id_2_class
                 var color1 = statuses[i].i_id_1_color
                 var color2 = statuses[i].i_id_2_color
-                var divid = statuses[i].id
-                var i_id_1 = statuses[i].i_id_1
-                var i_id_2 = statuses[i].i_id_2
+                var divid = statuses[i].status+'div'
+                var i_id_1 = statuses[i].status+'val'
+                var i_id_2 = statuses[i].status+'simplebg'
+                var rpuidiv = statuses[i].status+'bar'
+                var blink = statuses[i].status+'blink'
                 if (statleft == 'top-left' || statleft == 'bottom-left') {
                     float = 'left'
                 } else {
@@ -1787,18 +1793,18 @@ function SetNotify(table) {
                 }
                 if (statuses[i].type == 1) {
                     if (status_type == 'icons') {
-                        $("#statusv3").prepend('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:17px;position:relative;color:rgba(144, 144, 144, 0.876);float:right; margin-top:-25px;margin-left:-7px;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:17px;color:rgba(11, 39, 63, 0.707)"></i> <i id="'+statuses[i].id_3+'" class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+class1+'" style="font-size:19px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+class2+'" style="font-size:19px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
+                        $("#statusv3").prepend('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:17px;position:relative;color:rgba(144, 144, 144, 0.876);float:right; margin-top:-25px;margin-left:-7px;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:17px;color:rgba(11, 39, 63, 0.707)"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+fa+' fa-stack-1x" style="font-size:19px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+fa+' fa-stack-1x" style="font-size:19px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
                     } else {
-                        $("#statusv3").prepend('<div id="'+divid+'" style="float:'+float+';height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;left:3.5vw;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:1.25vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;"></i> <i id="'+statuses[i].id_3+'" class="fal fa-octagon fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i> <i id="'+statuses[i].i_id_2+'" class="'+statuses[i].i_id_1_class+'" style="font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.14vw;bottom:-0.53vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.9vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="'+statuses[i].i_id_1+'" class="meter statushud" stroke="'+statuses[i].i_id_1_color+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
+                        $("#statusv3").prepend('<div id="'+divid+'" style="float:'+float+';height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;left:3.5vw;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:1.25vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i> <i id="'+i_id_2+'" class="'+statuses[i].fa+' fa-stack-1x" style="font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.14vw;bottom:-0.53vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.9vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="'+i_id_1+'" class="meter statushud" stroke="'+statuses[i].i_id_1_color+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
                     }
                 } else {
                     $("#status_progress").append('<li style="height: 40px;position:relative;">\
                     <div class="prog-bar">\
                       <span class="bar">\
-                        <span style="background: '+statuses[i].i_id_1_color+';" class="prog_progress" id="'+statuses[i].rpuidiv+'"></span>\
+                        <span style="background: '+statuses[i].i_id_1_color+';" class="prog_progress" id="'+rpuidiv+'"></span>\
                       </span>\
                     </div>\
-                    <i style="position:absolute;right:23px;top:27px;z-index: 1350;color:white;font-size:20px;" class="tikol '+statuses[i].i_id_3_class+'"></i>\
+                    <i style="position:absolute;right:23px;top:27px;z-index: 1350;color:white;font-size:20px;" class="tikol '+statuses[i].fa+'"></i>\
                     <img style="position:relative;z-index:1205 !important;height:40px;" src="img/status_bar.png" />\
                 </li>');
                 $("tikol").removeClass("fa-stack-1x");

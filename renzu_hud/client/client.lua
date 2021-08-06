@@ -23,6 +23,7 @@ CreateThread(function()
 		QBCore = exports['qb-core']:GetSharedObject()
 		while QBCore == nil do Wait(0) end
 		QBCore.Functions.GetPlayerData(function(PlayerData)
+			xPlayer = PlayerData
             if PlayerData ~= nil and PlayerData.job ~= nil then
 				SendNUIMessage({type = "isAmbulance",content = PlayerData.job.name == config.checkbodycommandjob})
             end
@@ -73,35 +74,48 @@ end)
 
 --MUMBLE VOIP SetVoice Listener
 local current_channel = 0
+local cdch = 0
 RegisterNetEvent("renzu_hud:SetVoiceData")
 AddEventHandler("renzu_hud:SetVoiceData", function(mode,val)
+	if mode == 'radio' then
+		Wait(0,math.random(500)) -- fix old rpradio ver
+	end
 	if mode == 'proximity' then
 		Hud.voiceDisplay = val
 		SendNUIMessage({
 			type = "setMic",
 			content = val
 		})
-	elseif mode == 'radio' and val > 0 and val ~= current_channel then
+	elseif mode == 'radio' and cdch < GetGameTimer() then
+		cdch = GetGameTimer() + 1000
+		if current_channel == val then val = 0 end
+		local channel = config.radiochannels[val].text
+		if val == 0 then
+			channel = false
+			val = 0
+		end
+		if channel.job ~= 'all' and xPlayer ~= nil and xPlayer.job ~= nil and channel.job ~= xPlayer.job.name then
+			channel = false
+			val = 0
+		end
 		SendNUIMessage({
 			type = "setRadioChannel",
-			content = config.radiochannels[val]
+			content = channel
 		})
 		current_channel = val
-	elseif mode == 'radio' and val <= 0 or val == current_channel then
-		SendNUIMessage({
-			type = "setRadioChannel",
-			content = false
-		})
-		current_channel = 0
 	end
 end)
 
 -- PMA RADIO CHANNEL LISTENER
 RegisterNetEvent("pma-voice:clSetPlayerRadio")
 AddEventHandler("pma-voice:clSetPlayerRadio", function(channel)
+	local channel = config.radiochannels[channel].text
+	if channel.job ~= 'all' and xPlayer ~= nil and xPlayer.job ~= nil and channel.job ~= xPlayer.job.name then
+		channel = false
+	end
 	SendNUIMessage({
 		type = "setRadioChannel",
-		content = config.radiochannels[channel]
+		content = channel
 	})
 end)
 
