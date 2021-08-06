@@ -90,11 +90,11 @@ AddEventHandler("renzu_hud:SetVoiceData", function(mode,val)
 		cdch = GetGameTimer() + 1000
 		if current_channel == val then val = 0 end
 		local channel = config.radiochannels[val].text
-		if val == 0 then
+		if channel.job ~= nil and channel.job ~= 'all' and xPlayer ~= nil and xPlayer.job ~= nil and channel.job ~= xPlayer.job.name then
 			channel = false
 			val = 0
 		end
-		if channel.job ~= 'all' and xPlayer ~= nil and xPlayer.job ~= nil and channel.job ~= xPlayer.job.name then
+		if val == 0 then
 			channel = false
 			val = 0
 		end

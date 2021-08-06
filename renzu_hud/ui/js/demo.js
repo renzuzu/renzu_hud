@@ -235,9 +235,9 @@ function setStatus(t) {
         }
         if (type == 'icons') {
             document.getElementById(table[i].status).style.clip = 'rect('+toclip(table[i].value)+', 100px, 100px, 0)'
-        } else if (table[i].type == 1 && statuscache[table[i].status] !== table[i].value || table[i].type == 1 && statuscache[table[i].status] == undefined) {
+        } else if (table[i].type == 1 && statuscache[table[i].status] !== table[i].value*1.01 || table[i].type == 1 && statuscache[table[i].status] == undefined) {
             statuscache[table[i].status] = table[i].value
-            setNoobCircle(table[i].status+'val', table[i].value)
+            setNoobCircle(table[i].status+'val', table[i].value*0.9999)
             //console.log(table[i].status,table[i].value)
         }
         if (table[i].value >= 80 && table[i].status == 'stress') {
