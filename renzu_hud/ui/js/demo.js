@@ -94,9 +94,9 @@ function setHp(s) {
 
 function setMic(type) {
     if (status_type == 'icons') {
-        did = 'voip'
+        did = 'voipdiv'
     } else if (statusui == 'simple') {
-        did = 'voipsimplebg'
+        did = 'voipdiv'
         if (type == 1) {
             val = 20
             //$("#microphone").css("color", 'rgb(227, 250, 22)');
@@ -112,7 +112,7 @@ function setMic(type) {
         }
         setNoobCircle('voipval', val)
     } else {
-        did = 'voip'
+        did = 'voip_1'
     }
     switch (type) {
         case 1:
@@ -1361,7 +1361,7 @@ function setStatusUI(t) {
         //document.getElementById("mic-color").style.width = '15px';
         //document.getElementById("mic-color").style.height = '27px';
     } else if (t['enable']) {
-        document.getElementById("voip_2").innerHTML = '';
+        document.getElementById("voipdiv").remove()
     }
 }
 
