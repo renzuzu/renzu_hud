@@ -38,7 +38,7 @@ config.commanditem_permission = { -- item command permission -- standalone purpo
 	'steam:11000013ec77a2e',
 	'steam:11000013ec77a2e',
 }
-config.identifier = 'steam:' -- standalone purpose, ignore if using framework
+config.identifier = 'license:' -- standalone purpose, ignore if using framework
 --MULTI CHARACTER START -- set config.multichar = false if you are not using any multi character ( configuring this is needed to avoid problems saving to database )
 config.multichar = false -- KASHACTERS, cd_multicharacter, etc...
 --IMPORTANT PART IF USING Multicharacter

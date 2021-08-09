@@ -71,10 +71,12 @@ Citizen.CreateThread(function()
 		for k,v in pairs(results) do
 			if v.stats and v.plate ~= nil then
 				local stats = json.decode(v.stats)
-				stats.plate = v.plate
-				stats.owner = v.owner
-				stats.entity = nil
-				adv_table[v.plate] = stats
+				if stats ~= nil and stats ~= 'null' then
+					stats.plate = v.plate
+					stats.owner = v.owner
+					stats.entity = nil
+					adv_table[v.plate] = stats
+				end
 			end
 		end
 	end
@@ -82,7 +84,7 @@ Citizen.CreateThread(function()
 	if config.enable_commands_as_item then
 		RenzuCommand('useitem', function(source,args)
 			if args[1] ~= nil and config.ESX_Items[args[1]] ~= nil then
-				if havePermission(GetPlayerIdentifier(source, 0)) then
+				if havePermission(PlayerIdentifier(source)) then
 					TriggerClientEvent(config.ESX_Items[args[1]].event, source, config.ESX_Items[args[1]].value)
 				end
 			end
@@ -192,7 +194,7 @@ AddEventHandler("renzu_hud:savedata", function(plate,table,updatevehicles)
 end)
 
 function getlastcharslot(source)
-	local results = SQLQuery(config.Mysql,'fetchAll',"SELECT charid FROM user_lastcharacter WHERE steamid=@steamid", {['@steamid'] = GetPlayerIdentifiers(source)[1]})
+	local results = SQLQuery(config.Mysql,'fetchAll',"SELECT charid FROM user_lastcharacter WHERE steamid=@steamid", {['@steamid'] = PlayerIdentifier(source)})
 	if #results > 0 then
 		print("OK")
 		return results[1].charid
@@ -216,7 +218,7 @@ AddEventHandler("renzu_hud:getdata", function(slot, fetchslot)
 		if Renzu[tonumber(source)] == nil then
 			CreatePlayer(source)
 		end
-		TriggerClientEvent('renzu_hud:receivedata', source, adv_table, GetPlayerIdentifier(source))
+		TriggerClientEvent('renzu_hud:receivedata', source, adv_table, PlayerIdentifier(source))
 	end
 end)
 
@@ -367,11 +369,13 @@ AddEventHandler("mumble:SetVoiceData", function(mode,prox)
 	end
 end)
 
-function GetSteam(source)
+function PlayerIdentifier(source)
 	local source = source
 	for k, v in ipairs(GetPlayerIdentifiers(source)) do
+		print(v)
 		if string.match(v, config.identifier) then
 			license = v
+			print('gago',v)
 			break
 		end
 	end
@@ -394,7 +398,7 @@ function CreatePlayer(source)
 	if charslot[source] == nil or charslot[source] == 0 then
 		charslot[source] = 1
 	end
-	local xPlayer = Standalone(source, GetSteam(source), GetPlayerName(source), charslot[source] or 1)
+	local xPlayer = Standalone(source, PlayerIdentifier(source), GetPlayerName(source), charslot[source] or 1)
 	Renzu[tonumber(source)] = xPlayer
 end
 
@@ -416,8 +420,8 @@ end)
 
 RegisterServerEvent('playerDropped')
 AddEventHandler('playerDropped', function(reason)
-	local bodystatus = bodytable[GetSteam(source)]
-	UpdateBodySql(bodystatus,GetSteam(source))
+	local bodystatus = bodytable[PlayerIdentifier(source)]
+	UpdateBodySql(bodystatus,PlayerIdentifier(source))
 	if Renzu[tonumber(source)] then
 		Renzu[tonumber(source)] = nil
 	end
@@ -502,7 +506,7 @@ Citizen.CreateThread(function()
 	if config.enable_commands then
 		RenzuCommand('installengine', function(source,args)
 			if args[1] ~= nil and config.engine[args[1]] ~= nil then
-				if havePermission(GetPlayerIdentifier(source, 0)) then
+				if havePermission(PlayerIdentifier(source)) then
 					for v, k in pairs(config.engine) do
 						if v == args[1] then
 							print("install")
