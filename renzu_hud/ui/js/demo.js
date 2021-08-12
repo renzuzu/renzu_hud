@@ -2047,7 +2047,9 @@ function SetNotify(table) {
 
     function SetMetrics(v) {
         metrics = v
-        document.getElementById("speedtext").innerHTML = v;
+        if (document.getElementById("speedtext")) {
+            document.getElementById("speedtext").innerHTML = v;
+        }
     }
 
 //FUNCTIONS
