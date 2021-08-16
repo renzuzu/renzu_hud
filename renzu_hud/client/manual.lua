@@ -188,7 +188,7 @@ RenzuCommand('manual2', function()
         Hud.manual = false
         Hud.manualstatus = false
         Wait(100)
-        startmanual(nil,true)
+        Hud:startmanual(nil,true)
 	end
     Hud.manual = not Hud.manual
     --Hud.manualstatus = not Hud.manualstatus
@@ -249,7 +249,7 @@ end
 
 function Hud:trannyupgradespeed()
     if self.manual2 then
-        print("manual2")
+        --print("manual2")
         if tonumber(GetVehicleMod(self.vehicle,13)) > 0 then
             if mode == 'SPORTS' then
                 bonus = self:GetHandling(self:GetPlate(self.vehicle)).maxspeed * config.topspeed_multiplier
@@ -526,7 +526,7 @@ end
                 end
 
                 --if handbrake disable it when gear is >= 1
-                print(handbrake , not RCP(1, config.clutch) , self.savegear > 0 , not clutch)
+                --print(handbrake , not RCP(1, config.clutch) , self.savegear > 0 , not clutch)
                 if handbrake and not RCP(1, config.clutch) and self.savegear > 0 and not clutch or self.reverse and not clutch then
                     --ForceVehicleGear(self.vehicle, 0)
                     if self.speed < 10 then
@@ -544,13 +544,11 @@ end
 
     RenzuCommand('clutch', function()
         local sleep = 1000
-        print("VOVO")
         if Hud.invehicle and Hud.manual then
             if Hud.speed < 3 then
                 Hud:ForceVehicleGear(Hud.vehicle, 0)
                 SetVehicleHandbrake(Hud.vehicle,true)
             end
-            print(Hud.savegear == 0 , RCR(1, 173))
             if Hud.savegear == 0 and RCR(1, 173) or Hud.savegear == 0 and clutch and RCR(1, 173) then
                 Hud:ShowHelpNotification('REVERSE', true, 1, 5)
                 marcha = "R"
