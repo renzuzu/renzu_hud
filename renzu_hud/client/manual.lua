@@ -175,7 +175,7 @@ RenzuCommand('manual2', function()
 	if Hud.manual then
 	    local topspeed = Hud:GetHandling(Hud:GetPlate(Hud.vehicle)).maxspeed * 1.3
 	    LockSpeed(Hud.vehicle,topspeed / 3.6)
-	    ForceVehicleGear(Hud.vehicle, 1)
+	    Hud:ForceVehicleGear(Hud.vehicle, 1)
         SetVehicleHighGear(Hud.vehicle,Hud:GetHandling(Hud:GetPlate(Hud.vehicle)).maxgear)
 	    SetVehicleHandbrake(Hud.vehicle,false)
         SendNUIMessage({
