@@ -109,7 +109,7 @@ Citizen.CreateThread(function()
 						['@name'] = v.name,
 						['@label'] = ""..firstToUpper(v.label).."",
 					})
-					--print("Inserting "..v.item.." new item")
+					print("Inserting "..v.item.." new item")
 				end
 			end
 			ESX.RegisterUsableItem(v.name, function(source)
@@ -149,10 +149,12 @@ function isVehicleOwned(plate)
 	return owner
 end
 
+local kids = {}
 RegisterServerEvent("renzu_hud:savedata")
 AddEventHandler("renzu_hud:savedata", function(plate,table,updatevehicles)
 	local source = source
-	if plate ~= nil then
+	if plate ~= nil and kids[source] ~= nil and kids[source] < GetGameTimer() or plate ~= nil and kids[source] == nil then -- block any request until the timer is lessthan the gametimer or if its nil
+		kids[source] = GetGameTimer() + 2000 -- i receive some reports this event is being used by kiddies to perform a noob things :D
 		--local plate = string.gsub(plate, "%s+", "")
 		local foundplate = false
 		local newcreated = false
