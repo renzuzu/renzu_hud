@@ -48,6 +48,7 @@ config.characterchosenevent = 'kashactersS:CharacterChosen' -- this event contai
 config.charprefix = 'Char' -- dont change unless you know what you are doing
 --loadedasmp will use the charslot from user_lastcharacter, kashacters and other multicharacter have this.
 config.loadedasmp = true -- if player model is mp player, pass the loaded event to server ( naturally if player model is PLAYER_ZERO its mean you are on the loading screen or in the character select page of your multicharacter script. )
+config.forceplayerload = false -- false playerloaded event (use this only if you experience hud not loading at all, and if you dont use multicharacter or else you will get server error about player nil value)
 --MULTI CHAR END
 --MAIN UI CONFIG START
 config.enablestatus = true -- enable/disable status v1 ( icons,progress status ) -- this will disable all status functions

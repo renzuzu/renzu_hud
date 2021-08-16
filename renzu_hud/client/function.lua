@@ -1745,7 +1745,7 @@ function Hud:Fuel()
 		end
 		--print("FUEL USAGE: "..result..", ADV: "..advformula.." EngineLoad: "..engineload.."")
 		SetVehicleFuelLevel(self.vehicle ,GetVehicleFuelLevel(self.vehicle ) - advformula)
-		DecorSetFloat(self.vehicle ,config.fueldecor,GetVehicleFuelLevel(self.vehicle ))
+		DecorSetFloat(self.vehicle ,config.fueldecor,GetVehicleFuelLevel(self.vehicle))
 		config.boost = boostgas
 	end
 end
@@ -1753,13 +1753,12 @@ end
 function Hud:fuelusagerun()
 	CreateThread(function()
 		if config.usecustomfuel then
-			if not self.regdecor then
+			if not self.regdecor and not DecorExistOn(vehicle,config.fueldecor) then
 				self.regdecor = true
 				DecorRegister(config.fueldecor,1)
 			end
 			while self.invehicle do
 				Wait(2000)
-				
 				if GetPedInVehicleSeat(self.vehicle ,-1) == self.ped then
 					self:Fuel(self.vehicle )
 				end
@@ -3204,7 +3203,6 @@ function Hud:Carlock()
 					checkindentifier = string.gsub(checkindentifier, 'Char1', '')
 					checkindentifier = string.gsub(checkindentifier, 'steam', '')
 					checkindentifier = string.gsub(checkindentifier, string.gsub(config.identifier,":",""), '')
-					checkindentifier = string.gsub(checkindentifier,":","")
 					myidentifier = string.gsub(self.identifier, 'steam', '')
 					myidentifier = string.gsub(self.identifier, string.gsub(config.identifier,":",""), '')
 					myidentifier = string.gsub(myidentifier,":","")

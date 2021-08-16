@@ -224,7 +224,7 @@ CreateThread(function()
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 		Hud.playerloaded = true
 		SendNUIMessage({content = true, type = 'pedface'})
-	elseif Hud:isplayer() then
+	elseif Hud:isplayer() and config.forceplayerload then
 		Wait(10000)
 		Hud.playerloaded = true
 		Wait(2000)
