@@ -109,7 +109,7 @@ Citizen.CreateThread(function()
 						['@name'] = v.name,
 						['@label'] = ""..firstToUpper(v.label).."",
 					})
-					--print("Inserting "..v.item.." new item")
+					print("Inserting "..v.item.." new item")
 				end
 			end
 			ESX.RegisterUsableItem(v.name, function(source)
@@ -373,6 +373,7 @@ end)
 
 function PlayerIdentifier(source)
 	local source = source
+	local license = nil
 	for k, v in ipairs(GetPlayerIdentifiers(source)) do
 		print(v)
 		if string.match(v, config.identifier) then
