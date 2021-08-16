@@ -109,7 +109,6 @@ Citizen.CreateThread(function()
 						['@name'] = v.name,
 						['@label'] = ""..firstToUpper(v.label).."",
 					})
-					print("Inserting "..v.item.." new item")
 				end
 			end
 			ESX.RegisterUsableItem(v.name, function(source)
