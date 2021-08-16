@@ -256,7 +256,7 @@ function setStatus(t) {
             if(table[i].min_val_hide == undefined) { table[i].min_val_hide = 100 }
             if (table[i].value >= table[i].min_val_hide && table[i].status !== 'armor' && table[i].status !== 'stress' && table[i].type == 1 || table[i].value <= table[i].min_val_hide && table[i].status !== 'armor' && table[i].status == 'stress' && table[i].type == 1) {
                 document.getElementById(table[i].status+'div').style.display = 'none'
-            } else if (table[i].type == 1) {
+            } else if (table[i].type == 1 && document.getElementById(table[i].status+'div')) {
                 document.getElementById(table[i].status+'div').style.display = 'block'
                 if (table[i].status == 'armor' && statusui !== 'simple' || table[i].status == 'armor' && statusui == 'simple' && table[i].value == 0) {
                     document.getElementById(table[i].status+'div').style.display = 'none'
@@ -1767,6 +1767,7 @@ function SetNotify(table) {
     }
     
     function SetStatusOrder(t) {
+        console.log("status ordering")
         var s = t['table']
         statleft = t['float']
         var offsetplus = -35

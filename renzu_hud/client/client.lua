@@ -168,7 +168,7 @@ AddEventHandler('renzu_hud:charslot', function(charid)
 end)
 
 CreateThread(function()
-	Wait(10)
+	Wait(1011)
 	if config.framework == 'ESX' then
 		RegisterNetEvent('esx:playerLoaded')
 		AddEventHandler('esx:playerLoaded', function(xPlayer)
@@ -197,6 +197,7 @@ CreateThread(function()
 		RegisterNetEvent('playerSpawned')
 		AddEventHandler('playerSpawned', function(spawn)
 			Hud.playerloaded = true
+			print("PLAYERLOADED")
 			Wait(2000)
 			Hud.lastped = PlayerPedId()
 			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
@@ -430,20 +431,22 @@ RegisterNUICallback('getoutvehicle', function(data, cb)
 end)
 
 CreateThread(function()
-	Wait(1000)
+	Wait(2000)
 	SendNUIMessage({map = true, type = 'sarado'})
 	SendNUIMessage({type = "uiconfig", content = config.uiconfig})
+	SendNUIMessage({type = "setStatusType",content = config.status_type})
+	Wait(500)
+	SendNUIMessage({type = "SetStatusOrder",content = {['table'] = config.statusordering, ['float'] = config.statusplace}})
+	Wait(1000)
 	while not Hud.playerloaded do Citizen.Wait(100) end
 	Wait(100)
-	SendNUIMessage({type = "setStatusType",content = config.status_type})
 	local tbl = {['table'] = config.statusordering, ['float'] = config.statusplace}
 	if config.enable_carui then
 		SendNUIMessage({type = 'setCarui', content = config.carui})
 	end
+	print("Player Loaded SUCCESS")
 	Wait(500)
 	SendNUIMessage({type = "setCompass",content = config.enablecompass})
-	Wait(500)
-	SendNUIMessage({type = "SetStatusOrder",content = tbl})
 	Wait(500)
 	SendNUIMessage({type = "setStatusUI",content = {['type'] = config.status_type, ['ver'] = config.statusui, ['enable'] = config.enablestatus}})
 	Wait(500)
