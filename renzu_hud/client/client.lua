@@ -431,11 +431,12 @@ RegisterNUICallback('getoutvehicle', function(data, cb)
 end)
 
 CreateThread(function()
-	Wait(2000)
+	Wait(4000)
 	SendNUIMessage({map = true, type = 'sarado'})
 	SendNUIMessage({type = "uiconfig", content = config.uiconfig})
 	SendNUIMessage({type = "setStatusType",content = config.status_type})
 	Wait(500)
+	print(config.statusplace,config.statusordering)
 	SendNUIMessage({type = "SetStatusOrder",content = {['table'] = config.statusordering, ['float'] = config.statusplace}})
 	Wait(1000)
 	while not Hud.playerloaded do Citizen.Wait(100) end
