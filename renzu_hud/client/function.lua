@@ -2407,7 +2407,7 @@ function Hud:statusplace()
 			if config.statusui == 'simple' then
 				table = {['top'] = '40px', ['right'] = '110px'}
 			else
-				table = {['top'] = '10px', ['right'] = '110px'}
+				table = {['top'] = '10px', ['right'] = '150px'}
 			end
 		end
 	elseif placing == 'top-left' then
