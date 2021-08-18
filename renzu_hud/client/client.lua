@@ -174,24 +174,26 @@ CreateThread(function()
 		AddEventHandler('esx:playerLoaded', function(xPlayer)
 			Hud.playerloaded = true
 			Wait(2000)
-			----print("ESX")
+			print("ESX")
 			Hud.lastped = PlayerPedId()
 			TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
 			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 			Wait(5000)
 			SendNUIMessage({content = true, type = 'pedface'})
+			SendNUIMessage({content = true, type = 'playerloaded'})
 		end)
 	elseif config.framework == 'QBCORE' then
 		RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
 		AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
 			Hud.playerloaded = true
 			Wait(2000)
-			----print("ESX")
+			print("QB")
 			Hud.lastped = PlayerPedId()
 			TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
 			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 			Wait(5000)
 			SendNUIMessage({content = true, type = 'pedface'})
+			SendNUIMessage({content = true, type = 'playerloaded'})
 		end)
 	else
 		RegisterNetEvent('playerSpawned')
@@ -203,7 +205,8 @@ CreateThread(function()
 			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 			TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
 			Wait(5000)
-			SendNUIMessage({content = true, type = 'pedface'})	
+			SendNUIMessage({content = true, type = 'pedface'})
+			SendNUIMessage({content = true, type = 'playerloaded'})
 		end)
 	end
 	Wait(1000)
@@ -214,26 +217,30 @@ CreateThread(function()
 		Citizen.Wait(4000)
 	end
 	if DecorExistOn(PlayerPedId(), "PLAYERLOADED") and Hud.charslot ~= nil then
-		----print("PLAYERLOADED")
+		print("PLAYERLOADED")
 		TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
 		Hud.playerloaded = true
+		SendNUIMessage({content = true, type = 'playerloaded'})
 	end
 	Wait(500)
 	if DecorExistOn(PlayerPedId(), "PLAYERLOADED") and config.loadedasmp and Hud:isplayer() then
-		--print("ISMP")
+		print("ISMP")
 		TriggerServerEvent("renzu_hud:getdata",0, true)
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 		Hud.playerloaded = true
 		SendNUIMessage({content = true, type = 'pedface'})
+		SendNUIMessage({content = true, type = 'playerloaded'})
 	elseif Hud:isplayer() and config.forceplayerload then
 		Wait(10000)
 		Hud.playerloaded = true
+		print("isplayer f")
 		Wait(2000)
 		Hud.lastped = PlayerPedId()
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 		TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
 		Wait(5000)
 		SendNUIMessage({content = true, type = 'pedface'})	
+		SendNUIMessage({content = true, type = 'playerloaded'})
 	end
 	while not Hud.playerloaded do
 		Wait(1000)

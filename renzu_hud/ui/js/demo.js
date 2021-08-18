@@ -2004,8 +2004,11 @@ function SetNotify(table) {
     }
 
     function setStatusType(type) {
-        document.getElementById("uibody").style.display = 'block'
         status_type = type
+    }
+
+    function playerloaded() {
+        document.getElementById("uibody").style.display = 'block'
     }
 
     function isAmbulance(bool) {
@@ -2073,6 +2076,7 @@ var renzu_hud = {
     setCompass,
     setRadioChannel,
     setShowClothing,
+    playerloaded,
     setClotheState,
     ResetClotheState,
     setStatusUILocation,
