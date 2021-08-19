@@ -168,36 +168,36 @@ AddEventHandler('renzu_hud:charslot', function(charid)
 end)
 
 CreateThread(function()
-	Wait(1011)
-	if config.framework == 'ESX' then
-		RegisterNetEvent('esx:playerLoaded')
-		AddEventHandler('esx:playerLoaded', function(xPlayer)
-			Hud.playerloaded = true
-			Wait(2000)
-			print("ESX")
-			Hud.lastped = PlayerPedId()
-			TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
-			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
-			Wait(5000)
-			SendNUIMessage({content = true, type = 'pedface'})
-			SendNUIMessage({content = true, type = 'playerloaded'})
-		end)
-	elseif config.framework == 'QBCORE' then
-		RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
-		AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
-			Hud.playerloaded = true
-			Wait(2000)
-			print("QB")
-			Hud.lastped = PlayerPedId()
-			TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
-			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
-			Wait(5000)
-			SendNUIMessage({content = true, type = 'pedface'})
-			SendNUIMessage({content = true, type = 'playerloaded'})
-		end)
-	else
-		RegisterNetEvent('playerSpawned')
-		AddEventHandler('playerSpawned', function(spawn)
+	-- loaded events
+	RegisterNetEvent('esx:playerLoaded')
+	AddEventHandler('esx:playerLoaded', function(xPlayer)
+		Hud.playerloaded = true
+		Wait(2000)
+		print("ESX")
+		Hud.lastped = PlayerPedId()
+		TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
+		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
+		Wait(5000)
+		SendNUIMessage({content = true, type = 'pedface'})
+		SendNUIMessage({content = true, type = 'playerloaded'})
+	end)
+
+	RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
+	AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
+		Hud.playerloaded = true
+		Wait(2000)
+		print("QB")
+		Hud.lastped = PlayerPedId()
+		TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
+		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
+		Wait(5000)
+		SendNUIMessage({content = true, type = 'pedface'})
+		SendNUIMessage({content = true, type = 'playerloaded'})
+	end)
+
+	RegisterNetEvent('playerSpawned')
+	AddEventHandler('playerSpawned', function(spawn)
+		if config.framework ~= 'ESX' and config.framework ~= 'QBCORE' then
 			Hud.playerloaded = true
 			print("PLAYERLOADED")
 			Wait(2000)
@@ -207,8 +207,8 @@ CreateThread(function()
 			Wait(5000)
 			SendNUIMessage({content = true, type = 'pedface'})
 			SendNUIMessage({content = true, type = 'playerloaded'})
-		end)
-	end
+		end
+	end)
 	Wait(1000)
 	if Hud.charslot == nil and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0.0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= nil then
 		Hud.charslot = Hud:round(DecorGetFloat(PlayerPedId(),"CHARSLOT"))
