@@ -8,7 +8,7 @@
 // -- This copyright should appear in every part of the project code
 var carui = 'minimal'
 var statusui = 'normal'
-var status_type = 'icons'
+var status_type = 'progressbar'
 var class_icon = 'octagon'
 var statleft = false
 var isambulance = false
@@ -73,7 +73,7 @@ function setArmor(s) {
         if (status_type == 'icons') {
             document.getElementById("armorval").style.clip = 'rect('+toclip(s)+', 100px, 100px, 0)'
         } else {
-            setNoobCircle('armorval', s)
+            SetProgressCircle('armorval', s * 0.99)
         }
     } else {
         document.getElementById("armor").style.width = ''+s+'%'
@@ -85,7 +85,7 @@ function setHp(s) {
         if (status_type == 'icons') {
             document.getElementById("healthval").style.clip = 'rect('+toclip(s)+', 100px, 100px, 0)'
         } else {
-            setNoobCircle('healthval', s)
+            SetProgressCircle('healthval', s * 0.99)
         }
     } else {
         document.getElementById("health").style.width = ''+s+'%'
@@ -110,7 +110,7 @@ function setMic(type) {
             $("#voipval").attr('style', "rgb(255, 35, 6)")
             //$("#microphone").css("color", 'rgb(23, 255, 15)');
         }
-        setNoobCircle('voipval', val)
+        SetProgressCircle('voipval', val)
     } else {
         did = 'voip_1'
     }
@@ -235,9 +235,9 @@ function setStatus(t) {
         }
         if (type == 'icons') {
             document.getElementById(table[i].status).style.clip = 'rect('+toclip(table[i].value)+', 100px, 100px, 0)'
-        } else if (table[i].type == 1 && statuscache[table[i].status] !== table[i].value*1.01 || table[i].type == 1 && statuscache[table[i].status] == undefined) {
+        } else if (table[i].type == 1 && statuscache[table[i].status] !== table[i].value*1.01 && table[i].status !== 'health' && table[i].status !== 'armor' || table[i].type == 1 && statuscache[table[i].status] == undefined && table[i].status !== 'health' && table[i].status !== 'armor') {
             statuscache[table[i].status] = table[i].value
-            setNoobCircle(table[i].status+'val', table[i].value*0.9999)
+            SetProgressCircle(table[i].status+'val', table[i].value*0.9999)
             //console.log(table[i].status,table[i].value)
         }
         if (table[i].value >= 80 && table[i].status == 'stress') {
@@ -1755,14 +1755,18 @@ function SetNotify(table) {
         [array[i], array[j]] = [array[j], array[i]];
     }
 
-    function setNoobCircle(id,percent) {
+    function SetProgressCircle(id,percent) {
         var rpm = (percent);
         var e = document.getElementById(id);
         if (e) {
             let length = e.getTotalLength();
             let to = length * ((100 - percent) / 100);
             //e.style.strokeDashoffset = to;
-            $('#'+id+'').velocity({ 'stroke-dashoffset': to }, {duration: 850, delay: 60})
+            if (id == 'staminaval') {
+                $('#'+id+'').velocity({ 'stroke-dashoffset': to }, {duration: 350, delay: 30})
+            } else {
+                $('#'+id+'').velocity({ 'stroke-dashoffset': to }, {duration: 550, delay: 30})
+            }
         }
     }
     
@@ -1774,7 +1778,12 @@ function SetNotify(table) {
         var statuses = s
         for (const i in statuses) {
             if (statuses[i].enable) {
-                var offset = statuses[0].offset
+                var offset = 275
+                if (statuses[0] !== undefined) {
+                    offset = statuses[0].offset
+                } else{
+                    offset = statuses['health'].offset
+                }
                 offsetplus = offsetplus + 35
                 offset = (+offset - +offsetplus)
                 var fa = statuses[i].fa

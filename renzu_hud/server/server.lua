@@ -80,7 +80,12 @@ Citizen.CreateThread(function()
 			end
 		end
 	end
-	print("^g RENZU HUD STARTED!")
+	print('^2-------------')
+	print("RENZU HUD STARTED!")
+	print('FRAMEWORK: '..config.framework)
+	print("PLAYER VEHICLES TABLE: "..config.vehicle_table)
+	print("IDENTIFIER TO USE: "..config.identifier)
+	print('^7')
 	if config.enable_commands_as_item then
 		RenzuCommand('useitem', function(source,args)
 			if args[1] ~= nil and config.ESX_Items[args[1]] ~= nil then
@@ -252,18 +257,17 @@ AddEventHandler('renzu_hud:checkbody', function(target)
 		Citizen.Wait(500)
 		while xPlayer == nil do Wait(100) xPlayer = GetPlayerFromId(source) end
 		xPlayer = GetPlayerFromId(source)
-		print("Player Created...")
-		local results = SQLQuery(config.Mysql,'fetchAll',"SELECT status FROM body_status WHERE identifier=@identifier", {['@identifier'] = xPlayer.identifier})
-		if #results <= 0 then
-			SQLQuery(config.Mysql,'execute',"INSERT INTO body_status (status,identifier) VALUES (@status,@identifier)", {
-				['@status'] = '[]',
-				['@identifier'] = xPlayer.identifier
-			})
-		end
+		print("Player Created...", xPlayer.identifier)
 	end
 	local res = SQLQuery(config.Mysql,'fetchAll',"SELECT status FROM body_status WHERE identifier=@identifier", {['@identifier'] = xPlayer.identifier})
 	if res[1] ~= nil and res[1].status and json.decode(res[1].status) ~= nil then
 		done = json.decode(res[1].status)
+	elseif res[1] == nil then
+		SQLQuery(config.Mysql,'execute',"INSERT INTO body_status (status,identifier) VALUES (@status,@identifier)", {
+			['@status'] = json.encode({left_hand=0.0,left_leg=0.0,right_hand=0.0,right_leg=0.0,ped_body=0.0,ped_head=0.0}),
+			['@identifier'] = xPlayer.identifier
+		})
+		done = {left_hand=0.0,left_leg=0.0,right_hand=0.0,right_leg=0.0,ped_body=0.0,ped_head=0.0}
 	end
 	if target == nil then
 		target = false
@@ -374,10 +378,8 @@ function PlayerIdentifier(source)
 	local source = source
 	local license = nil
 	for k, v in ipairs(GetPlayerIdentifiers(source)) do
-		print(v)
 		if string.match(v, config.identifier) then
 			license = v
-			print('gago',v)
 			break
 		end
 	end
@@ -468,6 +470,8 @@ Citizen.CreateThread(function()
 					})
 					print("Inserting "..enginename.."")
 				end
+			else
+				break -- assume its already all registered
 			end
 		end
 		if config.framework == 'ESX' then

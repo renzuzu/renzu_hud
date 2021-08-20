@@ -90,7 +90,7 @@ AddEventHandler("renzu_hud:SetVoiceData", function(mode,val)
 		cdch = GetGameTimer() + 1000
 		if current_channel == val then val = 0 end
 		local channel = config.radiochannels[val].text
-		if channel.job ~= nil and channel.job ~= 'all' and xPlayer ~= nil and xPlayer.job ~= nil and channel.job ~= xPlayer.job.name then
+		if channel ~= nil and channel.job ~= nil and channel.job ~= 'all' and xPlayer ~= nil and xPlayer.job ~= nil and channel.job ~= xPlayer.job.name then
 			channel = false
 			val = 0
 		end
@@ -241,10 +241,18 @@ CreateThread(function()
 		Wait(5000)
 		SendNUIMessage({content = true, type = 'pedface'})	
 		SendNUIMessage({content = true, type = 'playerloaded'})
+	elseif DecorExistOn(PlayerPedId(), "PLAYERLOADED") then
+		print("already loaded")
+		TriggerServerEvent("renzu_hud:getdata",0, true)
+		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
+		Hud.playerloaded = true
+		SendNUIMessage({content = true, type = 'pedface'})
+		SendNUIMessage({content = true, type = 'playerloaded'})
 	end
 	while not Hud.playerloaded do
 		Wait(1000)
 	end
+
 	while Hud.playerloaded do -- dev purpose when restarting script, either you uncomment this or Hud.left it , it doesnt matter.
 		Wait(20000)
 		if not DecorExistOn(PlayerPedId(), "PLAYERLOADED") then
@@ -264,12 +272,10 @@ end)
 RegisterNUICallback('requestface', function(data, cb)
 	while not Hud.playerloaded do
 		Wait(1000)
-		--print("Playerloadedface")
 	end
 	Wait(5000)
 	TriggerEvent('skinchanger:getSkin', function(current) Hud.dummyskin = current end)
 	while Hud:tablelength(Hud.dummyskin) <= 2 do
-		--print(tablelength(Hud.dummyskin))
 		TriggerEvent('skinchanger:getSkin', function(current) Hud.dummyskin = current end)
 		Wait(1000)
 	end
@@ -288,11 +294,39 @@ CreateThread(function()
 		end
 	end
 	if config.enablestatus then
+		while not Hud.reorder do Wait(100) end
+		for k,v in ipairs(config.statusordering) do -- register all status
+			if config.registerautostatus and v.custom and not DecorGetBool(PlayerPedId(), "PLAYERLOADED") then
+				local remove_value = v.statusremove
+				print("Auto Status Register: ",v.status,v.startvalue,v.statusremove)
+				TriggerEvent('esx_status:registerStatus', v.status, tonumber(v.startvalue), '#CFAD0F', function(status)
+					return true
+					end, function(status)
+					status.remove(remove_value)
+				end)
+			end
+		end
 		if not config.QbcoreStatusDefault and config.framework == 'QBCORE' or config.framework == 'STANDALONE' or config.framework == 'ESX' then
-			RegisterNetEvent("esx_status:onTick")
+			--RegisterNetEvent("esx_status:onTick")
 			AddEventHandler("esx_status:onTick", function(vitals) -- use renzu_status
+				local vitals = vitals
+				if vitals[1] ~= nil then -- esx status (if index int is not nil, its a normal esx_status) else its renzu_status
+					if Hud.esx_status == nil then
+						for k,v in ipairs(config.statusordering) do -- replace int to string name
+							config.statusordering[v.status] = v
+							config.statusordering[k] = nil
+						end
+						Hud.esx_status = true
+					end
+					for k,v in ipairs(vitals) do
+						if config.statusordering[v.name] ~= nil then
+							vitals[v.name] = v.val -- populate the data from esx_status and convert to renzu_status format
+						end
+					end
+				else
+					Hud.esx_status = false
+				end
 				Hud:UpdateStatus(false,vitals)
-				--print("STATUS ONTICK")
 			end)
 		end
 		if config.framework == 'QBCORE' then
@@ -398,12 +432,13 @@ CreateThread(function()
 				end
 				Hud.garbage = Hud.garbage + 1
 				--print("TEST")
-				Hud:updateplayer()
+				--Hud:updateplayer()
 				Wait(2500)
 			end
 		end)
 	end
 	if config.enablestatus or not config.enablestatus and config.statusui == 'normal' then
+		while not Hud.playerloaded do Wait(100) end
 		Hud:updateplayer(true)
 	end
 end)
@@ -446,6 +481,7 @@ CreateThread(function()
 	print(config.statusplace,config.statusordering)
 	SendNUIMessage({type = "SetStatusOrder",content = {['table'] = config.statusordering, ['float'] = config.statusplace}})
 	Wait(1000)
+	Hud.reorder = true
 	while not Hud.playerloaded do Citizen.Wait(100) end
 	Wait(100)
 	local tbl = {['table'] = config.statusordering, ['float'] = config.statusplace}
@@ -568,14 +604,14 @@ local inshock = false
 local shockcount = 50 -- 5 seconds shock
 AddEventHandler('gameEventTriggered', function (name, args)
 	if name == 'CEventNetworkEntityDamage' then
-		local victim = args[1];
+		local victim = args[1]
 		if victim == Hud.ped and config.enablestatus or victim == Hud.ped and not config.enablestatus and config.statusui == 'normal' then
 			Hud:updateplayer(true)
 			Wait(300)
 			Hud:BodyMain()
 			if not inshock then
 				inshock = true
-				shockcount = 50
+				shockcount = 4
 				while inshock and shockcount > 1 do
 					Hud:updateplayer(true)
 					shockcount = shockcount - 1
@@ -1046,6 +1082,7 @@ end)
 RegisterNetEvent('renzu_hud:bodystatus')
 AddEventHandler('renzu_hud:bodystatus', function(status,other)
 	checkingpatient = other
+	local status = status
 	while not Hud.playerloaded do Wait(100) end
 	SendNUIMessage({type = "setBodyParts",content = config.healtype})
 	local status = status
@@ -1093,6 +1130,7 @@ AddEventHandler('renzu_hud:bodystatus', function(status,other)
 		SetNuiFocus(false,false)
 		return
 	end)
+	Hud:BodyLoop()
 end)
 
 CreateThread(function()
@@ -1712,7 +1750,6 @@ end)
 
 RegisterNetEvent("renzu_hud:nitro_flame")
 AddEventHandler("renzu_hud:nitro_flame", function(c_veh,coords)
-	print(coords - GetEntityCoords(Hud.ped))
 	if #(coords - GetEntityCoords(Hud.ped)) < 50 then
 		if not HasNamedPtfxAssetLoaded(config.nitroasset) then
 			RequestNamedPtfxAsset(config.nitroasset)
@@ -2108,7 +2145,6 @@ RegisterNUICallback('ChangeClothes', function(data)
 			end)
 			PlaySoundFrontend(-1, 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 0)
 			Hud.clothestate[tostring(data.variant)] = false
-			print(Hud.clothestate[tostring(data.variant)])
 			if data.variant == 'mask_1' or data.variant == 'helmet_1' then
 				SendNUIMessage({content = true, type = 'pedface'})
 			end
@@ -2138,7 +2174,6 @@ RegisterNUICallback('ChangeClothes', function(data)
 					TriggerEvent('skinchanger:loadClothes', current, Changes)
 				end)
 				Hud.clothestate[tostring(data.variant)] = true
-				print(Hud.clothestate[tostring(data.variant)])
 				PlaySoundFrontend(-1, 'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 0)
 				local table = {
 					['bool'] = Hud.clothestate[data.variant],

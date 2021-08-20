@@ -108,11 +108,13 @@ function Hud:ClearPedHeadshots()
 end
 
 function Hud:UpdateStatus(export,vitals)
+	if not export and vitals == nil then return end
 	self.vitals = vitals
 	if self.notloaded then return end
-	if export and not config.QbcoreStatusDefault and config.framework == 'QBCORE' or export and config.framework ~= 'QBCORE' then
-		self.vitals = exports['renzu_status']:GetStatus(self.statuses)
-		--print("STATUS 1")
+	if export and not config.QbcoreStatusDefault and config.framework == 'QBCORE' and self.esx_status ~= nil or export and config.framework ~= 'QBCORE' and self.esx_status ~= nil then
+		if not self.esx_status then
+			self.vitals = exports['renzu_status']:GetStatus(self.statuses)
+		end
 	elseif export and config.framework == 'QBCORE' and config.QbcoreStatusDefault then
 		QBCore.Functions.GetPlayerData(function(PlayerData)
 			if PlayerData ~= nil and PlayerData.metadata ~= nil then
@@ -123,57 +125,58 @@ function Hud:UpdateStatus(export,vitals)
 					['stress'] = stress -- this should be registered at config
 				}
 				self.vitals = vitals
-				--print("GAGO",vitals,vitals.hunger,vitals.thirst,vitals.stress)
 			end
 		end)
 	end
 	self.statusloop = 0
 	sleep = 11
+	
+	if export and not self.esx_status or not export and self.vitals ~= nil then
+		for k1,v1 in pairs(config.statusordering) do
+			if v1.status == 'stamina' then
+				v1.value = (100 - GetPlayerSprintStaminaRemaining(self.pid))
+			end
+			if v1.status == 'oxygen' then
+				v1.value = (self.underwatertime / 30) * 100
+				if self.underwatertime == 0 then
+					SetPedDiesInWater(self.ped,true)
+					SetPlayerUnderwaterTimeRemaining(self.pid,0)
+					SetPedMaxTimeUnderwater(self.ped,0)
+				end
+				--print(v1.value)
+			end
+			if v1.custom and self.statusloop <= 1  then
+				if self.vitals and self.vitals[v1.status] ~= nil and self.vitals[v1.status] then
+					v1.value = self.vitals[v1.status] / 10000
+				end
+			end
 
-	for k1,v1 in pairs(config.statusordering) do
-		if v1.status == 'stamina' then
-			v1.value = (100 - GetPlayerSprintStaminaRemaining(self.pid))
-		end
-		if v1.status == 'oxygen' then
-			v1.value = (self.underwatertime / 30) * 100
-			if self.underwatertime == 0 then
-				SetPedDiesInWater(self.ped,true)
-				SetPlayerUnderwaterTimeRemaining(self.pid,0)
-				SetPedMaxTimeUnderwater(self.ped,0)
-			end
-			--print(v1.value)
-		end
-		if v1.custom and self.statusloop <= 1  then
-			if self.vitals[v1.status] ~= nil and self.vitals[v1.status] then
-				v1.value = self.vitals[v1.status] / 10000
-			end
-		end
-
-		if config.statusnotify and self.statusloop <= 1 then
-			if not v1.notify_lessthan and v1.rpuidiv ~= 'null' then
-				if self.notifycd[v1.status] ~= nil and v1.value < v1.notify_value and self.notifycd[v1.status] < 1 then
-					self.notifycd[v1.status] = 120
-					self:Notify('error',v1.status,v1.notify_message)
+			if config.statusnotify and self.statusloop <= 1 then
+				if not v1.notify_lessthan and v1.rpuidiv ~= 'null' then
+					if self.notifycd[v1.status] ~= nil and v1.value < v1.notify_value and self.notifycd[v1.status] < 1 then
+						self.notifycd[v1.status] = 120
+						self:Notify('error',v1.status,v1.notify_message)
+					end
+				elseif v1.rpuidiv ~= 'null' then
+					if self.notifycd[v1.status] ~= nil and v1.value > v1.notify_value and self.notifycd[v1.status] < 1 then
+						self.notifycd[v1.status] = 120
+						self:Notify('error',v1.status,v1.notify_message)
+					end
 				end
-			elseif v1.rpuidiv ~= 'null' then
-				if self.notifycd[v1.status] ~= nil and v1.value > v1.notify_value and self.notifycd[v1.status] < 1 then
-					self.notifycd[v1.status] = 120
-					self:Notify('error',v1.status,v1.notify_message)
+				for k,v in pairs(self.notifycd) do
+					if v > 1 then
+						v = v - 1
+					end
 				end
 			end
-			for k,v in pairs(self.notifycd) do
-				if v > 1 then
-					v = v - 1
-				end
-			end
+			Wait(sleep)
 		end
-		Wait(sleep)
+		self.statusloop = self.statusloop + 1
+		SendNUIMessage({
+			type = "setStatus",
+			content = {['type']= config.status_type, ['data'] = config.statusordering}
+		})
 	end
-	self.statusloop = self.statusloop + 1
-	SendNUIMessage({
-		type = "setStatus",
-		content = {['type']= config.status_type, ['data'] = config.statusordering}
-	})
 end
 
 function Hud:EnterVehicleEvent(state,vehicle)
@@ -1388,25 +1391,28 @@ function Hud:Myinfo()
 	end
 end
 
+local firstload = 0
 function Hud:updateplayer(instant)
-	health = (GetEntityHealth(self.ped)-100)
-	armor = GetPedArmour(self.ped)
+	if self.ped == nil then return end
+	health = (GetEntityHealth(self.ped)/2) * 0.99
+	armor = GetPedArmour(self.ped) * 0.99
 	self.pid = PlayerId()
-	config.statusordering[1].value = armor
-	config.statusordering[0].value = health
-	if self.newarmor ~= armor or self.newarmor == nil then
+	if self.newarmor ~= armor or self.newarmor == nil and armor > 1 then
 		SendNUIMessage({
 			hud = "setArmor",
 			content = armor
 		})
+		if config.statusordering['armor'] then
+			config.statusordering['armor'].value = armor
+		end
 		self.newarmor = armor
 	end
-	if self.newhealth ~= health or self.newhealth == nil then
-		SendNUIMessage({
-			hud = "setHp",
-			content = health
-		})
-		self.newhealth = health
+	SendNUIMessage({
+		hud = "setHp",
+		content = health
+	})
+	if config.statusordering['health'] then
+		config.statusordering['health'].value = health
 	end
 end
 
@@ -2348,7 +2354,6 @@ function Hud:setStatusEffect()
 			if not sprinting then
 				sprinting = true
 				Citizen.Wait(111)
-				--print("running")
 				Citizen.CreateThread(function()
 					while IsPedSprinting(self.ped) and (100 - GetPlayerSprintStaminaRemaining(self.pid)) > 1 or IsPedRunning(self.ped) and (100 - GetPlayerSprintStaminaRemaining(self.pid)) > 1 do
 						self:UpdateStatus(true)
@@ -2604,7 +2609,7 @@ function Hud:bodydamage()
 			end
 			--print(health)
 			if health ~= nil and health > 40 then
-				SetEntityHealth(PlayerPedId(),(health + 100) - config.chesteffect_healthdegrade)
+				SetEntityHealth(PlayerPedId(),(GetEntityHealth(self.ped)) - config.chesteffect_healthdegrade)
 			end
 		end
 		SetPlayerHealthRechargeMultiplier(self.pid, 1.0)
@@ -2702,32 +2707,35 @@ function Hud:CheckBody()
 end
 
 function Hud:BodyMain()
+	if health == nil then
+		health = GetEntityHealth(PlayerPedId()) / 2
+	end
 	self.life = health
 	if health ~= nil and self.life < self.oldlife then
 		local index,bodytype = nil, nil
 		if not config.weaponsonly or not HasEntityBeenDamagedByWeapon(self.ped, 0 , 1) and HasEntityBeenDamagedByWeapon(self.ped, 0 , 2) and config.weaponsonly then
 			index,bodytype = self:CheckBody()
 			--if isWeapon(GetPedCauseOfDeath(PlayerPedId())) then
-		if index and bodytype then
-			if index ~= nil and self.parts[tostring(bodytype)] ~= nil and self.parts[tostring(bodytype)][tostring(index)] ~= nil and self.bonecategory ~= nil and self.bonecategory[tostring(bodytype)] ~= nil then
-				self.parts[bodytype][index] = self.parts[bodytype][index] + config.damageadd
-				self.bonecategory[bodytype] = self.bonecategory[bodytype] + config.damageadd
-				--print("saving")
-				SendNUIMessage({
-					type = "setUpdateBodyStatus",
-					content = self.bonecategory
-				})
-				if self.bonecategory['ped_head'] > 0 and config.bodyinjury_status_affected then
-					TriggerEvent('esx_status:'..config.headbone_status_mode..'', config.headbone_status, self.bonecategory['ped_head'] * config.headbone_status_value)
+			if index and bodytype then
+				if index ~= nil and self.parts[tostring(bodytype)] ~= nil and self.parts[tostring(bodytype)][tostring(index)] ~= nil and self.bonecategory ~= nil and self.bonecategory[tostring(bodytype)] ~= nil then
+					self.parts[bodytype][index] = self.parts[bodytype][index] + config.damageadd
+					self.bonecategory[bodytype] = self.bonecategory[bodytype] + config.damageadd
+					--print("saving")
+					SendNUIMessage({
+						type = "setUpdateBodyStatus",
+						content = self.bonecategory
+					})
+					if self.bonecategory['ped_head'] > 0 and config.bodyinjury_status_affected then
+						TriggerEvent('esx_status:'..config.headbone_status_mode..'', config.headbone_status, self.bonecategory['ped_head'] * config.headbone_status_value)
+					end
+					ApplyPedBlood(self.ped, GetPedBoneIndex(self.ped,index), 0.0, 0.0, 0.0, "wound_sheet")
+					Citizen.InvokeNative(0x8EF6B7AC68E2F01B, PlayerPedId())
+					TriggerServerEvent('renzu_hud:savebody', self.bonecategory)
 				end
-				ApplyPedBlood(self.ped, GetPedBoneIndex(self.ped,index), 0.0, 0.0, 0.0, "wound_sheet")
-				Citizen.InvokeNative(0x8EF6B7AC68E2F01B, PlayerPedId())
-				TriggerServerEvent('renzu_hud:savebody', self.bonecategory)
 			end
 		end
-		end
 	end
-	self.oldlife = GetEntityHealth(self.ped)
+	self.oldlife = GetEntityHealth(self.ped) / 2
 end
 
 function Hud:Makeloading(msg,ms)
