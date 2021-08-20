@@ -295,19 +295,10 @@ CreateThread(function()
 	end
 	if config.enablestatus then
 		while not Hud.reorder do Wait(100) end
-		for k,v in ipairs(config.statusordering) do -- register all status
-			if config.registerautostatus and v.custom and not DecorGetBool(PlayerPedId(), "PLAYERLOADED") then
-				local remove_value = v.statusremove
-				print("Auto Status Register: ",v.status,v.startvalue,v.statusremove)
-				TriggerEvent('esx_status:registerStatus', v.status, tonumber(v.startvalue), '#CFAD0F', function(status)
-					return true
-					end, function(status)
-					status.remove(remove_value)
-				end)
-			end
-		end
 		if not config.QbcoreStatusDefault and config.framework == 'QBCORE' or config.framework == 'STANDALONE' or config.framework == 'ESX' then
 			--RegisterNetEvent("esx_status:onTick")
+			local register = {}
+			local registered = false
 			AddEventHandler("esx_status:onTick", function(vitals) -- use renzu_status
 				local vitals = vitals
 				if vitals[1] ~= nil then -- esx status (if index int is not nil, its a normal esx_status) else its renzu_status
@@ -321,12 +312,36 @@ CreateThread(function()
 					for k,v in ipairs(vitals) do
 						if config.statusordering[v.name] ~= nil then
 							vitals[v.name] = v.val -- populate the data from esx_status and convert to renzu_status format
+							vitals[k] = nil
+						else
+							vitals[k] = nil
 						end
 					end
 				else
 					Hud.esx_status = false
 				end
 				Hud:UpdateStatus(false,vitals)
+
+				for k,v in pairs(vitals) do
+					register[k] = true
+				end
+
+				if config.registerautostatus and not registered then
+					DecorRegister("STATUSR", 1)
+					for k,v in pairs(config.statusordering) do -- register all status
+						if v.custom and register[v.status] == nil and not DecorGetBool(PlayerPedId(), "STATUSR") then
+							local remove_value = v.statusremove
+							print("Auto Status Register: ",v.status,v.startvalue,v.statusremove)
+							TriggerEvent('esx_status:registerStatus', v.status, tonumber(v.startvalue), '#CFAD0F', function(status)
+								return true
+								end, function(status)
+								status.remove(remove_value)
+							end)
+						end
+					end
+					DecorSetBool(PlayerPedId(), "STATUSR", true)
+					registered = true
+				end
 			end)
 		end
 		if config.framework == 'QBCORE' then
