@@ -225,7 +225,7 @@ CreateThread(function()
 	Wait(500)
 	if DecorExistOn(PlayerPedId(), "PLAYERLOADED") and config.loadedasmp and Hud:isplayer() then
 		print("ISMP")
-		TriggerServerEvent("renzu_hud:getdata",0, true)
+		TriggerServerEvent("renzu_hud:getdata",0, config.multichar)
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 		Hud.playerloaded = true
 		SendNUIMessage({content = true, type = 'pedface'})
@@ -243,7 +243,7 @@ CreateThread(function()
 		SendNUIMessage({content = true, type = 'playerloaded'})
 	elseif DecorExistOn(PlayerPedId(), "PLAYERLOADED") then
 		print("already loaded")
-		TriggerServerEvent("renzu_hud:getdata",0, true)
+		TriggerServerEvent("renzu_hud:getdata",0, config.multichar)
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 		Hud.playerloaded = true
 		SendNUIMessage({content = true, type = 'pedface'})
