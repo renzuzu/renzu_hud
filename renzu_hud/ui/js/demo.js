@@ -9,12 +9,22 @@
 var carui = 'minimal'
 var statusui = 'normal'
 var status_type = 'progressbar'
-var class_icon = 'octagon'
+var class_icon = 'circle'
 var statleft = false
 var isambulance = false
 var loopfuck = false
 var rpmanimation = false
 var speedanimation = false
+let setting = {}
+let usersetting = {}
+var featstate = {}
+var invehicle = false
+var statusbars = {}
+var locache = {}
+var statcache = {}
+featstate['turbohud'] = false
+featstate['weaponhud'] = false
+featstate['manualhud'] = false
 function pedface() {
     ////////console.log("REQUESTING")
     $.post(`https://${GetParentResourceName()}/requestface`, {}, function(data) {
@@ -68,27 +78,28 @@ var pressedkey = 0
 const time = new Date().toLocaleTimeString();
 
 function setArmor(s) {
-    ////////console.log("time",time)
-    if (statusui == 'simple') {
-        if (status_type == 'icons') {
+    if (statusui == 'simple' && !statusbars['health']) {
+        if (status_type == 'icons' && document.getElementById("armorval")) {
             document.getElementById("armorval").style.clip = 'rect('+toclip(s)+', 100px, 100px, 0)'
-        } else {
+        } else if (status_type !== 'icons') {
             SetProgressCircle('armorval', s * 0.99)
         }
     } else {
-        document.getElementById("armor").style.width = ''+s+'%'
+        document.getElementById("armorbar").style.width = ''+s * 0.99+'%'
     }
 }
 
 function setHp(s) {
-    if (statusui == 'simple') {
-        if (status_type == 'icons') {
+    if (statusui == 'simple' && !statusbars['health']) {
+        if (status_type == 'icons' && document.getElementById("healthval")) {
             document.getElementById("healthval").style.clip = 'rect('+toclip(s)+', 100px, 100px, 0)'
-        } else {
+        } else if (status_type !== 'icons') {
             SetProgressCircle('healthval', s * 0.99)
         }
     } else {
-        document.getElementById("health").style.width = ''+s+'%'
+        document.getElementById("healthbar").style.width = ''+s * 0.99+'%'
+        var perc = s * 0.99+'%'
+        //$('#healthbar').velocity({ width: "50px" })
     }
 }
 
@@ -226,16 +237,20 @@ var statuscache = {}
 function setStatus(t) {
     var table = t['data']
     var type = t['type']
-    status_type = type
+    if (setting['statusver']) {
+        status_type = setting['statusver']
+    } else {
+        status_type = type
+    }
     for (const i in table) {
         move_count[i] = i
         if (table[i].rpuidiv == undefined) { table[i].rpuidiv = table[i].status+'bar' }
-        if (document.getElementById(table[i].rpuidiv)) {
+        if (document.getElementById(table[i].rpuidiv) && table[i].rpuidiv !== 'armorbar' && table[i].rpuidiv !== 'healthbar') {
             document.getElementById(table[i].rpuidiv).style.width = ''+table[i].value+'%'
         }
-        if (type == 'icons') {
-            document.getElementById(table[i].status).style.clip = 'rect('+toclip(table[i].value)+', 100px, 100px, 0)'
-        } else if (table[i].type == 1 && statuscache[table[i].status] !== table[i].value*1.01 && table[i].status !== 'health' && table[i].status !== 'armor' || table[i].type == 1 && statuscache[table[i].status] == undefined && table[i].status !== 'health' && table[i].status !== 'armor') {
+        if (status_type == 'icons' && document.getElementById(table[i].status+'val') && table[i].rpuidiv !== 'armorbar' && table[i].rpuidiv !== 'healthbar') {
+            document.getElementById(table[i].status+'val').style.clip = 'rect('+toclip(table[i].value)+', 100px, 100px, 0)'
+        } else if (status_type !== 'icons' && table[i].type == 1 && statuscache[table[i].status] !== table[i].value*1.01 && table[i].status !== 'health' && table[i].status !== 'armor' || status_type !== 'icons' && table[i].type == 1 && statuscache[table[i].status] == undefined && table[i].status !== 'health' && table[i].status !== 'armor') {
             statuscache[table[i].status] = table[i].value
             SetProgressCircle(table[i].status+'val', table[i].value*0.9999)
             //console.log(table[i].status,table[i].value)
@@ -243,7 +258,7 @@ function setStatus(t) {
         if (table[i].value >= 80 && table[i].status == 'stress') {
             document.getElementById(table[i].status+'blink').style.setProperty("-webkit-filter", "drop-shadow(5px 5px 5px rgba(255, 5, 5, 1.0)");
             document.getElementById(table[i].status+'blink').style.color = "rgb(255, 5, 5)";
-        } else if (table[i].value <= 40 && table[i].status !== 'stress' && table[i].status !== 'voip' && table[i].type == 1) {
+        } else if (table[i].value <= 40 && table[i].status !== 'stress' && table[i].status !== 'voip' && table[i].status !== 'armor' && table[i].type == 1) {
             if (document.getElementById(table[i].status+'blink')) {
                 document.getElementById(table[i].status+'blink').style.color = "rgb(255, 5, 5)";
                 document.getElementById(table[i].status+'blink').style.setProperty("-webkit-filter", "drop-shadow(5px -1px 5px rgba(255, 5, 5, 1.0)");
@@ -252,9 +267,9 @@ function setStatus(t) {
             document.getElementById(table[i].status+'blink').style.color = "rgba(151, 147, 147, 0.623)";
             document.getElementById(table[i].status+'blink').style.setProperty("-webkit-filter", "drop-shadow(15px -1px 22px rgba(255, 5, 5, 0.0)");
         }
-        if (table[i].hideifmax) {
+        if (setting['status'] && setting['status'][table[i].status].hideifmax && setting['status'][table[i].status].type == 1) {
             if(table[i].min_val_hide == undefined) { table[i].min_val_hide = 100 }
-            if (table[i].value >= table[i].min_val_hide && table[i].status !== 'armor' && table[i].status !== 'stress' && table[i].type == 1 || table[i].value <= table[i].min_val_hide && table[i].status !== 'armor' && table[i].status == 'stress' && table[i].type == 1) {
+            if (table[i].value >= setting['status'][table[i].status].min_val_hide && table[i].status !== 'armor' && table[i].status !== 'stress' && table[i].type == 1 || table[i].value <= setting['status'][table[i].status].min_val_hide && table[i].status !== 'armor' && table[i].status == 'stress' && table[i].type == 1) {
                 document.getElementById(table[i].status+'div').style.display = 'none'
             } else if (table[i].type == 1 && document.getElementById(table[i].status+'div')) {
                 document.getElementById(table[i].status+'div').style.display = 'block'
@@ -264,14 +279,42 @@ function setStatus(t) {
                     document.getElementById(table[i].status+'div').style.display = 'block'
                 }
             }
+        } else if (document.getElementById(table[i].status+'div')) {
+            document.getElementById(table[i].status+'div').style.display = 'block'
         }
     }
 }
 
+var status_string = `<div id="status_prog">
+<i id="food" class="fad fa-cheeseburger"></i>
+<i id="water" class="fad fa-glass"></i>
+<i id="stress" class="fad fa-head-side-brain"></i>
+<i id="stamina" class="fad fa-running"></i>
+<i id="oxygen" class="fad fa-lungs"></i>
+<i id="energy" class="fad fa-bed"></i>
+<img style="z-index:999;position:absolute;right:25px;top:420px;opacity:0.9;width:260px;height:370px;" src="img/rpui.png" />
+<img style="z-index:1001;position:absolute;right:60px;top:465px;opacity:1;height:270px;" src="img/ui.png" />
+</div>
+<div id="rpui">
+<i id="idnum" class="fad fa-id-card"></i>
+<div id="idnumlabel">1</div>
+<i id="job" class="far fa-user-hard-hat"></i>
+<div id="joblabel">Meralco: Employee</div>
+<i id="money" class="fad fa-wallet"></i>
+<div id="moneylabel">1,000,000</div>
+<i id="black_money" class="fad fa-box-usd"></i>
+<div id="black_moneylabel">1,000,000</div>
+<i id="bank" class="fad fa-money-check"></i>
+<div id="banklabel">100,000,000</div>
+<img style="z-index:999;position:absolute;right:25px;top:110px;opacity:0.8;width:260px;height:353px;" src="img/rpui.png" />
+<div id="info">My Info:</div>
+<div id="stats">My Status:</div>
+</div>`
 function setShowstatus(t) {
     var bool = t['bool']
     var enable = t['enable']
     if (bool) {
+        $('#status').append(status_string)
         $("#status").fadeIn();
         setTimeout(function(){
             $("#statusbar").fadeIn();
@@ -283,6 +326,7 @@ function setShowstatus(t) {
             }
         }, 333);
     } else {
+        $('#status').html('')
         $("#statusbar").fadeOut();
         setTimeout(function(){
             $("#status").fadeOut();
@@ -305,7 +349,8 @@ var oldp = 0
 
 var r = 0
 var run = false
-
+var v1 = 5
+var v2 = 15
 function setRpm(percent) {
     if (rpmanimation) { return }
     var rpm = (percent * 100);
@@ -326,9 +371,22 @@ function setRpm(percent) {
     } else {
         e.style.stroke = 'white';
     }
+    if (setting['carhud'] && setting['carhud']['refreshrate'] > 170) {
+        $('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 35, delay: 25}).velocity({ 'stroke-dashoffset': to }, {duration: 22, delay: 25}).velocity({ 'stroke-dashoffset': to }, {duration: 25, delay: 25})
+    } else if (setting['carhud'] && setting['carhud']['refreshrate'] > 70) {
+        $('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15}).velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15}).velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15})
+    } else if (setting['carhud'] && setting['carhud']['refreshrate'] <= 20) {
+        //$('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 0, delay: 0})
+        e.style.strokeDashoffset = to;
+    } else if (setting['carhud']['refreshrate'] <= 30) {
+        $('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 0, delay: 0})
+    } else if (setting['carhud']['refreshrate'] <= 70) {
+        $('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: v1, delay: v2})
+    } else {
+        $('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: v1, delay: v2}).velocity({ 'stroke-dashoffset': to }, {duration: v1, delay: v2}).velocity({ 'stroke-dashoffset': to }, {duration: v1, delay: v2})
+    }
     //$('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 15, delay: 20}).velocity({ 'stroke-dashoffset': to }, {duration: 20, delay: 20}).velocity({ 'stroke-dashoffset': to }, {duration: 20, delay: 20})
     //$('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 15, delay: 20}).velocity({ 'stroke-dashoffset': to }, {duration: 15, delay: 21}).velocity({ 'stroke-dashoffset': to }, {duration: 20, delay: 23})
-    $('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15}).velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15}).velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15})
 }
 
 function SetVehData(table) {
@@ -423,20 +481,22 @@ function setCoolant(percent) {
 
 var manual = false
 function setShow(table) {
-  if (table['bool']) {
+    if (table['bool']) {
+        invehicle = true
         $("#"+carui+"").animate({
             opacity: "1"
         },400);
         setHeadlights(0)
         document.getElementById(""+carui+"").style.display = 'block'
-  } else {
-    $("#"+carui+"").animate({
-      opacity: "0"
-    },400);
-    document.getElementById(""+carui+"").style.display = 'none'
-    //clearInterval(loopfuck);
-  }
-  RestoreCarPosition()
+    } else {
+        invehicle = false
+        $("#"+carui+"").animate({
+            opacity: "0"
+        },400);
+        document.getElementById(""+carui+"").style.display = 'none'
+        //clearInterval(loopfuck);
+    }
+    RestoreCarPosition()
 }
 
 function setHeadlights(v) {
@@ -575,6 +635,7 @@ function numberWithCommas(x) {
 }
 
 function setInfo(table) {
+    if (document.getElementById("idnumlabel") == undefined) { return }
     document.getElementById("idnumlabel").innerHTML = 'Citizen ID#: '+table.id+''
     document.getElementById("joblabel").innerHTML = ''+table.job+': '+table.joblabel+''
     document.getElementById("moneylabel").innerHTML = ''+numberWithCommas(table.money)+''
@@ -613,13 +674,19 @@ function setSignal(value) {
     }, 733);
 }
 
-function setManual(bool) {
+function setManual(bool,s) {
     manual = bool
-    if (bool) {
+    if (!s) {
+        featstate['manualhud'] = bool
+    }
+    if (bool && setting['carhud']['manualhud'] && featstate['manualhud']) {
         $("#shift").animate({
             opacity: "1"
         },400);
     } else {
+        if (!s) {
+            featstate['manualhud'] = false
+        }
         $("#shift").animate({
             opacity: "0"
         },400);
@@ -648,30 +715,30 @@ function setDoor(s) {
 }
 
 function setHood(s) {
-    if (s == 2) {
+    if (s == 2 && document.getElementById('hoodopen')) {
         document.getElementById('hoodopen').style.display = 'block'
         document.getElementById('hoodclose').style.display = 'none'
-    } else {
+    } else if (document.getElementById('hoodopen')) {
         document.getElementById('hoodopen').style.display = 'none'
         document.getElementById('hoodclose').style.display = 'block'
     }
 }
 
 function setTrunk(s) {
-    if (s == 2) {
+    if (s == 2 && document.getElementById('trunkopen')) {
         document.getElementById('trunkopen').style.display = 'block'
         document.getElementById('trunkclose').style.display = 'none'
-    } else {
+    } else if (document.getElementById('trunkopen')) {
         document.getElementById('trunkopen').style.display = 'none'
         document.getElementById('trunkclose').style.display = 'block'
     }
 }
 
 function setBrake(s) {
-    if (s) {
+    if (s && document.getElementById('handbrakeopen')) {
         document.getElementById('handbrakeopen').style.display = 'block'
         document.getElementById('handbrakeclose').style.display = 'none'
-    } else {
+    } else if (document.getElementById('handbrakeopen')) {
         document.getElementById('handbrakeopen').style.display = 'none'
         document.getElementById('handbrakeclose').style.display = 'block'
     }
@@ -779,12 +846,36 @@ function setCruiseControl(bool) {
     }
 }
 
+var bodystring = `<div id="bodyinfo">Body Status:</div>
+<img style="z-index:900;position:absolute;right:440px;top:100px;opacity:0.7;height:650px;" src="img/bodybg.png" />
+<div class="pulse" style="z-index: 1111;"></div>
+<img id="bodystatus" style="z-index:1001;position:absolute;right:500px;top:100px;opacity:1;height:550px;" src="img/bodyui.png" />
+<i class="fad fa-first-aid" id="ped_body_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:632px;top:178px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
+<i class="fad fa-first-aid" id="ped_head_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:811px;top:177px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
+<i class="fad fa-first-aid" id="right_hand_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:856px;top:309px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
+<i class="fad fa-first-aid" id="left_hand_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:578px;top:306px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
+<i class="fad fa-first-aid" id="left_leg_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:807px;top:441.8px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
+<i class="fad fa-first-aid" id="right_leg_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:624px;top:441.8px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
+<img id="ped_body" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:632px;top:178px;opacity:0.0;height:100px;" src="img/chest.png" />
+<img id="ped_head" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:811px;top:177px;opacity:0.0;height:100px;" src="img/head.png" />
+<img id="right_hand" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:856px;top:309px;opacity:0.0;height:110px;" src="img/rightarm.png" />
+<img id="left_hand" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:578px;top:306px;opacity:0.0;height:110px;" src="img/leftarm.png" />
+<img id="left_leg" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:807px;top:441.8px;opacity:0.0;height:110px;" src="img/rightleg.png" />
+<img id="right_leg" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:624px;top:441.8px;opacity:0.0;height:110px;" src="img/leftleg.png" />
+<span id="ped_body_status" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:657px;border-radius:5px;top:280px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/chest.png">Normal</span>
+<span id="ped_head_status" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:835px;top:280px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/head.png">Normal</span>
+<span id="right_hand_status" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:890px;top:414px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/rightarm.png">Normal</span>
+<span id="left_hand_status" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:608px;top:412px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/leftarm.png">Normal</span>
+<span id="left_leg_status" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:840px;top:544.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/rightleg.png">Normal</span>
+<span id="right_leg_status" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:654px;top:545.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/leftleg.png">Normal</span>`
 function setShowBodyUi(bool) {
     if (bool) {
         document.getElementById('bodyui').style.display = 'block'
+        $('#bodyui').append(bodystring)
         $("#bodystatus").fadeIn();
     } else {
         document.getElementById('bodyui').style.display = 'none'
+        $('#bodyui').html('')
         $("#bodystatus").fadeOut();
     }
 }
@@ -839,6 +930,7 @@ function setUpdateBodyStatus(table) {
             val = 0.0
         }
         if(key) {
+            if (document.getElementById(''+key+'_status') == undefined) { return }
             document.getElementById(''+key+'_heal').style.zIndex = '0';
             document.getElementById(''+key+'_heal').style.opacity = '0.0';
             if (val < 0.29 && val >= 0.1) {
@@ -931,11 +1023,194 @@ function setBodyParts(table) {
     });
 }
 
+var carcontrolstring = `<div id="carcontrolinfo">Car Control:</div>
+<img style="z-index:900;position:absolute;right:440px;top:200px;opacity:0.4;height:800px;" src="img/carcontrol_bg.png" />
+<img id="carcontrol" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.8;height:400px;" src="img/carcontrol.png" />
+<img id="carcontrol2" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:1.0;height:400px;" src="img/carcontrol2.png" />
+<img id="hood" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/hood.png" />
+<span id="hoodclick" onclick="Carcontrolcallbackui('door','4');" style="z-index:1021;position:absolute;right:745px;top:290px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
+<img id="trunk" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/trunk.png" />
+<span id="" onclick="Carcontrolcallbackui('door','5');" style="z-index:1021;position:absolute;right:745px;top:590px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
+<img id="rearleftdoor" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/rearleftdoor.png" />
+<span id="" onclick="Carcontrolcallbackui('door','2');" style="z-index:1021;position:absolute;right:890px;top:400px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
+<img id="rearwindow" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/rearwindow.png" />
+<span id="" onclick="Carcontrolcallbackui('window','2');" style="z-index:1021;position:absolute;right:645px;top:554px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
+<img id="frontwindow" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/frontwindow.png" />
+<span id="" onclick="Carcontrolcallbackui('window','1');" style="z-index:1021;position:absolute;right:599px;top:479px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
+<img id="rearseat" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/rearseat.png" />
+<span id="" onclick="Carcontrolcallbackui('seat','2');" style="z-index:1021;position:absolute;right:840px;top:557px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
+<img id="frontseat" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/frontseat.png" />
+<span id="" onclick="Carcontrolcallbackui('seat','1');" style="z-index:1021;position:absolute;right:890px;top:485px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
+<img id="rearrightdoor" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/rearrightdoor.png" />
+<span id="" onclick="Carcontrolcallbackui('door','3');" style="z-index:1021;position:absolute;right:600px;top:390px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
+<img id="frontrightdoor" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/frontrightdoor.png" />
+<span id="" onclick="Carcontrolcallbackui('door','1');" style="z-index:1021;position:absolute;right:650px;top:320px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
+<img id="frontleftdoor" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/frontleftdoor.png" />
+<span id="" onclick="Carcontrolcallbackui('door','0');" style="z-index:1021;position:absolute;right:840px;top:325px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
+<img id="engine" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/engine_true.png" />
+<span id="" onclick="Carcontrolcallbackui('engine','0');" style="z-index:1021;position:absolute;right:694px;top:390px;opacity:1.0;height:160px; background:#00000000;border-radius:50%;height:160px;width:160px;"></span>
+<div id="morecontrol" style="z-index:1001;position:absolute;right:515px;bottom:-390px;opacity:1.0;height:400px;width:450px;padding:10px;">
+  <div id="airsusinfo">Air Suspension:</div>
+  <div class="range-slider" id="suspension">
+    <input class="range-slider__range" type="range" value="15" min="0" max="30">
+      <span class="range-slider__value">100</span>
+    </div>
+    <div id="neoninfo">Neon Lights:</div>
+    <div class="switch switch-blue" style="position: absolute;top:90px;left:10px;">
+      <input type="radio" class="switch-input" name="neon" value="on" id="week2" checked>
+        <label for="week2" class="switch-label switch-label-off">ON</label>
+        <input type="radio" class="switch-input" name="neon" value="off" id="month2">
+          <label for="month2" class="switch-label switch-label-on">OFF</label>
+          <span class="switch-selection"></span>
+        </div>
+        <div id="neoninfo1">Neon Effect 1:</div>
+        <div class="switch switch-blue" style="position: absolute;top:90px;left:140px;">
+          <input type="radio" class="switch-input" name="neoneffect1" value="on" id="neoneffect1">
+            <label for="neoneffect1" class="switch-label switch-label-off">ON</label>
+            <input type="radio" class="switch-input" name="neoneffect1" value="off" id="neoneffect1off" checked>
+              <label for="neoneffect1off" class="switch-label switch-label-on">OFF</label>
+              <span class="switch-selection"></span>
+            </div>
+            <div id="neoninfo2">Neon Effect 2:</div>
+            <div class="switch switch-blue" style="position: absolute;top:90px;left:270px;">
+              <input type="radio" class="switch-input" name="neoneffect2" value="on" id="neoneffect2">
+                <label for="neoneffect2" class="switch-label switch-label-off">ON</label>
+                <input type="radio" class="switch-input" name="neoneffect2" value="off" id="neoneffect2off" checked>
+                  <label for="neoneffect2off" class="switch-label switch-label-on">OFF</label>
+                  <span class="switch-selection"></span>
+                </div>
+                <div id="wheeloffsetfrontdiv">Wheel Offset Front:</div>
+                <div style="position:absolute;top:100px;" class="range-slider" id="wheeloffsetfront">
+                  <input class="range-slider__range" type="range" step="0.1" value="0.0" min="0.0" max="2.0">
+                    <span style="display:none;" class="range-slider__value">100</span>
+                  </div>
+                  <div id="wheeloffsetreardiv">Wheel Offset Rear:</div>
+                  <div style="position:absolute;top:134px;" class="range-slider" id="wheeloffsetrear">
+                    <input class="range-slider__range" type="range" step="0.1" value="0.0" min="0.0" max="2.0">
+                      <span style="display:none;" class="range-slider__value">100</span>
+                    </div>
+                    <div id="wheelrotationfrontdiv">Wheel Rotation Front:</div>
+                    <div style="position:absolute;top:168px;" class="range-slider" id="wheelrotationfront">
+                      <input class="range-slider__range" type="range" step="0.1" value="0.0" min="0.0" max="2.0">
+                        <span style="display:none;" class="range-slider__value">100</span>
+                      </div>
+                      <div id="wheelrotationreardiv">Wheel Rotation Rear:</div>
+                      <div style="position:absolute;top:198px;" class="range-slider" id="wheelrotationrear">
+                        <input class="range-slider__range" type="range" step="0.1" value="0.0" min="0.0" max="2.0">
+                          <span style="display:none;" class="range-slider__value">100</span>
+                        </div>
+                        <div id="wheelsettingdiv">Wheel Settings:</div>
+                        <div class="switch switch-blue" style="position: absolute;top:285px;left:150px;">
+                          <input type="radio" class="switch-input" name="wheelsetting" value="on" id="wheelsetting">
+                            <label for="wheelsetting" class="switch-label switch-label-off">ON</label>
+                            <input type="radio" class="switch-input" name="wheelsetting" value="off" id="wheelsettingoff" checked>
+                              <label for="wheelsettingoff" class="switch-label switch-label-on">OFF</label>
+                              <span class="switch-selection"></span>
+                            </div>
+                          </div>`
 function setShowCarcontrol(bool) {
     if (bool) {
         document.getElementById('carcontrolui').style.display = 'block'
+        $('#carcontrolui').append(carcontrolstring)
         $("#carcontrol").fadeIn();
+
+        // more carcontrols
+    const settings = {
+        fill: '#1abc9c',
+        background: '#d7dcdf' };
+        const suspension = document.querySelectorAll('#suspension');
+        Array.prototype.forEach.call(suspension, slider => {
+            slider.querySelector('input').addEventListener('input', event => {
+                slider.querySelector('span').innerHTML = event.target.value * 0.01;
+                applyFill(event.target);
+                post("setvehicleheight",{val:event.target.value * 0.01})
+            });
+            applyFill(slider.querySelector('input'));
+        });
+    
+        const wheeloffsetfront = document.querySelectorAll('#wheeloffsetfront');
+        Array.prototype.forEach.call(wheeloffsetfront, slider => {
+            slider.querySelector('input').addEventListener('input', event => {
+                slider.querySelector('span').innerHTML = event.target.value * 0.01;
+                applyFill(event.target);
+                //console.log(event.target.value)
+                post("setvehiclewheeloffsetfront",{val:event.target.value})
+            });
+            applyFill(slider.querySelector('input'));
+        });
+    
+        const wheeloffsetrear = document.querySelectorAll('#wheeloffsetrear');
+        Array.prototype.forEach.call(wheeloffsetrear, slider => {
+            slider.querySelector('input').addEventListener('input', event => {
+                slider.querySelector('span').innerHTML = event.target.value * 0.01;
+                applyFill(event.target);
+                //console.log(event.target.value)
+                post("setvehiclewheeloffsetrear",{val:event.target.value})
+            });
+            applyFill(slider.querySelector('input'));
+        });
+    
+        const wheelrotationfront = document.querySelectorAll('#wheelrotationfront');
+        Array.prototype.forEach.call(wheelrotationfront, slider => {
+            slider.querySelector('input').addEventListener('input', event => {
+                slider.querySelector('span').innerHTML = event.target.value * 0.01;
+                applyFill(event.target);
+                post("setvehiclewheelrotationfront",{val:event.target.value})
+            });
+            applyFill(slider.querySelector('input'));
+        });
+    
+        const wheelrotationrear = document.querySelectorAll('#wheelrotationrear');
+        Array.prototype.forEach.call(wheelrotationrear, slider => {
+            slider.querySelector('input').addEventListener('input', event => {
+                slider.querySelector('span').innerHTML = event.target.value * 0.01;
+                applyFill(event.target);
+                post("setvehiclewheelrotationrear",{val:event.target.value})
+            });
+            applyFill(slider.querySelector('input'));
+        });
+    
+        $('input[type=radio][name=wheelsetting]').change(function() {
+            if (this.value == 'on') {
+                //console.log("ON")
+                post("wheelsetting",{bool:false})
+            } else {
+                //console.log("OFF")
+                post("wheelsetting",{bool:true})
+            }
+        });
+        
+        $('input[type=radio][name=neon]').change(function() {
+            if (this.value == 'on') {
+                ////////console.log("ON")
+                post("setvehicleneon",{bool:true})
+            } else {
+                ////////console.log("OFF")
+                post("setvehicleneon",{bool:false})
+            }
+        });
+    
+        $('input[type=radio][name=neoneffect1]').change(function() {
+            if (this.value == 'on') {
+                ////////console.log("ON")
+                post("setneoneffect1",{bool:true})
+            } else {
+                ////////console.log("OFF")
+                post("setneoneffect1",{bool:false})
+            }
+        });
+    
+        $('input[type=radio][name=neoneffect2]').change(function() {
+            if (this.value == 'on') {
+                ////////console.log("ON")
+                post("setneoneffect2",{bool:true})
+            } else {
+                ////////console.log("OFF")
+                post("setneoneffect2",{bool:false})
+            }
+        });
     } else {
+        $('#carcontrolui').html('')
         document.getElementById('carcontrolui').style.display = 'none'
         $("#carcontrol").fadeOut();
     }
@@ -1132,15 +1407,17 @@ function setWeapon(weapon) {
     var url = "img/weapons/"+weapon+".png"
     $("#weaponimg").attr("src", url)
     setTimeout(function(){
-        var x = document.getElementById("weaponimg").naturalWidth
-        if (x > 200 && x < 300) {
-            document.getElementById("weaponimg").style.height = '37px';
-        } else if (x > 300 && x < 400) {
-            document.getElementById("weaponimg").style.height = '33px';
-        } else if (x > 400) {
-            document.getElementById("weaponimg").style.height = '27px';
-        } else {
-            document.getElementById("weaponimg").style.height = '40px';
+        if (document.getElementById("weaponimg")) {
+            var x = document.getElementById("weaponimg").naturalWidth
+            if (x > 200 && x < 300) {
+                document.getElementById("weaponimg").style.height = '37px';
+            } else if (x > 300 && x < 400) {
+                document.getElementById("weaponimg").style.height = '33px';
+            } else if (x > 400) {
+                document.getElementById("weaponimg").style.height = '27px';
+            } else {
+                document.getElementById("weaponimg").style.height = '40px';
+            }
         }
     }, 333);
 }
@@ -1167,18 +1444,37 @@ function setAmmo(table) {
     }
 }
 
-function setWeaponUi(bool) {
-    if (bool) {
+var weaponstring = `<img style="z-index:900;position:absolute;right:10px;bottom:100px;opacity:0.7;height:200px;" src="img/weaponui.png" />
+<img id="weaponimg" style="z-index:901;position:absolute;right:70px;bottom:180px;opacity:0.9;max-height:40px;max-width:100px;;align-content:center;align:center;display: block;margin-left: auto;margin-right: auto;" src="img/weapons/weapon_advancedrifle.png" />
+<svg id="weapon" style="z-index:889;position:absolute;right:-39px;bottom:90px;opacity:0.65;height:212px;transform: rotate(-270deg) scaleX(-1);"
+  xmlns="http://www.w3.org/2000/svg" height="250" width="250" viewBox="0 0 250 250" data-value="1">
+  <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
+  <path id="weaponpath" class="meter carhud" stroke="skyblue" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" stroke-dasharray="280" stroke-dashoffset="280"/>
+</svg>
+<div id="ammotext">500</div>
+<div class="crosshair-wrapper">
+  <img style="display:none;" id="crosshair" src="img/crosshair_1.png" class="crosshair"/>
+</div>`
+function setWeaponUi(bool,s) {
+    if (!s || s == undefined) {
+        featstate['weaponhud'] = bool
+    }
+    if (bool && setting['weaponhud'] && featstate['weaponhud']) {
         //document.getElementById("weaponui").style.display = 'block';
+        $('#weaponui').append(weaponstring)
         $("#weaponui").fadeIn();
     } else {
+        if (!s && !bool) {
+            featstate['weaponhud'] = false
+        }
+        $('#weaponui').html('')
         //document.getElementById("weaponui").style.display = 'none';
         $("#weaponui").fadeOut();
     }
 }
 
 function setCrosshair(val) {
-    if (val <= 5) {
+    if (val <= 5 && document.getElementById("crosshair")) {
         document.getElementById("crosshair").style.display = 'block';
         var url = "img/crosshair_"+val+".png"
         $("#crosshair").attr("src", url)
@@ -1188,152 +1484,704 @@ function setCrosshair(val) {
 setWeaponUi(false)
 
 var carui_element = []
+carui_element['modern'] = `<a id="start"></a>
+<div class="carhudmap" style="display: none;">
+  <div class="fadeout"></div>
+  <img src="img/carblip.png" alt="you" id="carblip" />
+  <div class="centermap">
+    <div class="maploc">
+      <img style="width:100%;" id="mapimg" src="img/loading.png">
+      </div>
+    </div>
+  </div>
+  <img id="carui" style="-webkit-filter: drop-shadow(1px -1px 0.4px rgba(255, 255, 255, 0.822));z-index:999;position:absolute;right:10px;bottom:10px;opacity:0.95;height:180px" src="img/carui_false.png?img/car.png" />
+  <!-- <img id="carui" style="-webkit-filter: drop-shadow(1px -1px 0.4px rgba(255, 255, 255, 0.822));z-index:999;position:absolute;right:10px;bottom:10px;opacity:0.95;height:180px" src="img/carui_false.png?img/car.png" /> -->
+  <!-- z-index:998;position:absolute;right:-27px;bottom:15px;opacity:0.65;height:125px;transform: rotate(-270deg) scaleX(-1); <svg id="rpm" style="z-index:999;position:absolute;right:-34px;bottom:12px;opacity:0.65;height:132px;transform: rotate(90deg);transform: scaleX(-1);"xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1"> -->
+  <svg id="rpm" style="z-index:998;position:absolute;right:-27px;bottom:15px;opacity:0.65;height:125px;transform: rotate(-270deg) scaleX(-1);"
+    xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+    <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
+    <defs>
+      <filter id="dropshadow" width="170%" height="110%">
+        <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
+        <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+values="1.000  0.000  0.000  0.000  0.000 
+0.000  1.000  0.000  0.000  0.000 
+0.000  0.000  6.000  0.000  0.000 
+0.000  0.000  0.000  1.000  0.000" />
+        <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="5"></feGaussianBlur>
+        <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+      </filter>
+    </defs>
+    <path id="rpmpath" class="meter rpm" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="filter:url(#dropshadow)" stroke-dasharray="280" stroke-dashoffset="280"/>
+  </svg>
+  <div id="rpmmeter">1000</div>
+  <div id="rpmtext">x 1000rpm</div>
+  <svg id="speed" style="z-index:998;position:absolute;right:201px;bottom:15px;opacity:0.65;height:125px;transform: rotate(-90deg)"
+    xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+    <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
+    <defs>
+      <filter id="dropshadow" width="170%" height="110%">
+        <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
+        <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+values="1.000  0.000  0.000  0.000  0.000 
+0.000  1.000  0.000  0.000  0.000 
+0.000  0.000  6.000  0.000  0.000 
+0.000  0.000  0.000  1.000  0.000" />
+        <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="5"></feGaussianBlur>
+        <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+      </filter>
+    </defs>
+    <path id="speedpath" class="meter carhud" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="filter:url(#dropshadow)" stroke-dasharray="290" stroke-dashoffset="290"/>
+  </svg>
+  <svg id="coolant" style="z-index:998;position:absolute;right:211px;bottom:10px;opacity:0.65;height:165px;transform: rotate(-90deg)"
+    xmlns="http://www.w3.org/2000/svg" height="250" width="200" viewBox="0 0 250 200" data-value="1">
+    <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
+    <defs>
+      <filter id="dropshadow" width="170%" height="110%">
+        <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
+        <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+values="1.000  0.000  0.000  0.000  0.000 
+0.000  1.000  0.000  0.000  0.000 
+0.000  0.000  6.000  0.000  0.000 
+0.000  0.000  0.000  1.000  0.000" />
+        <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="5"></feGaussianBlur>
+        <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+      </filter>
+    </defs>
+    <path style="stroke-width: 7px;stroke: rgb(0, 101, 253);" id="coolantpath" class="meter carhud" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" stroke-dasharray="290" stroke-dashoffset="0"/>
+  </svg>
+  <svg id="oil" style="z-index:998;position:absolute;right:-39px;bottom:10px;opacity:0.65;height:165px;transform:rotate(-270deg) scaleX(-1);"
+    xmlns="http://www.w3.org/2000/svg" height="250" width="200" viewBox="0 0 250 200" data-value="1">
+    <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
+    <defs>
+      <filter id="dropshadow" width="170%" height="110%">
+        <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
+        <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+values="1.000  0.000  0.000  0.000  0.000 
+0.000  1.000  0.000  0.000  0.000 
+0.000  0.000  6.000  0.000  0.000 
+0.000  0.000  0.000  1.000  0.000" />
+        <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="1"></feGaussianBlur>
+        <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+      </filter>
+    </defs>
+    <path style="stroke-width: 7px;stroke: rgb(128, 221, 22);" id="oilpath" class="meter carhud" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" stroke-dasharray="290" stroke-dashoffset="0"/>
+  </svg>
+  <div id="body" style="z-index:-1;position:absolute;border-radius:41%;right:21px;bottom:10px;height:175px;width:330px;background-color: #0000002a;"></div>
+  <div id="diffdiv">
+    <span id="diff">OFF</span>
+  </div>
+  <div id="modediv">
+    <span id="mode">ECO</span>
+  </div>
+  <div id="speedmeter"></div>
+  <div id="speedtext">kMH</div>
+  <div id="cruisetext">Cruise</div>
+  <div id="milediv">
+    <span id="mileage">0</span> kM
+  </div>
+  <div id="distancediv">
+    <span id="distance">0</span>
+    <span id="distext">Dis</span>
+  </div>
+  <div id="timediv">
+    <span id="time">00:00</span>
+    <span id="timetext">Pm</span>
+  </div>
+  <div id="geardiv">
+    <span id="gear">P</span>
+    <span id="geartext"></span>
+  </div>
+  <i id="right" class="fas fa-arrow-alt-right"></i>
+  <i id="left" class="fas fa-arrow-alt-left"></i>
+  <div class="gas-bar">
+    <span class="bar">
+      <span class="gas_progress" id="gasbar"></span>
+    </span>
+  </div>
+  <div class="carhealth-bar">
+    <span class="bar">
+      <span class="carhealth_progress" id="carhealthbar"></span>
+    </span>
+  </div>
+  <div class="cartemp-bar">
+    <span class="bar">
+      <span class="cartemp_progress" id="cartempbar"></span>
+    </span>
+  </div>
+  <div id="offlight">
+    <img id="offlightclip" src="assets/icons.svg" />
+  </div>
+  <div id="onlight">
+    <img id="onlightclip" src="assets/icons.svg" />
+  </div>
+  <div id="highlight">
+    <img id="highlightclip" src="assets/icons.svg" />
+  </div>
+  <div id="seatbelt">
+    <img id="seatbeltclip" src="assets/icons.svg" />
+  </div>
+  <div id="onseatbelt">
+    <img id="onseatbeltclip" src="assets/icons.svg" />
+  </div>
+  <div id="carfunc">
+    <img id="doorclose" src="img/doorclose.png" />
+    <img id="dooropen" src="img/dooropen.png" />
+    <img id="trunkopen" src="img/trunkopen.png" />
+    <img id="trunkclose" src="img/trunkclose.png" />
+    <img id="hoodopen" src="img/hoodopen.png" />
+    <img id="hoodclose" src="img/hoodclose.png" />
+    <img id="handbrakeopen" src="img/handbrakeopen.png" />
+    <img id="handbrakeclose" src="img/handbrakeclose.png" />
+    <i id="waterlevel" class="fad fa-oil-temp"></i>
+    <span id="watermax">F</span>
+    <span id="waterempty">E</span>
+    <i id="oillevel" class="fas fa-oil-can"></i>
+    <span id="oilmax">F</span>
+    <span id="oilempty">E</span>
+    <i id="tempicon" class="fad fa-thermometer-half"></i>
+    <i id="gasicon" class="fad fa-gas-pump"></i>
+    <i id="caricon" class="fad fa-car-mechanic"></i>
+  </div>`
+
+carui_element['minimal'] = `<img id="minimal_light" style="z-index:999;position:relative;opacity:0.85;width:100%;right:0;float:right;" src="img/carui_minimal.png?img/car.png" />
+<svg id="rpm" style="z-index:1005;position:absolute;right:60%;bottom:36%;opacity:0.65;width:40%;height:28.88%;transform: rotate(-60deg);"
+  xmlns="http://www.w3.org/2000/svg" height="210" width="210" viewBox="0 0 177 177" data-value="1">
+  <defs>
+    <filter id="dropshadow" width="170%" height="110%">
+      <feOffset result="offOut" in="SourceGraphic" dx="4" dy="7"></feOffset>
+      <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+values="1.000  0.000  0.000  0.000  0.000 
+0.000  1.000  0.000  0.000  0.000 
+0.000  0.000  6.000  0.000  0.000 
+0.000  0.000  0.000  1.000  0.000" />
+      <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="5"></feGaussianBlur>
+      <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+    </filter>
+  </defs>
+  <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none"/>
+  <path id="rpmpath" class="meter rpm rpm_minimal" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" stroke-dasharray="280" stroke-dashoffset="280"/>
+</svg>
+<div id="rpmmeter" style="display:none;">1000</div>
+<div id="speedtext">kMH</div>
+<svg id="speed" style="z-index:1005;position:absolute;right:22%;bottom:26%;opacity:0.65;;width:54%;height:47%;transform: rotate(0deg)"
+  xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+  <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 111.93 0"  fill="none"/>
+  <defs>
+    <filter id="dropshadow" width="170%" height="110%">
+      <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
+      <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+values="1.000  0.000  0.000  0.000  0.000 
+0.000  1.000  0.000  0.000  0.000 
+0.000  0.000  6.000  0.000  0.000 
+0.000  0.000  0.000  1.000  0.000" />
+      <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="5"></feGaussianBlur>
+      <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+    </filter>
+  </defs>
+  <path id="speedpath" class="meter carhud" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
+</svg>
+<div id="speedmeter"></div>
+<svg id="gas" style="z-index:1005;position:absolute;right:6.5%;bottom:34.5%;opacity:0.65;height:22%;width:18%;transform: rotate(-100deg) scaleX(1) scaleY(-1);;"
+  xmlns="http://www.w3.org/2000/svg" height="84" width="84" viewBox="0 0 140 140" data-value="1">
+  <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 170.93 0"  fill="none"/>
+  <defs>
+    <filter id="dropshadow2" width="170%" height="110%">
+      <feOffset result="offOut" in="SourceGraphic" dx="2" dy="2"></feOffset>
+      <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+values="1.000  0.000  0.000  0.000  0.000 
+0.000  1.000  0.000  0.000  0.000 
+0.000  0.000  6.000  0.000  0.000 
+0.000  0.000  0.000  1.000  0.000" />
+      <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="8"></feGaussianBlur>
+      <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+    </filter>
+  </defs>
+  <path id="gasbar" class="meter carhud" stroke="gold" d="M41 149.5a77 77 0 1 1 170.93 0" fill="none" style="filter:url(#dropshadow2)" stroke-dasharray="180" stroke-dashoffset="250"/>
+</svg>
+<svg id="cartemp" style="z-index:1005;position:absolute;right:13.7%;bottom:56.5%;opacity:0.65;height:23%;width:20%;transform: rotate(-200deg) scaleX(1) scaleY(-1);;"
+  xmlns="http://www.w3.org/2000/svg" height="84" width="84" viewBox="0 0 140 140" data-value="1">
+  <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 170.93 0"  fill="none"/>
+  <defs>
+    <filter id="dropshadow2" width="170%" height="110%">
+      <feOffset result="offOut" in="SourceGraphic" dx="2" dy="2"></feOffset>
+      <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+values="1.000  0.000  0.000  0.000  0.000 
+0.000  1.000  0.000  0.000  0.000 
+0.000  0.000  6.000  0.000  0.000 
+0.000  0.000  0.000  1.000  0.000" />
+      <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="8"></feGaussianBlur>
+      <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+    </filter>
+  </defs>
+  <path id="cartempbar" class="meter carhud" stroke="red" d="M41 149.5a77 77 0 1 1 170.93 0" fill="none" style="filter:url(#dropshadow2)" stroke-dasharray="190" stroke-dashoffset="190"/>
+</svg>
+<svg id="vehiclehealth" style="z-index:1005;position:absolute;right:0.2%;bottom:39.9%;opacity:0.65;;width:20%;height:13%;transform: rotate(0deg)"
+  xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+  <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 111.93 0"  fill="none"/>
+  <defs>
+    <filter id="dropshadow" width="170%" height="110%">
+      <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
+      <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+values="1.000  0.000  0.000  0.000  0.000 
+0.000  1.000  0.000  0.000  0.000 
+0.000  0.000  6.000  0.000  0.000 
+0.000  0.000  0.000  1.000  0.000" />
+      <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="5"></feGaussianBlur>
+      <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+    </filter>
+  </defs>
+  <path id="carhealthbar" class="meter carhud" stroke="#2B68E2" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
+</svg>
+<svg id="coolant" style="z-index:1005;position:absolute;right:-0.7%;bottom:50.5%;opacity:0.65;;width:20%;height:13%;transform: rotate(0deg)"
+  xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+  <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 111.93 0"  fill="none"/>
+  <defs>
+    <filter id="dropshadow" width="170%" height="110%">
+      <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
+      <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+values="1.000  0.000  0.000  0.000  0.000 
+0.000  1.000  0.000  0.000  0.000 
+0.000  0.000  6.000  0.000  0.000 
+0.000  0.000  0.000  1.000  0.000" />
+      <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="5"></feGaussianBlur>
+      <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+    </filter>
+  </defs>
+  <path id="coolantpath" class="meter carhud" stroke="#2B68E2" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
+</svg>
+<svg id="nitro" style="z-index:1005;position:absolute;right:3.1%;bottom:29.6%;opacity:0.65;;width:20%;height:12%;transform: rotate(0deg)"
+  xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+  <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 111.93 0"  fill="none"/>
+  <defs>
+    <filter id="dropshadow" width="170%" height="110%">
+      <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
+      <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+values="1.000  0.000  0.000  0.000  0.000 
+0.000  1.000  0.000  0.000  0.000 
+0.000  0.000  6.000  0.000  0.000 
+0.000  0.000  0.000  1.000  0.000" />
+      <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="5"></feGaussianBlur>
+      <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+    </filter>
+  </defs>
+  <path id="nitropath" class="meter carhud" stroke="red" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
+</svg>
+<div id="modediv">
+  <span id="mode">ECO</span>
+</div>
+<div id="rpmtext">x 1000rpm</div>
+<i id="tempicon" class="fad fa-oil-temp"></i>
+<i id="gasicon" class="fad fa-gas-pump"></i>
+<div id="geardiv">
+  <span id="gear">P</span>
+  <span id="geartext"></span>
+</div>
+<span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:22%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(147, 150, 151, 0.623)"></i>
+  <img style="display:block; height:100%;width:80%;position:absolute;top:4%;left:32.5%;" id="handbrakeopen" src="img/handbrakeopen.png" />
+  <img style="display:block; height:100%;width:80%;position:absolute;top:4%;left:32.5%;opacity:0.6;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" id="handbrakeclose" src="img/handbrakeclose.png" />
+</span>
+<span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:31%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
+  <img id="hoodopen" style="display:block; height:100%;width:80%;position:absolute;top:0%;left:33%;" src="img/hoodopen.png" />
+  <img id="hoodclose" style="display:none; height:100%;width:80%;position:absolute;top:0%;left:33%;;opacity:0.6;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" src="img/hoodclose.png" />
+</span>
+<span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:40%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
+  <img id="trunkopen" style="display:block; height:100%;width:80%;position:absolute;top:0%;left:33%;" src="img/trunkopen.png" />
+  <img id="trunkclose" style="display:block; height:100%;width:80%;position:absolute;top:0%;left:33%;;opacity:0.6;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" src="img/trunkclose.png" />
+</span>
+<span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:49%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
+  <img style="display:block; height:85%; width:75%;position:absolute;top:1%;left:33%;opacity:0.6;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" id="doorclose" src="img/doorclose.png" />
+  <img style="display:none; height:85%;width:75%;position:absolute;top:1%;left:33%;opacity:0.7" id="dooropen" src="img/dooropen.png" />
+</span>
+<span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:58%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
+  <img style="display:block; height:85%;position:absolute;top:4%;left:38%;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" id="seatbelt" src="img/seatbeltoff.png" />
+  <img style="display:none;height:85%;position:absolute;top:4%;left:38%;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" id="onseatbelt" src="img/seatbelton.png" />
+</span>
+<span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:66.9%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
+  <img style="display:block; height:100%;position:absolute;top:3%;left:35%;opacity:0.5;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" id="offlight" src="img/lightoff.png" />
+  <img style="display:none;height:100%;position:absolute;top:3%;left:35%;-webkit-filter: drop-shadow(1px -1px 2px rgba(0, 0, 0, 0.822));" id="onlight" src="img/lighton.png" />
+  <img style="display:none;height:100%;position:absolute;top:3%;left:35%;-webkit-filter: drop-shadow(1px -1px 2px rgba(4, 6, 7, 0.822));" id="highlight" src="img/lighthigh.png" />
+</span>
+<span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:5.6%;bottom:53.5%;color:rgba(144, 144, 144, 0.876)'>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
+  <i class="fas fa-tint fa-stack-1x" style='font-size:1.1vw;color:rgb(2, 116, 192);z-index:1130;opacity:1.0;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));'></i>
+</span>
+<span class="fa-stack fa-2x" style='font-size:0.5vw;position:absolute;right:67%;bottom:40%;color:rgba(144, 144, 144, 0.294)'>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.20)'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.01)"></i>
+  <i class="fas fa-oil-can fa-stack-1x" style='font-size:1.14vw;color:rgba(144, 144, 144, 0.849);z-index:1130;opacity:1.0;padding-left:12px;-webkit-filter: drop-shadow(1px -1px 0.9px rgba(6, 8, 8, 0.822));'></i>
+</span>
+<span class="fa-stack fa-2x" style='font-size:0.5vw;position:absolute;right:9.9%;bottom:44.5%;color:rgba(144, 144, 144, 0.294)'>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
+  <i class="fad fa-car-mechanic fa-stack-1x"  style='font-size:0.9vw;color:rgba(182, 182, 182, 0.685);z-index:1130;opacity:1.0;margin-left:45%;-webkit-filter: drop-shadow(1px -1px 0.9px rgba(6, 8, 8, 0.822));'></i>
+</span>
+<i id="right" class="fas fa-arrow-alt-right"></i>
+<i id="left" class="fas fa-arrow-alt-left"></i>
+<div id="milediv">
+  <span id="mileage">0</span> kM
+</div>
+<div id="timediv">
+  <span id="time">00:00</span>
+  <span id="timetext">Pm</span>
+</div>
+<div id="distancediv">
+  <span id="distance">0</span>
+  <span id="distext">Dis</span>
+</div>
+<div id="diffdiv">
+  <span id="diff">OFF</span>
+</div>
+<img style="-webkit-filter: drop-shadow(1px -1px 0.4px rgba(255, 255, 255, 0.822));z-index:999;position:absolute;opacity:0.85;width:10%;height:20%;left:4.5vw;bottom:3vw;" src="img/tires.png?img/car.png" />
+<img id="wheel0" style="-webkit-filter: drop-shadow(1px -1px 0.4px rgba(255, 0, 0, 0.822));z-index:999;position:absolute;opacity:0.85;width:10%;height:20%;left:4.5vw;bottom:3vw;opacity:0.0;" src="img/tirefrontleft.png?img/car.png" />
+<img id="wheel1" style="-webkit-filter: drop-shadow(1px -1px 0.4px rgba(255, 0, 0, 0.822));z-index:999;position:absolute;opacity:0.85;width:10%;height:20%;left:4.5vw;bottom:3vw;opacity:0.0;" src="img/tirefrontright.png?img/car.png" />
+<img id="wheel2" style="-webkit-filter: drop-shadow(1px -1px 0.4px rgba(246, 10, 10, 0.822));z-index:999;position:absolute;opacity:0.85;width:10%;height:20%;left:4.5vw;bottom:3vw;opacity:0.0;" src="img/tirerearleft.png?img/car.png" />
+<img id="wheel3" style="-webkit-filter: drop-shadow(1px -1px 0.4px rgba(255, 0, 0, 0.822));z-index:999;position:absolute;opacity:0.85;width:10%;height:20%;left:4.5vw;bottom:3vw;opacity:0.0;" src="img/tirerearright.png?img/car.png" />`
+carui_element['simple'] = `<img id="simple_light" style="z-index:999;position:relative;opacity:0.85;width:100%;right:0;float:right;" src="img/carui_simple.png?img/car.png" />
+<svg id="rpm" style="z-index:1005;position:absolute;right:60%;bottom:36%;opacity:0.65;width:40%;height: 28.5%;transform: rotate(-60deg);"
+  xmlns="http://www.w3.org/2000/svg" height="210" width="210" viewBox="0 0 177 177" data-value="1">
+  <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
+  <defs>
+    <filter id="dropshadow" width="170%" height="110%">
+      <feOffset result="offOut" in="SourceGraphic" dx="4" dy="7"></feOffset>
+      <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+values="1.000  0.000  0.000  0.000  0.000 
+0.000  1.000  0.000  0.000  0.000 
+0.000  0.000  6.000  0.000  0.000 
+0.000  0.000  0.000  1.000  0.000" />
+      <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="8"></feGaussianBlur>
+      <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+    </filter>
+  </defs>
+  <path id="rpmpath" class="meter rpm" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="filter:url(#dropshadow)" stroke-dasharray="280" stroke-dashoffset="280"/>
+</svg>
+<div id="rpmmeter" style="display:none;">1000</div>
+<svg id="speed" style="z-index:1005;position:absolute;right:22%;bottom:26%;opacity:0.65;;width:54%;height:47%;transform: rotate(0deg)"
+  xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+  <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 111.93 0"  fill="none"/>
+  <defs>
+    <filter id="dropshadow" width="170%" height="110%">
+      <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
+      <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+values="1.000  0.000  0.000  0.000  0.000 
+0.000  1.000  0.000  0.000  0.000 
+0.000  0.000  6.000  0.000  0.000 
+0.000  0.000  0.000  1.000  0.000" />
+      <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="5"></feGaussianBlur>
+      <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+    </filter>
+  </defs>
+  <path id="speedpath" class="meter carhud" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
+</svg>
+<div id="speedmeter"></div>
+<div id="speedtext">kMH</div>
+<svg id="cartemp" style="display:none;z-index:1005;position:absolute;right:13.7%;bottom:56.5%;opacity:0.65;height:23%;width:20%;transform: rotate(-200deg) scaleX(1) scaleY(-1);;"
+  xmlns="http://www.w3.org/2000/svg" height="84" width="84" viewBox="0 0 140 140" data-value="1">
+  <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 170.93 0"  fill="none"/>
+  <defs>
+    <filter id="dropshadow2" width="170%" height="110%">
+      <feOffset result="offOut" in="SourceGraphic" dx="2" dy="2"></feOffset>
+      <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+values="1.000  0.000  0.000  0.000  0.000 
+0.000  1.000  0.000  0.000  0.000 
+0.000  0.000  6.000  0.000  0.000 
+0.000  0.000  0.000  1.000  0.000" />
+      <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="8"></feGaussianBlur>
+      <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+    </filter>
+  </defs>
+  <path id="cartempbar" class="meter carhud" stroke="red" d="M41 149.5a77 77 0 1 1 170.93 0" fill="none" style="filter:url(#dropshadow2)" stroke-dasharray="190" stroke-dashoffset="190"/>
+</svg>
+<svg id="coolant" style="display:none;z-index:1005;position:absolute;right:-0.7%;bottom:50.5%;opacity:0.65;;width:20%;height:13%;transform: rotate(0deg)"
+  xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+  <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 111.93 0"  fill="none"/>
+  <defs>
+    <filter id="dropshadow" width="170%" height="110%">
+      <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
+      <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+values="1.000  0.000  0.000  0.000  0.000 
+0.000  1.000  0.000  0.000  0.000 
+0.000  0.000  6.000  0.000  0.000 
+0.000  0.000  0.000  1.000  0.000" />
+      <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="5"></feGaussianBlur>
+      <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+    </filter>
+  </defs>
+  <path id="coolantpath" class="meter carhud" stroke="#2B68E2" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
+</svg>
+<svg id="nitro" style="display:none;z-index:1005;position:absolute;right:3.1%;bottom:29.6%;opacity:0.65;;width:20%;height:13%;transform: rotate(0deg)"
+  xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
+  <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 111.93 0"  fill="none"/>
+  <defs>
+    <filter id="dropshadow" width="170%" height="110%">
+      <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
+      <feColorMatrix result="matrixOut" in="offOut" type="matrix"
+values="1.000  0.000  0.000  0.000  0.000 
+0.000  1.000  0.000  0.000  0.000 
+0.000  0.000  6.000  0.000  0.000 
+0.000  0.000  0.000  1.000  0.000" />
+      <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="5"></feGaussianBlur>
+      <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+    </filter>
+  </defs>
+  <path id="nitropath" class="meter carhud" stroke="red" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
+</svg>
+<div id="modediv">
+  <span id="mode">ECO</span>
+</div>
+<div id="rpmtext">x 1000rpm</div>
+<i style="display:none;" id="tempicon" class="fad fa-oil-temp"></i>
+<i style="display:none;" id="gasicon" class="fad fa-gas-pump"></i>
+<div id="geardiv">
+  <span id="gear">P</span>
+  <span id="geartext"></span>
+</div>
+<span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:22%;bottom:20%;color:rgba(144, 144, 144, 0.876); display:none;'>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
+  <img style="display:block; height:80%;width:60%;position:absolute;top:11%;left:20%;" id="handbrakeopen" src="img/handbrakeopen.png" />
+  <img style="display:block; height:80%;width:60%;position:absolute;top:11%;left:20%;opacity:0.6" id="handbrakeclose" src="img/handbrakeclose.png" />
+</span>
+<span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:35%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgba(151, 147, 147, 0.623);"></i>
+  <i id="gasbar" class="fad fa-gas-pump fa-stack-1x" style='font-size:1.2vw;color:rgb(231, 231, 231);z-index:1131;opacity:1.0;margin-left:0.8vw;'></i>
+  <i id="gasbg" class="fad fa-gas-pump fa-stack-1x" style='font-size:1.2vw;color:rgba(253, 0, 0, 0.856);z-index:1130;opacity:0.1;margin-left:0.8vw;'></i>
+</span>
+<span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:45%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgba(151, 147, 147, 0.623);"></i>
+  <i id="carhealthbar" class="fad fa-car-mechanic fa-stack-1x" style='font-size:1.2vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;margin-left:0.8vw;'></i>
+  <i id="carhealthbg" class="fad fa-car-mechanic fa-stack-1x" style='font-size:1.2vw;color:rgba(235, 5, 5, 0.89);z-index:1130;opacity:0.1;margin-left:0.8vw;'></i>
+</span>
+<span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:55%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgba(151, 147, 147, 0.623);"></i>
+  <img style="display:block; height:85%; width:75%;position:absolute;top:8%;left:29%;opacity:0.6" id="doorclose" src="img/doorclose.png" />
+  <img style="display:none; height:85%;width:75%;position:absolute;top:8%;left:29%;opacity:0.7" id="dooropen" src="img/dooropen.png" />
+</span>
+<span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:65%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgba(151, 147, 147, 0.623);"></i>
+  <img style="display:block; height:90%;position:absolute;top:11%;left:29%;" id="seatbelt" src="img/seatbeltoff.png" />
+  <img style="display:none;height:90%;position:absolute;top:11%;left:29%;" id="onseatbelt" src="img/seatbelton.png" />
+</span>
+<span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:75%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgba(151, 147, 147, 0.623);"></i>
+  <img style="display:block; height:90%;position:absolute;top:11%;left:29%;opacity:0.5;" id="offlight" src="img/lightoff.png" />
+  <img style="display:none;height:90%;position:absolute;top:11%;left:29%;" id="onlight" src="img/lighton.png" />
+  <img style="display:none;height:90%;position:absolute;top:11%;left:29%;" id="highlight" src="img/lighthigh.png" />
+</span>
+<span class="fa-stack fa-2x" style='font-size:0.5vw;position:absolute;right:67%;bottom:40%;color:rgba(144, 144, 144, 0.294)'>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:0.7vw;color:rgba(11, 39, 63, 0.055)'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.023)"></i>
+  <i class="fas fa-oil-can fa-stack-1x" style='font-size:0.9vw;color:rgba(93, 93, 93, 0.782);z-index:1130;opacity:1.0;padding-left:7px;'></i>
+</span>
+<i id="right" class="fas fa-arrow-alt-right"></i>
+<i id="left" class="fas fa-arrow-alt-left"></i>
+<div id="milediv">
+  <span id="mileage">0</span> kM
+</div>
+<div style="display:none;" id="timediv">
+  <span id="time">00:00</span>
+  <span id="timetext">Pm</span>
+</div>
+<div style="display:none;" id="distancediv">
+  <span id="distance">0</span>
+  <span id="distext">Dis</span>
+</div>
+<div style="display:none;" id="diffdiv">
+  <span id="diff">OFF</span>
+</div>`
 function setCarui(ver) {
     if (carui_element['simple'] == undefined) {
-        carui_element['simple'] = document.getElementById("simple").innerHTML
-        carui_element['modern'] = document.getElementById("modern").innerHTML
-        carui_element['minimal'] = document.getElementById("minimal").innerHTML
+        //carui_element['simple'] = document.getElementById("simple").innerHTML
+        //carui_element['modern'] = document.getElementById("modern").innerHTML
+        //carui_element['minimal'] = document.getElementById("minimal").innerHTML
     }
     document.getElementById("modern").innerHTML = '';
     document.getElementById("simple").innerHTML = '';
     document.getElementById("minimal").innerHTML = '';
     ////console.log(carui_element['modern'])
     //loopfuck = setInterval(function(){ getvehdata() }, 200);
-    document.getElementById(ver).innerHTML = ''
-    document.getElementById(ver).innerHTML = carui_element[ver]
     //console.log(carui_element[ver])
     carui = ver
-    if (ver == 'minimal') {
-        document.getElementById("speedtext").style.fontWeight = '100';
-        document.getElementById("speedtext").style.right = '47.5%';
-        document.getElementById("speedtext").style.bottom = '45%';
-        document.getElementById("speedtext").style.fontSize = '8px';
-        document.getElementById("minimal").style.display = 'block';
-        document.getElementById("rpmtext").style.right = '68%';
-        document.getElementById("rpmtext").style.bottom = '55%';
-        document.getElementById("rpmtext").style.fontSize = '0.3vw';
-        document.getElementById("mode").style.fontSize = '0.55vw';
-        document.getElementById("tempicon").style.right = '23.5%';
-        document.getElementById("tempicon").style.bottom = '57%';
-        document.getElementById("gasicon").style.right = '21%';
-        document.getElementById("gasicon").style.bottom = '47%';
-        document.getElementById("gasicon").style.opacity = '0.6';
-        document.getElementById("tempicon").style.opacity = '0.6';
-        document.getElementById("geardiv").style.right = '13.7vw';
-        document.getElementById("geardiv").style.bottom = '40%';
-        document.getElementById("geardiv").style.fontSize = '0.4vw';
-        document.getElementById("right").style.right = '27%';
-        document.getElementById("right").style.bottom = '75%';
-        document.getElementById("left").style.right = '69%';
-        document.getElementById("left").style.bottom = '75%';
-        document.getElementById("milediv").style.right = '12.5vw';
-        document.getElementById("milediv").style.bottom = '30.5%';
-        document.getElementById("milediv").style.margin = '1% 1% 1% 1%';
-        document.getElementById("milediv").style.background = '#000000';
-        document.getElementById("milediv").style.opacity = '0.6';
-        document.getElementById("milediv").style.fontSize = '0.5vw';
-        document.getElementById("milediv").style.fontSize = '0.5vw';
-        document.getElementById("milediv").style.webkitFilter = "drop-shadow(1px 1px 2px rgb(5, 155, 255))";
-        document.getElementById("timediv").style.right = '44%';
-        document.getElementById("timediv").style.textAlign = 'unset';
-        document.getElementById("timediv").style.width = 'unset';
-        document.getElementById("timediv").style.bottom = '72.6%';
-        document.getElementById("timediv").style.fontSize = '0.4vw';
-        document.getElementById("distancediv").style.right = '53%';
-        document.getElementById("distancediv").style.bottom = '73%';
-        document.getElementById("distancediv").style.width = 'unset';
-        document.getElementById("distancediv").style.textAlign = 'unset';
-        document.getElementById("distancediv").style.background = '#00000000';
-        document.getElementById("distancediv").style.fontSize = '0.4vw';
-        document.getElementById("diffdiv").style.right = '33%';
-        document.getElementById("diffdiv").style.bottom = '73%';
-        document.getElementById("diffdiv").style.background = '#00000000';
-        document.getElementById("diffdiv").style.fontSize = '0.4vw';
-        setCoolant(100)
-    } else if (ver == 'modern') {
-        document.getElementById("modern").style.display = 'block';
-    } else if (ver == 'simple') {
-        document.getElementById("speedtext").style.fontWeight = '100';
-        document.getElementById("speedtext").style.right = '47.5%';
-        document.getElementById("speedtext").style.bottom = '45%';
-        document.getElementById("speedtext").style.fontSize = '8px';
-        document.getElementById("simple").style.display = 'block';
-        document.getElementById("rpmtext").style.right = '68%';
-        document.getElementById("rpmtext").style.bottom = '55%';
-        document.getElementById("rpmtext").style.fontSize = '0.3vw';
-        document.getElementById("mode").style.fontSize = '0.55vw';
-        document.getElementById("tempicon").style.right = '23.5%';
-        document.getElementById("tempicon").style.bottom = '57%';
-        document.getElementById("gasicon").style.right = '21%';
-        document.getElementById("gasicon").style.bottom = '47%';
-        document.getElementById("gasicon").style.opacity = '0.6';
-        document.getElementById("tempicon").style.opacity = '0.6';
-        document.getElementById("geardiv").style.right = '45%';
-        document.getElementById("geardiv").style.bottom = '40%';
-        document.getElementById("geardiv").style.fontSize = '0.4vw';
-        document.getElementById("right").style.right = '37%';
-        document.getElementById("right").style.bottom = '30%';
-        document.getElementById("left").style.right = '79%';
-        document.getElementById("left").style.bottom = '30%';
-        document.getElementById("milediv").style.right = '50.0%';
-        document.getElementById("milediv").style.bottom = '28.5%';
-        document.getElementById("milediv").style.margin = '1% 1% 1% 1%';
-        document.getElementById("milediv").style.background = '#000000';
-        document.getElementById("milediv").style.opacity = '0.6';
-        document.getElementById("milediv").style.fontSize = '0.5vw';
-        document.getElementById("milediv").style.fontSize = '0.5vw';
-        document.getElementById("milediv").style.webkitFilter = "drop-shadow(1px 1px 2px rgb(5, 155, 255))";
-        document.getElementById("timediv").style.right = '42%';
-        document.getElementById("timediv").style.bottom = '72.6%';
-        document.getElementById("timediv").style.fontSize = '0.4vw';
-        document.getElementById("distancediv").style.right = '53%';
-        document.getElementById("distancediv").style.bottom = '73%';
-        document.getElementById("distancediv").style.background = '#00000000';
-        document.getElementById("distancediv").style.fontSize = '0.4vw';
-        document.getElementById("diffdiv").style.right = '33%';
-        document.getElementById("diffdiv").style.bottom = '73%';
-        document.getElementById("diffdiv").style.background = '#00000000';
-        document.getElementById("diffdiv").style.fontSize = '0.4vw';
+    if (usersetting['carhud'] && usersetting['carhud']['ver'] !== 'auto' && usersetting['carhud']['ver'] !== undefined) {
+        carui = usersetting['carhud']['ver']
+        ver = usersetting['carhud']['ver']
+        console.log("User setting")
     }
-    setMode('NORMAL',carui)
-    changeallclass(class_icon)
-    const el = document.querySelector('.rpm');
-    el.addEventListener('animationstart', function() {
-        console.log('transition start')
-        rpmanimation = true
-    });
+    document.getElementById(ver).innerHTML = ''
+    setTimeout(function(){
+        document.getElementById(ver).innerHTML = carui_element[ver]
+        if (ver == 'minimal') {
+            document.getElementById("speedtext").style.fontWeight = '100';
+            document.getElementById("speedtext").style.right = '47.5%';
+            document.getElementById("speedtext").style.bottom = '45%';
+            document.getElementById("speedtext").style.fontSize = '8px';
+            if (invehicle) {
+                document.getElementById("minimal").style.display = 'block';
+            }
+            document.getElementById("rpmtext").style.right = '68%';
+            document.getElementById("rpmtext").style.bottom = '55%';
+            document.getElementById("rpmtext").style.fontSize = '0.3vw';
+            document.getElementById("mode").style.fontSize = '0.55vw';
+            document.getElementById("tempicon").style.right = '23.5%';
+            document.getElementById("tempicon").style.bottom = '57%';
+            document.getElementById("gasicon").style.right = '21%';
+            document.getElementById("gasicon").style.bottom = '47%';
+            document.getElementById("gasicon").style.opacity = '0.6';
+            document.getElementById("tempicon").style.opacity = '0.6';
+            document.getElementById("geardiv").style.right = '13.7vw';
+            document.getElementById("geardiv").style.bottom = '40%';
+            document.getElementById("geardiv").style.fontSize = '0.4vw';
+            document.getElementById("right").style.right = '27%';
+            document.getElementById("right").style.bottom = '75%';
+            document.getElementById("left").style.right = '69%';
+            document.getElementById("left").style.bottom = '75%';
+            document.getElementById("milediv").style.right = '12.5vw';
+            document.getElementById("milediv").style.bottom = '30.5%';
+            document.getElementById("milediv").style.margin = '1% 1% 1% 1%';
+            document.getElementById("milediv").style.background = '#000000';
+            document.getElementById("milediv").style.opacity = '0.6';
+            document.getElementById("milediv").style.fontSize = '0.5vw';
+            document.getElementById("milediv").style.fontSize = '0.5vw';
+            document.getElementById("milediv").style.webkitFilter = "drop-shadow(1px 1px 2px rgb(5, 155, 255))";
+            document.getElementById("timediv").style.right = '44%';
+            document.getElementById("timediv").style.textAlign = 'unset';
+            document.getElementById("timediv").style.width = 'unset';
+            document.getElementById("timediv").style.bottom = '72.6%';
+            document.getElementById("timediv").style.fontSize = '0.4vw';
+            document.getElementById("distancediv").style.right = '53%';
+            document.getElementById("distancediv").style.bottom = '73%';
+            document.getElementById("distancediv").style.width = 'unset';
+            document.getElementById("distancediv").style.textAlign = 'unset';
+            document.getElementById("distancediv").style.background = '#00000000';
+            document.getElementById("distancediv").style.fontSize = '0.4vw';
+            document.getElementById("diffdiv").style.right = '33%';
+            document.getElementById("diffdiv").style.bottom = '73%';
+            document.getElementById("diffdiv").style.background = '#00000000';
+            document.getElementById("diffdiv").style.fontSize = '0.4vw';
+            setCoolant(100)
+        } else if (ver == 'modern') {
+            if (invehicle) {
+                document.getElementById("modern").style.display = 'block';
+            }
+        } else if (ver == 'simple') {
+            document.getElementById("speedtext").style.fontWeight = '100';
+            document.getElementById("speedtext").style.right = '47.5%';
+            document.getElementById("speedtext").style.bottom = '45%';
+            document.getElementById("speedtext").style.fontSize = '8px';
+            if (invehicle) {
+                document.getElementById("simple").style.display = 'block';
+            }
+            document.getElementById("rpmtext").style.right = '68%';
+            document.getElementById("rpmtext").style.bottom = '55%';
+            document.getElementById("rpmtext").style.fontSize = '0.3vw';
+            document.getElementById("mode").style.fontSize = '0.55vw';
+            document.getElementById("tempicon").style.right = '23.5%';
+            document.getElementById("tempicon").style.bottom = '57%';
+            document.getElementById("gasicon").style.right = '21%';
+            document.getElementById("gasicon").style.bottom = '47%';
+            document.getElementById("gasicon").style.opacity = '0.6';
+            document.getElementById("tempicon").style.opacity = '0.6';
+            document.getElementById("geardiv").style.right = '45%';
+            document.getElementById("geardiv").style.bottom = '40%';
+            document.getElementById("geardiv").style.fontSize = '0.4vw';
+            document.getElementById("right").style.right = '37%';
+            document.getElementById("right").style.bottom = '30%';
+            document.getElementById("left").style.right = '79%';
+            document.getElementById("left").style.bottom = '30%';
+            document.getElementById("milediv").style.right = '50.0%';
+            document.getElementById("milediv").style.bottom = '28.5%';
+            document.getElementById("milediv").style.margin = '1% 1% 1% 1%';
+            document.getElementById("milediv").style.background = '#000000';
+            document.getElementById("milediv").style.opacity = '0.6';
+            document.getElementById("milediv").style.fontSize = '0.5vw';
+            document.getElementById("milediv").style.fontSize = '0.5vw';
+            document.getElementById("milediv").style.webkitFilter = "drop-shadow(1px 1px 2px rgb(5, 155, 255))";
+            document.getElementById("timediv").style.right = '42%';
+            document.getElementById("timediv").style.bottom = '72.6%';
+            document.getElementById("timediv").style.fontSize = '0.4vw';
+            document.getElementById("distancediv").style.right = '53%';
+            document.getElementById("distancediv").style.bottom = '73%';
+            document.getElementById("distancediv").style.background = '#00000000';
+            document.getElementById("distancediv").style.fontSize = '0.4vw';
+            document.getElementById("diffdiv").style.right = '33%';
+            document.getElementById("diffdiv").style.bottom = '73%';
+            document.getElementById("diffdiv").style.background = '#00000000';
+            document.getElementById("diffdiv").style.fontSize = '0.4vw';
+        }
+        setMode('NORMAL',carui)
+        changeallclass(class_icon)
+        const el = document.querySelector('.rpm');
+        el.addEventListener('animationstart', function() {
+            console.log('transition start')
+            rpmanimation = true
+        });
 
-    el.addEventListener('animationend', function() {
-        rpmanimation = false
-        //console.log('transition end')
-    });
-    const el2 = document.querySelector('.carhud');
-    el2.addEventListener('transitionrun', function() {
-        //console.log('transition start')
-        speedanimation = true
-    });
+        el.addEventListener('animationend', function() {
+            rpmanimation = false
+            //console.log('transition end')
+        });
+        const el2 = document.querySelector('.carhud');
+        el2.addEventListener('transitionrun', function() {
+            //console.log('transition start')
+            speedanimation = true
+        });
 
-    el2.addEventListener('transitionend', function() {
-        speedanimation = false
-        //console.log('transition end')
-    });
+        el2.addEventListener('transitionend', function() {
+            speedanimation = false
+            //console.log('transition end')
+        });
+    }, 333);
 }
+
+var compassstring = `<div id="container">
+<section>
+  <span id="border" style="font-size:15px !important; color:rgba(255, 233, 233, 0.65) !important;display:none;">|</span>
+  <h4 id="direction" style="font-size:20px !important; color:rgba(255, 233, 233, 0.9) !important;position:fixed;top:40px;left:35px;"></h4>
+  <span id="border" style="font-size:15px !important; color:rgba(255, 233, 233, 0.65) !important;display:none;">|</span>
+</section>
+<div>
+  <p style="position:fixed;top:28px;left:90px;width:140px;" id="zone"></p>
+  <p id="street" style="position:fixed;top:48px;left:77px;width:150px;font-size:8px !important; color:rgba(255, 233, 233, 0.9) !important; padding-top:-10px;"></p>
+</div>
+</div>`
 function setCompass(bool) {
-    if (bool) {
+    if (bool && setting['streethud']) {
+        $('#location').append(compassstring)
         document.getElementById("location").style.display = 'block';
         document.getElementById("compass").style.display = 'block';
     } else {
-        setTimeout(function(){
-            document.getElementById("mic").style.top = '22px';
-            document.getElementById("mic").style.right = '365px';
-        }, 333);
+        $('#location').html('')
+        document.getElementById("location").style.display = 'none';
+        document.getElementById("compass").style.display = 'none';
     }
 }
 
 function setStatusUI(t) {
     var ver = t['ver']
     var type = t['type']
+    if (setting['statusver']) {
+        status_type = setting['statusver']
+    } else {
         status_type = type
+    }
     if (!t['enable'] && ver == 'simple') {
         document.getElementById("uibar").innerHTML = '';
         document.getElementById("logo").innerHTML = '';
@@ -1342,9 +2190,13 @@ function setStatusUI(t) {
     }
     if (ver == 'simple' && t['enable']) {
         statusui = 'simple'
-        document.getElementById("healthdiv").style.display = 'block';
+        if (document.getElementById("healthdiv")) {
+            document.getElementById("healthdiv").style.display = 'block';
+        }
         document.getElementById("armor").style.display = 'block';
-        document.getElementById("armordiv").style.display = 'block';
+        if (document.getElementById("armordiv")) {
+            document.getElementById("armordiv").style.display = 'block';
+        }
         if (type == 'icons') {
             document.getElementById("armorsimplebg").style.display = 'block';
         }
@@ -1366,6 +2218,7 @@ function setStatusUI(t) {
 }
 
 function setStatusUILocation(table) {
+    locache = table
     ////////console.log("MOVE UI")
     if (table['top']) {
         //////console.log(table['top'])
@@ -1422,10 +2275,23 @@ function setWheelHealth(table) {
         }
 }
 
+var keystring = `<div id="lockbg" style="background:#1f1717; height:220px;width:80px; position:absolute;bottom:55px;right:122px;z-index:1100;"></div>
+<div id="foundcar" style="display:none;background:#01f10d; height:30px;width:70px; position:absolute;bottom:225px;right:122px;z-index:1101;"></div>
+<div id="carlock" style="display:none;background:#0099ff; height:30px;width:70px; position:absolute;bottom:185px;right:132px;z-index:1101;"></div>
+<div onclick="carlockcallback('lock');" style="display:block;background:#079cff00; height:30px;width:70px; position:absolute;bottom:185px;right:132px;z-index:1111;"></div>
+<div id="carunlock" style="display:none;background:#fa260a; height:30px;width:70px; position:absolute;bottom:145px;right:132px;z-index:1101;"></div>
+<div onclick="carlockcallback('unlock');" style="display:block;background:#fa260a00; height:30px;width:70px; position:absolute;bottom:145px;right:132px;z-index:1111;"></div>
+<div id="allopen" style="display:none;background:#face0a; height:30px;width:70px; position:absolute;bottom:105px;right:132px;z-index:1101;"></div>
+<div onclick="carlockcallback('openall');" style="display:block;background:rgba(0, 0, 0, 0); height:30px;width:70px; position:absolute;bottom:105px;right:132px;z-index:1111;"></div>
+<div id="alarm" style="display:none;background:#fa0a46; height:30px;width:70px; position:absolute;bottom:65px;right:132px;z-index:1101;"></div>
+<div onclick="carlockcallback('alarm');" style="display:block;background:#ec003b00; height:30px;width:70px; position:absolute;bottom:65px;right:132px;z-index:1111;"></div>
+<img id="keyless_renzu" style="z-index:1101;position:absolute;right:10px;bottom:10px;opacity:1.0;height:300px;" src="img/carlock.png" />`
 function setShowKeyless(bool) {
     if (bool) {
+        $('#keyless').append(keystring)
         document.getElementById("keyless").style.display = 'block';
     } else {
+        $('#keyless').html('')
         document.getElementById("keyless").style.display = 'none';
     }
 }
@@ -1491,122 +2357,68 @@ function setKeyless(table) {
     }
 }
 
-pressfuck = 0
-var pressedkey1 = 0
-var pressedkey2 = false
-var pressedkey3 = false
-document.onkeyup = function (data) {
-	if (data.keyCode == '76' || data.keyCode == '27') { // Escape key 76 = L (Change the 76 to whatever keycodes you want to hide the carlock ui LINK https://css-tricks.com/snippets/javascript/javascript-keycodes/)
-        if (pressfuck == 1) {
-            document.getElementById("foundcar").style.display = 'none';
-            document.getElementById("carunlock").style.display = 'none';
-            document.getElementById("carlock").style.display = 'none';
-            post("hidecarlock",{})
-            pressfuck = 0
+    pressfuck = 0
+    var pressedkey1 = 0
+    var pressedkey2 = false
+    var pressedkey3 = false
+    document.onkeyup = function (data) {
+        if (data.keyCode == '76' || data.keyCode == '27') { // Escape key 76 = L (Change the 76 to whatever keycodes you want to hide the carlock ui LINK https://css-tricks.com/snippets/javascript/javascript-keycodes/)
+            if (pressfuck == 1) {
+                if (document.getElementById("foundcar")) {
+                    document.getElementById("foundcar").style.display = 'none';
+                    document.getElementById("carunlock").style.display = 'none';
+                    document.getElementById("carlock").style.display = 'none';
+                }
+                post("hidecarlock",{})
+                pressfuck = 0
+            }
+            pressfuck = 1
         }
-        pressfuck = 1
-	}
-    if (data.keyCode == '70') {
-        $.post(`https://${GetParentResourceName()}/getoutvehicle`, {}, function(data) {});
-        pressedkey1 = 0
-    }
-    if (data.keyCode == '144' || data.keyCode == '27') {
-        if (pressedkey2) {
-            pressedkey2 = false
-            //////console.log('pressed')
-            $.post(`https://${GetParentResourceName()}/closecarcontrol`, {}, function(data) {});
+        if (data.keyCode == '70') {
+            $.post(`https://${GetParentResourceName()}/getoutvehicle`, {}, function(data) {});
+            pressedkey1 = 0
         }
-        // if (!pressedkey2) {
-        //     pressedkey2 = true
-        // }
-    }
-    if (data.keyCode == '75' || data.keyCode == '76') {
-        if (pressedkey3) {
-            pressedkey3 = false
-            $.post(`https://${GetParentResourceName()}/hideclothing`, {}, function(data) {});
+        if (data.keyCode == '144' || data.keyCode == '27') {
+            if (pressedkey2) {
+                pressedkey2 = false
+                console.log('pressed')
+                $.post(`https://${GetParentResourceName()}/closecarcontrol`, {}, function(data) {});
+            }
+            // if (!pressedkey2) {
+            //     pressedkey2 = true
+            // }
         }
+        if (data.keyCode == '75' || data.keyCode == '76') {
+            if (pressedkey3) {
+                pressedkey3 = false
+                $.post(`https://${GetParentResourceName()}/hideclothing`, {}, function(data) {});
+            }
+        }
+    };
+
+    function playsound(table) {
+        var file = table['file']
+        var volume = table['volume']
+        var audioPlayer = null;
+        if (audioPlayer != null) {
+            audioPlayer.pause();
+        }
+        if (volume == undefined) {
+            volume = 0.8
+        }
+        audioPlayer = new Audio("./sounds/" + file + ".ogg");
+        audioPlayer.volume = volume;
+        audioPlayer.play();
     }
-};
 
-function playsound(table) {
-    var file = table['file']
-    var volume = table['volume']
-    var audioPlayer = null;
-    if (audioPlayer != null) {
-        audioPlayer.pause();
+    function SetNotify(table) {
+        ////////console.log("notify")
+        new Notify ({status: table['type'],title: table['title'],text: table['message'],autoclose: true})
     }
-    if (volume == undefined) {
-        volume = 0.8
-    }
-    audioPlayer = new Audio("./sounds/" + file + ".ogg");
-    audioPlayer.volume = volume;
-    audioPlayer.play();
-}
-
-function SetNotify(table) {
-    ////////console.log("notify")
-    new Notify ({status: table['type'],title: table['title'],text: table['message'],autoclose: true})
-}
-
-    // more carcontrols
-    const settings = {
-    fill: '#1abc9c',
-    background: '#d7dcdf' };
-    const suspension = document.querySelectorAll('#suspension');
-    Array.prototype.forEach.call(suspension, slider => {
-        slider.querySelector('input').addEventListener('input', event => {
-            slider.querySelector('span').innerHTML = event.target.value * 0.01;
-            applyFill(event.target);
-            post("setvehicleheight",{val:event.target.value * 0.01})
-        });
-        applyFill(slider.querySelector('input'));
-    });
-
-    const wheeloffsetfront = document.querySelectorAll('#wheeloffsetfront');
-    Array.prototype.forEach.call(wheeloffsetfront, slider => {
-        slider.querySelector('input').addEventListener('input', event => {
-            slider.querySelector('span').innerHTML = event.target.value * 0.01;
-            applyFill(event.target);
-            //console.log(event.target.value)
-            post("setvehiclewheeloffsetfront",{val:event.target.value})
-        });
-        applyFill(slider.querySelector('input'));
-    });
-
-    const wheeloffsetrear = document.querySelectorAll('#wheeloffsetrear');
-    Array.prototype.forEach.call(wheeloffsetrear, slider => {
-        slider.querySelector('input').addEventListener('input', event => {
-            slider.querySelector('span').innerHTML = event.target.value * 0.01;
-            applyFill(event.target);
-            //console.log(event.target.value)
-            post("setvehiclewheeloffsetrear",{val:event.target.value})
-        });
-        applyFill(slider.querySelector('input'));
-    });
-
-    const wheelrotationfront = document.querySelectorAll('#wheelrotationfront');
-    Array.prototype.forEach.call(wheelrotationfront, slider => {
-        slider.querySelector('input').addEventListener('input', event => {
-            slider.querySelector('span').innerHTML = event.target.value * 0.01;
-            applyFill(event.target);
-            post("setvehiclewheelrotationfront",{val:event.target.value})
-        });
-        applyFill(slider.querySelector('input'));
-    });
-
-    const wheelrotationrear = document.querySelectorAll('#wheelrotationrear');
-    Array.prototype.forEach.call(wheelrotationrear, slider => {
-        slider.querySelector('input').addEventListener('input', event => {
-            slider.querySelector('span').innerHTML = event.target.value * 0.01;
-            applyFill(event.target);
-            post("setvehiclewheelrotationrear",{val:event.target.value})
-        });
-        applyFill(slider.querySelector('input'));
-    });
 
     function applyFill(slider) {
         const percentage = 100 * (slider.value - slider.min) / (slider.max - slider.min);
-        const bg = `linear-gradient(90deg, ${settings.fill} ${percentage}%, ${settings.background} ${percentage + 0.1}%)`;
+        const bg = `linear-gradient(90deg, #0099ff ${percentage}%, #222222 ${percentage + 0.1}%)`;
         slider.style.background = bg;
     }
 
@@ -1616,46 +2428,6 @@ function SetNotify(table) {
         $("input[type=radio][name=wheelsetting][value='off']").prop("checked", true);
         //post("wheelsetting",{bool:true})
     }
-
-    $('input[type=radio][name=wheelsetting]').change(function() {
-        if (this.value == 'on') {
-            //console.log("ON")
-            post("wheelsetting",{bool:false})
-        } else {
-            //console.log("OFF")
-            post("wheelsetting",{bool:true})
-        }
-    });
-    
-    $('input[type=radio][name=neon]').change(function() {
-        if (this.value == 'on') {
-            ////////console.log("ON")
-            post("setvehicleneon",{bool:true})
-        } else {
-            ////////console.log("OFF")
-            post("setvehicleneon",{bool:false})
-        }
-    });
-
-    $('input[type=radio][name=neoneffect1]').change(function() {
-        if (this.value == 'on') {
-            ////////console.log("ON")
-            post("setneoneffect1",{bool:true})
-        } else {
-            ////////console.log("OFF")
-            post("setneoneffect1",{bool:false})
-        }
-    });
-
-    $('input[type=radio][name=neoneffect2]').change(function() {
-        if (this.value == 'on') {
-            ////////console.log("ON")
-            post("setneoneffect2",{bool:true})
-        } else {
-            ////////console.log("OFF")
-            post("setneoneffect2",{bool:false})
-        }
-    });
 
     function setMapVersion(table) {
         var type = table['type']
@@ -1694,15 +2466,95 @@ function SetNotify(table) {
 
     var state = {}
 
+    var clothes = `<li style="position:absolute;left:0;top:0;" id="variants_helmet_1" onclick="CallbackCLothing('helmet_1','helmet_2');">
+    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707);-webkit-text-stroke:4px rgb(190, 53, 48)'></i>
+      <i class="fad fa-helmet-battle" style="position:relative;margin-left:100%;;font-size:2.2vw;color:#ffffff"></i>
+    </span>
+  </li>
+  <li style="position:absolute;left:0;top:20%;" id="variants_glasses_1" onclick="CallbackCLothing('glasses_1','glasses_2');">
+    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fal fa-sunglasses" style="position:relative;margin-left:109%;;font-size:2.0vw;color:#ffffff"></i>
+    </span>
+  </li>
+  <li style="position:absolute;left:0;top:40%;" id="variants_chain_1" onclick="CallbackCLothing('chain_1','chain_2');">
+    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fad fa-scarf" style="position:relative;margin-left:115%;;font-size:2.0vw;color:#ffffff"></i>
+    </span>
+  </li>
+  <li style="position:absolute;left:0;top:60%;" id="variants_watches_1" onclick="CallbackCLothing('watches_1','watches_2');">
+    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fad fa-watch" style="position:relative;margin-left:120%;;font-size:2.0vw;color:#ffffff"></i>
+    </span>
+  </li>
+  <li style="position:absolute;left:0;top:80%;" id="variants_mask_1" onclick="CallbackCLothing('mask_1','mask_2');">
+    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fad fa-hockey-mask" style="position:relative;margin-left:120%;;font-size:2.0vw;color:#ffffff"></i>
+    </span>
+  </li>
+  <li style="position:absolute;left:30%;top:80%;" id="variants_reset" onclick="ResetClothes();">
+    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fas fa-redo-alt" style="position:relative;margin-left:120%;;font-size:2.0vw;color:#ffffff"></i>
+    </span>
+  </li>
+  <li style="position:absolute;left:60%;top:0;" id="variants_torso_1" onclick="CallbackCLothing('torso_1','torso_2');">
+    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fad fa-user-tie" style="position:relative;margin-left:120%;;font-size:2.0vw;color:#ffffff"></i>
+    </span>
+  </li>
+  <li style="position:absolute;left:60%;top:20%;" id="variants_tshirt_1" onclick="CallbackCLothing('tshirt_1','tshirt_2');">
+    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fad fa-tshirt" style="position:relative;margin-left:107%;;font-size:2.0vw;color:#ffffff"></i>
+    </span>
+  </li>
+  <li style="position:absolute;left:60%;top:40%;" id="variants_bproof_1" onclick="CallbackCLothing('bproof_1','bproof_2');">
+    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fad fa-user-shield" style="position:relative;margin-left:108%;;font-size:2.0vw;color:#ffffff"></i>
+    </span>
+  </li>
+  <li style="position:absolute;left:60%;top:60%;" id="variants_pants_1" onclick="CallbackCLothing('pants_1','pants_2');">
+    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i style="position:relative;margin-left:110%;">
+        <svg viewBox="-120 0 448 448"
+          xmlns="http://www.w3.org/2000/svg">
+          <path fill="#ffffff" stroke="grey" d="m0 448h72.59375l23.40625-304.617188c.324219-4.164062 3.796875-7.378906 7.976562-7.378906 4.175782 0 7.652344 3.214844 7.976563 7.378906l23.453125 304.617188h72.59375v-368.640625c-24.527344-3.566406-43.792969-22.832031-47.359375-47.359375h-16.640625v40c0 13.253906-10.746094 24-24 24h-16c-4.417969 0-8-3.582031-8-8v-56h-48.640625c-3.566406 24.527344-22.832031 43.792969-47.359375 47.359375zm0 0"/>
+          <path d="m0 0h96v16h-96zm0 0"/>
+          <path d="m0 63.199219c15.699219-3.234375 27.964844-15.5 31.199219-31.199219h-31.199219zm0 0"/>
+          <path d="m144 0h64v16h-64zm0 0"/>
+          <path d="m208 32h-31.199219c3.234375 15.699219 15.5 27.964844 31.199219 31.199219zm0 0"/>
+          <path d="m112 0h16v16h-16zm0 0"/>
+          <path d="m128 72v-40h-16v48h8c4.417969 0 8-3.582031 8-8zm0 0"/>
+        </svg>
+      </i>
+    </span>
+  </li>
+  <li style="position:absolute;left:60%;top:80%;" id="variants_shoes_1" onclick="CallbackCLothing('shoes_1','shoes_2');">
+    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fad fa-boot" style="position:relative;margin-left:115%;;font-size:2.0vw;color:#ffffff"></i>
+    </span>
+  </li>`
+
+
     function setShowClothing(table) {
         if (table['bool']) {
             state = table['equipped']
+            $('#clothe').append(clothes)
             document.getElementById("clothe").style.display = 'block';
         } else {
+            $('#clothe').html('')
             document.getElementById("clothe").style.display = 'none';
         }
     }
-
     function setClotheState(table) {
         ////////console.log("clothe",table['bool'])
         if (!table['bool']) {
@@ -1769,13 +2621,341 @@ function SetNotify(table) {
             }
         }
     }
+
+    let = globalconfig = {}
+    usersetting['carhud'] = {}
+    setting['carhud'] = {}
+
+    function carhudver() {
+        var val = document.getElementById("carhudver").value;
+        if (usersetting['carhud'] == undefined) {
+            usersetting['carhud'] = {}
+        }
+        if (val) {
+            usersetting['carhud']['ver'] = val
+        }
+        if (val !== 'auto') {
+            setCarui(val)
+        }
+    }
+
+    var settingsui = `<div class="card">
+    <div class="card__header">
+      <div class="toolbar">
+        <div class="toolbar__item toolbar__item--close"></div>
+        <div class="toolbar__item toolbar__item--min"></div>
+        <div class="toolbar__item toolbar__item--max"></div>
+      </div><a href="#"><img src="https://forum.cfx.re/uploads/default/original/4X/b/1/9/b196908c7e5dfcd60aa9dca0020119fa55e184cb.png" height="50" alt="Renzu Hud v1.17"></a>
+    </div>
+    <div class="card__body">
+      <div class="container">
+        <div class="grid">
+          <h1>Hud Setting</h1>
+        </div>
+      </div>
+      <div class="container">
+        <div class="grid grid--half" id="statussetting">
+          <h3 style="color: #64fd64;">Status HUD</h3>
+          <div class="form-item">
+            <label class="form-item__label">Status Version</label>
+            <div class="form-item__control">
+              <select class="control control--select" id="statusversion" onchange="statusversion()">
+                <option selected="selected" value="progressbar">Progress</option>
+                <option value="icons">Icons</option>
+              </select>
+            </div>
+          </div>
+          <h3>Name</h3>
+          <h3 style="
+          /* display: inline-block; */
+          /* float: right; */
+          /* margin-top: -30px; */
+          margin-top: -30px;
+          position: absolute;
+          top: 100px;
+          right: 50%;
+          ">Hide%</h3>
+          <h3 style="
+          /* display: inline-block; */
+          /* float: right; */
+          margin-top: -30px;
+          position: absolute;
+          top: 100px;
+          right: 5%;
+          ">Type</h3>
+          <h3 style="
+          /* display: inline-block; */
+          /* float: right; */
+          margin-top: -30px;
+          position: absolute;
+          top: 100px;
+          right: 27%;
+          ">HideIfMax</h3>
+        </div>
+        <div class="grid grid--half">
+          <h3 style="color: #64fd64;">Car HUD</h3>
+          <div class="form-item">
+            <label class="form-item__label">Version</label>
+            <div class="form-item__control">
+              <select class="control control--select" id="carhudver" onchange="carhudver()">
+                <option selected="selected" value="auto">Auto</option>
+                <option value="simple">Simple</option>
+                <option value="minimal">Minimal</option>
+                <option value="modern">Modern</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-item">
+            <label class="form-item__label">Speed Metric</label>
+            <div class="form-item__control">
+              <select class="control control--select" id="speedmetric" onchange="speedmetric()">
+                <option selected="selected" value="mph">MPH</option>
+                <option value="kmh">KMH</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-item">
+            <label class="form-item__label">Turbo Hud</label>
+            <div class="form-item__control toggle" id='turbohud'>
+              <div class="toggle__handle"></div>
+            </div>
+          </div>
+          <div class="form-item">
+            <label class="form-item__label">Manual Gears Hud</label>
+            <div class="form-item__control toggle" id='manualhud'>
+              <div class="toggle__handle"></div>
+            </div>
+          </div>
+          <div class="form-item">
+            <label class="form-item__label">Car Hud Refresh Rate</label>
+            <div class="form-item__control"><small><strong><span class="slider__value" id="rval">500</span><span>ms</span></strong></small></div>
+            <div class="slider">
+              <input class="slider__input" type="range" value="0" min="0" max="300" id="refreshrate" />
+              <div class="slider__positive" id="refreshrate2"></div>
+            </div>
+          </div>
+          <p><small>Lower MS is Much Accurate but higher CPU Usage.</small></p>
+          <h3 style="color: #64fd64;">Street Name HUD</h3>
+          <div class="form-item">
+            <label class="form-item__label">Enable/Disable</label>
+            <div class="form-item__control toggle" id='streethud'>
+              <div class="toggle__handle"></div>
+            </div>
+          </div>
+          <h3 style="color: #64fd64;">Weapon HUD</h3>
+          <div class="form-item">
+            <label class="form-item__label">Enable/Disable</label>
+            <div class="form-item__control toggle" id='weaponhud'>
+              <div class="toggle__handle"></div>
+            </div>
+          </div>
+          <p><small>Status HUD and CarHUD is Draggable.</small></p>
+          <button class="button" onclick='resetsetting(true)' style="background:red;">RESET</button>
+            <button class="button" onclick='SavetoLocal()'>DONE</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`
+
+    function settingui(t) {
+        if (t.bool) {
+            document.getElementById('statusv3').innerHTML = ''
+            document.getElementById('status_progress').innerHTML = ''
+            document.getElementById('settingui').innerHTML = ''
+            $("#settingui").append(settingsui);
+            SetStatusOrder(globalconfig['status'])
+            document.getElementById('settingui').style.display = 'block'
+            changeallclass(class_icon)
+        } else {
+            //document.getElementById('statusv3').innerHTML = ''
+            //document.getElementById('status_progress').innerHTML = ''
+            document.getElementById('settingui').innerHTML = '' 
+            document.getElementById('settingui').style.display = 'none'
+        }
+    }
+
+    function statusversion() {
+        var val = document.getElementById("statusversion").value;
+        status_type = val
+        setting['statusver'] = val
+        usersetting['statusver'] = val
+        document.getElementById('statusv3').innerHTML = ''
+        document.getElementById('status_progress').innerHTML = ''
+        document.getElementById('settingui').innerHTML = ''
+        localStorage.setItem("UISETTING", JSON.stringify(usersetting));
+        $("#settingui").append(settingsui);
+        SetStatusOrder(globalconfig['status'])
+    }    
+  
+    function speedmetric() {
+        var val = document.getElementById("speedmetric").value;
+        SetMetrics(val)
+        usersetting['carhud']['speedmetric'] = val
+    }
+
+    function statustype(st) {
+        var val = document.getElementById(""+st+"statustype").value;
+        if (usersetting['status'] == undefined) { usersetting['status'] = {} }
+        if (usersetting['status'][st] == undefined) { usersetting['status'][st] = {}}
+        setting['status'][st].type = val
+        usersetting['status'][st].type = val
+        document.getElementById('statusv3').innerHTML = ''
+        document.getElementById('status_progress').innerHTML = ''
+        document.getElementById('settingui').innerHTML = ''
+        localStorage.setItem("UISETTING", JSON.stringify(usersetting));
+        $("#settingui").append(settingsui);
+        SetStatusOrder(globalconfig['status'])
+    }
+
+    function SavetoLocal() {
+        post("hidecarlock",{})
+        resetsetting(false)
+        localStorage.setItem("UISETTING", JSON.stringify(usersetting));
+    }
     
+    function resetsetting(force) {
+        if (force) {
+            usersetting = {}
+            if (setting['statusver'] == undefined || usersetting['statusver'] == undefined) {
+                status_type = globalconfig['statusver']
+                setting['statusver'] = globalconfig['statusver']
+                usersetting['statusver'] = globalconfig['statusver']
+            }
+            localStorage.removeItem("UISETTING")
+            ResetStorages()
+            document.getElementById('statusv3').innerHTML = ''
+            document.getElementById('status_progress').innerHTML = ''
+            document.getElementById('settingui').innerHTML = ''
+            $("#settingui").append(settingsui);
+            SetStatusOrder(globalconfig['status'])
+            setStatusUILocation(locache)
+        }
+        if (usersetting['carhud'] == undefined) {
+            usersetting['carhud'] = {}
+        }
+        if (setting['carhud'] == undefined) {
+            setting['carhud'] = {}
+        }
+        if (setting['statusver'] == undefined || usersetting['statusver'] == undefined) {
+            status_type = globalconfig['statusver']
+            setting['statusver'] = globalconfig['statusver']
+            usersetting['statusver'] = globalconfig['statusver']
+        }
+        if (setting['streethud'] == undefined || usersetting['streethud'] == undefined) {
+            setting['streethud'] = globalconfig['streethud']
+            usersetting['streethud'] = globalconfig['streethud']
+            setCompass(setting['streethud'])
+        }
+        if (setting['weaponhud'] == undefined && globalconfig['weaponhud'] !== undefined || usersetting['weaponhud'] == undefined) {
+            setting['weaponhud'] = globalconfig['weaponhud']
+            usersetting['weaponhud'] = globalconfig['weaponhud']
+            setWeaponUi(setting['weaponhud'],true)
+        }
+        for (const i in globalconfig['carhud']) {
+            if (i == 'version' && setting['carhud']['ver'] == undefined || i == 'version' && usersetting['carhud']['ver'] == undefined) {
+              setting['carhud']['ver'] = globalconfig['carhud'][i]
+              usersetting['carhud']['ver'] = globalconfig['carhud'][i]
+              carui = setting['carhud']['ver']
+              setCarui(setting['carhud']['ver'])
+            }
+            if(i == 'speedmetric' && setting['carhud']['speedmetric'] == undefined || i == 'speedmetric' && usersetting['carhud']['speedmetric'] == undefined) {
+              setting['carhud']['speedmetric'] = globalconfig['carhud'][i]
+              usersetting['carhud']['speedmetric'] = globalconfig['carhud'][i]
+              SetMetrics(setting['carhud']['speedmetric'])
+            }
+            if(i == 'turbohud' && setting['carhud']['turbohud'] == undefined || i == 'turbohud' && usersetting['carhud']['turbohud'] == undefined) {
+              setting['carhud']['turbohud'] = globalconfig['carhud'][i]
+              usersetting['carhud']['turbohud'] = globalconfig['carhud'][i]
+              setShowTurboBoost(setting['carhud']['turbohud'],true)
+            }
+            if(i == 'manualhud' && setting['carhud']['manualhud'] == undefined || i == 'manualhud' && usersetting['carhud']['manualhud'] == undefined) {
+              setting['carhud']['manualhud'] = globalconfig['carhud'][i]
+              usersetting['carhud']['manualhud'] = globalconfig['carhud'][i]
+              setManual(setting['carhud']['manualhud'],true)
+            }
+            if(i == 'refreshrate' && setting['carhud']['refreshrate'] == undefined && i == 'refreshrate' && usersetting['carhud']['refreshrate'] == undefined) {
+              setting['carhud']['refreshrate'] = globalconfig['carhud'][i]
+              usersetting['carhud']['refreshrate'] = globalconfig['carhud'][i]
+              post("setrefreshrate",{val:setting['carhud']['refreshrate']})
+            }
+        }
+    }
+
+    function reimportsetting(c) {
+        $("#settingui").append(settingsui);
+        console.log("Checking User Setting...")
+        globalconfig = c
+        resetsetting()
+        const sett = JSON.parse(localStorage.getItem("UISETTING"))
+        if (sett) {
+            usersetting = sett
+            setting = usersetting
+            console.log("User Setting Activated")
+            for (const i in globalconfig['carhud']) {
+                if (setting['carhud'] == undefined) {
+                    setting['carhud'] = {}
+                }
+                if (i == 'version' && setting['carhud']['ver'] == undefined && globalconfig['carhud'][i] !== undefined) {
+                  setting['carhud']['ver'] = globalconfig['carhud'][i]
+                  carui = setting['carhud']['ver']
+                  setCarui(setting['carhud']['ver'])
+                }
+                if(i == 'speedmetric' && setting['carhud']['speedmetric'] == undefined && globalconfig['carhud'][i] !== undefined) {
+                  setting['carhud']['speedmetric'] = globalconfig['carhud'][i]
+                  SetMetrics(setting['carhud']['speedmetric'])
+                }
+                if(i == 'turbohud' && setting['carhud']['turbohud'] == undefined && globalconfig['carhud'][i] !== undefined) {
+                  setting['carhud']['turbohud'] = globalconfig['carhud'][i]
+                  setShowTurboBoost(setting['carhud']['turbohud'],true)
+                }
+                if(i == 'manualhud' && setting['carhud']['manualhud'] == undefined & globalconfig['carhud'][i] !== undefined) {
+                  setting['carhud']['manualhud'] = globalconfig['carhud'][i]
+                  setManual(setting['carhud']['manualhud'],true)
+                }
+                if(i == 'refreshrate' && setting['carhud']['refreshrate'] == undefined && globalconfig['carhud'][i] !== undefined) {
+                  setting['carhud']['refreshrate'] = globalconfig['carhud'][i]
+                  post("setrefreshrate",{val:setting['carhud']['refreshrate']})
+                }
+            }
+        }
+    }
+    
+    function changelinecolor(s) {
+        console.log(s)
+    }
+    function componentFromStr(numStr, percent) {
+        var num = Math.max(0, parseInt(numStr, 10));
+        return percent ?
+            Math.floor(255 * Math.min(100, num) / 100) : Math.min(255, num);
+    }
+    
+    function rgbToHex(rgb) {
+        var rgbRegex = /^rgb\(\s*(-?\d+)(%?)\s*,\s*(-?\d+)(%?)\s*,\s*(-?\d+)(%?)\s*\)$/;
+        var result, r, g, b, hex = "";
+        if ( (result = rgbRegex.exec(rgb)) ) {
+            r = componentFromStr(result[1], result[2]);
+            g = componentFromStr(result[3], result[4]);
+            b = componentFromStr(result[5], result[6]);
+        
+            hex = "#" + (0x1000000 + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+        return hex;
+    } 
+    var toggle = undefined
     function SetStatusOrder(t) {
+        statcache = t['table']
         console.log("status ordering")
         var s = t['table']
         statleft = t['float']
         var offsetplus = -35
         var statuses = s
+        if (setting['status'] == undefined) {
+            setting['status'] = {}
+        }
+        if (setting['statusver'] == undefined) {
+            setting['statusver'] = status_type
+        }
         for (const i in statuses) {
             if (statuses[i].enable) {
                 var offset = 275
@@ -1791,23 +2971,108 @@ function SetNotify(table) {
                 var class2 = statuses[i].i_id_2_class
                 var color1 = statuses[i].i_id_1_color
                 var color2 = statuses[i].i_id_2_color
+                var bg = statuses[i].bg
+                if (localStorage.getItem(""+statuses[i].status+"color2")) {
+                    bg = localStorage.getItem(""+statuses[i].status+"color2")
+                }
+                if (localStorage.getItem(""+statuses[i].status+"color1")) {
+                    color1 = localStorage.getItem(""+statuses[i].status+"color1")
+                }
                 var divid = statuses[i].status+'div'
                 var i_id_1 = statuses[i].status+'val'
                 var i_id_2 = statuses[i].status+'simplebg'
                 var rpuidiv = statuses[i].status+'bar'
                 var blink = statuses[i].status+'blink'
+                var hidemax = statuses[i].min_val_hide
+                if (hidemax == undefined) {
+                    hidemax = 100
+                }
                 if (statleft == 'top-left' || statleft == 'bottom-left') {
                     float = 'left'
                 } else {
                     float = 'right'
                 }
-                if (statuses[i].type == 1) {
-                    if (status_type == 'icons') {
-                        $("#statusv3").prepend('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:17px;position:relative;color:rgba(144, 144, 144, 0.876);float:right; margin-top:-25px;margin-left:-7px;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:17px;color:rgba(11, 39, 63, 0.707)"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:16px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+fa+' fa-stack-1x" style="font-size:19px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+fa+' fa-stack-1x" style="font-size:19px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
-                    } else {
-                        $("#statusv3").prepend('<div id="'+divid+'" style="float:'+float+';height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;left:3.5vw;"> <i class="fas fa-octagon fa-stack-2x" style="font-size:1.25vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:1.4vw;color:rgba(170, 170, 170, 0.623)"></i> <i id="'+i_id_2+'" class="'+statuses[i].fa+' fa-stack-1x" style="font-size:1.25vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.14vw;bottom:-0.53vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.9vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="'+i_id_1+'" class="meter statushud" stroke="'+statuses[i].i_id_1_color+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
+                if (setting['status'][statuses[i].status] == undefined) {
+                    setting['status'][statuses[i].status] = {}
+                }
+                if (usersetting['status'] && usersetting['status'][statuses[i].status] !== undefined) {
+                    setting['status'][statuses[i].status].min_val_hide = usersetting['status'][statuses[i].status].min_val_hide
+                    setting['status'][statuses[i].status].hideifmax = usersetting['status'][statuses[i].status].hideifmax
+                    if (usersetting['status'][statuses[i].status].type == undefined) {
+                        usersetting['status'][statuses[i].status].type = statuses[i].type
                     }
+                    setting['status'][statuses[i].status].type = usersetting['status'][statuses[i].status].type
                 } else {
+                    setting['status'][statuses[i].status].min_val_hide = hidemax
+                    setting['status'][statuses[i].status].hideifmax = statuses[i].hideifmax
+                    setting['status'][statuses[i].status].type = statuses[i].type
+                    if (usersetting['status'] == undefined) {
+                        usersetting['status'] = {}
+                    }
+                    if (usersetting['status'][statuses[i].status] == undefined) { usersetting['status'][statuses[i].status] = {} }
+                    usersetting['status'][statuses[i].status].min_val_hide = hidemax
+                    usersetting['status'][statuses[i].status].hideifmax = statuses[i].hideifmax
+                    usersetting['status'][statuses[i].status].type = statuses[i].type
+                }
+                hex = rgbToHex(statuses[i].bg)
+                if (hex == undefined) { hex = '#000000'}
+                //console.log(setting['status'][statuses[i].status].hideifmax)
+                $("#statussetting").append(`<div class="form-item">
+                <div style="position: absolute;
+                left: -25px;
+                font-size: 15px;">
+                <input style="width: 30px;" type="color" id="`+statuses[i].status+`color" name="`+statuses[i].status+`color"
+                value="`+rgbToHex(statuses[i].i_id_1_color)+`">
+                </div>
+                <div style="position: absolute;
+                left: -55px;
+                font-size: 15px;">
+                <input style="width: 30px;" type="color" id="`+statuses[i].status+`color2" name="`+statuses[i].status+`color"
+                value="`+rgbToHex(statuses[i].bg)+`">
+                </div>
+                <label class="form-item__label">`+statuses[i].status+`</label>
+                <div class="slider" style="width:30%;">
+                    <input id="`+statuses[i].status+`range" class="slider__input" type="range" value="`+setting['status'][statuses[i].status].min_val_hide+`" min="0" max="100"/>
+                    <div class="slider__positive" style="width: `+setting['status'][statuses[i].status].min_val_hide+`%;" id="`+statuses[i].status+`widthbar"></div>
+                </div>
+                <div class="form-item__control toggle" data-id="`+statuses[i].status+`" id="`+statuses[i].status+`toggle">
+                  <div class="toggle__handle"></div>
+                </div>
+                <div class="form-item__control" style="width: 15%;display: inline-flex;">
+                    <select class="control control--select" id="`+statuses[i].status+`statustype" onchange="statustype('`+statuses[i].status+`')">
+                        <option selected="selected" value="1">1</option>
+                        <option value="0">0</option>
+                    </select>
+                </div>
+              </div>`);
+                $("#"+statuses[i].status+"color").on("input", function() {
+                    document.getElementById(statuses[i].status+'val').style.stroke = ''+$(this).val()+'';
+                    localStorage.setItem(""+statuses[i].status+"color1", $(this).val());
+                });
+                $("#"+statuses[i].status+"color2").on("input", function() {
+                    document.getElementById(''+statuses[i].status+'fabg').style.color = ''+$(this).val()+'';
+                    localStorage.setItem(""+statuses[i].status+"color2", $(this).val());
+                });
+                if (setting['status'][statuses[i].status] == undefined) { setting['status'][statuses[i].status] = {} }
+                document.getElementById(''+statuses[i].status+'statustype').value = setting['status'][statuses[i].status].type;
+                if (setting['statusver']) {
+                    document.getElementById('statusversion').value = setting['statusver']
+                }
+                if (setting['carhud']['ver']) {
+                    document.getElementById('carhudver').value = setting['carhud']['ver']
+                }
+                if (setting['carhud']['speedmetric']) {
+                    document.getElementById('speedmetric').value = setting['carhud']['speedmetric']
+                }
+                if (setting['status'][statuses[i].status].type == 1) {
+                    if (setting['statusver'] == 'icons') {
+                        $("#statusv3").prepend('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:27px;position:relative;color:rgba(144, 144, 144, 0.876);float:right; margin-top:4px;margin-left:1px;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:27px;color:'+bg+'"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:26px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
+                    } else {
+                        $("#statusv3").prepend('<div id="'+divid+'" style="float:'+float+';height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:1.25vw;color:'+bg+';margin-left:0.2vw;"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:1.41vw;color:rgba(170, 170, 170, 0.623)"></i> <i id="'+i_id_2+'" class="'+statuses[i].fa+' fa-stack-1x" style="font-size:1.0vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1.19vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.25vw;bottom:-0.312vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.45vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="'+i_id_1+'" class="meter statushud" stroke="'+color1+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
+                    }
+                    statusbars[statuses[i].status] = false
+                } else {
+                    statusbars[statuses[i].status] = true
                     $("#status_progress").append('<li style="height: 40px;position:relative;">\
                     <div class="prog-bar">\
                       <span class="bar">\
@@ -1821,21 +3086,173 @@ function SetNotify(table) {
                 }
             }
         }
+
+        const toggle = document.querySelectorAll('.toggle');
+        if (setting['carhud']['refreshrate']) {
+            var p = (setting['carhud']['refreshrate'] / 300) * 100
+            document.getElementById('rval').innerHTML = setting['carhud']['refreshrate']
+            document.getElementById('refreshrate').value = setting['carhud']['refreshrate']
+            document.getElementById('refreshrate2').style.width = ''+p+'%'
+            post("setrefreshrate",{val:setting['carhud']['refreshrate']})
+        }
+        for (var i = 0; toggle.length > i; i++) {
+            var statusname = toggle[i].id
+            statusname = statusname.replace("toggle", "");
+            if (usersetting['status'] && usersetting['status'][statusname] !== undefined) {
+                setting['status'][statusname].hideifmax = usersetting['status'][statusname].hideifmax
+            }
+            if (setting['status'][statusname] && setting['status'][statusname].hideifmax) {
+                //console.log('toggle',statusname)
+                toggle[i].classList.toggle('is-on');
+            }
+            //console.log(statusname)
+            if (setting['streethud'] && statusname == 'streethud') {
+                toggle[i].classList.toggle('is-on');
+            }
+            if (setting['carhud'] && setting['carhud']['turbohud'] && statusname == 'turbohud') {
+                toggle[i].classList.toggle('is-on');
+            }
+            if (setting['carhud'] && setting['carhud']['manualhud'] && statusname == 'manualhud') {
+                toggle[i].classList.toggle('is-on');
+            }
+            if (setting['weaponhud'] && statusname == 'weaponhud') {
+                toggle[i].classList.toggle('is-on');
+            }
+            toggle[i].addEventListener('click', function () {
+                this.classList.toggle('is-on');
+                const statusname = this.id.replace("toggle", "")
+                if (setting['status'][statusname] !== undefined) { // status only
+                    setting['status'][statusname].hideifmax = !setting['status'][statusname].hideifmax
+                    if (usersetting['status'] == undefined) {
+                        usersetting['status'] = {}
+                    }
+                    if (usersetting['status'][statusname] == undefined) {
+                        usersetting['status'][statusname] = {}
+                    }
+                    usersetting['status'][statusname].hideifmax = setting['status'][statusname].hideifmax
+                }
+                if (setting['carhud'][statusname] !== undefined && statusname == 'turbohud') { // status only
+                    setting['carhud'][statusname] = !setting['carhud'][statusname]
+                    usersetting['carhud'][statusname] = setting['carhud'][statusname]
+                    setShowTurboBoost(usersetting['carhud'][statusname],true)
+                }
+
+                if (setting['carhud'][statusname] !== undefined && statusname == 'manualhud') { // status only
+                    setting['carhud'][statusname] = !setting['carhud'][statusname]
+                    usersetting['carhud'][statusname] = setting['carhud'][statusname]
+                    setManual(usersetting['carhud'][statusname],true)
+                }
+                if (setting[statusname] !== undefined && statusname == 'streethud') { // status only
+                    setting[statusname] = !setting[statusname]
+                    usersetting[statusname] = setting[statusname]
+                    setCompass(setting['streethud'])
+                }
+                if (setting[statusname] !== undefined && statusname == 'weaponhud') { // status only
+                    setting[statusname] = !setting[statusname]
+                    usersetting[statusname] = setting[statusname]
+                    setWeaponUi(setting['weaponhud'],true)
+                }
+            });
+        }
+        const sliderInput = document.querySelectorAll('.slider__input');
+        for (var i = 0; sliderInput.length > i; i++) {
+            sliderInput[i].addEventListener('input', function () {
+            var statusname = this.id
+            statusname = statusname.replace("range", "");
+            const valueContainer = this.parentNode.parentNode.querySelector('.slider__value');
+            const sliderValue = this.value;
+            const maxVal = this.getAttribute('max');
+            const posWidth = this.value / maxVal;
+            this.parentNode.querySelector('.slider__positive').style.width = posWidth * 100 + '%';
+            if (setting['carhud'][statusname]) {
+                setting['carhud'][statusname] = sliderValue
+                valueContainer.innerHTML = sliderValue;
+                if (usersetting['carhud'] == undefined) {
+                    usersetting['carhud'] = {}
+                }
+                usersetting['carhud'][statusname] = sliderValue
+                post("setrefreshrate",{val:sliderValue})
+                v1 = sliderValue * 0.001
+                v2 = sliderValue * 0.01
+            }
+            if (setting['status'][statusname]) {
+                setting['status'][statusname].min_val_hide = sliderValue
+                if (usersetting['status'] == undefined) {
+                    usersetting['status'] = {}
+                }
+                if (usersetting['status'][statusname] == undefined) {
+                    usersetting['status'][statusname] = {}
+                }
+                if (usersetting['status'][statusname]) {
+                    usersetting['status'][statusname].min_val_hide = sliderValue
+                }
+            }
+            });
+        }
         RestoreStatusPosition()
     }
 
-    function setShowTurboBoost(bool) {
+    console.clear();
+
+    const radioItem = document.querySelectorAll('.radio__item');
+
+    for (var i = 0; radioItem.length > i; i++) {
+        radioItem[i].addEventListener('click', function () {
+        const siblingItems = this.parentNode.getElementsByClassName('radio__item');
+        for (var i = 0; siblingItems.length > i; i++) {
+            siblingItems[i].classList.remove('is-active');
+        }
+        this.classList.toggle('is-active');
+        });
+    }
+
+    var turbostring = `<div class="turbo_hud">
+    <div class="boost_div-bg"></div>
+    <div class="boost_div">
+      <svg class="circle" width="50" height="50" style="transform: rotate(-75deg) scale(2.5);">
+        <circle class="test1" stroke="#FFFFFF" stroke-width="3" style="stroke-opacity: 0.2;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="20 100" stroke-dashoffset="0"/>
+        <circle class="test2" stroke="#FFFFFF" stroke-width="3" style="stroke-opacity: 0.2;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="10 100" stroke-dashoffset="0"/>
+        <circle class="test3" stroke="#FFFFFF" stroke-width="3" style="stroke-opacity: 0.2;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="20 100" stroke-dashoffset="0"/>
+        <circle class="test4" stroke="#FFFFFF" stroke-width="3" style="stroke-opacity: 0.2;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="17 100" stroke-dashoffset="0"/>
+        <circle class="progress1" stroke="rgb(52, 147, 255)" stroke-width="3" style="stroke-opacity: 1;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="0 100" stroke-dashoffset="0"/>
+        <circle class="progress2" stroke="rgb(52, 147, 255)" stroke-width="3" style="stroke-opacity: 1;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="0 100" stroke-dashoffset="0"/>
+        <circle class="progress4" stroke="rgb(52, 147, 255)" stroke-width="3" style="stroke-opacity: 1;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="0 100" stroke-dashoffset="0"/>
+        <circle class="progress3 boost" stroke="rgb(52, 147, 255)" stroke-width="1.8" style="stroke-opacity: 1;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="0 180" stroke-dashoffset="0"/>
+        <defs>
+          <linearGradient id="gradient">
+            <stop offset="30%" stop-color="#FF0245" />
+            <stop offset="100%" stop-color="#BBFFFE" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="boost_text">
+        <p>0</p>
+        <small>BOOST</small>
+      </div>
+      <div class="section-conex"></div>
+    </div>
+  </div>`
+    function setShowTurboBoost(bool,s) {
         ////////console.log("show turbo")
-        if (bool) {
+        if (!s) {
+            featstate['turbohud'] = bool
+        }
+        if (bool && setting['carhud'] && setting['carhud']['turbohud'] && featstate['turbohud']) {
             //////console.log(bool)
+            $('#turbohuddiv').append(turbostring)
             $('.turbo_hud').fadeIn('fast');
         } else {
+            if (!s) {
+                featstate['turbohud'] = false
+            }
+            $('#turbohuddiv').html('')
             $('.turbo_hud').fadeOut('fast');
         }
     }
 
     function setTurboBoost(table) {
         let data = table
+        if(!setting['carhud']['turbohud']) { return }
         //$('.turbo_hud').fadeIn('fast');
         //////console.log(data['speed'])
         if (data['speed']) {
@@ -1865,6 +3282,26 @@ function SetNotify(table) {
         }
     }
 
+    var carstatusstring = `<div id="carinfo">Car Status:</div>
+    <img style="z-index:900;position:absolute;right:440px;top:100px;opacity:0.7;height:650px;" src="img/bodybg.png" />
+    <!-- <div class="pulse" style="z-index: 1111;"></div> -->
+    <img id="carstatimg" style="z-index:1001;position:absolute;right:500px;top:100px;opacity:1;height:550px;" src="img/carstatus.png" />
+    <span id="brakelevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:657px;border-radius:5px;top:250px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/chest.png">LVL 1</span>
+    <span id="enginelevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:835px;top:250px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/head.png">LVL 1</span>
+    <span id="enginename" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:905px;top:180px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/head.png">Default Engine</span>
+    <span id="suspensionlevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:890px;top:384px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/rightarm.png">LVL 1</span>
+    <span id="trannytype" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:945px;top:300px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/head.png">Automatic</span>
+    <span id="trannylevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:608px;top:382px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/leftarm.png">LVL 1</span>
+    <span id="turbolevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:840px;top:514.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/rightleg.png">LVL 1</span>
+    <span id="tirelevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:654px;top:515.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/leftleg.png">LVL 1</span>
+    <img id="coolantlevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(5, 84, 255));z-index:1001;position:absolute;right:974px;top:581.8px;opacity:1.0;height:40px;" src="img/coolant.png" />
+    <span id="coolanttext" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:934px;top:598.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;overflow:hidden;" src="img/leftleg.png">LVL 1</span>
+    <img id="oillevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(5, 84, 255));z-index:1001;position:absolute;right:974px;top:641.8px;opacity:1.0;height:40px;" src="img/oil.png" />
+    <span id="oiltext" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:934px;top:658.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;overflow:hidden;" src="img/leftleg.png">LVL 1</span>
+    <img id="mileagelevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(5, 84, 255));z-index:1001;position:absolute;right:744px;top:581.8px;opacity:1.0;height:40px;" src="img/mileage.png" />
+    <span id="mileagetext" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:654px;top:598.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;overflow:hidden;" src="img/leftleg.png">LVL 1</span>
+    <img id="tirelevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(5, 84, 255));z-index:1001;position:absolute;right:744px;top:641.8px;opacity:1.0;height:40px;" src="img/tire.png" />
+    <span id="tiretext" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:654px;top:658.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;overflow:hidden;" src="img/leftleg.png">LVL 1</span>`
     function setShowCarStatus(table) {
         for (const i in table) {
             //////console.log(i,table[i])
@@ -1909,8 +3346,10 @@ function SetNotify(table) {
             }
         }
         if (table['bool']) {
+            $('#carstatusui').append(carstatusstring)
             $('#carstatusui').fadeIn('fast');
         } else {
+            $('#carstatusui').html('')
             $('#carstatusui').fadeOut('fast');
         }
     }
@@ -1930,11 +3369,8 @@ function SetNotify(table) {
             $('#statusv3').draggable({
                 // ...
                 drag: function(event, ui) {
-                  //////console.log($(event.target).width() + " x " + $(event.target).height());
-                  //////console.log(ui.position.top + " x " + ui.position.left);
                 },
                 stop: function(event, ui) {
-                  //////console.log($(event.target).width() + " x " + $(event.target).height());
                   console.log(ui.position.top + " x " + ui.position.left);
                   localStorage.setItem("statustop", ui.position.top);
                   localStorage.setItem("statusleft", ui.position.left);
@@ -1944,64 +3380,100 @@ function SetNotify(table) {
         } else {
             $('#statusv3').draggable().draggable('disable');
         }
+        if (bool) {
+            $('#status_progress').draggable({
+                // ...
+                drag: function(event, ui) {
+                },
+                stop: function(event, ui) {
+                  console.log(ui.position.top + " x " + ui.position.left);
+                  localStorage.setItem("statusptop", ui.position.top);
+                  localStorage.setItem("statuspleft", ui.position.left);
+                },
+                scroll: false
+              }).draggable('enable');
+        } else {
+            $('#status_progress').draggable().draggable('disable');
+        }
     }
     function RestoreStatusPosition() {
-        if (localStorage.getItem("statusleft") !== undefined) {
-            //console.log(localStorage.getItem("statusleft"),"POSITION")
+        if (localStorage.getItem("statusleft")) {
             $('#statusv3').css('left', ''+localStorage.getItem("statusleft")+'px');
             $('#statusv3').css('top', ''+localStorage.getItem("statustop")+'px');
+        }
+        if (localStorage.getItem("statuspleft")) {
+            $('#status_progress').css('left', ''+localStorage.getItem("statuspleft")+'px');
+            $('#status_progress').css('top', ''+localStorage.getItem("statusptop")+'px');
         }
     }
 
     function RestoreCarPosition() {
-        if (localStorage.getItem("carleft") !== undefined) {
-            //console.log(localStorage.getItem("statusleft"),"POSITION")
-            $('#'+carui+'').css('left', ''+localStorage.getItem("carleft")+'px');
-            $('#'+carui+'').css('top', ''+localStorage.getItem("cartop")+'px');
+        var screenh = $(window).height();
+        var screenw = $(window).width();
+        if (localStorage.getItem("carhudleft")) {
+            $('#'+carui+'').css('left', ''+screenw * localStorage.getItem("carhudleft")+'px');
+            $('#'+carui+'').css('top', ''+screenh * localStorage.getItem("carhudtop")+'px');
+        }
+    }
+
+    function ResetStorages() {
+        localStorage.removeItem("carhudtop")
+        localStorage.removeItem("carhudleft")
+        localStorage.removeItem("statusptop")
+        localStorage.removeItem("statuspleft")
+        localStorage.removeItem("statustop")
+        localStorage.removeItem("statusleft")
+        for (const i in statcache) {
+            if (statcache[i].enable) {
+                localStorage.removeItem(""+statcache[i].status+"color1")
+                localStorage.removeItem(""+statcache[i].status+"color2")
+            }
         }
     }
 
     function DragCar(bool) {
         if (bool) {
             $('#simple').draggable({
-            // ...
             drag: function(event, ui) {
-                //////console.log($(event.target).width() + " x " + $(event.target).height());
-                //////console.log(ui.position.top + " x " + ui.position.left);
             },
             stop: function(event, ui) {
-                //////console.log($(event.target).width() + " x " + $(event.target).height());
-                //////console.log(ui.position.top + " x " + ui.position.left);
-                localStorage.setItem("cartop", ui.position.top);
-                localStorage.setItem("carleft", ui.position.left);
+                var screenh = $(window).height();
+                var screenw = $(window).width();
+                var percentleft = ui.position.left / screenw
+                var percenttop = ui.position.top / screenh
+                console.log(ui.position.top + " x " + percenttop,screenh * percenttop,ui.position.top);
+                localStorage.setItem("carhudtop", percenttop);
+                localStorage.setItem("carhudleft", percentleft);
             },
             scroll: false
             }).draggable('enable');
             $('#minimal').draggable({
-            // ...
             drag: function(event, ui) {
-                //////console.log($(event.target).width() + " x " + $(event.target).height());
-                //////console.log(ui.position.top + " x " + ui.position.left);
+
             },
             stop: function(event, ui) {
-                //////console.log($(event.target).width() + " x " + $(event.target).height());
-                //////console.log(ui.position.top + " x " + ui.position.left);
-                localStorage.setItem("cartop", ui.position.top);
-                localStorage.setItem("carleft", ui.position.left);
+                var screenh = $(window).height();
+                var screenw = $(window).width();
+                var percentleft = ui.position.left / screenw
+                var percenttop = ui.position.top / screenh
+                console.log(ui.position.top + " x " + percenttop,screenh * percenttop,ui.position.top);
+                localStorage.setItem("carhudtop", percenttop);
+                localStorage.setItem("carhudleft", percentleft);
             },
             scroll: false
             }).draggable('enable');
             $('#modern').draggable({
-            // ...
             drag: function(event, ui) {
-                //////console.log($(event.target).width() + " x " + $(event.target).height());
-                //////console.log(ui.position.top + " x " + ui.position.left);
+
             },
             stop: function(event, ui) {
-                //////console.log($(event.target).width() + " x " + $(event.target).height());
-                //////console.log(ui.position.top + " x " + ui.position.left);
-                localStorage.setItem("cartop", ui.position.top);
-                localStorage.setItem("carleft", ui.position.left);
+                var screenh = $(window).height();
+                var screenw = $(window).width();
+                var percentleft = ui.position.left / screenw
+                var percenttop = ui.position.top / screenh
+                console.log(ui.position.top + " x " + percenttop,screenh * percenttop,ui.position.top);
+                localStorage.setItem("carhudtop", percenttop);
+                localStorage.setItem("carhudleft", percentleft);
             },
             scroll: false
             }).draggable('enable');
@@ -2102,6 +3574,8 @@ var renzu_hud = {
     uiconfig,
     unsetradio,
     pedface,
+    settingui,
+    reimportsetting,
     //CAR
     setShow,
     setRpm,

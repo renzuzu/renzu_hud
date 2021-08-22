@@ -1,3 +1,8 @@
+
+config.enable_carui = true -- enable/disable the car UI (THIS WILL DISABLE ALL VEHICLE FUNCTION AS WELL)
+config.carui = 'simple' -- Choose a Carui Version ( simple, minimal, modern )
+config.carui_metric = 'mph' -- Speed Metrics to Use 'kmh' or 'mph'
+
 config.available_carui = {
 	['simple'] = true,
 	['minimal'] = true,
@@ -330,6 +335,8 @@ config.gears = {
         [8] = 1.91
     }
 }
+
+config.manualhud = true -- enable manual gears hud
 config.upshift = 172 -- UP ARROW (SHIFT TO HIGHER GEAR)
 config.downshift = 173 -- DOWN ARROW (SHIFT TO LOWER GEAR)
 config.clutch = 73 -- Z -- Activate Clutch Mode

@@ -460,12 +460,12 @@ end)
 
 RegisterCommand(config.commands['showstatus'], function()
 	Hud.show = not Hud.show
-	Hud:Myinfo(true)
     PlaySoundFrontend(-1, "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", 0 )
 	SendNUIMessage({
 		type = "setShowstatus",
 		content = {['bool'] = Hud.show, ['enable'] = config.enablestatus}
 	})
+	Hud:Myinfo(true)
 end, false)
 
 CreateThread(function()
@@ -488,7 +488,10 @@ RegisterNUICallback('getoutvehicle', function(data, cb)
 end)
 
 CreateThread(function()
-	Wait(4000)
+	Wait(3000)
+	while config.userconfig == nil do Wait(100) end
+	SendNUIMessage({type = "reimportsetting",content = config.userconfig})
+	Wait(1000)
 	SendNUIMessage({map = true, type = 'sarado'})
 	SendNUIMessage({type = "uiconfig", content = config.uiconfig})
 	SendNUIMessage({type = "setStatusType",content = config.status_type})
@@ -642,9 +645,10 @@ AddEventHandler('gameEventTriggered', function (name, args)
 	end
 	if name == 'CEventNetworkPlayerEnteredVehicle' then
 		print("ENTER VEHICLE",args[1],Hud.pid,args[2])
-		if args[1] == Hud.pid and config.enable_carui then
+		print(args[2], GetVehiclePedIsIn(PlayerPedId()))
+		if args[1] == PlayerId() and config.enable_carui or args[2] == GetVehiclePedIsIn(PlayerPedId()) and config.enable_carui then
 			Hud.vehicle = args[2]
-			local enterEvent <const> = Hud:Renzu_Function(Hud:EnterVehicleEvent(true,args[2]))
+			Hud:EnterVehicleEvent(true,args[2])
 		end
 	end
 	--print(name)
@@ -1083,6 +1087,7 @@ end)
 
 RegisterCommand(config.commands['bodystatus'], function()
 	Hud:BodyUi()
+	SendNUIMessage({type = "setUpdateBodyStatus",content = Hud.bonecategory})
 end, false)
 
 RegisterCommand(config.commands['bodystatus_other'], function()
@@ -2033,6 +2038,7 @@ AddEventHandler("renzu_hud:synclock", function(v, type, coords)
 	end
 end)
 
+settingbool = false
 RegisterNUICallback('hidecarlock', function(data, cb)
     SetNuiFocus(false,false)
 	SendNUIMessage({
@@ -2040,6 +2046,11 @@ RegisterNUICallback('hidecarlock', function(data, cb)
 		content = false
 	})
 	Hud.keyless = true
+	SendNUIMessage({
+		type = "settingui",
+		content = {config = config.userconfig, bool = false}
+	})
+	settingbool = false
 	cb(true)
 end)
 
@@ -2430,6 +2441,42 @@ RegisterCommand(config.commands['uiconfig'], function(source, args, raw)
 		type = "uiconfig",
 		content = config.uiconfig
 	})
+end)
+
+RegisterCommand(config.settingcommand, function(source, args, raw)
+	settingbool = not settingbool
+	SendNUIMessage({
+		type = "settingui",
+		content = {config = config.userconfig, bool = settingbool}
+	})
+	SetNuiFocus(settingbool,settingbool)
+	SendNUIMessage({
+		type = "DragCar",
+		content = settingbool
+	})
+	SendNUIMessage({
+		type = "Drag",
+		content = settingbool
+	})
+end)
+RegisterNUICallback('setrefreshrate', function(data)
+	if tonumber(data.val) then
+		config.Rpm_sleep = data.val
+	end
+end)
+
+RegisterNUICallback('SetSetting', function(data)
+	clothing = false
+	local table = {
+		['bool'] = clothing,
+		['equipped'] = Hud.clothestate
+	}
+	SendNUIMessage({
+		type = "setShowClothing",
+		content = table
+	})
+	SetNuiFocusKeepInput(clothing)
+	SetNuiFocus(clothing,clothing)
 end)
 
 -- CreateThread(function()

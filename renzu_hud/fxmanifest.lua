@@ -31,6 +31,7 @@ shared_scripts {
 	'conf/voice.lua',
 	'conf/vehicle.lua',
 	'conf/weapon.lua',
+	'conf/settings.lua'
 }
 server_scripts {
 	'@mysql-async/lib/MySQL.lua',

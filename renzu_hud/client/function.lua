@@ -1397,15 +1397,12 @@ function Hud:updateplayer(instant)
 	health = (GetEntityHealth(self.ped)/2) * 0.99
 	armor = GetPedArmour(self.ped) * 0.99
 	self.pid = PlayerId()
-	if self.newarmor ~= armor or self.newarmor == nil and armor > 1 then
-		SendNUIMessage({
-			hud = "setArmor",
-			content = armor
-		})
-		if config.statusordering['armor'] then
-			config.statusordering['armor'].value = armor
-		end
-		self.newarmor = armor
+	SendNUIMessage({
+		hud = "setArmor",
+		content = armor
+	})
+	if config.statusordering['armor'] then
+		config.statusordering['armor'].value = armor
 	end
 	SendNUIMessage({
 		hud = "setHp",

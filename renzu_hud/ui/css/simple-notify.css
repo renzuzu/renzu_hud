@@ -73,11 +73,11 @@
 }
 .notify__title {
     font-weight: 600;
-    font-size: 0.6rem !important;
+    font-size: 1.0rem !important;
     padding-right: calc(var(--notify-padding) + var(--notify-close-icon-size));
 }
 .notify__text {
-    font-size: 0.475rem !important;
+    font-size: 0.975rem !important;
     margin-top: 0.25rem !important;
 }
 .notify--type-1 {

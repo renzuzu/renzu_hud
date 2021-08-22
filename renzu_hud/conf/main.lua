@@ -53,9 +53,6 @@ config.forceplayerload = false -- false playerloaded event (use this only if you
 --MAIN UI CONFIG START
 config.enablestatus = true -- enable/disable status v1 ( icons,progress status ) -- this will disable all status functions
 config.enablecompass = true -- enable/disable compass
-config.enable_carui = true -- enable/disable the car UI (THIS WILL DISABLE ALL VEHICLE FUNCTION AS WELL)
-config.carui = 'simple' -- Choose a Carui Version ( simple, minimal, modern )
-config.carui_metric = 'mph' -- Speed Metrics to Use 'kmh' or 'mph'
 
 -- minimap
 config.useminimapeverytime = false -- FORCE display radarmap all the time? (USE THIS ONLY IF Some of your other script use displayradar(FALSE) , its advisable to disable this config instead remove it on your other script, default GTA show the Minimap everytime)
