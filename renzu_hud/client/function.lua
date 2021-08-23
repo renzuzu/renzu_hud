@@ -59,8 +59,8 @@ function Hud:tablelength(T)
 	return tonumber(count)
 end
 
-function Hud:getawsomeface()
-	if config.statusui ~= 'normal' then return end
+function Hud:getawsomeface(force)
+	if config.statusui ~= 'normal' and not force then return end
     self:ClearPedHeadshots()
 	Wait(2000)
     local playerPos = GetEntityCoords(PlayerPedId())

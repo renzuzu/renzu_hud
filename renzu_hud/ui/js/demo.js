@@ -22,16 +22,17 @@ var invehicle = false
 var statusbars = {}
 var locache = {}
 var statcache = {}
+var lasticon = undefined
 featstate['turbohud'] = false
 featstate['weaponhud'] = false
 featstate['manualhud'] = false
-function pedface() {
-    ////////console.log("REQUESTING")
-    $.post(`https://${GetParentResourceName()}/requestface`, {}, function(data) {
-        ////////console.log("POSTED")
+function pedface(force) {
+    console.log("REQUESTING",force)
+    $.post(`https://${GetParentResourceName()}/requestface`, JSON.stringify({force:force}), function(data) {
+        console.log("POSTED",data)
         let face = data;
         if (face) {
-            ////////console.log("URL")
+            console.log("URL",face)
             let url = 'https://nui-img/' + face + '/' + face + '?t=' + String(Math.round(new Date().getTime() / 1000));
             if (face == 'none') {
                 url = 'https://nui-img/pedmugshot_01/pedmugshot_01?t123';   // assuming theres a cache
@@ -2020,9 +2021,9 @@ function setCarui(ver) {
     //loopfuck = setInterval(function(){ getvehdata() }, 200);
     //console.log(carui_element[ver])
     carui = ver
-    if (usersetting['carhud'] && usersetting['carhud']['ver'] !== 'auto' && usersetting['carhud']['ver'] !== undefined) {
-        carui = usersetting['carhud']['ver']
-        ver = usersetting['carhud']['ver']
+    if (usersetting['carhud'] && usersetting['carhud']['version'] !== 'auto' && usersetting['carhud']['version'] !== undefined) {
+        carui = usersetting['carhud']['version']
+        ver = usersetting['carhud']['version']
         console.log("User setting")
     }
     document.getElementById(ver).innerHTML = ''
@@ -2127,7 +2128,10 @@ function setCarui(ver) {
             document.getElementById("diffdiv").style.fontSize = '0.4vw';
         }
         setMode('NORMAL',carui)
-        changeallclass(class_icon)
+        if (setting['iconshape']) {
+            class_icon = setting['iconshape']
+        }
+        //changeallclass(class_icon)
         const el = document.querySelector('.rpm');
         el.addEventListener('animationstart', function() {
             console.log('transition start')
@@ -2174,14 +2178,36 @@ function setCompass(bool) {
     }
 }
 
+var logostring = `<img style="border-radius: 50%;" id="pedface" src="https://nui-img/pedmugshot_01/pedmugshot_01?t123" height="70">`
+var voipstring = `<i class="fas fa-octagon fa-stack-2x" style='font-size:15px;color:rgba(11, 39, 63, 0.707)'></i>
+<i class="fal fa-octagon fa-stack-2x" style="font-size:14px;color:rgb(28, 52, 129)"></i>
+<i id="microphone" class="fas fa-microphone fa-stack-1x" style='font-size:19px;z-index:1131;opacity:1.0;'></i>`
+var uibarstring = `<div class="armor-bar"><span class="bar"><span class="armor_progress" id="armorbar"></span></span></div>
+<div class="health-bar"><span class="bar"><span class="health_progress" id="healthbar"></span></span></div>`
+
+function NormalUI() {
+    $('#logo').html('')
+    $('#voip_1').html('')
+    $('#uibar').html('')
+    $('#logo').append(logostring)
+    $('#voip_1').append(voipstring)
+    $('#uibar').append(uibarstring)
+    pedface(true)
+}
+
 function setStatusUI(t) {
     var ver = t['ver']
     var type = t['type']
+    if (setting['uilook'] == undefined) {
+        setting['uilook'] = ver
+        statusui = ver
+    }
     if (setting['statusver']) {
         status_type = setting['statusver']
     } else {
         status_type = type
     }
+    NormalUI()
     if (!t['enable'] && ver == 'simple') {
         document.getElementById("uibar").innerHTML = '';
         document.getElementById("logo").innerHTML = '';
@@ -2189,11 +2215,15 @@ function setStatusUI(t) {
         document.getElementById("statusnormal").style.display = 'none';
     }
     if (ver == 'simple' && t['enable']) {
-        statusui = 'simple'
+        if (setting['uilook'] == undefined) {
+            statusui = 'simple'
+        }
         if (document.getElementById("healthdiv")) {
             document.getElementById("healthdiv").style.display = 'block';
         }
-        document.getElementById("armor").style.display = 'block';
+        if (document.getElementById("armor")) {
+            document.getElementById("armor").style.display = 'block';
+        }
         if (document.getElementById("armordiv")) {
             document.getElementById("armordiv").style.display = 'block';
         }
@@ -2213,7 +2243,9 @@ function setStatusUI(t) {
         //document.getElementById("mic-color").style.width = '15px';
         //document.getElementById("mic-color").style.height = '27px';
     } else if (t['enable']) {
-        document.getElementById("voipdiv").remove()
+        if(document.getElementById("voipdiv")) {
+            document.getElementById("voipdiv").remove()
+        }
     }
 }
 
@@ -2587,19 +2619,30 @@ function setKeyless(table) {
         return (' ' + element.className + ' ').indexOf(' ' + className+ ' ') > -1;
     }
 
-    function changeallclass(setting) {
-        class_icon = setting
-        var all = document.getElementsByClassName('fa-octagon');
-        for (var i = 0; i < all.length; i++) {
-            all[i].classList.toggle("fa-"+setting+"");
+    function changeallclass(s) {
+        class_icon = s
+        if (lasticon !== undefined && lasticon == class_icon || lasticon == class_icon) { return }
+        if (lasticon == undefined) {
+            lasticon = 'octagon'
         }
-        if (setting !== 'circle' && settings !== 'octagon') {
+        const all = document.getElementsByClassName('fa-'+lasticon+'');
+        if (setting['iconshape'] !== undefined) {
+            class_icon = setting['iconshape']
+        }
+        for (var i = 0; i < all.length; i++) {
+            const status = all[i].classList.toggle("fa-"+class_icon+"");
+        }
+        for (var i = 0; i < all.length; i++) {
+            all[i].classList.remove("fa-"+lasticon+"");
+        }
+        if (class_icon !== 'circle' && class_icon !== 'octagon') {
             var icon = document.getElementsByClassName('default');
             for (var i = 0; i < icon.length; i++) {
-                //////console.log(i)
+                console.log(i)
                 icon[i].classList.toggle("square");
             }
         }
+        lasticon = class_icon
     }
 
     function reverseArrayInPlace(array) {
@@ -2632,7 +2675,7 @@ function setKeyless(table) {
             usersetting['carhud'] = {}
         }
         if (val) {
-            usersetting['carhud']['ver'] = val
+            usersetting['carhud']['version'] = val
         }
         if (val !== 'auto') {
             setCarui(val)
@@ -2665,6 +2708,25 @@ function setKeyless(table) {
               </select>
             </div>
           </div>
+          <div class="form-item">
+            <label class="form-item__label">UI Version</label>
+            <div class="form-item__control">
+              <select class="control control--select" id="uilook" onchange="uilook()">
+                <option selected="selected" value="normal">Normal</option>
+                <option value="simple">Simple</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-item">
+            <label class="form-item__label">Status Shapes</label>
+            <div class="form-item__control">
+              <select class="control control--select" id="iconshape" onchange="iconshape()">
+                <option selected="selected" value="circle">Circle</option>
+                <option value="octagon">Octagon</option>
+                <option value="square">Square</option>
+              </select>
+            </div>
+          </div>
           <h3>Name</h3>
           <h3 style="
           /* display: inline-block; */
@@ -2672,7 +2734,7 @@ function setKeyless(table) {
           /* margin-top: -30px; */
           margin-top: -30px;
           position: absolute;
-          top: 100px;
+          top: 163px;
           right: 50%;
           ">Hide%</h3>
           <h3 style="
@@ -2680,7 +2742,7 @@ function setKeyless(table) {
           /* float: right; */
           margin-top: -30px;
           position: absolute;
-          top: 100px;
+          top: 165x;
           right: 5%;
           ">Type</h3>
           <h3 style="
@@ -2688,7 +2750,7 @@ function setKeyless(table) {
           /* float: right; */
           margin-top: -30px;
           position: absolute;
-          top: 100px;
+          top: 163px;
           right: 27%;
           ">HideIfMax</h3>
         </div>
@@ -2751,7 +2813,7 @@ function setKeyless(table) {
           </div>
           <p><small>Status HUD and CarHUD is Draggable.</small></p>
           <button class="button" onclick='resetsetting(true)' style="background:red;">RESET</button>
-            <button class="button" onclick='SavetoLocal()'>DONE</button>
+            <button class="button" onclick='SavetoLocal()'>SAVE</button>
           </div>
         </div>
       </div>
@@ -2766,6 +2828,10 @@ function setKeyless(table) {
             $("#settingui").append(settingsui);
             SetStatusOrder(globalconfig['status'])
             document.getElementById('settingui').style.display = 'block'
+            if (setting['iconshape'] !== undefined) {
+                class_icon = setting['iconshape']
+            }
+            lasticon = undefined
             changeallclass(class_icon)
         } else {
             //document.getElementById('statusv3').innerHTML = ''
@@ -2786,11 +2852,55 @@ function setKeyless(table) {
         localStorage.setItem("UISETTING", JSON.stringify(usersetting));
         $("#settingui").append(settingsui);
         SetStatusOrder(globalconfig['status'])
-    }    
+    }
+    function iconshape() {
+        var val = document.getElementById("iconshape").value;
+        class_icon = val
+        setting['iconshape'] = val
+        usersetting['iconshape'] = val
+        document.getElementById('statusv3').innerHTML = ''
+        document.getElementById('status_progress').innerHTML = ''
+        document.getElementById('settingui').innerHTML = ''
+        localStorage.setItem("UISETTING", JSON.stringify(usersetting));
+        $("#settingui").append(settingsui);
+        SetStatusOrder(globalconfig['status'])
+        changeallclass(setting['iconshape'])
+    }
+    function uilook() {
+        var val = document.getElementById("uilook").value;
+        statusui = val
+        setting['uilook'] = val
+        usersetting['uilook'] = val
+        document.getElementById('statusv3').innerHTML = ''
+        document.getElementById('status_progress').innerHTML = ''
+        document.getElementById('settingui').innerHTML = ''
+        localStorage.setItem("UISETTING", JSON.stringify(usersetting));
+        $("#settingui").append(settingsui);
+        $('#logo').html('')
+        $('#voip_1').html('')
+        $('#uibar').html('')
+        document.getElementById("statusnormal").style.display = 'none';
+        if (statusui == 'normal') {
+            NormalUI()
+            document.getElementById("statusnormal").style.display = 'block';
+        }
+        SetStatusOrder(globalconfig['status'])
+        if (statusui == 'normal') {
+            if (document.getElementById("healthdiv")) {
+                document.getElementById("healthdiv").innerHTML = '';
+            }
+            if (document.getElementById("voipdiv")) {
+                document.getElementById("voipdiv").style.display = 'none';
+            }
+            if (document.getElementById("armordiv")) {
+                document.getElementById("armordiv").innerHTML = '';
+            }
+        }
+    }
   
     function speedmetric() {
         var val = document.getElementById("speedmetric").value;
-        SetMetrics(val)
+        SetMetrics(val,true)
         usersetting['carhud']['speedmetric'] = val
     }
 
@@ -2822,6 +2932,16 @@ function setKeyless(table) {
                 setting['statusver'] = globalconfig['statusver']
                 usersetting['statusver'] = globalconfig['statusver']
             }
+            if (setting['uilook'] == undefined || usersetting['uilook'] == undefined) {
+                statusui = globalconfig['uilook']
+                setting['uilook'] = globalconfig['uilook']
+                usersetting['uilook'] = globalconfig['uilook']
+            }
+            if (setting['iconshape'] == undefined || usersetting['iconshape'] == undefined) {
+                class_icon = globalconfig['iconshape']
+                setting['iconshape'] = globalconfig['iconshape']
+                usersetting['iconshape'] = globalconfig['iconshape']
+            }
             localStorage.removeItem("UISETTING")
             ResetStorages()
             document.getElementById('statusv3').innerHTML = ''
@@ -2842,6 +2962,17 @@ function setKeyless(table) {
             setting['statusver'] = globalconfig['statusver']
             usersetting['statusver'] = globalconfig['statusver']
         }
+        if (setting['uilook'] == undefined || usersetting['uilook'] == undefined) {
+            setting['uilook'] = globalconfig['uilook']
+            statusui = globalconfig['uilook']
+            usersetting['uilook'] = globalconfig['uilook']
+            console.log("set default")
+        }
+        if (setting['iconshape'] == undefined || usersetting['iconshape'] == undefined) {
+            class_icon = globalconfig['iconshape']
+            setting['iconshape'] = globalconfig['iconshape']
+            usersetting['iconshape'] = globalconfig['iconshape']
+        }
         if (setting['streethud'] == undefined || usersetting['streethud'] == undefined) {
             setting['streethud'] = globalconfig['streethud']
             usersetting['streethud'] = globalconfig['streethud']
@@ -2853,16 +2984,16 @@ function setKeyless(table) {
             setWeaponUi(setting['weaponhud'],true)
         }
         for (const i in globalconfig['carhud']) {
-            if (i == 'version' && setting['carhud']['ver'] == undefined || i == 'version' && usersetting['carhud']['ver'] == undefined) {
-              setting['carhud']['ver'] = globalconfig['carhud'][i]
-              usersetting['carhud']['ver'] = globalconfig['carhud'][i]
-              carui = setting['carhud']['ver']
-              setCarui(setting['carhud']['ver'])
+            if (i == 'version' && setting['carhud']['version'] == undefined || i == 'version' && usersetting['carhud']['version'] == undefined) {
+              setting['carhud']['version'] = globalconfig['carhud'][i]
+              usersetting['carhud']['version'] = globalconfig['carhud'][i]
+              carui = setting['carhud']['version']
+              setCarui(setting['carhud']['version'])
             }
             if(i == 'speedmetric' && setting['carhud']['speedmetric'] == undefined || i == 'speedmetric' && usersetting['carhud']['speedmetric'] == undefined) {
               setting['carhud']['speedmetric'] = globalconfig['carhud'][i]
               usersetting['carhud']['speedmetric'] = globalconfig['carhud'][i]
-              SetMetrics(setting['carhud']['speedmetric'])
+              SetMetrics(setting['carhud']['speedmetric'],true)
             }
             if(i == 'turbohud' && setting['carhud']['turbohud'] == undefined || i == 'turbohud' && usersetting['carhud']['turbohud'] == undefined) {
               setting['carhud']['turbohud'] = globalconfig['carhud'][i]
@@ -2886,24 +3017,38 @@ function setKeyless(table) {
         $("#settingui").append(settingsui);
         console.log("Checking User Setting...")
         globalconfig = c
-        resetsetting()
         const sett = JSON.parse(localStorage.getItem("UISETTING"))
         if (sett) {
             usersetting = sett
-            setting = usersetting
+            setting = sett
+            for (const i in globalconfig) {
+                if (usersetting[i] == undefined) {
+                    usersetting[i] = globalconfig[i]
+                }
+            }
+            if (setting['uilook']) {
+                statusui = usersetting['uilook']
+            }
+            if (setting['iconshape']) {
+                class_icon = usersetting['iconshape']
+            }
+            if (setting['statusver']) {
+                status_type = usersetting['statusver']
+            }
+            //setting = usersetting
             console.log("User Setting Activated")
             for (const i in globalconfig['carhud']) {
                 if (setting['carhud'] == undefined) {
                     setting['carhud'] = {}
                 }
-                if (i == 'version' && setting['carhud']['ver'] == undefined && globalconfig['carhud'][i] !== undefined) {
-                  setting['carhud']['ver'] = globalconfig['carhud'][i]
-                  carui = setting['carhud']['ver']
-                  setCarui(setting['carhud']['ver'])
+                if (i == 'version' && setting['carhud']['version'] == undefined && globalconfig['carhud'][i] !== undefined) {
+                  setting['carhud']['version'] = globalconfig['carhud'][i]
+                  carui = setting['carhud']['version']
+                  setCarui(setting['carhud']['version'])
                 }
                 if(i == 'speedmetric' && setting['carhud']['speedmetric'] == undefined && globalconfig['carhud'][i] !== undefined) {
                   setting['carhud']['speedmetric'] = globalconfig['carhud'][i]
-                  SetMetrics(setting['carhud']['speedmetric'])
+                  SetMetrics(setting['carhud']['speedmetric'],true)
                 }
                 if(i == 'turbohud' && setting['carhud']['turbohud'] == undefined && globalconfig['carhud'][i] !== undefined) {
                   setting['carhud']['turbohud'] = globalconfig['carhud'][i]
@@ -2918,6 +3063,8 @@ function setKeyless(table) {
                   post("setrefreshrate",{val:setting['carhud']['refreshrate']})
                 }
             }
+        } else {
+            resetsetting()
         }
     }
     
@@ -2955,6 +3102,9 @@ function setKeyless(table) {
         }
         if (setting['statusver'] == undefined) {
             setting['statusver'] = status_type
+        }
+        if (setting['iconshape'] == undefined) {
+            setting['iconshape'] = class_icon
         }
         for (const i in statuses) {
             if (statuses[i].enable) {
@@ -3021,13 +3171,13 @@ function setKeyless(table) {
                 <div style="position: absolute;
                 left: -25px;
                 font-size: 15px;">
-                <input style="width: 30px;" type="color" id="`+statuses[i].status+`color" name="`+statuses[i].status+`color"
+                <input style="width: 30px;opacity:0.3;" type="color" id="`+statuses[i].status+`color" name="`+statuses[i].status+`color"
                 value="`+rgbToHex(statuses[i].i_id_1_color)+`">
                 </div>
                 <div style="position: absolute;
                 left: -55px;
                 font-size: 15px;">
-                <input style="width: 30px;" type="color" id="`+statuses[i].status+`color2" name="`+statuses[i].status+`color"
+                <input style="width: 30px;opacity:0.3;" type="color" id="`+statuses[i].status+`color2" name="`+statuses[i].status+`color"
                 value="`+rgbToHex(statuses[i].bg)+`">
                 </div>
                 <label class="form-item__label">`+statuses[i].status+`</label>
@@ -3058,17 +3208,38 @@ function setKeyless(table) {
                 if (setting['statusver']) {
                     document.getElementById('statusversion').value = setting['statusver']
                 }
-                if (setting['carhud']['ver']) {
-                    document.getElementById('carhudver').value = setting['carhud']['ver']
+                if (setting['uilook']) {
+                    document.getElementById('uilook').value = setting['uilook']
+                }
+                if (setting['iconshape']) {
+                    document.getElementById('iconshape').value = setting['iconshape']
+                }
+                if (setting['carhud']['version']) {
+                    document.getElementById('carhudver').value = setting['carhud']['version']
                 }
                 if (setting['carhud']['speedmetric']) {
                     document.getElementById('speedmetric').value = setting['carhud']['speedmetric']
                 }
                 if (setting['status'][statuses[i].status].type == 1) {
+                    var appendto = false
+                    if (localStorage.getItem("statusleft")) {
+                        if (localStorage.getItem("statusleft") > 1000) {
+                            appendto = true
+                        }
+                    }
                     if (setting['statusver'] == 'icons') {
-                        $("#statusv3").prepend('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:27px;position:relative;color:rgba(144, 144, 144, 0.876);float:right; margin-top:4px;margin-left:1px;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:27px;color:'+bg+'"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:26px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
+                        if (appendto) {
+                            $("#statusv3").append('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:27px;position:relative;color:rgba(144, 144, 144, 0.876);float:right; margin-top:4px;margin-left:1px;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:27px;color:'+bg+'"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:26px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
+                        } else {
+                            $("#statusv3").prepend('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:27px;position:relative;color:rgba(144, 144, 144, 0.876);float:left; margin-top:4px;margin-left:1px;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:27px;color:'+bg+'"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:26px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
+                        }
                     } else {
-                        $("#statusv3").prepend('<div id="'+divid+'" style="float:'+float+';height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:1.25vw;color:'+bg+';margin-left:0.2vw;"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:1.41vw;color:rgba(170, 170, 170, 0.623)"></i> <i id="'+i_id_2+'" class="'+statuses[i].fa+' fa-stack-1x" style="font-size:1.0vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1.19vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.25vw;bottom:-0.312vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.45vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="'+i_id_1+'" class="meter statushud" stroke="'+color1+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
+                        if (appendto) {
+                            float = 'right'
+                            $("#statusv3").append('<div id="'+divid+'" style="float:'+float+';height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:1.25vw;color:'+bg+';margin-left:0.2vw;"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:1.41vw;color:rgba(170, 170, 170, 0.623)"></i> <i id="'+i_id_2+'" class="'+statuses[i].fa+' fa-stack-1x" style="font-size:1.0vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1.19vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.25vw;bottom:-0.312vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.45vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="'+i_id_1+'" class="meter statushud" stroke="'+color1+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
+                        } else {
+                            $("#statusv3").prepend('<div id="'+divid+'" style="float:'+float+';height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:1.25vw;color:'+bg+';margin-left:0.2vw;"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:1.41vw;color:rgba(170, 170, 170, 0.623)"></i> <i id="'+i_id_2+'" class="'+statuses[i].fa+' fa-stack-1x" style="font-size:1.0vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1.19vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.25vw;bottom:-0.312vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.45vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="'+i_id_1+'" class="meter statushud" stroke="'+color1+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
+                        }
                     }
                     statusbars[statuses[i].status] = false
                 } else {
@@ -3084,6 +3255,21 @@ function setKeyless(table) {
                 </li>');
                 $("tikol").removeClass("fa-stack-1x");
                 }
+            }
+        }
+        console.log(statusui,'statusui')
+        if (statusui == 'normal') {
+            //setting['uilook'] = statusui
+            if (document.getElementById("healthdiv")) {
+                document.getElementById("healthdiv").remove()
+            }
+            if (document.getElementById("armordiv")) {
+                document.getElementById("armordiv").remove()
+            }
+            if(document.getElementById("voipdiv")) {
+                document.getElementById("voipdiv").remove()
+                NormalUI()
+                document.getElementById("statusnormal").style.display = 'block';
             }
         }
 
@@ -3530,10 +3716,19 @@ function setKeyless(table) {
         r.style.setProperty('--transcar', table.transitioncar);
     }
 
-    function SetMetrics(v) {
-        metrics = v
+    function SetMetrics(v,s) {
+        if (setting !== undefined && setting['carhud'] !== undefined && setting['carhud']['speedmetric'] !== undefined) {
+            if (setting['carhud']['speedmetric'] !== v && s) {
+                metrics = v
+            } else {
+                metrics = setting['carhud']['speedmetric']
+            }
+        } else {
+            metrics = v
+        }
+        console.log(metrics)
         if (document.getElementById("speedtext")) {
-            document.getElementById("speedtext").innerHTML = v;
+            document.getElementById("speedtext").innerHTML = metrics;
         }
     }
 

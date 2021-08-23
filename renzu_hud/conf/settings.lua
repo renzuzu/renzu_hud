@@ -4,6 +4,8 @@ config.statusbackup = {['table'] = config.statusordering, ['float'] = config.sta
 config.settingcommand = 'hud'
 config.userconfig = {
 	['statusver'] = config.status_type,
+	['uilook'] = config.statusui,
+	['iconshape'] = config.uidesign,
 	['status'] = {['table'] = config.statusordering, ['float'] = config.statusplace},
 	['carhud'] = {
 		version = config.carui, 
