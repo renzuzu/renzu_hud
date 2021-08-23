@@ -20,7 +20,7 @@ let usersetting = {}
 var featstate = {}
 var invehicle = false
 var statusbars = {}
-var locache = {}
+var locache = undefined
 var statcache = {}
 var lasticon = undefined
 featstate['turbohud'] = false
@@ -2250,40 +2250,53 @@ function setStatusUI(t) {
 }
 
 function setStatusUILocation(table) {
-    locache = table
+    if (locache == undefined) {
+        locache = table   
+    }
     ////////console.log("MOVE UI")
-    if (table['top']) {
-        //////console.log(table['top'])
-        document.getElementById("statusv3").style.top = ''+table['top']+'';
+    if (!RestoreStatusPosition()) {
+        if (table['top']) {
+            //////console.log(table['top'])
+            document.getElementById("statusv3").style.top = ''+table['top']+'';
+        } else {
+            document.getElementById("statusv3").style.top = 'unset';
+        }
+        if (table['right']) {
+            //////console.log(table['right'])
+            document.getElementById("statusv3").style.right = ''+table['right']+'';
+        } else {
+            document.getElementById("statusv3").style.right = 'unset';
+        }
+        if (table['bottom']) {
+            //////console.log(table['bottom'])
+            document.getElementById("statusv3").style.bottom = ''+table['bottom']+'';
+        } else {
+            document.getElementById("statusv3").style.bottom = 'unset';
+        }
+        if (table['left']) {
+            //////console.log(table['left'])
+            document.getElementById("statusv3").style.left = ''+table['left']+'';
+        } else {
+            document.getElementById("statusv3").style.left = 'unset';
+        }
     }
-    if (table['right']) {
-        //////console.log(table['right'])
-        document.getElementById("statusv3").style.right = ''+table['right']+'';
-    }
-    if (table['bottom']) {
-        //////console.log(table['bottom'])
-        document.getElementById("statusv3").style.bottom = ''+table['bottom']+'';
-    }
-    if (table['left']) {
-        //////console.log(table['left'])
-        document.getElementById("statusv3").style.left = ''+table['left']+'';
-    }
-    RestoreStatusPosition()
 }
 
 function setMoveStatusUi(bool) {
     ////////console.log("MOVE UI")
-    if (bool) {
-        if (status_type == 'icons') {
-            document.getElementById("statusv3").style.right = '22%';
+    if (!RestoreStatusPosition()) {
+        if (bool) {
+            if (status_type == 'icons') {
+                document.getElementById("statusv3").style.right = '22%';
+            } else {
+                document.getElementById("statusv3").style.right = '30%';
+            }
         } else {
-            document.getElementById("statusv3").style.right = '30%';
-        }
-    } else {
-        if (status_type == 'icons') {
-            document.getElementById("statusv3").style.right = '25px';
-        } else {
-            document.getElementById("statusv3").style.right = '85px';
+            if (status_type == 'icons') {
+                document.getElementById("statusv3").style.right = '25px';
+            } else {
+                document.getElementById("statusv3").style.right = '85px';
+            }
         }
     }
 }
@@ -2950,7 +2963,10 @@ function setKeyless(table) {
             document.getElementById('settingui').innerHTML = ''
             $("#settingui").append(settingsui);
             SetStatusOrder(globalconfig['status'])
-            setStatusUILocation(locache)
+            var temp = {}
+            temp['bottom'] = '20px'
+            temp['left'] = '20px'
+            setStatusUILocation(temp)
             if (globalconfig['uilook'] == 'simple') {
                 document.getElementById("uibar").innerHTML = '';
                 document.getElementById("logo").innerHTML = '';
@@ -3562,6 +3578,7 @@ function setKeyless(table) {
             $('#statusv3').draggable({
                 // ...
                 drag: function(event, ui) {
+                    $('#statusv3').css('inset', 'unset');
                 },
                 stop: function(event, ui) {
                   console.log(ui.position.top + " x " + ui.position.left);
@@ -3590,14 +3607,21 @@ function setKeyless(table) {
         }
     }
     function RestoreStatusPosition() {
+        var havedefault = false
         if (localStorage.getItem("statusleft")) {
+            havedefault = true
             $('#statusv3').css('left', ''+localStorage.getItem("statusleft")+'px');
             $('#statusv3').css('top', ''+localStorage.getItem("statustop")+'px');
+            $('#statusv3').css('right', 'unset');
+            $('#statusv3').css('bottom', 'unset');
         }
         if (localStorage.getItem("statuspleft")) {
             $('#status_progress').css('left', ''+localStorage.getItem("statuspleft")+'px');
             $('#status_progress').css('top', ''+localStorage.getItem("statusptop")+'px');
+            $('#status_progress').css('right', 'unset');
+            $('#status_progress').css('bottom', 'unset');
         }
+        return havedefault
     }
 
     function RestoreCarPosition() {
@@ -3606,6 +3630,8 @@ function setKeyless(table) {
         if (localStorage.getItem("carhudleft")) {
             $('#'+carui+'').css('left', ''+screenw * localStorage.getItem("carhudleft")+'px');
             $('#'+carui+'').css('top', ''+screenh * localStorage.getItem("carhudtop")+'px');
+            $('#'+carui+'').css('right', 'auto');
+            $('#'+carui+'').css('bottom', 'auto');
         }
     }
 
@@ -3628,6 +3654,7 @@ function setKeyless(table) {
         if (bool) {
             $('#simple').draggable({
             drag: function(event, ui) {
+                $('#simple').css('inset', 'unset');
             },
             stop: function(event, ui) {
                 var screenh = $(window).height();
@@ -3642,7 +3669,7 @@ function setKeyless(table) {
             }).draggable('enable');
             $('#minimal').draggable({
             drag: function(event, ui) {
-
+                $('#minimal').css('inset', 'unset');
             },
             stop: function(event, ui) {
                 var screenh = $(window).height();
@@ -3657,7 +3684,7 @@ function setKeyless(table) {
             }).draggable('enable');
             $('#modern').draggable({
             drag: function(event, ui) {
-
+                $('#modern').css('inset', 'unset');
             },
             stop: function(event, ui) {
                 var screenh = $(window).height();
