@@ -2459,25 +2459,18 @@ RegisterCommand(config.settingcommand, function(source, args, raw)
 		content = settingbool
 	})
 end)
+
+CreateThread(function()
+	RegisterKeyMapping(config.settingcommand, 'HUD Settings', 'keyboard', config.keybinds['hudsetting'])
+	return
+end)
+
 RegisterNUICallback('setrefreshrate', function(data)
 	if tonumber(data.val) then
 		config.Rpm_sleep = data.val
 	end
 end)
 
-RegisterNUICallback('SetSetting', function(data)
-	clothing = false
-	local table = {
-		['bool'] = clothing,
-		['equipped'] = Hud.clothestate
-	}
-	SendNUIMessage({
-		type = "setShowClothing",
-		content = table
-	})
-	SetNuiFocusKeepInput(clothing)
-	SetNuiFocus(clothing,clothing)
-end)
 
 -- CreateThread(function()
 -- 	Wait(10000)

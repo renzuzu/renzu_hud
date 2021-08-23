@@ -26,6 +26,7 @@ config.keybinds = {
 	car_handbrake = 'SPACE', -- beta this instantly send notification to UI. instead of using while true do loop ( this is 100% more optimize )
 	vehicle_status = 'U', -- Show Car Status, Coolant, Wheel, Mileage etc..
 	carheadlight = 'H',
+	hudsetting = 'F9',
 }
 
 --COMMANDS FOR KEYBINDS
@@ -62,5 +63,5 @@ config.commands = {
 	--example: uiconfig ms 0ms
 	--uiconfig transition ease
 	--uiconfig acceleration gpu
-	carheadlight = 'carheadlight'
+	carheadlight = 'carheadlight',
 }
