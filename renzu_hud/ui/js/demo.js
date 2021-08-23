@@ -2944,12 +2944,19 @@ function setKeyless(table) {
             }
             localStorage.removeItem("UISETTING")
             ResetStorages()
+            NormalUI()
             document.getElementById('statusv3').innerHTML = ''
             document.getElementById('status_progress').innerHTML = ''
             document.getElementById('settingui').innerHTML = ''
             $("#settingui").append(settingsui);
             SetStatusOrder(globalconfig['status'])
             setStatusUILocation(locache)
+            if (globalconfig['uilook'] == 'simple') {
+                document.getElementById("uibar").innerHTML = '';
+                document.getElementById("logo").innerHTML = '';
+                document.getElementById("voip_1").innerHTML = '';
+                document.getElementById("statusnormal").style.display = 'none';
+            }
         }
         if (usersetting['carhud'] == undefined) {
             usersetting['carhud'] = {}
