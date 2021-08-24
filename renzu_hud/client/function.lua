@@ -1600,7 +1600,7 @@ function Hud:sendsignaltoNUI()
 end
 
 function Hud:entervehicle()
-	if not config.push_start then return end
+	if not config.push_start or self.customcarui then return end
 	CreateThread(function()
 		local p = PlayerPedId()
 		local mycoords = GetEntityCoords(p)
@@ -3763,7 +3763,7 @@ end
 
 function Hud:DefineCarUI(ver)
 	CreateThread(function()
-		if config.available_carui[tostring(ver)] ~= nil then
+		if config.available_carui[tostring(ver)] ~= nil and not self.customcarui then
 			SendNUIMessage({type = 'setCarui', content = tostring(ver)})
 			config.carui = ver
 			if GetVehiclePedIsIn(PlayerPedId()) ~= 0 and ver == 'modern' then

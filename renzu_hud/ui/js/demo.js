@@ -26,22 +26,32 @@ var lasticon = undefined
 featstate['turbohud'] = false
 featstate['weaponhud'] = false
 featstate['manualhud'] = false
+var pedfacetimer = 0
+var pedfacecache = "https://nui-img/pedmugshot_01/pedmugshot_01?t123"
 function pedface(force) {
     console.log("REQUESTING",force)
-    $.post(`https://${GetParentResourceName()}/requestface`, JSON.stringify({force:force}), function(data) {
-        console.log("POSTED",data)
-        let face = data;
-        if (face) {
-            console.log("URL",face)
-            let url = 'https://nui-img/' + face + '/' + face + '?t=' + String(Math.round(new Date().getTime() / 1000));
-            if (face == 'none') {
-                url = 'https://nui-img/pedmugshot_01/pedmugshot_01?t123';   // assuming theres a cache
-            }
-            //////console.log(url)
-            $("#pedface").attr("src", ""+url+"")
+    if (pedfacetimer == 0 || Date.now() > pedfacetimer) {
+        pedfacetimer = Date.now() + 5000
+        $.post(`https://${GetParentResourceName()}/requestface`, JSON.stringify({force:force}), function(data) {
+            console.log("POSTED",data)
+            let face = data;
+            if (face) {
+                console.log("URL",face)
+                let url = 'https://nui-img/' + face + '/' + face + '?t=' + String(Math.round(new Date().getTime() / 1000));
+                if (face !== 'none') {
+                    pedfacecache = url
+                }
+                if (face == 'none') {
+                    url = pedfacecache;   // assuming theres a cache
+                }
+                console.log(url)
+                $("#pedface").attr("src", ""+url+"")
 
-        }  
-    });
+            }  
+        });
+    } else {
+        $("#pedface").attr("src", pedfacecache)
+    }
 }
 
 function getvehdata() {
@@ -846,17 +856,17 @@ function setCruiseControl(bool) {
         document.getElementById('cruisetext').style.color = '#1817179f'
     }
 }
-
+var cachebody = undefined
 var bodystring = `<div id="bodyinfo">Body Status:</div>
 <img style="z-index:900;position:absolute;right:440px;top:100px;opacity:0.7;height:650px;" src="img/bodybg.png" />
 <div class="pulse" style="z-index: 1111;"></div>
 <img id="bodystatus" style="z-index:1001;position:absolute;right:500px;top:100px;opacity:1;height:550px;" src="img/bodyui.png" />
-<i class="fad fa-first-aid" id="ped_body_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:632px;top:178px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
-<i class="fad fa-first-aid" id="ped_head_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:811px;top:177px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
-<i class="fad fa-first-aid" id="right_hand_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:856px;top:309px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
-<i class="fad fa-first-aid" id="left_hand_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:578px;top:306px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
-<i class="fad fa-first-aid" id="left_leg_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:807px;top:441.8px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
-<i class="fad fa-first-aid" id="right_leg_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:624px;top:441.8px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
+<i onclick="healpart('chest')" class="fad fa-first-aid" id="ped_body_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:632px;top:178px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
+<i onclick="healpart('head')" class="fad fa-first-aid" id="ped_head_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:811px;top:177px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
+<i onclick="healpart('arm')" class="fad fa-first-aid" id="right_hand_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:856px;top:309px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
+<i onclick="healpart('arm')" class="fad fa-first-aid" id="left_hand_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:578px;top:306px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
+<i onclick="healpart('leg')" class="fad fa-first-aid" id="left_leg_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:807px;top:441.8px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
+<i onclick="healpart('leg')" class="fad fa-first-aid" id="right_leg_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:624px;top:441.8px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
 <img id="ped_body" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:632px;top:178px;opacity:0.0;height:100px;" src="img/chest.png" />
 <img id="ped_head" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:811px;top:177px;opacity:0.0;height:100px;" src="img/head.png" />
 <img id="right_hand" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:856px;top:309px;opacity:0.0;height:110px;" src="img/rightarm.png" />
@@ -874,6 +884,9 @@ function setShowBodyUi(bool) {
         document.getElementById('bodyui').style.display = 'block'
         $('#bodyui').append(bodystring)
         $("#bodystatus").fadeIn();
+        setTimeout(function(){
+            setBodyParts(cachebody)
+        }, 533);
     } else {
         document.getElementById('bodyui').style.display = 'none'
         $('#bodyui').html('')
@@ -977,6 +990,7 @@ function setUpdateBodyStatus(table) {
 
 function setBodyParts(table) {
     ////////console.log("bodyparts")
+    cachebody = table
     $(document).ready(function(){
         for (const key in table) {
             if (key == 'arm') {
@@ -989,9 +1003,6 @@ function setBodyParts(table) {
                         }, function(){
                         $(this).css("opacity", "0.5");
                     });
-                    $("#"+idname+"").click(function(){
-                        post("healpart",{part:key})
-                    });
                 }
             } else if (key == 'leg') {
                 for (const key2 in table[key]) {
@@ -1003,9 +1014,6 @@ function setBodyParts(table) {
                         }, function(){
                         $(this).css("opacity", "0.5");
                     });
-                    $("#"+idname+"").click(function(){
-                        post("healpart",{part:key})
-                    });
                 }
             } else {
                 var idname = ""+table[key]+"_heal"
@@ -1015,9 +1023,6 @@ function setBodyParts(table) {
                     ////////console.log("hover")
                     }, function(){
                     $(this).css("opacity", "0.5");
-                });
-                $("#"+idname+"").click(function(){
-                    post("healpart",{part:key})
                 });
             }
         }
@@ -1222,6 +1227,13 @@ function post(name,data){
 	var data = data;
 	$.post("https://renzu_hud/"+name,JSON.stringify(data));
 }
+
+function healpart(data){
+	var name = name;
+	var data = data;
+	$.post("https://renzu_hud/healpart",JSON.stringify({part:data}));
+}
+
 function indexname(index) {
     if (index == 0) {
         return 'frontleftdoor'
@@ -2642,16 +2654,17 @@ function setKeyless(table) {
         if (setting['iconshape'] !== undefined) {
             class_icon = setting['iconshape']
         }
-        for (var i = 0; i < all.length; i++) {
-            const status = all[i].classList.toggle("fa-"+class_icon+"");
-        }
-        for (var i = 0; i < all.length; i++) {
-            all[i].classList.remove("fa-"+lasticon+"");
+        if (lasticon !== class_icon) {
+            for (var i = 0; i < all.length; i++) {
+                const status = all[i].classList.toggle("fa-"+class_icon+"");
+            }
+            for (var i = 0; i < all.length; i++) {
+                all[i].classList.remove("fa-"+lasticon+"");
+            }
         }
         if (class_icon !== 'circle' && class_icon !== 'octagon') {
             var icon = document.getElementsByClassName('default');
             for (var i = 0; i < icon.length; i++) {
-                console.log(i)
                 icon[i].classList.toggle("square");
             }
         }
@@ -2737,6 +2750,14 @@ function setKeyless(table) {
                 <option selected="selected" value="circle">Circle</option>
                 <option value="octagon">Octagon</option>
                 <option value="square">Square</option>
+                <option value="hexagon">Hexagon</option>
+                <option value="vector-square">Vector Square</option>
+                <option value="draw-square">Draw Square</option>
+                <option value="draw-circle">Draw Circle</option>
+                <option value="badge">Badge</option>
+                <option value="certificate">Certificate</option>
+                <option value="comment">Comment</option>
+                <option value="heart">Heart</option>
               </select>
             </div>
           </div>
@@ -3060,6 +3081,14 @@ function setKeyless(table) {
             }
             //setting = usersetting
             console.log("User Setting Activated")
+            if (usersetting['carhud']['version']) {
+                post("setcarui",{val:setting['carhud']['version']})
+                console.log("custom Car HUD")
+            }
+            if (usersetting['carhud']['refreshrate']) {
+                post("setrefreshrate",{val:setting['carhud']['refreshrate']})
+                console.log("Custom CarHUD Refresh Rate")
+            }
             for (const i in globalconfig['carhud']) {
                 if (setting['carhud'] == undefined) {
                     setting['carhud'] = {}

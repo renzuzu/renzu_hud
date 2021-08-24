@@ -13,6 +13,7 @@ CreateThread(function()
 		while ESX.GetPlayerData().job == nil do Wait(0) end
 		ESX.PlayerData = ESX.GetPlayerData()
 		xPlayer = ESX.GetPlayerData()
+		Wait(1000)
 		SendNUIMessage({type = "isAmbulance",content = xPlayer.job.name == config.checkbodycommandjob})
 		Wait(5000)
 	elseif config.framework == 'VRP' then
@@ -2468,6 +2469,16 @@ end)
 RegisterNUICallback('setrefreshrate', function(data)
 	if tonumber(data.val) then
 		config.Rpm_sleep = data.val
+	end
+end)
+
+RegisterNUICallback('setcarui', function(data)
+	print(data.val)
+	if config.carui ~= data.val or config.enable_carui_perclass then
+		Hud.customcarui = true
+		config.carui = data.val
+	else
+		Hud.customcarui = false
 	end
 end)
 
