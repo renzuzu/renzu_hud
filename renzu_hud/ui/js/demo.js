@@ -3541,6 +3541,13 @@ function setKeyless(table) {
     <img id="tirelevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(5, 84, 255));z-index:1001;position:absolute;right:744px;top:641.8px;opacity:1.0;height:40px;" src="img/tire.png" />
     <span id="tiretext" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:654px;top:658.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;overflow:hidden;" src="img/leftleg.png">LVL 1</span>`
     function setShowCarStatus(table) {
+        if (table['bool']) {
+            $('#carstatusui').append(carstatusstring)
+            $('#carstatusui').fadeIn('fast');
+        } else {
+            $('#carstatusui').html('')
+            $('#carstatusui').fadeOut('fast');
+        }
         for (const i in table) {
             //////console.log(i,table[i])
             if (i == 'brake') {
@@ -3582,13 +3589,6 @@ function setKeyless(table) {
             if (i == 'enginename') {
                 $('#enginename').html(table[i])
             }
-        }
-        if (table['bool']) {
-            $('#carstatusui').append(carstatusstring)
-            $('#carstatusui').fadeIn('fast');
-        } else {
-            $('#carstatusui').html('')
-            $('#carstatusui').fadeOut('fast');
         }
     }
     
