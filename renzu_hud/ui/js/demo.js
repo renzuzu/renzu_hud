@@ -2691,7 +2691,7 @@ function setKeyless(table) {
         }
     }
 
-    let = globalconfig = {}
+    let globalconfig = {}
     usersetting['carhud'] = {}
     setting['carhud'] = {}
 
