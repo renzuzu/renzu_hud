@@ -1008,7 +1008,7 @@ AddEventHandler('renzu_hud:oil', function()
 	Hud:requestmodel('prop_oilcan_01a')
 	local animPos, targetHeading = GetAnimInitialOffsetPosition(animDict, "chemical_pour_short_cooker", x,y,z, 0.0,0.0,veh_heading, 0, 2), 52.8159
 	local ax,ay,az = table.unpack(animPos)
-	local rx,ry,rz = table.unpack(GetEntityForwardVector(getveh()) * 0.5)
+	local rx,ry,rz = table.unpack(GetEntityForwardVector(Hud:getveh()) * 0.5)
 	local realx,realy,realz = x - ax , y - ay , z - az
 	local netScene = NetworkCreateSynchronisedScene(x +realx+rx,y +realy+ry, z+0.2, 0.0,0.0,veh_heading, 2, false, false, 1065353216, 0, 1.3)
 	Hud:playanimation('creatures@rottweiler@tricks@','petting_franklin')
