@@ -1036,8 +1036,8 @@ AddEventHandler('renzu_hud:oil', function()
 	SetVehicleDoorShut(Hud:getveh(),4,false)
 	Wait(300)
 	ClearPedTasks(Hud.ped)
-	Hud.veh_stats[plate].oil = 100
-	Hud.veh_stats[plate].mileage = 0
+	Hud.veh_stats[Hud:GetPlate(Hud:getveh())].oil = 100
+	Hud.veh_stats[Hud:GetPlate(Hud:getveh())].mileage = 0
 	Hud.degrade = 1.0
 	SendNUIMessage({
 		type = "setMileage",
