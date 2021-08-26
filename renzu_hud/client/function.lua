@@ -2604,8 +2604,7 @@ function Hud:bodydamage()
 			if config.disabledregen then
 				SetPlayerHealthRechargeMultiplier(self.pid, 0.0)
 			end
-			--print(health)
-			if health ~= nil and health > 40 then
+			if health ~= nil and health > 55.0 then
 				SetEntityHealth(PlayerPedId(),(GetEntityHealth(self.ped)) - config.chesteffect_healthdegrade)
 			end
 		end

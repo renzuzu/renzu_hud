@@ -1005,7 +1005,7 @@ AddEventHandler('renzu_hud:oil', function()
 		Wait(1)
 		RequestAnimDict(animDict)
 	end
-	requestmodel('prop_oilcan_01a')
+	Hud:requestmodel('prop_oilcan_01a')
 	local animPos, targetHeading = GetAnimInitialOffsetPosition(animDict, "chemical_pour_short_cooker", x,y,z, 0.0,0.0,veh_heading, 0, 2), 52.8159
 	local ax,ay,az = table.unpack(animPos)
 	local rx,ry,rz = table.unpack(GetEntityForwardVector(getveh()) * 0.5)
