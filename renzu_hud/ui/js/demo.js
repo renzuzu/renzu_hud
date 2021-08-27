@@ -3791,7 +3791,6 @@ function setKeyless(table) {
         } else {
             metrics = v
         }
-        console.log(metrics)
         if (document.getElementById("speedtext")) {
             document.getElementById("speedtext").innerHTML = metrics;
         }
