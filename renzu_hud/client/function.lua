@@ -1024,13 +1024,13 @@ function Hud:NuiVehicleHandbrake()
 	--TerminateThisThread()
 end
 
-function Hud:NuiShowMap()
+function Hud:NuiShowMap(force)
 	CreateThread(function()
 		Wait(2000)
 		print(config.carui,"MAP")
-		if config.centercarhud == 'map' and config.carui == 'modern' then
+		if config.centercarhud == 'map' and config.carui == 'modern' or force then
 			Wait(1000)
-			while not self.start and config.push_start do
+			while not self.start and config.push_start and not force do
 				Wait(10)
 			end
 			SendNUIMessage({map = true, type = 'bukas'})
@@ -1042,10 +1042,10 @@ function Hud:NuiShowMap()
 				--print("map ui")
 				local sleep = 2000
 				--print(GetNuiCursorPosition())
-				if config.carui ~= 'modern' then
+				if config.carui ~= 'modern' and not force then
 					break
 				end
-				if self.start and config.carui == 'modern' then
+				if self.start and config.carui == 'modern' or force then
 					sleep = 250
 					local myh = GetEntityHeading(self.ped) + GetCamhead()
 					local camheading = GetCamhead()
@@ -2606,6 +2606,7 @@ function Hud:bodydamage()
 			if config.disabledregen then
 				SetPlayerHealthRechargeMultiplier(self.pid, 0.0)
 			end
+			print(health)
 			if health ~= nil and health > 55.0 then
 				SetEntityHealth(PlayerPedId(),(GetEntityHealth(self.ped)) - config.chesteffect_healthdegrade)
 			end
@@ -3790,6 +3791,12 @@ function Hud:DefineCarUI(ver)
 		return
 	end)
 end
+
+RegisterNUICallback('openmap', function(data, cb)
+	print("open map")
+	Hud:NuiShowMap(true)
+	cb(true)
+end)
 
 standmodel , enginemodel = nil, nil
 function Hud:repairengine(plate)

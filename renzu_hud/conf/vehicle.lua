@@ -38,11 +38,11 @@ config.carui_perclass = {
 --start car map
 config.centercarhud = 'map' -- Feature of Car hud - MAP , MP3 (IF YOU CHOOSE MP3 you need renzu_mp3 as dependency, and renzu_mp3 need xsound) (MP3 not implemented yet..lazy..)
 config.mapversion = 'satellite' -- available ( satellite, atlas, oldschool )
-config.usecustomlink = false -- use custom url of image map
+config.usecustomlink = true -- use custom url of image map // use this for now , self hosted is remove due to file size issue
 config.push_start = true -- enable/disable push to start for modern UI
-config.mapurl = 'https://github.com/jgardner117/gtav-interactive-map/blob/master/images/gtav.png?raw=true' -- if use custom url define it
---atlas link https://github.com/jgardner117/gtav-interactive-map/blob/master/images/gtav.png?raw=true
---satellite link https://github.com/jgardner117/gtav-interactive-map/blob/master/images/GTAV_SATELLITE_8192x8192.png?raw=true
+config.mapurl = 'https://github.com/renzuzu/carmap/blob/main/carmap/atlas.webp?raw=true' -- if use custom url define it
+--atlas link https://github.com/renzuzu/carmap/blob/main/carmap/oldschool.webp?raw=true
+--satellite link https://github.com/renzuzu/carmap/blob/main/carmap/satellite.webp
 --credits https://github.com/jgardner117/gtav-interactive-map
 
 --OVERHEAT FUNC

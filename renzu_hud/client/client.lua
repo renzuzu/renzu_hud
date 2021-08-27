@@ -2473,7 +2473,6 @@ RegisterNUICallback('setrefreshrate', function(data)
 end)
 
 RegisterNUICallback('setcarui', function(data)
-	print(data.val)
 	if config.carui ~= data.val or config.enable_carui_perclass then
 		Hud.customcarui = true
 		config.carui = data.val

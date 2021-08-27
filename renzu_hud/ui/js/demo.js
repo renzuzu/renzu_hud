@@ -498,6 +498,9 @@ function setShow(table) {
             opacity: "1"
         },400);
         setHeadlights(0)
+        if (carui == 'modern') {
+            post("openmap",{})
+        }
         document.getElementById(""+carui+"").style.display = 'block'
     } else {
         invehicle = false
@@ -2489,7 +2492,6 @@ function setKeyless(table) {
     function setMapVersion(table) {
         var type = table['type']
         var custom = table['custom']
-        //console.log(table['custom'],table['custom'],table['custom'])
         if (custom) {
             //console.log("its custom")
             $("#mapimg").attr("src", ""+table['link']+"")
