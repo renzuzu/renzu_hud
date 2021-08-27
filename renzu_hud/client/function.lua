@@ -438,7 +438,9 @@ function Hud:inVehicleFunctions()
 		while not self.loadedplate do
 			Wait(100)
 		end
-		self:NuiDistancetoWaypoint()
+		if config.WaypointMarkerLarge then
+			self:NuiDistancetoWaypoint()
+		end
 		self:NuiMileAge()
 		if not config.enable_carui_perclass then
 			self:NuiShowMap()

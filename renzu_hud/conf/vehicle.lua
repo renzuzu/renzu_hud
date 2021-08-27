@@ -2,7 +2,7 @@
 config.enable_carui = true -- enable/disable the car UI (THIS WILL DISABLE ALL VEHICLE FUNCTION AS WELL)
 config.carui = 'simple' -- Choose a Carui Version ( simple, minimal, modern )
 config.carui_metric = 'mph' -- Speed Metrics to Use 'kmh' or 'mph'
-
+config.WaypointMarkerLarge = false -- disable / enable large marker while on vehicle waypoint
 config.available_carui = {
 	['simple'] = true,
 	['minimal'] = true,
