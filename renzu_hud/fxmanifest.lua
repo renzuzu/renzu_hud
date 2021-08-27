@@ -56,9 +56,9 @@ files {
 	'ui/js/*.js',
 	'ui/img/*.png',
 	'ui/img/*.webp',
-	'ui/img/weapons/*.png',
+	'ui/img/weapons/*.webp',
 	'ui/sounds/*.ogg',
-	'ui/shifter/*.png',
+	'ui/shifter/*.webp',
 	'stream/*.ydr',
 	'handling.min.json',
 	"turbo.ytyp"

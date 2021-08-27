@@ -707,7 +707,7 @@ function setManual(bool,s) {
 function setShift(gear) {
     $("#shifter").css(
         "background-image",
-        'url("shifter/' + gear + '.png")'
+        'url("shifter/' + gear + '.webp")'
       );
 }
 
@@ -1417,7 +1417,7 @@ function Carcontrolcallbackui(type,index) {
 
 function setWeapon(weapon) {
     //////////console.log(""+weapon+".png")
-    var url = "img/weapons/"+weapon+".png"
+    var url = "img/weapons/"+weapon+".webp"
     $("#weaponimg").attr("src", url)
     setTimeout(function(){
         if (document.getElementById("weaponimg")) {

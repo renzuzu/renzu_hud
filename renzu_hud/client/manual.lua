@@ -799,7 +799,7 @@ function Hud:NuiMainmanualLoop() -- Dont edit unless you know the system how it 
         if self.vehicle == 0 then
             self.vehicle = self:getveh()
         end
-        if self:GetHandling(self:GetPlate(self.vehicle)).finaldrive ~= 0.0 and self:GetHandling(self:GetPlate(self.vehicle)).flywheel ~= 0.0 then
+        if self.vehicle ~= nil and self:GetPlate(self.vehicle) ~= nil and self:GetHandling(self:GetPlate(self.vehicle)).finaldrive ~= 0.0 and self:GetHandling(self:GetPlate(self.vehicle)).flywheel ~= 0.0 then
             SetVehicleHandlingField(self.vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", self:GetHandling(self:GetPlate(self.vehicle)).maxspeed)
             SetVehStats(self.vehicle, "CHandlingData", "fDriveInertia", self:GetHandling(self:GetPlate(self.vehicle)).finaldrive)
             SetVehStats(self.vehicle, "CHandlingData", "fInitialDriveForce", self:GetHandling(self:GetPlate(self.vehicle)).flywheel)
