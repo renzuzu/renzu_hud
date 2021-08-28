@@ -26,9 +26,25 @@ html {
   transform: scale(1.4);
   transform-origin: 50% 50%;
 }
+.talking { animation: ripple 2s infinite; border-radius:50%; }
+
+@keyframes ripple {
+  0% {
+    box-shadow: 0 0 0 0px rgba(255,255,255,0.75);
+    opacity: 1;
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
+  100% {
+    color:rgb(96, 255, 96);
+    box-shadow: 0 0 0 25px rgba(255,255,255,0);
+    opacity: 0.5;
+    -webkit-transform: scale(1);
+    transform: scale(1.2);
+  }
+}
 #logo {
   display: inline-block;
-  #border: 50%;
   border-radius: 50px 50px 50px 50px;
   width: 70px;
   height: 70px;

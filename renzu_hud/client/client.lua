@@ -129,6 +129,7 @@ AddEventHandler("pma-voice:removePlayerFromRadio", function(channel)
 	})
 end)
 
+
 CreateThread(function()
 	if config.voicecommandandkeybind then
 		RegisterCommand(config.commands['voip'], function()
@@ -561,6 +562,7 @@ CreateThread(function()
 		if config.enable_carui and build() < 2000 and not Hud.invehicle and Hud.vehicle ~= 0 or config.gamebuild ~= 'auto' and build() > 2000 then
 			Hud:EnterVehicleEvent(true,Hud.vehicle)
 		end
+		SendNUIMessage({ type = 'Talking', content = NetworkIsPlayerTalking(PlayerId()) })
 		Wait(config.car_mainloop_sleep)
 	end
 end)

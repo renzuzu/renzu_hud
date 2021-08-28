@@ -3796,6 +3796,12 @@ function setKeyless(table) {
         }
     }
 
+    function Talking(bool) {
+        var voiceId = document.querySelector('#voipsimplebg');
+        if (bool) { voiceId.classList.add('talking'); }
+        else { voiceId.classList.remove('talking'); }
+    }
+
 //FUNCTIONS
 var renzu_hud = {
     setArmor,
@@ -3835,6 +3841,7 @@ var renzu_hud = {
     pedface,
     settingui,
     reimportsetting,
+    Talking,
     //CAR
     setShow,
     setRpm,
