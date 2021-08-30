@@ -633,11 +633,14 @@ AddEventHandler('gameEventTriggered', function (name, args)
 			if not inshock then
 				inshock = true
 				shockcount = 4
-				while inshock and shockcount > 1 do
-					Hud:updateplayer(true)
-					shockcount = shockcount - 1
-					Wait(100)
-				end
+				CreateThread(function()
+					while inshock and shockcount > 1 do
+						Hud:updateplayer(true)
+						shockcount = shockcount - 1
+						Wait(500)
+					end
+					return
+				end)
 				Wait(100)
 				if config.bodystatus then
 					Hud:BodyLoop()

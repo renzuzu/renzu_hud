@@ -1396,13 +1396,16 @@ end
 local firstload = 0
 function Hud:updateplayer(instant)
 	if self.ped == nil then return end
-	health = (GetEntityHealth(self.ped)/2) * 0.99
+	health = (GetEntityHealth(self.ped)-100) * 0.99
 	armor = GetPedArmour(self.ped) * 0.99
 	self.pid = PlayerId()
 	SendNUIMessage({
 		hud = "setArmor",
 		content = armor
 	})
+	if health <= 0 then
+		health = 0
+	end
 	if config.statusordering['armor'] then
 		config.statusordering['armor'].value = armor
 	end
@@ -2707,7 +2710,7 @@ end
 
 function Hud:BodyMain()
 	if health == nil then
-		health = GetEntityHealth(PlayerPedId()) / 2
+		health = GetEntityHealth(PlayerPedId()) -100
 	end
 	self.life = health
 	if health ~= nil and self.life < self.oldlife then
@@ -2734,7 +2737,7 @@ function Hud:BodyMain()
 			end
 		end
 	end
-	self.oldlife = GetEntityHealth(self.ped) / 2
+	self.oldlife = GetEntityHealth(self.ped) -100
 end
 
 function Hud:Makeloading(msg,ms)
