@@ -278,7 +278,7 @@ function setStatus(t) {
             document.getElementById(table[i].status+'blink').style.color = "rgba(151, 147, 147, 0.623)";
             document.getElementById(table[i].status+'blink').style.setProperty("-webkit-filter", "drop-shadow(15px -1px 22px rgba(255, 5, 5, 0.0)");
         }
-        if (setting['status'] && setting['status'][table[i].status].hideifmax && setting['status'][table[i].status].type == 1) {
+        if (setting['status'] && setting['status'][table[i].status].hideifmax && setting['status'][table[i].status].type == 1 && document.getElementById(table[i].status+'div')) {
             if(table[i].min_val_hide == undefined) { table[i].min_val_hide = 100 }
             if (table[i].value >= setting['status'][table[i].status].min_val_hide && table[i].status !== 'armor' && table[i].status !== 'stress' && table[i].type == 1 || table[i].value <= setting['status'][table[i].status].min_val_hide && table[i].status !== 'armor' && table[i].status == 'stress' && table[i].type == 1) {
                 document.getElementById(table[i].status+'div').style.display = 'none'
