@@ -95,7 +95,7 @@ function setArmor(s) {
         } else if (status_type !== 'icons') {
             SetProgressCircle('armorval', s * 0.99)
         }
-    } else {
+    } else if(document.getElementById("armorbar")) {
         document.getElementById("armorbar").style.width = ''+s * 0.99+'%'
     }
 }
@@ -107,7 +107,7 @@ function setHp(s) {
         } else if (status_type !== 'icons') {
             SetProgressCircle('healthval', s * 0.99)
         }
-    } else {
+    } else if(document.getElementById("healthbar")) {
         document.getElementById("healthbar").style.width = ''+s * 0.99+'%'
         var perc = s * 0.99+'%'
         //$('#healthbar').velocity({ width: "50px" })
@@ -3798,8 +3798,13 @@ function setKeyless(table) {
 
     function Talking(bool) {
         var voiceId = document.querySelector('#voipsimplebg');
-        if (bool) { voiceId.classList.add('talking'); }
-        else { voiceId.classList.remove('talking'); }
+        if (voiceId) {
+            if (bool) { 
+                voiceId.classList.add('talking') 
+            } else { 
+                voiceId.classList.remove('talking')
+            }
+        }
     }
 
 //FUNCTIONS
