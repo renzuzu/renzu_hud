@@ -2577,6 +2577,8 @@ function Hud:BodyLoop()
 			self.armbone2 = self.bonecategory["left_hand"]
 		end
 	else
+		self.armbone = 0
+		self.armbone2 = 0
 		self.arm = false
 	end
 	if self.bonecategory and self.bonecategory["left_leg"] and self.bonecategory["right_leg"] and (self.bonecategory["left_leg"] >= 2 or self.bonecategory["right_leg"] >= 2) then
@@ -2890,7 +2892,7 @@ function Hud:WeaponStatus()
 						lastent = ent
 						self.shooting = true
 						if config.bodystatus then
-							if self.armbone > self.armbone2 then
+							if self.arm and self.armbone > self.armbone2 then
 								self:recoil(self.armbone / 5.0)
 							else
 								self:recoil(self.armbone2 / 5.0)
