@@ -2894,7 +2894,7 @@ function Hud:WeaponStatus()
 						if config.bodystatus then
 							if self.arm and self.armbone > self.armbone2 then
 								self:recoil(self.armbone / 5.0)
-							else
+							elseif self.arm then
 								self:recoil(self.armbone2 / 5.0)
 							end
 						end
