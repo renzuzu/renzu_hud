@@ -2592,9 +2592,10 @@ function Hud:BodyLoop()
 		SetPedMovementClipset(self.ped, "move_m@injured", true)
 	elseif self.leg then
 		self.leg = false
-		ResetPedMovementClipset(GetPlayerPed(-1))
-		ResetPedWeaponMovementClipset(GetPlayerPed(-1))
-		ResetPedStrafeClipset(GetPlayerPed(-1))
+		Wait(2000)
+		ResetPedMovementClipset(self.ped)
+		ResetPedWeaponMovementClipset(self.ped)
+		ResetPedStrafeClipset(self.ped)
 		SetPedMoveRateOverride(self.ped, 1.0)
 	else
 		self.leg = false
@@ -2845,11 +2846,12 @@ end
 function Hud:WeaponStatus()
 	weapon = GetSelectedPedWeapon(self.ped)
 	if self.wstatus['armed'] then return end
-	local weapon = nil
 	self.oldweapon = nil
 	if IsPedArmed(self.ped, 7) and not self.invehicle then
 		if not self.shooting then
-			--print("not self.shooting")
+			if not self.updateweapon then
+				self:WeaponLoop()
+			end
 			CreateThread(function()
 				local count = 0
 				local killed = {}
@@ -2891,6 +2893,7 @@ function Hud:WeaponStatus()
 						----print(count)
 						lastent = ent
 						self.shooting = true
+						self:WeaponLoop()
 						if config.bodystatus then
 							if self.arm and self.armbone > self.armbone2 then
 								self:recoil(self.armbone / 5.0)
@@ -2898,7 +2901,6 @@ function Hud:WeaponStatus()
 								self:recoil(self.armbone2 / 5.0)
 							end
 						end
-						self:WeaponLoop()
 						Wait(sleep)
 					end
 					self:WeaponLoop()
@@ -2911,61 +2913,23 @@ function Hud:WeaponStatus()
 						content = false
 					})
 					self.weaponui = false
+					self.updateweapon = false
 				end
 				self.wstatus['armed'] = false	
 				self.shooting = false
 				return
 			end)
 		end
-		-- while IsPedArmed(self.ped, 7) and not self.invehicle and self.oldweapon == weapon do
-		-- 	sleep = config.ammoupdatedelay
-		-- 	weapon = GetSelectedPedWeapon(self.ped)
-		-- 	local ammoTotal = GetAmmoInPedWeapon(self.ped,weapon)
-		-- 	local bool,ammoClip = GetAmmoInClip(self.ped,weapon)
-		-- 	local ammoRemaining = math.floor(ammoTotal - ammoClip)
-		-- 	local maxammo = GetMaxAmmoInClip(self.ped, weapon, 1)
-		-- 	self.wstatus['armed'] = true
-		-- 	----print(ammoRemaining)
-		-- 	if self.oldweapon ~= weapon then
-		-- 		for key,value in pairs(config.WeaponTable) do
-		-- 			for name,v in pairs(config.WeaponTable[key]) do
-		-- 				weap = weapon == GetHashKey('weapon_'..name)
-		-- 				if weap then
-		-- 					self.wstatus['weapon'] = 'weapon_'..name
-		-- 				end
-		-- 			end
-		-- 		end
-		-- 	end
-		-- 	local weapon_ammo = {
-		-- 		['clip'] = ammoClip,
-		-- 		['ammo'] = ammoRemaining,
-		-- 		['max'] = maxammo
-		-- 	}
-		-- 	SendNUIMessage({
-		-- 		type = "setAmmo",
-		-- 		content = weapon_ammo
-		-- 	})
-		-- 	if not self.weaponui then
-		-- 		SendNUIMessage({
-		-- 			type = "setWeaponUi",
-		-- 			content = true
-		-- 		})
-		-- 		self.weaponui = true
-		-- 	end
-
-		-- 	Wait(sleep)
-		-- end
 	end
 end
 
 function Hud:WeaponLoop()
-	weapon = GetSelectedPedWeapon(self.ped)
+	local weapon = GetSelectedPedWeapon(self.ped)
 	local ammoTotal = GetAmmoInPedWeapon(self.ped,weapon)
 	local bool,ammoClip = GetAmmoInClip(self.ped,weapon)
 	local ammoRemaining = math.floor(ammoTotal - ammoClip)
 	local maxammo = GetMaxAmmoInClip(self.ped, weapon, 1)
 	self.wstatus['armed'] = true
-	----print(ammoRemaining)
 	if self.oldweapon ~= weapon then
 		for key,value in pairs(config.WeaponTable) do
 			for name,v in pairs(config.WeaponTable[key]) do

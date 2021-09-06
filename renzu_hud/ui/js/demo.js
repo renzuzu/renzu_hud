@@ -1438,7 +1438,7 @@ function setWeapon(weapon) {
     }, 333);
 }
 
-oldto = 0
+oldto = 55
 function setAmmo(table) {
     var max = table['max'];
     var ammo = table['clip'];
