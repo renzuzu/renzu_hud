@@ -470,7 +470,7 @@ function setSpeed(s) {
     val = to / 1000
     //e.style.strokeDashoffset = to;
     //$('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 20, delay: 20}).velocity({ 'stroke-dashoffset': to }, {duration: 15, delay: 23}).velocity({ 'stroke-dashoffset': to }, {duration: 20, delay: 23})
-    $('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15}).velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15}).velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15})
+    $('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 2, delay: 5}).velocity({ 'stroke-dashoffset': to }, {duration: 2, delay: 5}).velocity({ 'stroke-dashoffset': to }, {duration: 1, delay: 5})
     //$('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 30, delay: 60})
 }
 
@@ -2348,7 +2348,6 @@ var keystring = `<div id="lockbg" style="background:#1f1717; height:220px;width:
 <img id="keyless_renzu" style="z-index:1101;position:absolute;right:10px;bottom:10px;opacity:1.0;height:300px;" src="img/carlock.png" />`
 function setShowKeyless(bool) {
     if (bool) {
-        $('#keyless').append(keystring)
         document.getElementById("keyless").style.display = 'block';
     } else {
         $('#keyless').html('')
@@ -2403,6 +2402,7 @@ function setKeyless(table) {
     var vehicle = table['vehicle']
     var plate = table['plate']
     var doorstatus = table['state']
+    $('#keyless').append(keystring)
     if (type == 'connect') {
         currentvehicle = vehicle
         document.getElementById("foundcar").style.display = 'block';
