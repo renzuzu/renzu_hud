@@ -105,6 +105,15 @@ Hazard = Backspace
 - renzu_fuel https://github.com/renzuzu/renzu_fuel
 - renzu_status ( Standalone Status Function ) https://github.com/renzuzu/renzu_status (optional for standalone purpose and VRP, QB Implementation)
 
+# Installation
+- Download renzu_hud
+- Extract
+- rename to renzu_hud
+- start renzu_hud
+- start renzu_status (OPTIONAL without esx_status) (standalone purpose)
+- start esx_status (without renzu_status)
+- EDIT conf/main.lua config.framework = 'ESX' (Select ESX, STANDALONE, QBCORE)
+
 # TODOS
 - Settings UI ✔️
 - Fix Css
