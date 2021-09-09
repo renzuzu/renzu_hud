@@ -101,11 +101,12 @@ Hazard = Backspace
 
 # Dependency
 - ESX ( OPTIONAL )
+- ESX status - ESX basic needs 
 - renzu_fuel https://github.com/renzuzu/renzu_fuel
-- renzu_status ( Standalone Status Function ) https://github.com/renzuzu/renzu_status
+- renzu_status ( Standalone Status Function ) https://github.com/renzuzu/renzu_status (optional for standalone purpose and VRP, QB Implementation)
 
 # TODOS
-- Settings UI
+- Settings UI ✔️
 - Fix Css
 - Translation
 - Other Framework integration
