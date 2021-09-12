@@ -410,7 +410,25 @@ function GetPlayerFromId(source)
 	if config.framework == 'ESX' then
 		return ESX.GetPlayerFromId(tonumber(source))
 	elseif config.framework == 'QBCORE' then
-		return QBCore.Functions.GetPlayer(tonumber(source))
+		selfcore = {}
+		selfcore.data = QBCore.Functions.GetPlayer(tonumber(source))
+		if selfcore.data.identifier == nil then
+			selfcore.data.identifier = selfcore.data.PlayerData.citizenid
+		end
+		if selfcore.data.job == nil then
+			selfcore.data.job = selfcore.data.PlayerData.job
+		end
+
+		selfcore.data.getMoney = function(value)
+			return selfcore.data.PlayerData.money['cash']
+		end
+		selfcore.data.removeMoney = function(value)
+				QBCore.Functions.GetPlayer(tonumber(tonumber(source))).Functions.RemoveMoney('cash',tonumber(value))
+			return true
+		end
+		-- we only do wrapper or shortcuts for what we used here.
+		-- a lot of qbcore functions and variables need to port , its possible to port all, but we only port what this script needs.
+		return selfcore.data
 	end
 	return Renzu[tonumber(source)]
 end

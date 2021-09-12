@@ -553,7 +553,7 @@ CreateThread(function()
 	while true do
 		Hud.ped = PlayerPedId()
 		Hud.vehicle = GetVehiclePedIsIn(Hud.ped)
-		if not Hud.invehicle and config.enablestatus or not Hud.invehicle and not config.enablestatus and config.statusui == 'normal' then
+		if config.enablestatus or not config.enablestatus and config.statusui == 'normal' then
 			Hud:updateplayer()
 		end
 		if Hud.invehicle and Hud.vehicle == 0 then
