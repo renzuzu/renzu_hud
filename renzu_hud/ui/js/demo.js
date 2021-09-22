@@ -383,7 +383,7 @@ function setRpm(percent) {
         e.style.stroke = 'white';
     }
     if (setting['carhud'] && setting['carhud']['refreshrate'] > 170) {
-        $('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 35, delay: 25}).velocity({ 'stroke-dashoffset': to }, {duration: 22, delay: 25}).velocity({ 'stroke-dashoffset': to }, {duration: 25, delay: 25})
+        $('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 35, delay: 23}).velocity({ 'stroke-dashoffset': to }, {duration: 24, delay: 24}).velocity({ 'stroke-dashoffset': to }, {duration: 24, delay: 23})
     } else if (setting['carhud'] && setting['carhud']['refreshrate'] > 70) {
         $('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15}).velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15}).velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15})
     } else if (setting['carhud'] && setting['carhud']['refreshrate'] <= 20) {
@@ -470,8 +470,22 @@ function setSpeed(s) {
     val = to / 1000
     //e.style.strokeDashoffset = to;
     //$('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 20, delay: 20}).velocity({ 'stroke-dashoffset': to }, {duration: 15, delay: 23}).velocity({ 'stroke-dashoffset': to }, {duration: 20, delay: 23})
-    $('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 2, delay: 5}).velocity({ 'stroke-dashoffset': to }, {duration: 2, delay: 5}).velocity({ 'stroke-dashoffset': to }, {duration: 1, delay: 5})
+    //$('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 2, delay: 5}).velocity({ 'stroke-dashoffset': to }, {duration: 2, delay: 5}).velocity({ 'stroke-dashoffset': to }, {duration: 1, delay: 5})
     //$('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 30, delay: 60})
+    if (setting['carhud'] && setting['carhud']['refreshrate'] > 170) {
+        $('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 35, delay: 25}).velocity({ 'stroke-dashoffset': to }, {duration: 24, delay: 23}).velocity({ 'stroke-dashoffset': to }, {duration: 24, delay: 23})
+    } else if (setting['carhud'] && setting['carhud']['refreshrate'] > 70) {
+        $('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15}).velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15}).velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15})
+    } else if (setting['carhud'] && setting['carhud']['refreshrate'] <= 20) {
+        //$('.speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 0, delay: 0})
+        e.style.strokeDashoffset = to;
+    } else if (setting['carhud']['refreshrate'] <= 30) {
+        $('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 0, delay: 0})
+    } else if (setting['carhud']['refreshrate'] <= 70) {
+        $('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: v1, delay: v2})
+    } else {
+        $('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: v1, delay: v2}).velocity({ 'stroke-dashoffset': to }, {duration: v1, delay: v2}).velocity({ 'stroke-dashoffset': to }, {duration: v1, delay: v2})
+    }
 }
 
 function setCoolant(percent) {
