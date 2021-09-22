@@ -697,6 +697,11 @@ RegisterCommand(config.commands['car_seatbelt'], function()
 						--SetPedConfigFlag(PlayerPedId(), 32, false)
 						Hud:Notify('success','Seatbelt',"Seatbelt has been attached")
 					end
+					while Hud.belt and Hud.invehicle and config.seatbelt_2 do
+						DisableControlAction(0,75)
+						Wait(4)
+					end
+					Hud.belt = false
 					--SendNuiSeatBelt()
 				end)
 			end
