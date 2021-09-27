@@ -3219,6 +3219,12 @@ function setKeyless(table) {
                     if (usersetting['status'][statuses[i].status].type == undefined) {
                         usersetting['status'][statuses[i].status].type = statuses[i].type
                     }
+                    if (setting['status'][statuses[i].status].hideifmax == undefined) {
+                        setting['status'][statuses[i].status].hideifmax = statuses[i].hideifmax
+                    }
+                    if (usersetting['status'][statuses[i].status].hideifmax == undefined) {
+                        usersetting['status'][statuses[i].status].hideifmax = statuses[i].hideifmax
+                    }
                     setting['status'][statuses[i].status].type = usersetting['status'][statuses[i].status].type
                 } else {
                     setting['status'][statuses[i].status].min_val_hide = hidemax
