@@ -331,7 +331,7 @@ CreateThread(function()
 				if config.registerautostatus and not registered then
 					DecorRegister("STATUSR", 1)
 					for k,v in pairs(config.statusordering) do -- register all status
-						if v.custom and register[v.status] == nil and not DecorGetBool(PlayerPedId(), "STATUSR") then
+						if v.enable and v.custom and register[v.status] == nil and not DecorGetBool(PlayerPedId(), "STATUSR") then
 							local remove_value = v.statusremove
 							print("Auto Status Register: ",v.status,v.startvalue,v.statusremove)
 							TriggerEvent('esx_status:registerStatus', v.status, tonumber(v.startvalue), '#CFAD0F', function(status)
