@@ -680,7 +680,7 @@ RegisterCommand(config.commands['car_seatbelt'], function()
 						})
 					end
 					Hud:Notify('warning','Seatbelt',"Seatbelt has been Detached")
-					SetFlyThroughWindscreenParams(config.seatbeltminspeed, 2.2352, 0.0, 0.0)
+					SetFlyThroughWindscreenParams(config.seatbeltminspeed, 10.2352, 0.0, 0.0)
 					SetPedConfigFlag(PlayerPedId(), 32, true)
 					--SendNuiSeatBelt()
 				end)
