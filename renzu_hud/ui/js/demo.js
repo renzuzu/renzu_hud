@@ -173,7 +173,7 @@ function setFuelLevel(value) {
             //e.style.strokeDashoffset = to;
             $('#gasbar').velocity({ 'stroke-dashoffset': to }, {duration: 230, delay: 60})
         }
-    } else if (carui == 'simple') {
+    } else if (carui == 'simple' && document.getElementById("gasbar")) {
         var opacity = 1.0 - (gas * 0.01)
         document.getElementById("gasbar").style.clip = 'rect('+toclip(gas)+', 100px, 100px, 0)'
         document.getElementById("gasbg").style.opacity = ''+opacity+''
@@ -619,6 +619,7 @@ function setWaydistance(value) {
 
 function setTime(format) {
     var cur = 'Am'
+    if (!document.getElementById("timetext")) { return }
     if (format.hour > 12) {
         cur = 'Pm'
         document.getElementById("timetext").innerHTML = ' Pm' 
@@ -2039,17 +2040,9 @@ values="1.000  0.000  0.000  0.000  0.000
   <span id="diff">OFF</span>
 </div>`
 function setCarui(ver) {
-    if (carui_element['simple'] == undefined) {
-        //carui_element['simple'] = document.getElementById("simple").innerHTML
-        //carui_element['modern'] = document.getElementById("modern").innerHTML
-        //carui_element['minimal'] = document.getElementById("minimal").innerHTML
-    }
     document.getElementById("modern").innerHTML = '';
     document.getElementById("simple").innerHTML = '';
     document.getElementById("minimal").innerHTML = '';
-    ////console.log(carui_element['modern'])
-    //loopfuck = setInterval(function(){ getvehdata() }, 200);
-    //console.log(carui_element[ver])
     carui = ver
     if (usersetting['carhud'] && usersetting['carhud']['version'] !== 'auto' && usersetting['carhud']['version'] !== undefined) {
         carui = usersetting['carhud']['version']
@@ -2308,6 +2301,26 @@ function setStatusUILocation(table) {
             document.getElementById("statusv3").style.left = ''+table['left']+'';
         } else {
             document.getElementById("statusv3").style.left = 'unset';
+        }
+    }
+    if (!RestoreCarPosition()) {
+        console.log("setting to default")
+        if (document.getElementById("simple")) {
+            $('#simple').css('inset', 'unset');
+            document.getElementById("minimal").style.inset = 'unset';
+            document.getElementById("simple").style.right = '-4.5%';
+            document.getElementById("simple").style.bottom = '-20px';
+            console.log("setting simple to default")
+        }
+        if (document.getElementById("minimal")) {
+            document.getElementById("minimal").style.inset = 'unset';
+            document.getElementById("minimal").style.right = '-0.5%';
+            document.getElementById("minimal").style.bottom = '-40px';
+        }
+        if (document.getElementById("minimal")) {
+            document.getElementById("minimal").style.inset = 'unset';
+            document.getElementById("modern").style.right = '-0.5%';
+            document.getElementById("modern").style.bottom = '-40px';
         }
     }
 }
@@ -2863,8 +2876,8 @@ function setKeyless(table) {
             </div>
           </div>
           <p><small>Status HUD and CarHUD is Draggable.</small></p>
-          <button class="button" onclick='resetsetting(true)' style="background:red;">RESET</button>
-            <button class="button" onclick='SavetoLocal()'>SAVE</button>
+          <button class="button" onclick='resetsetting(true)' style="background:red;z-index:111;">RESET</button>
+            <button style="z-index:111;" class="button" onclick='SavetoLocal()'>SAVE</button>
           </div>
         </div>
       </div>
@@ -3677,14 +3690,18 @@ function setKeyless(table) {
     }
 
     function RestoreCarPosition() {
+        var havedefault = false
         var screenh = $(window).height();
         var screenw = $(window).width();
         if (localStorage.getItem("carhudleft")) {
+            havedefault = true
             $('#'+carui+'').css('left', ''+screenw * localStorage.getItem("carhudleft")+'px');
             $('#'+carui+'').css('top', ''+screenh * localStorage.getItem("carhudtop")+'px');
             $('#'+carui+'').css('right', 'auto');
             $('#'+carui+'').css('bottom', 'auto');
+            console.log("have default")
         }
+        return havedefault
     }
 
     function ResetStorages() {

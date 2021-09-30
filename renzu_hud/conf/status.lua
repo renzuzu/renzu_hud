@@ -4,7 +4,7 @@ config.registerautostatus = true -- register all status from config.statusorderi
 config.statusui = 'simple' -- UI LOOK ( simple, normal ) -- NORMAL = with pedface, Simple = Only Icons
 config.status_type = 'progressbar' -- circle progress bar = progressbar, fontawsome icon = icons
 config.statusv2 = true -- enable this if you want the status toggle mode (TOGGLE VIA INSERT) (THIS INCLUDE RP PURPOSE HUD like job,money,etc.)
-config.statusplace = 'bottom-right' -- available option top-right,top-left,bottom-right,bottom-left,top-center,bottom-center
+config.statusplace = 'bottom-left' -- available option top-right,top-left,bottom-right,bottom-left,top-center,bottom-center
 config.uidesign = 'circle' -- octagon (default), circle, square
 config.QbcoreStatusDefault = false -- if true will use metadatas as default you can stop renzu_status
 --CHANGE ACCORDING TO YOUR STATUS ESX STATUS OR ANY STATUS MOD
