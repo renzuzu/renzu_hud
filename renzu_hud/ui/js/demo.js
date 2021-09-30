@@ -275,7 +275,7 @@ function setStatus(t) {
                 document.getElementById(table[i].status+'blink').style.setProperty("-webkit-filter", "drop-shadow(5px -1px 5px rgba(255, 5, 5, 1.0)");
             }
         } else if (document.getElementById(table[i].status+'blink')) {
-            document.getElementById(table[i].status+'blink').style.color = "rgba(151, 147, 147, 0.623)";
+            document.getElementById(table[i].status+'blink').style.color = "rgb(177 177 177 / 13%)";
             document.getElementById(table[i].status+'blink').style.setProperty("-webkit-filter", "drop-shadow(15px -1px 22px rgba(255, 5, 5, 0.0)");
         }
         if (setting['status'] && setting['status'][table[i].status] !== undefined && setting['status'][table[i].status].hideifmax && setting['status'][table[i].status].type == 1 && document.getElementById(table[i].status+'div')) {
@@ -284,6 +284,7 @@ function setStatus(t) {
                 document.getElementById(table[i].status+'div').style.display = 'none'
             } else if (table[i].type == 1 && document.getElementById(table[i].status+'div')) {
                 document.getElementById(table[i].status+'div').style.display = 'block'
+                //console.log(table[i].status,table[i].value)
                 if (table[i].status == 'armor' && statusui !== 'simple' || table[i].status == 'armor' && statusui == 'simple' && table[i].value == 0) {
                     document.getElementById(table[i].status+'div').style.display = 'none'
                 } else if (table[i].status == 'armor' && statusui == 'simple' && table[i].value > 0) {
@@ -509,7 +510,7 @@ function setShow(table) {
     if (table['bool']) {
         invehicle = true
         $("#"+carui+"").animate({
-            opacity: "1"
+            opacity: "0.65"
         },400);
         setHeadlights(0)
         if (carui == 'modern') {
@@ -852,7 +853,7 @@ function setMode(value,c) {
         document.getElementById("modediv").style.fontSize = '0.5vw';
     }
     document.getElementById(""+carui+"").style.display = ''+carui+'';
-    document.getElementById(""+carui+"").style.opacity = '1.0';
+    document.getElementById(""+carui+"").style.opacity = '0.65';
 }
 
 function setDifferential(value) {
@@ -1808,45 +1809,45 @@ values="1.000  0.000  0.000  0.000  0.000
   <span id="geartext"></span>
 </div>
 <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:22%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
-  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
-  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(147, 150, 151, 0.623)"></i>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgb(20 25 27 / 46%);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgb(177 177 177 / 13%)"></i>
   <img style="display:block; height:100%;width:80%;position:absolute;top:4%;left:32.5%;" id="handbrakeopen" src="img/handbrakeopen.png" />
   <img style="display:block; height:100%;width:80%;position:absolute;top:4%;left:32.5%;opacity:0.6;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" id="handbrakeclose" src="img/handbrakeclose.png" />
 </span>
 <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:31%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
-  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
-  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgb(20 25 27 / 46%);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgb(177 177 177 / 13%)"></i>
   <img id="hoodopen" style="display:block; height:100%;width:80%;position:absolute;top:0%;left:33%;" src="img/hoodopen.png" />
   <img id="hoodclose" style="display:none; height:100%;width:80%;position:absolute;top:0%;left:33%;;opacity:0.6;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" src="img/hoodclose.png" />
 </span>
 <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:40%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
-  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
-  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgb(20 25 27 / 46%);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgb(177 177 177 / 13%)"></i>
   <img id="trunkopen" style="display:block; height:100%;width:80%;position:absolute;top:0%;left:33%;" src="img/trunkopen.png" />
   <img id="trunkclose" style="display:block; height:100%;width:80%;position:absolute;top:0%;left:33%;;opacity:0.6;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" src="img/trunkclose.png" />
 </span>
 <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:49%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
-  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
-  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgb(20 25 27 / 46%);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgb(177 177 177 / 13%)"></i>
   <img style="display:block; height:85%; width:75%;position:absolute;top:1%;left:33%;opacity:0.6;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" id="doorclose" src="img/doorclose.png" />
   <img style="display:none; height:85%;width:75%;position:absolute;top:1%;left:33%;opacity:0.7" id="dooropen" src="img/dooropen.png" />
 </span>
 <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:58%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
-  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
-  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgb(20 25 27 / 46%);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgb(177 177 177 / 13%)"></i>
   <img style="display:block; height:85%;position:absolute;top:4%;left:38%;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" id="seatbelt" src="img/seatbeltoff.png" />
   <img style="display:none;height:85%;position:absolute;top:4%;left:38%;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" id="onseatbelt" src="img/seatbelton.png" />
 </span>
 <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:66.9%;bottom:20%;color:rgba(144, 144, 144, 0.876)'>
-  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
-  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgba(151, 147, 147, 0.623)"></i>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.1vw;color:rgb(20 25 27 / 46%);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.3vw;color:rgb(177 177 177 / 13%)"></i>
   <img style="display:block; height:100%;position:absolute;top:3%;left:35%;opacity:0.5;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));" id="offlight" src="img/lightoff.png" />
   <img style="display:none;height:100%;position:absolute;top:3%;left:35%;-webkit-filter: drop-shadow(1px -1px 2px rgba(0, 0, 0, 0.822));" id="onlight" src="img/lighton.png" />
   <img style="display:none;height:100%;position:absolute;top:3%;left:35%;-webkit-filter: drop-shadow(1px -1px 2px rgba(4, 6, 7, 0.822));" id="highlight" src="img/lighthigh.png" />
 </span>
 <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:5.6%;bottom:53.5%;color:rgba(144, 144, 144, 0.876)'>
-  <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
-  <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgb(20 25 27 / 46%)'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgb(177 177 177 / 13%)"></i>
   <i class="fas fa-tint fa-stack-1x" style='font-size:1.1vw;color:rgb(2, 116, 192);z-index:1130;opacity:1.0;-webkit-filter: drop-shadow(1px -1px 2px rgba(6, 8, 8, 0.822));'></i>
 </span>
 <span class="fa-stack fa-2x" style='font-size:0.5vw;position:absolute;right:67%;bottom:40%;color:rgba(144, 144, 144, 0.294)'>
@@ -1855,8 +1856,8 @@ values="1.000  0.000  0.000  0.000  0.000
   <i class="fas fa-oil-can fa-stack-1x" style='font-size:1.14vw;color:rgba(144, 144, 144, 0.849);z-index:1130;opacity:1.0;padding-left:12px;-webkit-filter: drop-shadow(1px -1px 0.9px rgba(6, 8, 8, 0.822));'></i>
 </span>
 <span class="fa-stack fa-2x" style='font-size:0.5vw;position:absolute;right:9.9%;bottom:44.5%;color:rgba(144, 144, 144, 0.294)'>
-  <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
-  <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgb(20 25 27 / 46%)'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgb(177 177 177 / 13%)"></i>
   <i class="fad fa-car-mechanic fa-stack-1x"  style='font-size:0.9vw;color:rgba(182, 182, 182, 0.685);z-index:1130;opacity:1.0;margin-left:45%;-webkit-filter: drop-shadow(1px -1px 0.9px rgba(6, 8, 8, 0.822));'></i>
 </span>
 <i id="right" class="fas fa-arrow-alt-right"></i>
@@ -1980,38 +1981,38 @@ values="1.000  0.000  0.000  0.000  0.000
   <span id="geartext"></span>
 </div>
 <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:22%;bottom:20%;color:rgba(144, 144, 144, 0.876); display:none;'>
-  <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgba(11, 39, 63, 0.707)'></i>
-  <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgba(151, 147, 147, 0.623)"></i>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:0.9vw;color:rgb(20 25 27 / 46%)'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:0.9vw;color:rgb(177 177 177 / 13%)"></i>
   <img style="display:block; height:80%;width:60%;position:absolute;top:11%;left:20%;" id="handbrakeopen" src="img/handbrakeopen.png" />
   <img style="display:block; height:80%;width:60%;position:absolute;top:11%;left:20%;opacity:0.6" id="handbrakeclose" src="img/handbrakeclose.png" />
 </span>
 <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:35%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
-  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
-  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgba(151, 147, 147, 0.623);"></i>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgb(20 25 27 / 46%);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgb(177 177 177 / 13%);"></i>
   <i id="gasbar" class="fad fa-gas-pump fa-stack-1x" style='font-size:1.2vw;color:rgb(231, 231, 231);z-index:1131;opacity:1.0;margin-left:0.8vw;'></i>
   <i id="gasbg" class="fad fa-gas-pump fa-stack-1x" style='font-size:1.2vw;color:rgba(253, 0, 0, 0.856);z-index:1130;opacity:0.1;margin-left:0.8vw;'></i>
 </span>
 <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:45%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
-  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
-  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgba(151, 147, 147, 0.623);"></i>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgb(20 25 27 / 46%);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgb(177 177 177 / 13%);"></i>
   <i id="carhealthbar" class="fad fa-car-mechanic fa-stack-1x" style='font-size:1.2vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;margin-left:0.8vw;'></i>
   <i id="carhealthbg" class="fad fa-car-mechanic fa-stack-1x" style='font-size:1.2vw;color:rgba(235, 5, 5, 0.89);z-index:1130;opacity:0.1;margin-left:0.8vw;'></i>
 </span>
 <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:55%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
-  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
-  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgba(151, 147, 147, 0.623);"></i>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgb(20 25 27 / 46%);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgb(177 177 177 / 13%);"></i>
   <img style="display:block; height:85%; width:75%;position:absolute;top:8%;left:29%;opacity:0.6" id="doorclose" src="img/doorclose.png" />
   <img style="display:none; height:85%;width:75%;position:absolute;top:8%;left:29%;opacity:0.7" id="dooropen" src="img/dooropen.png" />
 </span>
 <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:65%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
-  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
-  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgba(151, 147, 147, 0.623);"></i>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgb(20 25 27 / 46%);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgb(177 177 177 / 13%);"></i>
   <img style="display:block; height:90%;position:absolute;top:11%;left:29%;" id="seatbelt" src="img/seatbeltoff.png" />
   <img style="display:none;height:90%;position:absolute;top:11%;left:29%;" id="onseatbelt" src="img/seatbelton.png" />
 </span>
 <span class="fa-stack fa-2x" style='font-size:0.9vw;position:absolute;right:75%;bottom:17%;color:rgba(144, 144, 144, 0.876)'>
-  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgba(11, 39, 63, 0.707);margin-left:0.2vw;'></i>
-  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgba(151, 147, 147, 0.623);"></i>
+  <i class="fas fa-octagon fa-stack-2x" style='font-size:1.04vw;color:rgb(20 25 27 / 46%);margin-left:0.2vw;'></i>
+  <i class="fal fa-octagon fa-stack-2x" style="font-size:1.2vw;color:rgb(177 177 177 / 13%);"></i>
   <img style="display:block; height:90%;position:absolute;top:11%;left:29%;opacity:0.5;" id="offlight" src="img/lightoff.png" />
   <img style="display:none;height:90%;position:absolute;top:11%;left:29%;" id="onlight" src="img/lighton.png" />
   <img style="display:none;height:90%;position:absolute;top:11%;left:29%;" id="highlight" src="img/lighthigh.png" />
@@ -2208,7 +2209,7 @@ function setCompass(bool) {
 }
 
 var logostring = `<img style="border-radius: 50%;" id="pedface" src="https://nui-img/pedmugshot_01/pedmugshot_01?t123" height="70">`
-var voipstring = `<i class="fas fa-octagon fa-stack-2x" style='font-size:15px;color:rgba(11, 39, 63, 0.707)'></i>
+var voipstring = `<i class="fas fa-octagon fa-stack-2x" style='font-size:15px;color:rgb(20 25 27 / 46%)'></i>
 <i class="fal fa-octagon fa-stack-2x" style="font-size:14px;color:rgb(28, 52, 129)"></i>
 <i id="microphone" class="fas fa-microphone fa-stack-1x" style='font-size:19px;z-index:1131;opacity:1.0;'></i>`
 var uibarstring = `<div class="armor-bar"><span class="bar"><span class="armor_progress" id="armorbar"></span></span></div>
@@ -2541,61 +2542,61 @@ function setKeyless(table) {
 
     var clothes = `<li style="position:absolute;left:0;top:0;" id="variants_helmet_1" onclick="CallbackCLothing('helmet_1','helmet_2');">
     <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707);-webkit-text-stroke:4px rgb(190, 53, 48)'></i>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%);-webkit-text-stroke:4px rgb(190, 53, 48)'></i>
       <i class="fad fa-helmet-battle" style="position:relative;margin-left:100%;;font-size:2.2vw;color:#ffffff"></i>
     </span>
   </li>
   <li style="position:absolute;left:0;top:20%;" id="variants_glasses_1" onclick="CallbackCLothing('glasses_1','glasses_2');">
     <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
       <i class="fal fa-sunglasses" style="position:relative;margin-left:109%;;font-size:2.0vw;color:#ffffff"></i>
     </span>
   </li>
   <li style="position:absolute;left:0;top:40%;" id="variants_chain_1" onclick="CallbackCLothing('chain_1','chain_2');">
     <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
       <i class="fad fa-scarf" style="position:relative;margin-left:115%;;font-size:2.0vw;color:#ffffff"></i>
     </span>
   </li>
   <li style="position:absolute;left:0;top:60%;" id="variants_watches_1" onclick="CallbackCLothing('watches_1','watches_2');">
     <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
       <i class="fad fa-watch" style="position:relative;margin-left:120%;;font-size:2.0vw;color:#ffffff"></i>
     </span>
   </li>
   <li style="position:absolute;left:0;top:80%;" id="variants_mask_1" onclick="CallbackCLothing('mask_1','mask_2');">
     <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
       <i class="fad fa-hockey-mask" style="position:relative;margin-left:120%;;font-size:2.0vw;color:#ffffff"></i>
     </span>
   </li>
   <li style="position:absolute;left:30%;top:80%;" id="variants_reset" onclick="ResetClothes();">
     <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
       <i class="fas fa-redo-alt" style="position:relative;margin-left:120%;;font-size:2.0vw;color:#ffffff"></i>
     </span>
   </li>
   <li style="position:absolute;left:60%;top:0;" id="variants_torso_1" onclick="CallbackCLothing('torso_1','torso_2');">
     <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
       <i class="fad fa-user-tie" style="position:relative;margin-left:120%;;font-size:2.0vw;color:#ffffff"></i>
     </span>
   </li>
   <li style="position:absolute;left:60%;top:20%;" id="variants_tshirt_1" onclick="CallbackCLothing('tshirt_1','tshirt_2');">
     <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
       <i class="fad fa-tshirt" style="position:relative;margin-left:107%;;font-size:2.0vw;color:#ffffff"></i>
     </span>
   </li>
   <li style="position:absolute;left:60%;top:40%;" id="variants_bproof_1" onclick="CallbackCLothing('bproof_1','bproof_2');">
     <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
       <i class="fad fa-user-shield" style="position:relative;margin-left:108%;;font-size:2.0vw;color:#ffffff"></i>
     </span>
   </li>
   <li style="position:absolute;left:60%;top:60%;" id="variants_pants_1" onclick="CallbackCLothing('pants_1','pants_2');">
     <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
       <i style="position:relative;margin-left:110%;">
         <svg viewBox="-120 0 448 448"
           xmlns="http://www.w3.org/2000/svg">
@@ -2612,7 +2613,7 @@ function setKeyless(table) {
   </li>
   <li style="position:absolute;left:60%;top:80%;" id="variants_shoes_1" onclick="CallbackCLothing('shoes_1','shoes_2');">
     <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgba(11, 39, 63, 0.707)'></i>
+      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
       <i class="fad fa-boot" style="position:relative;margin-left:115%;;font-size:2.0vw;color:#ffffff"></i>
     </span>
   </li>`
@@ -3303,16 +3304,16 @@ function setKeyless(table) {
                     }
                     if (setting['statusver'] == 'icons') {
                         if (appendto) {
-                            $("#statusv3").append('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:27px;position:relative;color:rgba(144, 144, 144, 0.876);float:right; margin-top:4px;margin-left:1px;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:27px;color:'+bg+'"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:26px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
+                            $("#statusv3").append('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:27px;position:relative;color:rgba(144, 144, 144, 0.876);float:right; margin-top:4px;margin-left:1px;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:27px;color:'+bg+'"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:26px;color:rgb(177 177 177 / 13%)"></i> <i id="'+i_id_1+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
                         } else {
-                            $("#statusv3").prepend('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:27px;position:relative;color:rgba(144, 144, 144, 0.876);float:left; margin-top:4px;margin-left:1px;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:27px;color:'+bg+'"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:26px;color:rgba(151, 147, 147, 0.623)"></i> <i id="'+i_id_1+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
+                            $("#statusv3").prepend('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:27px;position:relative;color:rgba(144, 144, 144, 0.876);float:left; margin-top:4px;margin-left:1px;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:27px;color:'+bg+'"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:26px;color:rgb(177 177 177 / 13%)"></i> <i id="'+i_id_1+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
                         }
                     } else {
                         if (appendto) {
                             float = 'right'
-                            $("#statusv3").append('<div id="'+divid+'" style="float:'+float+';height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:1.25vw;color:'+bg+';margin-left:0.2vw;"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:1.41vw;color:rgba(170, 170, 170, 0.623)"></i> <i id="'+i_id_2+'" class="'+statuses[i].fa+' fa-stack-1x" style="font-size:1.0vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1.19vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.25vw;bottom:-0.312vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.45vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="'+i_id_1+'" class="meter statushud" stroke="'+color1+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
+                            $("#statusv3").append('<div id="'+divid+'" style="float:'+float+';height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:1.25vw;color:'+bg+';margin-left:0.2vw;"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:1.41vw;color:rgb(177 177 177 / 13%)"></i> <i id="'+i_id_2+'" class="'+statuses[i].fa+' fa-stack-1x" style="font-size:1.0vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1.19vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.25vw;bottom:-0.312vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.55vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path style="stroke-opacity:0.4;stroke-width:24px;" class="bg" stroke="'+color1+'" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="'+i_id_1+'" class="meter statushud" style="stroke-width:24px;" stroke="'+color1+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
                         } else {
-                            $("#statusv3").prepend('<div id="'+divid+'" style="float:'+float+';height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:1.25vw;color:'+bg+';margin-left:0.2vw;"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:1.41vw;color:rgba(170, 170, 170, 0.623)"></i> <i id="'+i_id_2+'" class="'+statuses[i].fa+' fa-stack-1x" style="font-size:1.0vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1.19vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.25vw;bottom:-0.312vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.45vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path class="bg" stroke="#00000078" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="'+i_id_1+'" class="meter statushud" stroke="'+color1+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
+                            $("#statusv3").prepend('<div id="'+divid+'" style="float:'+float+';height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:1.25vw;color:'+bg+';margin-left:0.2vw;"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:1.41vw;color:rgb(177 177 177 / 13%)"></i> <i id="'+i_id_2+'" class="'+statuses[i].fa+' fa-stack-1x" style="font-size:1.0vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1.19vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.25vw;bottom:-0.312vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.55vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path style="stroke-opacity:0.4;stroke-width:24px;" class="bg" stroke="'+color1+'" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="'+i_id_1+'" class="meter statushud" style="stroke-width:24px;" stroke="'+color1+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
                         }
                     }
                     statusbars[statuses[i].status] = false

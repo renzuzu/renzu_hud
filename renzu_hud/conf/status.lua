@@ -4,9 +4,9 @@ config.registerautostatus = true -- register all status from config.statusorderi
 config.statusui = 'simple' -- UI LOOK ( simple, normal ) -- NORMAL = with pedface, Simple = Only Icons
 config.status_type = 'progressbar' -- circle progress bar = progressbar, fontawsome icon = icons
 config.statusv2 = true -- enable this if you want the status toggle mode (TOGGLE VIA INSERT) (THIS INCLUDE RP PURPOSE HUD like job,money,etc.)
-config.statusplace = 'bottom-left' -- available option top-right,top-left,bottom-right,bottom-left,top-center,bottom-center
+config.statusplace = 'bottom-right' -- available option top-right,top-left,bottom-right,bottom-left,top-center,bottom-center
 config.uidesign = 'circle' -- octagon (default), circle, square
-config.QbcoreStatusDefault = true -- if true will use metadatas as default you can stop renzu_status
+config.QbcoreStatusDefault = false -- if true will use metadatas as default you can stop renzu_status
 --CHANGE ACCORDING TO YOUR STATUS ESX STATUS OR ANY STATUS MOD
 
 --STATUS ( disabled v2 if you want the optimize version ( FETCH ONLY The Player Status if Toggled ) else v2 is running loop default of 1sec)
@@ -70,20 +70,20 @@ config.status_animation = {
 -- status = the status name
 -- OTHER OPTION ARE ICON CUSTOMIZATION for Colors, Fontawsome etc..
 config.statusordering = { -- SET enable = false to disable the status (the status must be registered from your esx_status) i highly suggest to use my standalone_status (https://github.com/renzuzu/renzu_status) so you wont have to edit the special events and exports needed for the status System!
-	[0] = {type = 1, enable = true, status = 'health', hideifmax = false, custom = false, value = 100, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'none', offset = '275', i_id_1_color = 'rgb(251, 29, 9)',bg = 'rgb(11, 39, 63)', fa = 'fas fa-heartbeat', i_id_2_color = 'rgba(251, 29, 9, 0.3)'},
-	[1] = {type = 1, enable = true, status = 'armor', hideifmax = true, custom = false, value = 0, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'none', offset = '275', i_id_1_color = 'rgb(1, 103, 255)', bg = 'rgb(11, 39, 63)',fa = 'far fa-shield-alt', i_id_2_color = 'rgb(0, 41, 129)'},
-	[2] = {type = 1, enable = true, status = 'hunger', hideifmax = false, custom = true, value = 0, startvalue = 1000000, statusremove = 100, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'block', offset = '275', i_id_1_color = 'rgb(221, 144, 0)',bg = 'rgb(11, 39, 63)', fa = 'fad fa-cheeseburger', i_id_2_color = 'rgb(114, 68, 0)'},
-	[3] = {type = 1, enable = true, status = 'thirst', hideifmax = false, custom = true, value = 0, startvalue = 1000000, statusremove = 100, notify_lessthan = false, notify_message = 'i am very thirsty', notify_value = 20, display = 'block', offset = '275', i_id_1_color = 'rgb(36, 113, 255)',bg = 'rgb(11, 39, 63)', fa = 'fad fa-glass', i_id_2_color = 'rgb(0, 11, 112)'},
-	[4] = {type = 1, enable = true, status = 'stress', hideifmax = false, min_val_hide = 50, custom = true, value = 0, startvalue = 0, statusremove = 0, notify_lessthan = true, notify_message = 'i see some dragons', notify_value = 80, display = 'block', offset = '275', i_id_1_color = 'rgb(255, 16, 68)',bg = 'rgb(11, 39, 63)', fa = 'fad fa-head-side-brain', i_id_2_color = 'rgba(35, 255, 101, 0.84)'},
-	[5] = {type = 1, enable = true, status = 'stamina', hideifmax = true, min_val_hide = 100, custom = false, value = 0, notify_lessthan = false, notify_message = 'running makes me thirsty', notify_value = 20, display = 'block', offset = '275', i_id_1_color = 'rgb(16, 255, 136)',bg = 'rgb(11, 39, 63)', fa = 'fad fa-running', i_id_2_color = 'rgba(0, 119, 57, 0.94)'},
-	[6] = {type = 1, enable = true, status = 'oxygen', hideifmax = true, min_val_hide = 100, custom = false, value = 0, notify_lessthan = false, notify_message = 'my oxygen is almost gone', notify_value = 20, display = 'block', offset = '275', i_id_1_color = 'rgb(15, 227, 255)',bg = 'rgb(11, 39, 63)', fa = 'fad fa-lungs', i_id_2_color = 'rgba(8, 76, 85, 0.78)'},
-	[7] = {type = 1, enable = true, status = 'energy', hideifmax = true, min_val_hide = 50, custom = true, value = 0, startvalue = 1000000, statusremove = 100, notify_lessthan = false, notify_message = 'i am very tired', notify_value = 20, display = 'block', offset = '275', i_id_1_color = 'rgb(233, 233, 233)',bg = 'rgb(11, 39, 63)', fa = 'fas fa-snooze', i_id_2_color = 'color:rgb(243, 57, 0)'},
-	[8] = {type = 1, enable = true, status = 'voip', hideifmax = false, custom = false, value = 0, notify_lessthan = false, notify_message = 'silent mode', notify_value = 0, display = 'block', offset = '275', i_id_1_color = 'rgb(251, 29, 9)',bg = 'rgb(11, 39, 63)', fa = 'fas fa-microphone', i_id_2_color = 'rgba(251, 29, 9, 0.3)'},
+	[0] = {type = 1, enable = true, status = 'health', hideifmax = false, custom = false, value = 100, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'none', offset = '275', i_id_1_color = 'rgb(101, 255, 131)',bg = 'rgb(57,59,60)', fa = 'fas fa-heartbeat', i_id_2_color = 'rgba(251, 29, 9, 0.3)'},
+	[1] = {type = 1, enable = true, status = 'armor', hideifmax = true, custom = false, value = 0, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'none', offset = '275', i_id_1_color = 'rgb(1, 103, 255)', bg = 'rgb(57,59,60)',fa = 'far fa-shield-alt', i_id_2_color = 'rgb(0, 41, 129)'},
+	[2] = {type = 1, enable = true, status = 'hunger', hideifmax = false, custom = true, value = 0, startvalue = 1000000, statusremove = 100, notify_lessthan = false, notify_message = 'i am very hungry', notify_value = 20, display = 'block', offset = '275', i_id_1_color = 'rgb(255, 155, 39)',bg = 'rgb(57,59,60)', fa = 'fas fa-cheeseburger', i_id_2_color = 'rgb(114, 68, 0)'},
+	[3] = {type = 1, enable = true, status = 'thirst', hideifmax = false, custom = true, value = 0, startvalue = 1000000, statusremove = 100, notify_lessthan = false, notify_message = 'i am very thirsty', notify_value = 20, display = 'block', offset = '275', i_id_1_color = 'rgb(36, 113, 255)',bg = 'rgb(57,59,60)', fa = 'fad fa-glass', i_id_2_color = 'rgb(0, 11, 112)'},
+	[4] = {type = 1, enable = false, status = 'stress', hideifmax = false, min_val_hide = 50, custom = true, value = 0, startvalue = 0, statusremove = 0, notify_lessthan = true, notify_message = 'i see some dragons', notify_value = 80, display = 'block', offset = '275', i_id_1_color = 'rgb(255, 16, 68)',bg = 'rgb(57,59,60)', fa = 'fad fa-head-side-brain', i_id_2_color = 'rgba(35, 255, 101, 0.84)'},
+	[5] = {type = 1, enable = true, status = 'stamina', hideifmax = true, min_val_hide = 100, custom = false, value = 0, notify_lessthan = false, notify_message = 'running makes me thirsty', notify_value = 20, display = 'block', offset = '275', i_id_1_color = 'rgb(16, 255, 136)',bg = 'rgb(57,59,60)', fa = 'fad fa-running', i_id_2_color = 'rgba(0, 119, 57, 0.94)'},
+	[6] = {type = 1, enable = true, status = 'oxygen', hideifmax = true, min_val_hide = 100, custom = false, value = 0, notify_lessthan = false, notify_message = 'my oxygen is almost gone', notify_value = 20, display = 'block', offset = '275', i_id_1_color = 'rgb(15, 227, 255)',bg = 'rgb(57,59,60)', fa = 'fad fa-lungs', i_id_2_color = 'rgba(8, 76, 85, 0.78)'},
+	[7] = {type = 1, enable = true, status = 'energy', hideifmax = true, min_val_hide = 50, custom = true, value = 0, startvalue = 1000000, statusremove = 100, notify_lessthan = false, notify_message = 'i am very tired', notify_value = 20, display = 'block', offset = '275', i_id_1_color = 'rgb(233, 233, 233)',bg = 'rgb(57,59,60)', fa = 'fas fa-snooze', i_id_2_color = 'color:rgb(243, 57, 0)'},
+	[8] = {type = 1, enable = true, status = 'voip', hideifmax = false, custom = false, value = 0, notify_lessthan = false, notify_message = 'silent mode', notify_value = 0, display = 'block', offset = '275', i_id_1_color = 'rgb(255, 255, 255)',bg = 'rgb(57,59,60)', fa = 'fas fa-microphone', i_id_2_color = 'rgba(251, 29, 9, 0.3)'},
 	
 	--SAMPLE ONLY
 	[9] = {
 		type = 1, -- 1 = circle progress or 0 = flat progress bar
-		enable = true,  -- enable or disable status
+		enable = false,  -- enable or disable status
 		status = 'poop',  -- status name from esx_status or renzu_status
 		hideifmax = false,  -- hide the status if its max (stress and armor is inverted)
 		min_val_hide = 50, -- works only if hideifmax == true (show/hide the status if value is met)
@@ -97,13 +97,13 @@ config.statusordering = { -- SET enable = false to disable the status (the statu
 		display = 'block',  -- dont change
 		offset = '275',  -- default offset
 		fa = 'fas fa-poo',  -- font awsome
-		i_id_1_color = 'rgb(124, 119, 56)', -- progress color
+		i_id_1_color = 'rgb(255, 199, 102)', -- progress color
 		i_id_2_color = 'rgba(251, 29, 9, 0.3)', -- use if icons type
-	bg = 'rgba(11, 39, 63, 0.707)',
+	bg = 'rgb(57,59,60)',
 	},
 	[10] = {
 		type = 1, 
-		enable = true, 
+		enable = false, 
 		status = 'pee', 
 		hideifmax = false,
 		min_val_hide = 50,
@@ -117,13 +117,13 @@ config.statusordering = { -- SET enable = false to disable the status (the statu
 		display = 'block', 
 		offset = '275', 
 		fa = 'fas fa-restroom', -- font awsome
-		i_id_1_color = 'gold', -- progress color
+		i_id_1_color = 'rgb(255, 245, 112)', -- progress color
 		i_id_2_color = 'rgba(251, 29, 9, 0.3)', -- bg color
-	bg = 'rgba(11, 39, 63, 0.707)',
+	bg = 'rgb(57,59,60)',
 	},
 	[11] = {
 		type = 1, 
-		enable = true, 
+		enable = false, 
 		status = 'hygiene', 
 		hideifmax = false,
 		min_val_hide = 50,
@@ -137,9 +137,9 @@ config.statusordering = { -- SET enable = false to disable the status (the statu
 		display = 'block', 
 		offset = '275', 
 		fa = 'fad fa-shower', -- font awsome
-		i_id_1_color = 'skyblue', -- progress color
+		i_id_1_color = 'rgb(102, 196, 255)', -- progress color
 		i_id_2_color = 'rgba(251, 29, 9, 0.3)', -- bg color
-	bg = 'rgba(11, 39, 63, 0.707)',
+	bg = 'rgb(57,59,60)',
 	},
 }
 
