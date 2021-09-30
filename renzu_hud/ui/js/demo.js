@@ -2313,12 +2313,14 @@ function setStatusUILocation(table) {
             console.log("setting simple to default")
         }
         if (document.getElementById("minimal")) {
+            $('#minimal').css('inset', 'unset');
             document.getElementById("minimal").style.inset = 'unset';
             document.getElementById("minimal").style.right = '-0.5%';
             document.getElementById("minimal").style.bottom = '-40px';
         }
-        if (document.getElementById("minimal")) {
-            document.getElementById("minimal").style.inset = 'unset';
+        if (document.getElementById("modern")) {
+            $('#modern').css('inset', 'unset');
+            document.getElementById("modern").style.inset = 'unset';
             document.getElementById("modern").style.right = '-0.5%';
             document.getElementById("modern").style.bottom = '-40px';
         }
