@@ -1399,6 +1399,13 @@ function Hud:updateplayer(instant)
 	health = (GetEntityHealth(self.ped)-100) * 0.99
 	armor = GetPedArmour(self.ped) * 0.99
 	self.pid = PlayerId()
+	if Hud.esx_status ~= nil and Hud.esx_status and config.statusordering['armor'] and config.statusordering['health'] then
+		config.statusordering['armor'].value = armor
+		config.statusordering['health'].value = health
+	elseif Hud.esx_status ~= nil and not Hud.esx_status and config.statusordering[1] and config.statusordering[0] then
+		config.statusordering[0].value = health
+		config.statusordering[1].value = armor
+	end
 	SendNUIMessage({
 		hud = "setArmor",
 		content = armor
@@ -1406,16 +1413,10 @@ function Hud:updateplayer(instant)
 	if health <= 0 then
 		health = 0
 	end
-	if config.statusordering['armor'] then
-		config.statusordering['armor'].value = armor
-	end
 	SendNUIMessage({
 		hud = "setHp",
 		content = health
 	})
-	if config.statusordering['health'] then
-		config.statusordering['health'].value = health
-	end
 end
 
 function Hud:haveseatbelt()

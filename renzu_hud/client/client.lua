@@ -309,6 +309,8 @@ CreateThread(function()
 							config.statusordering[v.status] = v
 							config.statusordering[k] = nil
 						end
+						config.statusordering['health'] = config.statusordering[0]
+						config.statusordering[0] = nil
 						Hud.esx_status = true
 					end
 					for k,v in ipairs(vitals) do
