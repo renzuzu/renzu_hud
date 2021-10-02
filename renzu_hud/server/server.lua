@@ -13,28 +13,38 @@ ESX = nil
 QBCore = nil
 
 function SQLQuery(plugin,type,query,var)
+	local wait = promise.new()
     if type == 'fetchAll' and plugin == 'mysql-async' then
-		local q = nil
 		MySQL.Async.fetchAll(query, var, function(result)
-            q = result
+            wait:resolve(result)
         end)
-		while q == nil do Wait(0) end
-		return q
     end
     if type == 'execute' and plugin == 'mysql-async' then
-        MySQL.Sync.execute(query,var) 
+        MySQL.Async.execute(query, var, function(result)
+            wait:resolve(result)
+        end)
     end
     if type == 'execute' and plugin == 'ghmattisql' then
-        exports['ghmattimysql']:execute(query, var)
+        exports['ghmattimysql']:execute(query, var, function(result)
+            wait:resolve(result)
+        end)
     end
     if type == 'fetchAll' and plugin == 'ghmattisql' then
-        local data = nil
         exports.ghmattimysql:execute(query, var, function(result)
-            data = result
+            wait:resolve(result)
         end)
-        while data == nil do Wait(0) end
-        return data
     end
+    if type == 'execute' and plugin == 'oxmysql' then
+        exports.oxmysql:execute(query, var, function(result)
+            wait:resolve(result)
+        end)
+    end
+    if type == 'fetchAll' and plugin == 'oxmysql' then
+		exports['oxmysql']:fetch(query, var, function(result)
+			wait:resolve(result)
+		end)
+    end
+	return Citizen.Await(wait)
 end
 
 Citizen.CreateThread(function()
