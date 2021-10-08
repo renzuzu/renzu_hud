@@ -10,7 +10,7 @@
 config = {}
 config.gamebuild = 'auto' -- if 2189 pedshot transparent and 1604 or < 2000 = Enter vehicle game event will not work, we will use normal pedshot ( gamebuild is what you set on your server start example: +set sv_enforceGameBuild 2189, available build 1604, 2060, 2189 and more.) this is important if you are using UI Normal with Ped Face.
 config.framework = 'ESX' -- ESX | QBCORE | VRP | STANDALONE (VRP not supported yet, but you can use standalone, it will work!)
-config.Mysql = 'mysql-async' -- 'ghmattisql' | 'mysql-async'
+config.Mysql = 'mysql-async' -- 'ghmattisql' | 'mysql-async' | 'oxmysql'
 config.weight_type = false -- ESX item weight or limit type
 config.vehicle_table = 'owned_vehicles' -- change this if you use different sql table for player vehicles (note identifier steam is always being used here)
 config.Owner_column = 'owner' -- owner column name for identifier eg.steam hex,licensed
@@ -37,6 +37,7 @@ config.commanditem_permission = { -- item command permission -- standalone purpo
 	'steam:11000013ec77a2e', -- steam hex id, change this to yours, you can add as many as you want
 	'steam:11000013ec77a2e',
 	'df845523fc29c5159ece179359f22a741ca2ca9a',
+	'license:df845523fc29c5159ece179359f22a741ca2ca9a',
 }
 config.identifier = 'license:' -- standalone purpose, ignore if using framework
 --MULTI CHARACTER START -- set config.multichar = false if you are not using any multi character ( configuring this is needed to avoid problems saving to database )

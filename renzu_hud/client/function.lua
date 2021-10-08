@@ -488,6 +488,7 @@ function Hud:SetVehicleOnline() -- for vehicle loop
 	if self.veh_stats[self.plate] ~= nil then
 		self.veh_stats[self.plate].entity = VehToNet(self.vehicle )
 		TriggerServerEvent('renzu_hud:savedata', self.plate, self.veh_stats[tostring(self.plate)],true)
+		LocalPlayer.state:set( --[[keyName]] 'adv_stat', --[[value]] self.veh_stats, --[[replicate to server]] true)
 	end
 end
 
@@ -768,9 +769,12 @@ end
 
 function Hud:get_veh_stats(v,p)
 	--if self.veh_stats[plate] ~= nil then return end
-	while not self.veh_stats_loaded do
+	while not LocalPlayer.state.loaded do
 		Wait(10)
 	end
+	while self.veh_stats == nil do Wait(1) self.veh_stats = LocalPlayer.state.adv_stat end
+	self.veh_stats = LocalPlayer.state.adv_stat
+	--while self.veh_stats[self.plate] == nil do Wait(10) self.veh_ end
 	if v ~= nil and p ~= nil then
 		self.vehicle  = v
 		self.plate = p
@@ -816,7 +820,7 @@ function Hud:get_veh_stats(v,p)
 	end
 	if self.veh_stats[self.plate].engine ~= nil and self.veh_stats[self.plate].engine ~= 'default' and self.currentengine[self.plate] ~= GetHashKey(tostring(self.veh_stats[self.plate].engine)) and self.invehicle then
 		self:SetEngineSpecs(self.vehicle , GetHashKey(tostring(self.veh_stats[self.plate].engine)))
-		print("new ENGINE")
+		print("new ENGINE",self.veh_stats[self.plate].engine)
 		Citizen.Wait(1500)
 	end
 	if self.veh_stats[self.plate].tires ~= nil and self.veh_stats[self.plate].tires ~= 'default' and self.invehicle then
@@ -838,6 +842,7 @@ function Hud:get_veh_stats(v,p)
 	end
 	if lets_save then
 		TriggerServerEvent('renzu_hud:savedata', saveplate, self.veh_stats[tostring(saveplate)])
+		LocalPlayer.state:set( --[[keyName]] 'adv_stat', --[[value]] self.veh_stats, --[[replicate to server]] true)
 		lets_save = false -- why?
 	end
 end
@@ -991,6 +996,7 @@ function Hud:NuiMileAge()
 			elseif savemile and lastve ~= nil and saveplate ~= nil then
 				savemile = false
 				TriggerServerEvent('renzu_hud:savedata', saveplate, self.veh_stats[tostring(saveplate)])
+				LocalPlayer.state:set( --[[keyName]] 'adv_stat', --[[value]] self.veh_stats, --[[replicate to server]] true)
 				Wait(1000)
 				lastve = nil
 				saveplate = nil
@@ -3172,7 +3178,7 @@ function Hud:Carlock()
 		for k,v in pairs(GetGamePool('CVehicle')) do
 			if #(mycoords - GetEntityCoords(v, false)) < config.carlock_distance then
 				self.plate = GetVehicleNumberPlateText(v)
-				if self.veh_stats[self.plate] ~= nil and self.veh_stats[self.plate].owner ~= nil and self.identifier ~= nil then
+				if self.veh_stats[self.plate] ~= nil and self.veh_stats[self.plate].owner ~= nil and LocalPlayer.state.identifier ~= nil then
 					checkindentifier = string.gsub(self.veh_stats[self.plate].owner, 'Char5', '')
 					checkindentifier = string.gsub(checkindentifier, 'Char4', '')
 					checkindentifier = string.gsub(checkindentifier, 'Char3', '')
@@ -3186,8 +3192,8 @@ function Hud:Carlock()
 					checkindentifier = string.gsub(checkindentifier, 'steam', '')
 					checkindentifier = string.gsub(checkindentifier,":","")
 					checkindentifier = string.gsub(checkindentifier, string.gsub(config.identifier,":",""), '')
-					myidentifier = string.gsub(self.identifier, 'steam', '')
-					myidentifier = string.gsub(self.identifier, string.gsub(config.identifier,":",""), '')
+					myidentifier = string.gsub(LocalPlayer.state.identifier, 'steam', '')
+					myidentifier = string.gsub(LocalPlayer.state.identifier, string.gsub(config.identifier,":",""), '')
 					myidentifier = string.gsub(myidentifier,":","")
 					myidentifier = string.gsub(myidentifier, 'Char5', '')
 					myidentifier = string.gsub(myidentifier, 'Char4', '')
@@ -3839,7 +3845,8 @@ end
 
 function Hud:SyncWheelAndSound(sounds,wheels)
 	local coords = GetEntityCoords(PlayerPedId())
-	for k,v in pairs(self.onlinevehicles) do
+	while LocalPlayer.state.onlinevehicles == nil do Wait(1) print(LocalPlayer.state.onlinevehicles) end
+	for k,v in pairs(LocalPlayer.state.onlinevehicles) do
 		if v.entity ~= nil and NetworkDoesEntityExistWithNetworkId(v.entity) and v.plate == self:tostringplate(GetVehicleNumberPlateText(NetToVeh(v.entity))) then
 			local vv = NetToVeh(v.entity)
 			local vehcoords = GetEntityCoords(vv)

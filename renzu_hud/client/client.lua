@@ -867,6 +867,7 @@ AddEventHandler('renzu_hud:install_turbo', function(type)
 	Hud.veh_stats[plate].turbo = type
 	Hud.veh_stats[plate].turbo_health = config.turbo_health
 	TriggerServerEvent('renzu_hud:savedata', plate, Hud.veh_stats[tostring(plate)])
+	LocalPlayer.state:set( --[[keyName]] 'adv_stat', --[[value]] Hud.veh_stats, --[[replicate to server]] true)
 	Hud:Notify('success','Turbo Install',""..Hud.veh_stats[plate].turbo.." turbine has been install")
 	Hud:playanimation('rcmepsilonism8','bag_handler_close_trunk_walk_left')
 	Wait(2000)
@@ -1520,7 +1521,7 @@ CreateThread(function()
 			local sleep = 2000
 			for k,v in pairs(Hud.nearstancer) do
 				if v.speed > 1 and not v.wheeledit and v.dist < 100 and Hud.veh_stats[v.plate] ~= nil and Hud.veh_stats[v.plate]['wheelsetting'] ~= nil then
-					sleep = 30
+					sleep = 11
 					SetVehicleWheelWidth(v.entity,0.7) -- trick to avoid stance bug
 					SetVehicleWheelXOffset(v.entity,0,tonumber(Hud.veh_stats[v.plate]['wheelsetting']['wheeloffsetfront'].wheel0))
 					SetVehicleWheelXOffset(v.entity,1,tonumber(Hud.veh_stats[v.plate]['wheelsetting']['wheeloffsetfront'].wheel1))
@@ -1585,6 +1586,7 @@ RegisterNUICallback('wheelsetting', function(data, cb)
 	Hud.veh_stats[plate].height = vehicle_height
     if Hud.vehicle ~= nil and Hud.vehicle ~= 0 and not data.bool then
 		TriggerServerEvent('renzu_hud:savedata', plate, Hud.veh_stats[tostring(plate)])
+		LocalPlayer.state:set( --[[keyName]] 'adv_stat', --[[value]] Hud.veh_stats, --[[replicate to server]] true)
 	end
 	Wait(1000)
 	Hud.nearstancer[plate].wheeledit = false
@@ -1953,6 +1955,7 @@ AddEventHandler("renzu_hud:installtire", function(type)
 						Hud.veh_stats[plate].tires = type
 					end
 					TriggerServerEvent('renzu_hud:savedata', plate, Hud.veh_stats[tostring(plate)])
+					LocalPlayer.state:set( --[[keyName]] 'adv_stat', --[[value]] Hud.veh_stats, --[[replicate to server]] true)
 					Hud:ReqAndDelete(Hud.proptire,true)
 					break
 				else
@@ -1992,6 +1995,7 @@ AddEventHandler("renzu_hud:installtire", function(type)
 						end
 					end
 					TriggerServerEvent('renzu_hud:savedata', plate, Hud.veh_stats[tostring(plate)])
+					LocalPlayer.state:set( --[[keyName]] 'adv_stat', --[[value]] Hud.veh_stats, --[[replicate to server]] true)
 					Hud:Notify('success','Tire System',"New Tire #"..i.." has been Successfully Install")
 					Hud:ReqAndDelete(Hud.proptire,true)
 					break
@@ -2366,7 +2370,9 @@ end)
 
 RegisterNetEvent('renzu_hud:syncengine')
 AddEventHandler('renzu_hud:syncengine', function(plate, t)
+	while Hud.veh_stats == nil do Wait(1) Hud.veh_stats = LocalPlayer.state.adv_stat end
     Hud.veh_stats[tostring(plate)] = t
+	Hud.onlinevehicles[tostring(plate)] = t
 end)
 
 RegisterCommand(config.commands['carui'], function(source, args, raw)

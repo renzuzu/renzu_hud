@@ -53,8 +53,8 @@ Citizen.CreateThread(function()
 		MySQL.Sync.execute([[
 			CREATE TABLE IF NOT EXISTS `vehicle_status` (
 				`stats` LONGTEXT NULL COLLATE 'utf8mb4_general_ci',
-				`plate` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
-				`owner` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
+				`plate` VARCHAR(64) NOT NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
+				`owner` VARCHAR(64) NOT NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
 				PRIMARY KEY (`plate`) USING BTREE
 			)
 			COLLATE='utf8mb4_general_ci'
@@ -62,7 +62,7 @@ Citizen.CreateThread(function()
 			;
 			CREATE TABLE IF NOT EXISTS `body_status` (
 				`status` LONGTEXT NULL COLLATE 'utf8mb4_general_ci',
-				`identifier` VARCHAR(64) NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
+				`identifier` VARCHAR(64) NOT NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
 				PRIMARY KEY (`identifier`) USING BTREE
 			)
 			COLLATE='utf8mb4_general_ci'
@@ -136,12 +136,10 @@ Citizen.CreateThread(function()
 		if config.use_esx_accesories then
 			-- COPYRIGHT TO ESX ACCESOSRIES LINK https://github.com/esx-framework/esx_accessories/blob/e812dde63bcb746e9b49bad704a9c9174d6329fa/server/main.lua#L31
 			ESX.RegisterServerCallback('esx_accessories:get2', function(source, cb, accessory)
-				print("SKINS")
 				local xPlayer = GetPlayerFromId(source)
 				TriggerEvent('esx_datastore:getDataStore', 'user_' .. string.lower(accessory), xPlayer.identifier, function(store)
 				local hasAccessory = (store.get('has' .. accessory) and store.get('has' .. accessory) or false)
 				local skin = (store.get('skin') and store.get('skin') or {})
-
 					cb(hasAccessory, skin)
 				end)
 			end)
@@ -163,8 +161,33 @@ function isVehicleOwned(plate)
 	return owner
 end
 
+SyncStat = function(stat)
+	for i=0, GetNumPlayerIndices()-1 do
+		--if IsPlayerAceAllowed(GetPlayerFromIndex(i), "ace.test") then  
+		local ply = Player(GetPlayerFromIndex(i))
+		ply.state.adv_stat = stat
+		local temp = {}
+		for k,v in pairs(stat) do
+			if v.entity ~= nil then
+				if temp[k] == nil then
+					temp[k] = {}
+				end
+				temp[k].entity = v.entity
+				temp[k].plate = k
+				if v.height ~= nil then
+					temp[k].height = v.height
+				end
+				if v.engine ~= nil then
+					temp[k].engine = v.engine
+				end
+			end
+		end
+		ply.state.onlinevehicles = temp
+	end
+end
+
 local kids = {}
-RegisterServerEvent("renzu_hud:savedata")
+RegisterNetEvent("renzu_hud:savedata")
 AddEventHandler("renzu_hud:savedata", function(plate,table,updatevehicles)
 	local source = source
 	if plate ~= nil and kids[source] ~= nil and kids[source] < GetGameTimer() or plate ~= nil and kids[source] == nil then -- block any request until the timer is lessthan the gametimer or if its nil
@@ -173,12 +196,12 @@ AddEventHandler("renzu_hud:savedata", function(plate,table,updatevehicles)
 		local foundplate = false
 		local newcreated = false
 		if plate ~= nil then
-			print("SAVING")
+			--print("SAVING")
 			adv_table[tostring(plate)] = table
 			local results = SQLQuery(config.Mysql,'fetchAll',"SELECT stats,plate,owner FROM vehicle_status WHERE UPPER(plate)=@plate", {['@plate'] = plate:upper()})
 			if #results <= 0 then
 				local owner = isVehicleOwned(plate)
-				print(owner,#owner)
+				--print(owner,#owner)
 				if #owner > 0 then
 					SQLQuery(config.Mysql,'execute',"INSERT INTO vehicle_status (stats, plate, owner) VALUES (@stats, @plate, @owner)", {
 						['@stats'] = json.encode(adv_table[tostring(plate)]),
@@ -202,7 +225,10 @@ AddEventHandler("renzu_hud:savedata", function(plate,table,updatevehicles)
 			if not foundplate then
 				adv_table[tostring(plate)].owner = nil
 			end
-			TriggerClientEvent('renzu_hud:receivedata', -1, adv_table)
+			SyncStat(adv_table)
+			--ply.state:set( --[[keyName]] 'adv_stat', --[[value]] adv_table, --[[replicate to server]] true)
+			--print(ply.state.adv_stat) -- returns true
+			--TriggerClientEvent('renzu_hud:receivedata', -1, adv_table)
 		end
 	else
 		print('plate is nil')
@@ -223,6 +249,7 @@ AddEventHandler("renzu_hud:getdata", function(slot, fetchslot)
 	-- print(slot)
 	-- print("SLOT")
 	-- print(fetchslot)
+	local xPlayer = GetPlayerFromId(source)
 	local source = source
 	if slot ~= nil and charslot[source] == nil then
 		charslot[source] = slot
@@ -234,7 +261,12 @@ AddEventHandler("renzu_hud:getdata", function(slot, fetchslot)
 		if Renzu[tonumber(source)] == nil then
 			CreatePlayer(source)
 		end
-		TriggerClientEvent('renzu_hud:receivedata', source, adv_table, PlayerIdentifier(source))
+	local ply = Player(source)
+	-- ply.state.adv_stat = adv_table
+	SyncStat(adv_table)
+	ply.state.loaded = true
+	ply.state.identifier = xPlayer.identifier
+		--TriggerClientEvent('renzu_hud:receivedata', source, adv_table, PlayerIdentifier(source))
 	end
 end)
 
@@ -260,7 +292,7 @@ AddEventHandler('renzu_hud:checkbody', function(target)
 	end
 	local xPlayer = GetPlayerFromId(source)
 	local done = false
-	print(xPlayer,"PLAYERLOADED",xPlayer)
+	--print(xPlayer,"PLAYERLOADED",xPlayer)
 	while xPlayer == nil do
 		print("Creating Player")
 		CreatePlayer(source)
@@ -284,7 +316,7 @@ AddEventHandler('renzu_hud:checkbody', function(target)
 	else
 		target = true
 	end
-	print(target,source)
+	--print(target,source)
 	TriggerClientEvent('renzu_hud:bodystatus', originalsource, done, target)
 end)
 
@@ -304,7 +336,7 @@ end)
 
 RegisterServerEvent('renzu_hud:healbody')
 AddEventHandler('renzu_hud:healbody', function(target,part)
-	print("1",part)
+	--("1",part)
 	local xPlayer = GetPlayerFromId(source)
 	local identifier = xPlayer.identifier
 	if config.framework == 'Standalone' or config.framework == 'ESX' and xPlayer.job.name == config.checkbodycommandjob or config.framework == 'QBCORE' and xPlayer.PlayerData.job.name == config.checkbodycommandjob then
@@ -366,6 +398,8 @@ end)
 local wheelsetting = {}
 RegisterServerEvent("renzu_hud:wheelsetting")
 AddEventHandler("renzu_hud:wheelsetting", function(entity,val,coords)
+	SyncStat(adv_table)
+	Wait(100)
 	TriggerClientEvent("renzu_hud:wheelsetting", -1, entity,wheelsetting)
 end)
 
@@ -565,6 +599,8 @@ AddEventHandler('renzu_hud:change_engine', function(plate, stats)
 			['@plate'] = plate:upper()
 		})
 	end
+	SyncStat(adv_table)
+	Wait(100)
 	TriggerClientEvent("renzu_hud:syncengine", -1, plate, stats)
 	print("syncing to all")
 end)
