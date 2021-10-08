@@ -2187,13 +2187,13 @@ RegisterNUICallback('ChangeClothes', function(data)
 			if data.variant == 'mask_1' or data.variant == 'helmet_1' then
 				SendNUIMessage({content = true, type = 'pedface'})
 			end
-			local table = {
+			local t = {
 				['bool'] = Hud.clothestate[data.variant],
 				['variant'] = data.variant
 			}
 			SendNUIMessage({
 				type = "setClotheState",
-				content = table
+				content = t
 			})
 		else
 			if Hud.oldclothes[tostring(data.variant)] == config.clothing[tostring(data.variant)]['default'] then
@@ -2214,13 +2214,13 @@ RegisterNUICallback('ChangeClothes', function(data)
 				end)
 				Hud.clothestate[tostring(data.variant)] = true
 				PlaySoundFrontend(-1, 'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 0)
-				local table = {
+				local t = {
 					['bool'] = Hud.clothestate[data.variant],
 					['variant'] = data.variant
 				}
 				SendNUIMessage({
 					type = "setClotheState",
-					content = table
+					content = t
 				})
 			end
 		end
@@ -2231,13 +2231,13 @@ end)
 
 RegisterNUICallback('hideclothing', function(data)
 	clothing = false
-	local table = {
+	local t = {
 		['bool'] = clothing,
 		['equipped'] = Hud.clothestate
 	}
 	SendNUIMessage({
 		type = "setShowClothing",
-		content = table
+		content = t
 	})
 	SetNuiFocusKeepInput(clothing)
 	SetNuiFocus(clothing,clothing)
@@ -2365,8 +2365,8 @@ AddEventHandler('renzu_hud:change_engine', function(engine)
 end)
 
 RegisterNetEvent('renzu_hud:syncengine')
-AddEventHandler('renzu_hud:syncengine', function(plate, table)
-    Hud.veh_stats[tostring(plate)] = table
+AddEventHandler('renzu_hud:syncengine', function(plate, t)
+    Hud.veh_stats[tostring(plate)] = t
 end)
 
 RegisterCommand(config.commands['carui'], function(source, args, raw)

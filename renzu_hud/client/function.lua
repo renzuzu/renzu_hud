@@ -3463,12 +3463,11 @@ function Hud:ClotheState()
 end
 
 function Hud:TaskAnimation(t)
-	if not t then return end
 	if self.imbusy then
 		self.imbusy = false
 		local Ped = self.ped
 		while not HasAnimDictLoaded(t.dictionary) do
-			RequestAnimDict(table.dictionary)
+			RequestAnimDict(t.dictionary)
 			Citizen.Wait(5)
 		end
 		if IsPedInAnyVehicle(Ped) then
@@ -3532,7 +3531,7 @@ function Hud:CarStatus()
 	end
 	local enginename = self.veh_stats[self.plate].engine
 	enginename = enginename:gsub("^%l", string.upper).." Engine"
-	local table = {
+	local t = {
 		['bool'] = self.carstatus,
 		['engine'] = GetVehicleMod(self.vehicle , 11) + 1,
 		['tranny'] = GetVehicleMod(self.vehicle , 13) + 1,
@@ -3549,7 +3548,7 @@ function Hud:CarStatus()
 	}
 	SendNUIMessage({
 		type = "setShowCarStatus",
-		content = table
+		content = t
 	})
 end
 
@@ -3685,7 +3684,7 @@ function Hud:GetHandlingfromModel(model)
 		if config.custom_engine[model].turboinstall then
 			ToggleVehicleMod(self.vehicle , 18, true)
 		end
-		local table = {
+		local t = {
 			['fDriveInertia'] = tonumber(config.custom_engine[model].fDriveInertia),
 			['nInitialDriveGears'] = tonumber(config.custom_engine[model].nInitialDriveGears),
 			['fInitialDriveForce'] = tonumber(config.custom_engine[model].fInitialDriveForce),
@@ -3694,12 +3693,12 @@ function Hud:GetHandlingfromModel(model)
 			['fInitialDriveMaxFlatVel'] = tonumber(config.custom_engine[model].fInitialDriveMaxFlatVel),
 			['fMass'] = tonumber(config.custom_engine[model].fMass),
 		}
-		return table
+		return t
 	else
 		for k,v in pairs(self.vehiclehandling) do
 			--print(v.VehicleModels[1],model)
 			if GetHashKey(v.VehicleModels[1]) == model then
-				local table = {
+				local t = {
 					['fDriveInertia'] = tonumber(v.DriveInertia),
 					['nInitialDriveGears'] = tonumber(v.InitialDriveGears),
 					['fInitialDriveForce'] = tonumber(v.InitialDriveForce),
@@ -3708,7 +3707,7 @@ function Hud:GetHandlingfromModel(model)
 					['fInitialDriveMaxFlatVel'] = tonumber(v.InitialDriveMaxFlatVel),
 					['fMass'] = tonumber(v.Mass),
 				}
-				return table
+				return t
 			end
 		end
 	end
