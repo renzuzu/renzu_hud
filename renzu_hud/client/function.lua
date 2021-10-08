@@ -3462,19 +3462,20 @@ function Hud:ClotheState()
 	end
 end
 
-function Hud:TaskAnimation(table)
+function Hud:TaskAnimation(t)
+	if not t then return end
 	if self.imbusy then
 		self.imbusy = false
 		local Ped = self.ped
-		while not HasAnimDictLoaded(table.dictionary) do
+		while not HasAnimDictLoaded(t.dictionary) do
 			RequestAnimDict(table.dictionary)
 			Citizen.Wait(5)
 		end
 		if IsPedInAnyVehicle(Ped) then
-			table.speed = 51
+			t.speed = 51
 		end
-		TaskPlayAnim(Ped, table.dictionary, table.name, 3.0, 3.0, table.duration, table.speed, 0, false, false, false)
-		local delay = table.duration-500 
+		TaskPlayAnim(Ped, t.dictionary, t.name, 3.0, 3.0, t.duration, t.speed, 0, false, false, false)
+		local delay = t.duration-500 
 		if delay < 500 then
 			delay = 500
 		end
