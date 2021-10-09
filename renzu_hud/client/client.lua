@@ -332,6 +332,7 @@ CreateThread(function()
 
 				if config.registerautostatus and not registered then
 					DecorRegister("STATUSR", 1)
+					print("REGISTER START")
 					for k,v in pairs(config.statusordering) do -- register all status
 						if v.enable and v.custom and register[v.status] == nil and not DecorGetBool(PlayerPedId(), "STATUSR") then
 							local remove_value = v.statusremove
@@ -506,7 +507,7 @@ CreateThread(function()
 	SendNUIMessage({type = "SetStatusOrder",content = {['table'] = config.statusordering, ['float'] = config.statusplace}})
 	Wait(1000)
 	Hud.reorder = true
-	while not Hud.playerloaded do Citizen.Wait(100) end
+	while not Hud.playerloaded do Citizen.Wait(100) print("loading") end
 	Wait(100)
 	local tbl = {['table'] = config.statusordering, ['float'] = config.statusplace}
 	if config.enable_carui then
@@ -545,7 +546,7 @@ CreateThread(function()
 		Hud:EnterVehicleEvent(true,Hud.vehicle)
 	end
 	--WHEN RESTARTED IN CAR
-	while Hud.veh_stats == nil do
+	while not LocalPlayer.state.loaded do
 		--print("vehstats")
 		Wait(100)
 	end

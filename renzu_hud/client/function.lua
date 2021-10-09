@@ -185,7 +185,6 @@ function Hud:EnterVehicleEvent(state,vehicle)
 		if config.enable_carui_perclass then
 			self:DefineCarUI(config.carui_perclass[GetVehicleClass(vehicle)])
 		end
-		--print("veh loop")
 		-- self.plate = tostring(GetVehicleNumberPlateText(vehicle))
 		-- self.plate = string.gsub(self.plate, '^%s*(.-)%s*$', '%1')
 		self.hp = GetVehicleEngineHealth(vehicle)
