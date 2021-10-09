@@ -425,6 +425,7 @@ CreateThread(function()
 		nuiloop = true
 	end
 	while Hud.veh_stats == nil do
+		Hud.veh_stats = LocalPlayer.state.adv_stat
 		Wait(100)
 	end
 	if nuiloop then
@@ -1517,6 +1518,7 @@ CreateThread(function()
 	if config.wheelstancer then
 		while Hud.veh_stats == nil do
 			Wait(100)
+			Hud.veh_stats = LocalPlayer.state.adv_stat
 		end
 		while true do
 			local sleep = 2000
