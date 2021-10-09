@@ -3162,6 +3162,7 @@ function Hud:Carlock()
 	if not self.keyless then return end
 	while self.veh_stats == nil do
 		Wait(100)
+		self.veh_stats = LocalPlayer.state.adv_stat
 	end
 	if not self.veh_stats_loaded then
 		self:get_veh_stats()
