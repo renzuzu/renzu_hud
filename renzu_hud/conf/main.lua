@@ -39,7 +39,7 @@ config.commanditem_permission = { -- item command permission -- standalone purpo
 	'df845523fc29c5159ece179359f22a741ca2ca9a',
 	'license:df845523fc29c5159ece179359f22a741ca2ca9a',
 }
-config.identifier = 'license:' -- standalone purpose, ignore if using framework
+config.identifier = 'license:' -- identifier format
 --MULTI CHARACTER START -- set config.multichar = false if you are not using any multi character ( configuring this is needed to avoid problems saving to database )
 config.multichar = false -- KASHACTERS, cd_multicharacter, etc...
 --IMPORTANT PART IF USING Multicharacter

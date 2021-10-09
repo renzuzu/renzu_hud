@@ -202,7 +202,7 @@ AddEventHandler("renzu_hud:savedata", function(plate,table,updatevehicles)
 			if #results <= 0 then
 				local owner = isVehicleOwned(plate)
 				--print(owner,#owner)
-				if #owner > 0 then
+				if owner ~= nil and #owner > 0 then
 					SQLQuery(config.Mysql,'execute',"INSERT INTO vehicle_status (stats, plate, owner) VALUES (@stats, @plate, @owner)", {
 						['@stats'] = json.encode(adv_table[tostring(plate)]),
 						['@plate'] = plate:upper(),
