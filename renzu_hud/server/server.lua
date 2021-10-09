@@ -247,9 +247,11 @@ end
 RegisterServerEvent("renzu_hud:getdata")
 AddEventHandler("renzu_hud:getdata", function(slot, fetchslot)
 	-- print(slot)
-	-- print("SLOT")
 	-- print(fetchslot)
 	local xPlayer = GetPlayerFromId(source)
+	local ply = Player(source)
+	ply.state.loaded = true
+	ply.state.identifier = xPlayer.identifier
 	local source = source
 	if slot ~= nil and charslot[source] == nil then
 		charslot[source] = slot
@@ -264,8 +266,6 @@ AddEventHandler("renzu_hud:getdata", function(slot, fetchslot)
 	local ply = Player(source)
 	-- ply.state.adv_stat = adv_table
 	SyncStat(adv_table)
-	ply.state.loaded = true
-	ply.state.identifier = xPlayer.identifier
 		--TriggerClientEvent('renzu_hud:receivedata', source, adv_table, PlayerIdentifier(source))
 	end
 end)
