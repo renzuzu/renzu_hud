@@ -536,6 +536,7 @@ Citizen.CreateThread(function()
 				break -- assume its already all registered
 			end
 		end
+		while ESX == nil do Wait(10) end
 		if config.framework == 'ESX' then
 			for v, k in pairs(config.engine) do
 				local enginename = string.lower(v)
