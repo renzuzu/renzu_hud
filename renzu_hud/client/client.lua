@@ -7,6 +7,7 @@
 -- If you redistribute this software, you must link to ORIGINAL repository at https://github.com/renzuzu/renzu_hud
 -- This copyright should appear in every part of the project code
 ESX = nil
+local getdata = false
 CreateThread(function()
 	if config.framework == 'ESX' then
 		while ESX == nil do TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end) Wait(0) end
@@ -177,7 +178,10 @@ CreateThread(function()
 		Wait(2000)
 		print("ESX")
 		Hud.lastped = PlayerPedId()
-		TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
+		if not getdata then
+			TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
+			getdata = true
+		end
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 		Wait(5000)
 		SendNUIMessage({content = true, type = 'pedface'})
@@ -190,7 +194,10 @@ CreateThread(function()
 		Wait(2000)
 		print("QB")
 		Hud.lastped = PlayerPedId()
-		TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
+		if not getdata then
+			TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
+			getdata = true
+		end
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 		Wait(5000)
 		SendNUIMessage({content = true, type = 'pedface'})
@@ -205,7 +212,10 @@ CreateThread(function()
 			Wait(2000)
 			Hud.lastped = PlayerPedId()
 			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
-			TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
+			if not getdata then
+				TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
+				getdata = true
+			end
 			Wait(5000)
 			SendNUIMessage({content = true, type = 'pedface'})
 			SendNUIMessage({content = true, type = 'playerloaded'})
@@ -220,14 +230,20 @@ CreateThread(function()
 	end
 	if DecorExistOn(PlayerPedId(), "PLAYERLOADED") and Hud.charslot ~= nil then
 		print("PLAYERLOADED")
-		TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
+		if not getdata then
+			TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
+			getdata = true
+		end
 		Hud.playerloaded = true
 		SendNUIMessage({content = true, type = 'playerloaded'})
 	end
 	Wait(500)
 	if DecorExistOn(PlayerPedId(), "PLAYERLOADED") and config.loadedasmp and Hud:isplayer() then
 		print("ISMP")
-		TriggerServerEvent("renzu_hud:getdata",0, config.multichar)
+		if not getdata then
+			TriggerServerEvent("renzu_hud:getdata",0, config.multichar)
+			getdata = true
+		end
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 		Hud.playerloaded = true
 		SendNUIMessage({content = true, type = 'pedface'})
@@ -239,13 +255,19 @@ CreateThread(function()
 		Wait(2000)
 		Hud.lastped = PlayerPedId()
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
-		TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
+		if not getdata then
+			TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
+			getdata = true
+		end
 		Wait(5000)
 		SendNUIMessage({content = true, type = 'pedface'})	
 		SendNUIMessage({content = true, type = 'playerloaded'})
 	elseif DecorExistOn(PlayerPedId(), "PLAYERLOADED") then
 		print("already loaded")
-		TriggerServerEvent("renzu_hud:getdata",0, config.multichar)
+		if not getdata then
+			TriggerServerEvent("renzu_hud:getdata",0, config.multichar)
+			getdata = true
+		end
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 		Hud.playerloaded = true
 		SendNUIMessage({content = true, type = 'pedface'})

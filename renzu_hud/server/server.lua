@@ -11,7 +11,8 @@ Renzu = {}
 charslot = {}
 ESX = nil
 QBCore = nil
-
+local vehicles = {}
+vehicle_stat = {}
 function SQLQuery(plugin,type,query,var)
 	local wait = promise.new()
     if type == 'fetchAll' and plugin == 'mysql-async' then
@@ -47,8 +48,36 @@ function SQLQuery(plugin,type,query,var)
 	return Citizen.Await(wait)
 end
 
+function FetchVehicles()
+	local ownedvehicles = SQLQuery(config.Mysql,'fetchAll',"SELECT "..config.Owner_column..", `plate` FROM "..config.vehicle_table.." ", {})
+	for k,v in pairs(ownedvehicles) do
+		local plate = string.gsub(v.plate:upper(), '^%s*(.-)%s*$', '%1')
+		v.plate = plate
+		vehicles[v.plate] = v
+	end
+end
+
+Citizen.CreateThread(function()
+	while true do
+		FetchVehicles()
+		Wait(30000)
+	end
+end)
+
 Citizen.CreateThread(function()
 	Wait(1000)
+	local ownedvehicles = SQLQuery(config.Mysql,'fetchAll',"SELECT "..config.Owner_column..", `plate` FROM "..config.vehicle_table.." ", {})
+	local stat = SQLQuery(config.Mysql,'fetchAll',"SELECT stats,plate,owner FROM vehicle_status", {})
+	for k , v in pairs(ownedvehicles) do
+		local plate = string.gsub(v.plate:upper(), '^%s*(.-)%s*$', '%1')
+		v.plate = plate
+		vehicles[v.plate] = v
+	end
+	for k , v in pairs(stat) do
+		local plate = string.gsub(v.plate:upper(), '^%s*(.-)%s*$', '%1')
+		v.plate = plate
+		vehicle_stat[v.plate] = v
+	end
 	if config.Mysql == 'mysql-async' then
 		MySQL.Sync.execute([[
 			CREATE TABLE IF NOT EXISTS `vehicle_status` (
@@ -157,7 +186,8 @@ Citizen.CreateThread(function()
 end)
 
 function isVehicleOwned(plate)
-	local owner = SQLQuery(config.Mysql,'fetchAll',"SELECT "..config.Owner_column.." FROM "..config.vehicle_table.." WHERE UPPER(plate)=@plate", {['@plate'] = plate:upper()})
+	local plate = string.gsub(plate:upper(), '^%s*(.-)%s*$', '%1')
+	local owner = vehicles[plate] ~= nil and vehicles[plate] or nil
 	return owner
 end
 
@@ -187,43 +217,58 @@ SyncStat = function(stat)
 end
 
 local kids = {}
+local oldt = {}
+local toupdate = 0
+local lastupdate = 0
+local unsaved = {}
 RegisterNetEvent("renzu_hud:savedata")
 AddEventHandler("renzu_hud:savedata", function(plate,table,updatevehicles)
 	local source = source
-	if plate ~= nil and kids[source] ~= nil and kids[source] < GetGameTimer() or plate ~= nil and kids[source] == nil then -- block any request until the timer is lessthan the gametimer or if its nil
-		kids[source] = GetGameTimer() + 2000 -- i receive some reports this event is being used by kiddies to perform a noob things :D
-		--local plate = string.gsub(plate, "%s+", "")
+	if plate ~= nil and kids[source] ~= nil and kids[source] < GetGameTimer() or plate ~= nil and kids[source] == nil then
+		kids[source] = GetGameTimer() + 2000 
 		local foundplate = false
 		local newcreated = false
 		if plate ~= nil then
-			--print("SAVING")
-			adv_table[tostring(plate)] = table
-			local results = SQLQuery(config.Mysql,'fetchAll',"SELECT stats,plate,owner FROM vehicle_status WHERE UPPER(plate)=@plate", {['@plate'] = plate:upper()})
-			if #results <= 0 then
+			adv_table[string.gsub(plate, '^%s*(.-)%s*$', '%1')] = table
+			local results = vehicle_stat[string.gsub(plate, '^%s*(.-)%s*$', '%1')]
+			if results == nil then
 				local owner = isVehicleOwned(plate)
-				--print(owner,#owner)
-				if owner ~= nil and #owner > 0 then
+				if owner ~= nil then
 					SQLQuery(config.Mysql,'execute',"INSERT INTO vehicle_status (stats, plate, owner) VALUES (@stats, @plate, @owner)", {
-						['@stats'] = json.encode(adv_table[tostring(plate)]),
+						['@stats'] = json.encode(adv_table[string.gsub(plate, '^%s*(.-)%s*$', '%1')]),
 						['@plate'] = plate:upper(),
-						['@owner'] = owner[1][config.Owner_column]
+						['@owner'] = owner[config.Owner_column]
 					})
 					foundplate = true
-					adv_table[tostring(plate)].owner = owner[1][config.Owner_column]
+					print("INSERT")
+					adv_table[string.gsub(plate, '^%s*(.-)%s*$', '%1')].owner = owner[config.Owner_column]
+					vehicle_stat[string.gsub(plate, '^%s*(.-)%s*$', '%1')] = adv_table[string.gsub(plate, '^%s*(.-)%s*$', '%1')]
 				end
 			end
-			if #results > 0 then
+			if results then
 				foundplate = true
 				local owner = isVehicleOwned(plate)
-				SQLQuery(config.Mysql,'execute',"UPDATE vehicle_status SET stats = @stats WHERE UPPER(plate) = @plate", {
-					['@stats'] = json.encode(adv_table[tostring(plate)]),
-					['@plate'] = plate:upper(),
-					['owner'] = owner[1][config.Owner_column]
-				})
-				adv_table[tostring(plate)].owner = owner[1][config.Owner_column]
+				if toupdate > 10 or lastupdate == 0 or lastupdate <= GetGameTimer() then
+					for k,v in pairs(unsaved) do
+						SQLQuery(config.Mysql,'execute',"UPDATE vehicle_status SET stats = @stats WHERE TRIM(UPPER(plate)) = @plate", {
+							['@stats'] = json.encode(unsaved[string.gsub(v.plate:upper(), '^%s*(.-)%s*$', '%1')]),
+							['@plate'] = string.gsub(v.plate:upper(), '^%s*(.-)%s*$', '%1'),
+							['owner'] = v.owner
+						})
+						print("Update"..v.plate)
+					end
+					lastupdate = GetGameTimer() + 20000
+					toupdate = 0
+				end
+				toupdate = toupdate + 1
+				if toupdate < 10 then
+					unsaved[string.gsub(plate, '^%s*(.-)%s*$', '%1')] = adv_table[string.gsub(plate, '^%s*(.-)%s*$', '%1')]
+				end
+				adv_table[string.gsub(plate, '^%s*(.-)%s*$', '%1')].owner = owner[config.Owner_column]
+				oldt[string.gsub(plate, '^%s*(.-)%s*$', '%1')] = adv_table[string.gsub(plate, '^%s*(.-)%s*$', '%1')]
 			end
 			if not foundplate then
-				adv_table[tostring(plate)].owner = nil
+				adv_table[string.gsub(plate, '^%s*(.-)%s*$', '%1')].owner = nil
 			end
 			SyncStat(adv_table)
 			--ply.state:set( --[[keyName]] 'adv_stat', --[[value]] adv_table, --[[replicate to server]] true)
@@ -403,20 +448,20 @@ AddEventHandler("renzu_hud:wheelsetting", function(entity,val,coords)
 	TriggerClientEvent("renzu_hud:wheelsetting", -1, entity,wheelsetting)
 end)
 
-local antispam = {}
-RegisterServerEvent("mumble:SetVoiceData")
-AddEventHandler("mumble:SetVoiceData", function(mode,prox)
-	local source = source
-	if mode == 'mode' then
-		TriggerClientEvent("renzu_hud:SetVoiceData", source, 'proximity', prox)
-	end
-	if mode == 'radio' and not antispam[source] then
-		antispam[source] = true
-		TriggerClientEvent("renzu_hud:SetVoiceData", source, 'radio', prox)
-		Wait(10)
-		antispam[source] = false
-	end
-end)
+-- local antispam = {}
+-- RegisterServerEvent("mumble:SetVoiceData")
+-- AddEventHandler("mumble:SetVoiceData", function(mode,prox)
+-- 	local source = source
+-- 	if mode == 'mode' then
+-- 		TriggerClientEvent("renzu_hud:SetVoiceData", source, 'proximity', prox)
+-- 	end
+-- 	if mode == 'radio' and not antispam[source] then
+-- 		antispam[source] = true
+-- 		TriggerClientEvent("renzu_hud:SetVoiceData", source, 'radio', prox)
+-- 		Wait(10)
+-- 		antispam[source] = false
+-- 	end
+-- end)
 
 function PlayerIdentifier(source)
 	local source = source
@@ -592,7 +637,8 @@ RegisterServerEvent('renzu_hud:change_engine')
 AddEventHandler('renzu_hud:change_engine', function(plate, stats)
 	local plate = plate
 	adv_table[tostring(plate)] = stats
-	results = SQLQuery(config.Mysql,'fetchAll',"SELECT stats,plate FROM vehicle_status WHERE UPPER(plate)=@plate", {['@plate'] = plate:upper()})
+	FetchVehicles()
+	results = SQLQuery(config.Mysql,'fetchAll',"SELECT stats,plate FROM vehicle_status WHERE TRIM(UPPER(plate))=@plate", {['@plate'] = string.gsub(plate:upper(), '^%s*(.-)%s*$', '%1')})
 	if #results > 0 then
 		foundplate = true
 		SQLQuery(config.Mysql,'execute',"UPDATE vehicle_status SET stats = @status WHERE UPPER(plate) = @plate", {
