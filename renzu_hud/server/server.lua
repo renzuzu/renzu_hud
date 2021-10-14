@@ -257,6 +257,7 @@ AddEventHandler("renzu_hud:savedata", function(plate,table,updatevehicles)
 						})
 						print("Update"..v.plate)
 					end
+					unsaved = {}
 					lastupdate = GetGameTimer() + 20000
 					toupdate = 0
 				end
