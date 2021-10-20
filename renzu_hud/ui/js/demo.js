@@ -1081,7 +1081,7 @@ var carcontrolstring = `<div id="carcontrolinfo">Car Control:</div>
 <div id="morecontrol" style="z-index:1001;position:absolute;right:515px;bottom:-390px;opacity:1.0;height:400px;width:450px;padding:10px;">
   <div id="airsusinfo">Air Suspension:</div>
   <div class="range-slider" id="suspension">
-    <input class="range-slider__range" type="range" value="15" min="0" max="30">
+    <input class="range-slider__range" step="0.1" type="range" value="15" min="0" max="30">
       <span class="range-slider__value">100</span>
     </div>
     <div id="neoninfo">Neon Lights:</div>
@@ -1137,8 +1137,8 @@ var carcontrolstring = `<div id="carcontrolinfo">Car Control:</div>
                               <span class="switch-selection"></span>
                             </div>
                           </div>`
-function setShowCarcontrol(bool) {
-    if (bool) {
+function setShowCarcontrol(table) {
+    if (table.bool) {
         document.getElementById('carcontrolui').style.display = 'block'
         $('#carcontrolui').append(carcontrolstring)
         $("#carcontrol").fadeIn();
@@ -1159,6 +1159,8 @@ function setShowCarcontrol(bool) {
     
         const wheeloffsetfront = document.querySelectorAll('#wheeloffsetfront');
         Array.prototype.forEach.call(wheeloffsetfront, slider => {
+            console.log(table.offset[1],table.offset['0'])
+            slider.querySelector('input').value = table.offset[1]
             slider.querySelector('input').addEventListener('input', event => {
                 slider.querySelector('span').innerHTML = event.target.value * 0.01;
                 applyFill(event.target);
@@ -1170,6 +1172,7 @@ function setShowCarcontrol(bool) {
     
         const wheeloffsetrear = document.querySelectorAll('#wheeloffsetrear');
         Array.prototype.forEach.call(wheeloffsetrear, slider => {
+            slider.querySelector('input').value = table.offset[1]
             slider.querySelector('input').addEventListener('input', event => {
                 slider.querySelector('span').innerHTML = event.target.value * 0.01;
                 applyFill(event.target);
@@ -1181,6 +1184,7 @@ function setShowCarcontrol(bool) {
     
         const wheelrotationfront = document.querySelectorAll('#wheelrotationfront');
         Array.prototype.forEach.call(wheelrotationfront, slider => {
+            slider.querySelector('input').value = table.rotation[1]
             slider.querySelector('input').addEventListener('input', event => {
                 slider.querySelector('span').innerHTML = event.target.value * 0.01;
                 applyFill(event.target);
@@ -1191,6 +1195,7 @@ function setShowCarcontrol(bool) {
     
         const wheelrotationrear = document.querySelectorAll('#wheelrotationrear');
         Array.prototype.forEach.call(wheelrotationrear, slider => {
+            slider.querySelector('input').value = table.rotation[1]
             slider.querySelector('input').addEventListener('input', event => {
                 slider.querySelector('span').innerHTML = event.target.value * 0.01;
                 applyFill(event.target);

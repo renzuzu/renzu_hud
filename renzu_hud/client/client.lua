@@ -1454,7 +1454,7 @@ end)
 RegisterNUICallback('setvehiclewheeloffsetfront', function(data, cb)
 	Hud.vehicle = Hud:getveh()
 	plate = tostring(GetVehicleNumberPlateText(Hud.vehicle))
-	--plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
     if Hud.vehicle ~= nil and Hud.vehicle ~= 0 then
 		if Hud.wheelsettings[plate] == nil then Hud.wheelsettings[plate] = {} end
 		local val = Hud:round(data.val * 100)
@@ -1475,7 +1475,7 @@ end)
 RegisterNUICallback('setvehiclewheeloffsetrear', function(data, cb)
 	Hud.vehicle = Hud:getveh()
 	plate = tostring(GetVehicleNumberPlateText(Hud.vehicle))
-	--plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
     if Hud.vehicle ~= nil and Hud.vehicle ~= 0 then
 		if Hud.wheelsettings[plate] == nil then Hud.wheelsettings[plate] = {} end
 		local val = Hud:round(data.val * 100)
@@ -1496,7 +1496,7 @@ end)
 RegisterNUICallback('setvehiclewheelrotationfront', function(data, cb)
 	Hud.vehicle = Hud:getveh()
 	plate = tostring(GetVehicleNumberPlateText(Hud.vehicle))
-	--plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
     if Hud.vehicle ~= nil and Hud.vehicle ~= 0 then
 		if Hud.wheelsettings[plate] == nil then Hud.wheelsettings[plate] = {} end
 		local val = Hud:round(data.val * 100)
@@ -1517,7 +1517,7 @@ end)
 RegisterNUICallback('setvehiclewheelrotationrear', function(data, cb)
 	Hud.vehicle = Hud:getveh()
 	plate = tostring(GetVehicleNumberPlateText(Hud.vehicle))
-	--plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
     if Hud.vehicle ~= nil and Hud.vehicle ~= 0 then
 		if Hud.wheelsettings[plate] == nil then Hud.wheelsettings[plate] = {} end
 		local val = Hud:round(data.val * 100)
@@ -1535,6 +1535,7 @@ RegisterNUICallback('setvehiclewheelrotationrear', function(data, cb)
 	cb(true)
 end)
 
+temp_advstat = {}
 CreateThread(function()
 	Wait(1000)
 	if config.wheelstancer then
@@ -1542,21 +1543,29 @@ CreateThread(function()
 			Wait(100)
 			Hud.veh_stats = LocalPlayer.state.adv_stat
 		end
+		CreateThread(function()
+			while true do
+				temp_advstat = LocalPlayer.state.adv_stat
+				Wait(2000)
+			end
+		end)
 		while true do
 			local sleep = 2000
+			advstat = temp_advstat
 			for k,v in pairs(Hud.nearstancer) do
-				if v.speed > 1 and not v.wheeledit and v.dist < 100 and Hud.veh_stats[v.plate] ~= nil and Hud.veh_stats[v.plate]['wheelsetting'] ~= nil then
+				v.plate = string.gsub(v.plate, "^%s*(.-)%s*$", "%1")
+				if v.speed > 1 and not v.wheeledit and v.dist < 100 and advstat[v.plate] ~= nil and advstat[v.plate]['wheelsetting'] ~= nil then
 					sleep = 11
 					SetVehicleWheelWidth(v.entity,0.7) -- trick to avoid stance bug
-					SetVehicleWheelXOffset(v.entity,0,tonumber(Hud.veh_stats[v.plate]['wheelsetting']['wheeloffsetfront'].wheel0))
-					SetVehicleWheelXOffset(v.entity,1,tonumber(Hud.veh_stats[v.plate]['wheelsetting']['wheeloffsetfront'].wheel1))
-					SetVehicleWheelXOffset(v.entity,2,tonumber(Hud.veh_stats[v.plate]['wheelsetting']['wheeloffsetrear'].wheel2))
-					SetVehicleWheelXOffset(v.entity,3,tonumber(Hud.veh_stats[v.plate]['wheelsetting']['wheeloffsetrear'].wheel3))
+					SetVehicleWheelXOffset(v.entity,0,tonumber(advstat[v.plate]['wheelsetting']['wheeloffsetfront'].wheel0))
+					SetVehicleWheelXOffset(v.entity,1,tonumber(advstat[v.plate]['wheelsetting']['wheeloffsetfront'].wheel1))
+					SetVehicleWheelXOffset(v.entity,2,tonumber(advstat[v.plate]['wheelsetting']['wheeloffsetrear'].wheel2))
+					SetVehicleWheelXOffset(v.entity,3,tonumber(advstat[v.plate]['wheelsetting']['wheeloffsetrear'].wheel3))
 					SetVehicleWheelSize(v.entity,GetVehicleWheelSize(v.entity)) -- trick to avoid stance bug tricking the system or game that this is all visual only not physics maybe?
-					SetVehicleWheelYRotation(v.entity,0,tonumber(Hud.veh_stats[v.plate]['wheelsetting']['wheelrotationfront'].wheel0))
-					SetVehicleWheelYRotation(v.entity,1,tonumber(Hud.veh_stats[v.plate]['wheelsetting']['wheelrotationfront'].wheel1))
-					SetVehicleWheelYRotation(v.entity,2,tonumber(Hud.veh_stats[v.plate]['wheelsetting']['wheelrotationrear'].wheel2))
-					SetVehicleWheelYRotation(v.entity,3,tonumber(Hud.veh_stats[v.plate]['wheelsetting']['wheelrotationrear'].wheel3))
+					SetVehicleWheelYRotation(v.entity,0,tonumber(advstat[v.plate]['wheelsetting']['wheelrotationfront'].wheel0))
+					SetVehicleWheelYRotation(v.entity,1,tonumber(advstat[v.plate]['wheelsetting']['wheelrotationfront'].wheel1))
+					SetVehicleWheelYRotation(v.entity,2,tonumber(advstat[v.plate]['wheelsetting']['wheelrotationrear'].wheel2))
+					SetVehicleWheelYRotation(v.entity,3,tonumber(advstat[v.plate]['wheelsetting']['wheelrotationrear'].wheel3))
 					-- SetVehicleWheelTireColliderWidth(v.entity,0,0.4)
 					-- SetVehicleWheelTireColliderWidth(v.entity,1,0.4)
 					-- SetVehicleWheelTireColliderWidth(v.entity,2,0.1)
@@ -1573,7 +1582,7 @@ RegisterNUICallback('wheelsetting', function(data, cb)
 	Hud.vehicle = Hud:getveh()
 	Hud.wheeledit = false
 	plate = tostring(GetVehicleNumberPlateText(Hud.vehicle))
-	--plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
+	plate = string.gsub(plate, '^%s*(.-)%s*$', '%1')
 	Hud:get_veh_stats(Hud:getveh(), plate)
 	if Hud.veh_stats[plate]['wheelsetting'] == nil then
 		Hud.veh_stats[plate]['wheelsetting'] = {}

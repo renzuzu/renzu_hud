@@ -2791,9 +2791,15 @@ function Hud:CarControl()
 		end
 
 		self.carcontrol = not self.carcontrol
+		local offset = {}
+		local rotation = {}
+		for i=0, 4 do
+			offset[i] = GetVehicleWheelXOffset(self.vehicle,i)
+			rotation[i] = GetVehicleWheelYRotation(self.vehicle,i)
+		end
 		SendNUIMessage({
 			type = "setShowCarcontrol",
-			content = self.carcontrol
+			content = {bool = self.carcontrol, offset = offset, rotation = rotation, height = GetVehicleSuspensionHeight(self.vehicle)}
 		})
 		SendNUIMessage({
 			type = "setDoorState",
@@ -3853,11 +3859,13 @@ function Hud:SyncWheelAndSound(sounds,wheels)
 	local coords = GetEntityCoords(PlayerPedId())
 	while LocalPlayer.state.onlinevehicles == nil do Wait(1) print(LocalPlayer.state.onlinevehicles) end
 	for k,v in pairs(LocalPlayer.state.onlinevehicles) do
-		if v.entity ~= nil and NetworkDoesEntityExistWithNetworkId(v.entity) and v.plate == self:tostringplate(GetVehicleNumberPlateText(NetToVeh(v.entity))) then
+		v.plate = string.gsub(v.plate, "^%s*(.-)%s*$", "%1")
+		local pl = string.gsub(self:tostringplate(GetVehicleNumberPlateText(NetToVeh(v.entity))), "^%s*(.-)%s*$", "%1")
+		if v.entity ~= nil and NetworkDoesEntityExistWithNetworkId(v.entity) and v.plate == pl then
 			local vv = NetToVeh(v.entity)
 			local vehcoords = GetEntityCoords(vv)
 			local dist = #(coords-vehcoords)
-			local plate = GetVehicleNumberPlateText(vv)
+			local plate = string.gsub(self:tostringplate(GetVehicleNumberPlateText(vv)), "^%s*(.-)%s*$", "%1")
 			--plate = string.gsub(plate, "%s+", "")
 			if wheels then
 				if self.nearstancer[plate] == nil then
