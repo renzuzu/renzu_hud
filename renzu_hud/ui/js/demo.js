@@ -1882,12 +1882,12 @@ values="1.000  0.000  0.000  0.000  0.000
 <img id="wheel1" style="-webkit-filter: drop-shadow(1px -1px 0.4px rgba(255, 0, 0, 0.822));z-index:999;position:absolute;opacity:0.85;width:10%;height:20%;left:4.5vw;bottom:3vw;opacity:0.0;" src="img/tirefrontright.png?img/car.png" />
 <img id="wheel2" style="-webkit-filter: drop-shadow(1px -1px 0.4px rgba(246, 10, 10, 0.822));z-index:999;position:absolute;opacity:0.85;width:10%;height:20%;left:4.5vw;bottom:3vw;opacity:0.0;" src="img/tirerearleft.png?img/car.png" />
 <img id="wheel3" style="-webkit-filter: drop-shadow(1px -1px 0.4px rgba(255, 0, 0, 0.822));z-index:999;position:absolute;opacity:0.85;width:10%;height:20%;left:4.5vw;bottom:3vw;opacity:0.0;" src="img/tirerearright.png?img/car.png" />`
-carui_element['simple'] = `<img id="simple_light" style="z-index:999;position:relative;opacity:0.85;width:100%;right:0;float:right;" src="img/carui_simple.png?img/car.png" />
+carui_element['simple'] = `<img id="simple_light" style="z-index:999;position:relative;opacity:0.0;width:100%;right:0;float:right;" src="img/carui_simple.png?img/car.png" />
 <svg id="rpm" style="z-index:1005;position:absolute;right:60%;bottom:36%;opacity:0.65;width:40%;height: 28.5%;transform: rotate(-60deg);"
   xmlns="http://www.w3.org/2000/svg" height="210" width="210" viewBox="0 0 177 177" data-value="1">
-  <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none"/>
+  <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 180.93 0"  fill="none" stroke-linejoin= "round" stroke-linecap= "round" />
   <defs>
-    <filter id="dropshadow" width="170%" height="110%">
+    <filter id="dropshadow" width="170%" height="120%">
       <feOffset result="offOut" in="SourceGraphic" dx="4" dy="7"></feOffset>
       <feColorMatrix result="matrixOut" in="offOut" type="matrix"
 values="1.000  0.000  0.000  0.000  0.000 
@@ -1898,14 +1898,15 @@ values="1.000  0.000  0.000  0.000  0.000
       <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
     </filter>
   </defs>
-  <path id="rpmpath" class="meter rpm" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="filter:url(#dropshadow)" stroke-dasharray="280" stroke-dashoffset="280"/>
+  <path id="rpmpath" class="meter rpm" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 180.93 0" fill="none" style="    stroke-linecap: round;
+  stroke-linejoin: round; filter:url(#dropshadow)" stroke-dasharray="280" stroke-dashoffset="280"/>
 </svg>
 <div id="rpmmeter" style="display:none;">1000</div>
 <svg id="speed" style="z-index:1005;position:absolute;right:22%;bottom:26%;opacity:0.65;;width:54%;height:47%;transform: rotate(0deg)"
   xmlns="http://www.w3.org/2000/svg" height="200" width="200" viewBox="0 0 200 200" data-value="1">
-  <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 111.93 0"  fill="none"/>
+  <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 111.93 0"  fill="none" stroke-linecap= "round" />
   <defs>
-    <filter id="dropshadow" width="170%" height="110%">
+    <filter id="dropshadow" width="170%" height="120%">
       <feOffset result="offOut" in="SourceGraphic" dx="4" dy="15"></feOffset>
       <feColorMatrix result="matrixOut" in="offOut" type="matrix"
 values="1.000  0.000  0.000  0.000  0.000 
@@ -1916,7 +1917,7 @@ values="1.000  0.000  0.000  0.000  0.000
       <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
     </filter>
   </defs>
-  <path id="speedpath" class="meter carhud" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360"/>
+  <path id="speedpath" class="meter carhud" stroke="#fefefe" d="M41 149.5a77 77 0 1 1 111.93 0" fill="none" stroke-dasharray="360" stroke-dashoffset="360" stroke-linecap = "round" />
 </svg>
 <div id="speedmeter"></div>
 <div id="speedtext">kMH</div>
@@ -1924,7 +1925,7 @@ values="1.000  0.000  0.000  0.000  0.000
   xmlns="http://www.w3.org/2000/svg" height="84" width="84" viewBox="0 0 140 140" data-value="1">
   <path class="bg" stroke="#00000078" d="M41 149.5a77 77 0 1 1 170.93 0"  fill="none"/>
   <defs>
-    <filter id="dropshadow2" width="170%" height="110%">
+    <filter id="dropshadow2" width="170%" height="120%">
       <feOffset result="offOut" in="SourceGraphic" dx="2" dy="2"></feOffset>
       <feColorMatrix result="matrixOut" in="offOut" type="matrix"
 values="1.000  0.000  0.000  0.000  0.000 
@@ -2131,13 +2132,13 @@ function setCarui(ver) {
             document.getElementById("left").style.right = '79%';
             document.getElementById("left").style.bottom = '30%';
             document.getElementById("milediv").style.right = '50.0%';
-            document.getElementById("milediv").style.bottom = '28.5%';
+            document.getElementById("milediv").style.bottom = '27.5%';
             document.getElementById("milediv").style.margin = '1% 1% 1% 1%';
-            document.getElementById("milediv").style.background = '#000000';
+            document.getElementById("milediv").style.background = 'rgb(0 0 0 / 86%)';
             document.getElementById("milediv").style.opacity = '0.6';
             document.getElementById("milediv").style.fontSize = '0.5vw';
             document.getElementById("milediv").style.fontSize = '0.5vw';
-            document.getElementById("milediv").style.webkitFilter = "drop-shadow(1px 1px 2px rgb(5, 155, 255))";
+            document.getElementById("milediv").style.webkitFilter = "drop-shadow(1px 1px 1px rgb(5, 155, 255))";
             document.getElementById("timediv").style.right = '42%';
             document.getElementById("timediv").style.bottom = '72.6%';
             document.getElementById("timediv").style.fontSize = '0.4vw';
