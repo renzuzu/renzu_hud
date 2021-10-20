@@ -2071,6 +2071,9 @@ function Hud:Boost(hasturbo)
 		local turbo_type = tostring(self.veh_stats[self.plate].turbo or 'default')
 		while self.invehicle do
 			local sleep = 100
+			if self.mode ~= 'SPORTS' and not hasturbo then
+				break
+			end
 			if IsControlPressed(1, 32) and self.rpm > 0.4 and not RCR(1, 32) then
 				sleep = 5
 				self.pressed = true
@@ -2081,6 +2084,9 @@ function Hud:Boost(hasturbo)
 					self.boost = 1.0
 				end
 				if self.mode == 'SPORTS' and not hasturbo then
+					if self.mode ~= 'SPORTS' then
+						break
+					end
 					SetVehicleBoost(self.vehicle , 1.0 + config.boost)
 				else
 					SetVehicleBoost(self.vehicle , 1+self.boost * (config.turbo_boost[turbo_type] + self.maxgear - self.gear))

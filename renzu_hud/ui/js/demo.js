@@ -657,7 +657,9 @@ function setGear(gear) {
     if (gear == 6) {
         gear = '6th'
     }
-    document.getElementById("gear").innerHTML = ''+gear+''
+    if (document.getElementById("gear")) {
+        document.getElementById("gear").innerHTML = ''+gear+''
+    }
 }
 
 function numberWithCommas(x) {
@@ -865,7 +867,9 @@ function setDifferential(value) {
     } else {
         value = 'AWD'
     }
-    document.getElementById("diff").innerHTML = value;
+    if (document.getElementById("diff")) {
+        document.getElementById("diff").innerHTML = value;
+    }
 }
 
 function setCruiseControl(bool) {

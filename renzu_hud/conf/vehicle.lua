@@ -59,7 +59,7 @@ config.driftcars = { -- whitelist the driftcars to engine blown ( why? drift car
 }
 -- Vehicle Mode
 --config.boost and config.turbo_boost cannot be the same high value, if you want to use turbo system, config.boost must be always lower than the config.turbo_boost
-config.boost = 0.45 -- Boost Level when sports mode is activated eg. 1.5 Bar, you can put upt o 3.0 or even 5.0 but pretty sure it will be unrealistic acceleration ( this affect Fuel Consumption )
+config.boost = 1.15 -- Boost Level when sports mode is activated eg. 1.5 Bar, you can put upt o 3.0 or even 5.0 but pretty sure it will be unrealistic acceleration ( this affect Fuel Consumption )
 config.sports_increase_topspeed = true -- do you want the topspeed will be affected? some Fivem Servers Likes a demonic topspeed :D - not good in RP. Boost only affects engine torque and horsepower not the gear ratio and final drive of transmision which affects topspeed
 config.topspeed_multiplier = 1.1 -- if sports_increase_topspeed is enable, multiplier 1.5 = x1.5 eg. normal top speed 200kmh if you put 1.5 the new topspeed is 300kmh
 config.eco = 0.5 -- Eco Level when Eco Mode is activated (this affect the efficiency of fuel)
