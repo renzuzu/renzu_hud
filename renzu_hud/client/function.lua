@@ -3895,6 +3895,10 @@ function Hud:SyncWheelAndSound(sounds,wheels)
 					end
 				end
 			end
+		elseif not NetworkDoesEntityExistWithNetworkId(v.entity) then
+			local temp = LocalPlayer.state.onlinevehicles
+			temp[k] = nil
+			LocalPlayer.state:set('onlinevehicles', temp, true)
 		end
 	end
 	for k,v in pairs(self.nearstancer) do
