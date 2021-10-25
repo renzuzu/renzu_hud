@@ -780,7 +780,7 @@ function Hud:get_veh_stats(v,p)
 	end
 	local lets_save = false
 	if self.plate ~= nil and self.veh_stats[self.plate] == nil then
-		--print("CREATING VEHSTATS")
+		print("CREATING VEHSTATS")
 		lets_save = true
 		self.veh_stats[self.plate] = {}
 		self.veh_stats[self.plate].plate = self.plate
@@ -909,7 +909,7 @@ function Hud:NuiMileAge()
 			local driver = GetPedInVehicleSeat(self.vehicle , -1)
 			if self.vehicle  ~= nil and self.vehicle  ~= 0 and driver == self.ped then
 				-- local self.plate = tostring(GetVehicleNumberPlateText(self.vehicle ))
-				-- self.plate = string.gsub(self.plate, '^%s*(.-)%s*$', '%1')
+				--self.plate = string.gsub(self.plate, '^%s*(.-)%s*$', '%1')
 				local newPos = GetEntityCoords(self.ped)
 				savemile = true
 				lastve = GetVehiclePedIsIn(self.ped, false)
@@ -984,7 +984,6 @@ function Hud:NuiMileAge()
 						end
 						if newmileage ~= nil and newmileage+0.5 < Round(self.veh_stats[self.plate].mileage) or newmileage == nil then
 							newmileage = self.veh_stats[self.plate].mileage
-							print(newmileage)
 							SendNUIMessage({
 								type = "setMileage",
 								content = self.veh_stats[self.plate].mileage
@@ -2624,7 +2623,6 @@ function Hud:bodydamage()
 			if config.disabledregen then
 				SetPlayerHealthRechargeMultiplier(self.pid, 0.0)
 			end
-			print(health)
 			if health ~= nil and health > 55.0 then
 				SetEntityHealth(PlayerPedId(),(GetEntityHealth(self.ped)) - config.chesteffect_healthdegrade)
 			end
@@ -3505,9 +3503,11 @@ function Hud:CarStatus()
 	self.vehicle  = self:getveh()
 	local dis = #(GetEntityCoords(self.ped) - GetEntityCoords(self.vehicle ))
 	if dis > 10 then return end
-	self.plate = tostring(GetVehicleNumberPlateText(self.vehicle ))
+	--self.plate = tostring(GetVehicleNumberPlateText(self.vehicle ))
 	--self.plate = string.gsub(self.plate, '^%s*(.-)%s*$', '%1')
-	self:get_veh_stats(self.vehicle , self.plate)
+	if self.veh_stats[self.plate] == nil then
+		self:get_veh_stats(self.vehicle , self.plate)
+	end
 	self.carstatus = not self.carstatus
 	local turbolevel = self.veh_stats[self.plate].turbo
 	if turbolevel == 'default' then
