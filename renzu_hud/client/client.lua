@@ -516,23 +516,29 @@ RegisterNUICallback('getoutvehicle', function(data, cb)
 end)
 
 CreateThread(function()
+	local enable_status = config.enablestatus
+	local ordering = config.statusordering
+	local placing = config.statusplace
+	local status_type = config.status_type
+	local status_ui = config.statusui
+	local uiconf = config.uiconfig
 	Wait(3000)
 	while config.userconfig == nil do Wait(100) end
 	SendNUIMessage({type = "reimportsetting",content = config.userconfig})
 	Wait(500)
-	SendNUIMessage({type = "setStatusUI",content = {['type'] = config.status_type, ['ver'] = config.statusui, ['enable'] = config.enablestatus}})
+	SendNUIMessage({type = "setStatusUI",content = {['type'] = status_type, ['ver'] = status_ui, ['enable'] = enable_status}})
 	Wait(1000)
 	SendNUIMessage({map = true, type = 'sarado'})
-	SendNUIMessage({type = "uiconfig", content = config.uiconfig})
-	SendNUIMessage({type = "setStatusType",content = config.status_type})
+	--SendNUIMessage({type = "uiconfig", content = uiconf})
+	SendNUIMessage({type = "setStatusType",content = status_type})
 	Wait(500)
-	print(config.statusplace,config.statusordering)
-	SendNUIMessage({type = "SetStatusOrder",content = {['table'] = config.statusordering, ['float'] = config.statusplace}})
+	print(placing,ordering)
+	SendNUIMessage({type = "SetStatusOrder",content = {['table'] = ordering, ['float'] = placing}})
 	Wait(1000)
 	Hud.reorder = true
 	while not Hud.playerloaded do Citizen.Wait(100) print("loading") end
 	Wait(100)
-	local tbl = {['table'] = config.statusordering, ['float'] = config.statusplace}
+	local tbl = {['table'] = ordering, ['float'] = placing}
 	if config.enable_carui then
 		SendNUIMessage({type = 'setCarui', content = config.carui})
 	end

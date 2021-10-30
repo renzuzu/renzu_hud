@@ -28,6 +28,9 @@ featstate['weaponhud'] = false
 featstate['manualhud'] = false
 var pedfacetimer = 0
 var pedfacecache = "https://nui-img/pedmugshot_01/pedmugshot_01?t123"
+let globalconfig = {}
+usersetting['carhud'] = {}
+setting['carhud'] = {}
 function pedface(force) {
     console.log("REQUESTING",force)
     if (pedfacetimer == 0 || Date.now() > pedfacetimer) {
@@ -2219,12 +2222,24 @@ var uibarstring = `<div class="armor-bar"><span class="bar"><span class="armor_p
 <div class="health-bar"><span class="bar"><span class="health_progress" id="healthbar"></span></span></div>`
 
 function NormalUI() {
-    $('#logo').html('')
-    $('#voip_1').html('')
-    $('#uibar').html('')
-    $('#logo').append(logostring)
-    $('#voip_1').append(voipstring)
-    $('#uibar').append(uibarstring)
+    if ($('#logo')) {
+        $('#logo').html('')
+    }
+    if ($('#voip_1')) {
+        $('#voip_1').html('')
+    }
+    if ($('#uibar')) {
+        $('#uibar').html('')
+    }
+    if ($('#logo')) {
+        $('#logo').append(logostring)
+    }
+    if ($('#voip_1')) {
+        $('#voip_1').append(voipstring)
+    }
+    if ($('#uibar')) {
+        $('#uibar').append(uibarstring)
+    }
     pedface(true)
 }
 
@@ -2242,10 +2257,18 @@ function setStatusUI(t) {
     }
     NormalUI()
     if (!t['enable'] && ver == 'simple') {
-        document.getElementById("uibar").innerHTML = '';
-        document.getElementById("logo").innerHTML = '';
-        document.getElementById("voip_1").innerHTML = '';
-        document.getElementById("statusnormal").style.display = 'none';
+        if (document.getElementById("uibar")) {
+            document.getElementById("uibar").innerHTML = '';
+        }
+        if (document.getElementById("logo")) {
+            document.getElementById("logo").innerHTML = '';
+        }
+        if (document.getElementById("voip_1")) {
+            document.getElementById("voip_1").innerHTML = '';
+        }
+        if (document.getElementById("statusnormal")) {
+            document.getElementById("statusnormal").style.display = 'none';
+        }
     }
     if (ver == 'simple' && t['enable']) {
         if (setting['uilook'] == undefined) {
@@ -2260,18 +2283,30 @@ function setStatusUI(t) {
         if (document.getElementById("armordiv")) {
             document.getElementById("armordiv").style.display = 'block';
         }
-        if (type == 'icons') {
+        if (type == 'icons' && document.getElementById("armorsimplebg")) {
             document.getElementById("armorsimplebg").style.display = 'block';
         }
         //document.getElementById("voip_2").style.marginLeft = '40px';
-        document.getElementById("uibar").innerHTML = '';
-        $("#statusver").attr("src", "img/simplestatus.png")
-        document.getElementById("statusnormal").style.display = 'none';
-        document.getElementById("logo").innerHTML = '';
-        document.getElementById("location").style.top = '60px';
-        document.getElementById("location").style.right = '60px';
-        document.getElementById("location").style.width = '280px';
-        document.getElementById("voip_1").innerHTML = '';
+        if (document.getElementById("uibar")) {
+            document.getElementById("uibar").innerHTML = '';
+        }
+        if ($("#statusver")) {
+            $("#statusver").attr("src", "img/simplestatus.png")
+        }
+        if (document.getElementById("statusnormal")) {
+            document.getElementById("statusnormal").style.display = 'none';
+        }
+        if (document.getElementById("logo")) {
+            document.getElementById("logo").innerHTML = '';
+        }
+        if (document.getElementById("location")) {
+            document.getElementById("location").style.top = '60px';
+            document.getElementById("location").style.right = '60px';
+            document.getElementById("location").style.width = '280px';
+        }
+        if (document.getElementById("voip_1")) {
+            document.getElementById("voip_1").innerHTML = '';
+        }
         //document.getElementById("mic").style.right = '363px';
         //document.getElementById("mic-color").style.width = '15px';
         //document.getElementById("mic-color").style.height = '27px';
@@ -2733,10 +2768,6 @@ function setKeyless(table) {
         }
     }
 
-    let globalconfig = {}
-    usersetting['carhud'] = {}
-    setting['carhud'] = {}
-
     function carhudver() {
         var val = document.getElementById("carhudver").value;
         if (usersetting['carhud'] == undefined) {
@@ -2896,13 +2927,16 @@ function setKeyless(table) {
     </div>
   </div>`
 
-    function settingui(t) {
+    $("#settingui").append(settingsui)
+    function SettingHud(t) {
         if (t.bool) {
             document.getElementById('statusv3').innerHTML = ''
             document.getElementById('status_progress').innerHTML = ''
             document.getElementById('settingui').innerHTML = ''
             $("#settingui").append(settingsui);
-            SetStatusOrder(globalconfig['status'])
+            if (globalconfig['status'] && globalconfig['status']['table']) {
+                SetStatusOrder(globalconfig['status'])
+            }
             document.getElementById('settingui').style.display = 'block'
             if (setting['iconshape'] !== undefined) {
                 class_icon = setting['iconshape']
@@ -2927,7 +2961,9 @@ function setKeyless(table) {
         document.getElementById('settingui').innerHTML = ''
         localStorage.setItem("UISETTING", JSON.stringify(usersetting));
         $("#settingui").append(settingsui);
-        SetStatusOrder(globalconfig['status'])
+        if (globalconfig['status'] && globalconfig['status']['table']) {
+            SetStatusOrder(globalconfig['status'])
+        }
     }
     function iconshape() {
         var val = document.getElementById("iconshape").value;
@@ -2939,7 +2975,9 @@ function setKeyless(table) {
         document.getElementById('settingui').innerHTML = ''
         localStorage.setItem("UISETTING", JSON.stringify(usersetting));
         $("#settingui").append(settingsui);
-        SetStatusOrder(globalconfig['status'])
+        if (globalconfig['status'] && globalconfig['status']['table']) {
+            SetStatusOrder(globalconfig['status'])
+        }
         changeallclass(setting['iconshape'])
     }
     function uilook() {
@@ -2960,7 +2998,9 @@ function setKeyless(table) {
             NormalUI()
             document.getElementById("statusnormal").style.display = 'block';
         }
-        SetStatusOrder(globalconfig['status'])
+        if (globalconfig['status'] && globalconfig['status']['table']) {
+            SetStatusOrder(globalconfig['status'])
+        }
         if (statusui == 'normal') {
             if (document.getElementById("healthdiv")) {
                 document.getElementById("healthdiv").innerHTML = '';
@@ -2991,7 +3031,9 @@ function setKeyless(table) {
         document.getElementById('settingui').innerHTML = ''
         localStorage.setItem("UISETTING", JSON.stringify(usersetting));
         $("#settingui").append(settingsui);
-        SetStatusOrder(globalconfig['status'])
+        if (globalconfig['status'] && globalconfig['status']['table']) {
+            SetStatusOrder(globalconfig['status'])
+        }
     }
 
     function SavetoLocal() {
@@ -3025,7 +3067,9 @@ function setKeyless(table) {
             document.getElementById('status_progress').innerHTML = ''
             document.getElementById('settingui').innerHTML = ''
             $("#settingui").append(settingsui);
-            SetStatusOrder(globalconfig['status'])
+            if (globalconfig['status'] && globalconfig['status']['table']) {
+                SetStatusOrder(globalconfig['status'])
+            }
             var temp = {}
             temp['bottom'] = '20px'
             temp['left'] = '20px'
@@ -3104,7 +3148,7 @@ function setKeyless(table) {
         console.log("Checking User Setting...")
         globalconfig = c
         const sett = JSON.parse(localStorage.getItem("UISETTING"))
-        if (sett) {
+        if (sett && sett['uilook']) {
             usersetting = sett
             setting = sett
             for (const i in globalconfig) {
@@ -3185,6 +3229,7 @@ function setKeyless(table) {
     } 
     var toggle = undefined
     function SetStatusOrder(t) {
+        if (t['table'] == undefined) { return }
         statcache = t['table']
         console.log("status ordering")
         var s = t['table']
@@ -3304,20 +3349,22 @@ function setKeyless(table) {
                     localStorage.setItem(""+statuses[i].status+"color2", $(this).val());
                 });
                 if (setting['status'][statuses[i].status] == undefined) { setting['status'][statuses[i].status] = {} }
-                document.getElementById(''+statuses[i].status+'statustype').value = setting['status'][statuses[i].status].type;
-                if (setting['statusver']) {
+                if (document.getElementById(''+statuses[i].status+'statustype')) {
+                    document.getElementById(''+statuses[i].status+'statustype').value = setting['status'][statuses[i].status].type;
+                }
+                if (setting['statusver'] && document.getElementById('statusversion')) {
                     document.getElementById('statusversion').value = setting['statusver']
                 }
-                if (setting['uilook']) {
+                if (setting['uilook'] && document.getElementById('uilook')) {
                     document.getElementById('uilook').value = setting['uilook']
                 }
-                if (setting['iconshape']) {
+                if (setting['iconshape'] && document.getElementById('iconshape')) {
                     document.getElementById('iconshape').value = setting['iconshape']
                 }
-                if (setting['carhud']['version']) {
+                if (setting['carhud']['version'] && document.getElementById('carhudver')) {
                     document.getElementById('carhudver').value = setting['carhud']['version']
                 }
-                if (setting['carhud']['speedmetric']) {
+                if (setting['carhud']['speedmetric'] && document.getElementById('speedmetric')) {
                     document.getElementById('speedmetric').value = setting['carhud']['speedmetric']
                 }
                 if (setting['status'][statuses[i].status].type == 1) {
@@ -3685,14 +3732,14 @@ function setKeyless(table) {
     }
     function RestoreStatusPosition() {
         var havedefault = false
-        if (localStorage.getItem("statusleft")) {
+        if (localStorage.getItem("statusleft") &&  $('#statusv3')) {
             havedefault = true
             $('#statusv3').css('left', ''+localStorage.getItem("statusleft")+'px');
             $('#statusv3').css('top', ''+localStorage.getItem("statustop")+'px');
             $('#statusv3').css('right', 'unset');
             $('#statusv3').css('bottom', 'unset');
         }
-        if (localStorage.getItem("statuspleft")) {
+        if (localStorage.getItem("statuspleft") &&  $('#status_progress')) {
             $('#status_progress').css('left', ''+localStorage.getItem("statuspleft")+'px');
             $('#status_progress').css('top', ''+localStorage.getItem("statusptop")+'px');
             $('#status_progress').css('right', 'unset');
@@ -3894,7 +3941,7 @@ var renzu_hud = {
     uiconfig,
     unsetradio,
     pedface,
-    settingui,
+    SettingHud,
     reimportsetting,
     Talking,
     //CAR
