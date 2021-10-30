@@ -852,11 +852,11 @@ function Hud:NuiMileAge()
 	local saveplate = nil
 	CreateThread(function()
 		local count = 0
-		while not self.playerloaded and count < 3 do
+		while not LocalPlayer.state.playerloaded and count < 3 do
 			Wait(1000)
 			count = count + 1
 		end
-		if not self.playerloaded then
+		if not LocalPlayer.state.playerloaded then
 			TriggerServerEvent("renzu_hud:getdata",self.charslot)
 		end
 		Wait(1000)

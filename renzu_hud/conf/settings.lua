@@ -6,7 +6,7 @@ config.userconfig = {
 	['statusver'] = config.status_type,
 	['uilook'] = config.statusui,
 	['iconshape'] = config.uidesign,
-	['status'] = {['table'] = config.statusordering, ['float'] = config.statusplace},
+	['status'] = {['data'] = config.statusordering, ['float'] = config.statusplace},
 	['carhud'] = {
 		version = config.carui, 
 		speedmetric = config.carui_metric, 

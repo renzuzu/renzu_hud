@@ -2781,7 +2781,7 @@ function setKeyless(table) {
         }
     }
 
-    var settingsui = `<div class="card">
+    var settingstring = `<div class="card">
     <div class="card__header">
       <div class="toolbar">
         <div class="toolbar__item toolbar__item--close"></div>
@@ -2927,14 +2927,14 @@ function setKeyless(table) {
     </div>
   </div>`
 
-    $("#settingui").append(settingsui)
+    $("#settingui").append(settingstring)
     function SettingHud(t) {
         if (t.bool) {
             document.getElementById('statusv3').innerHTML = ''
             document.getElementById('status_progress').innerHTML = ''
             document.getElementById('settingui').innerHTML = ''
-            $("#settingui").append(settingsui);
-            if (globalconfig['status'] && globalconfig['status']['table']) {
+            $("#settingui").append(settingstring);
+            if (globalconfig['status'] && globalconfig['status']['data']) {
                 SetStatusOrder(globalconfig['status'])
             }
             document.getElementById('settingui').style.display = 'block'
@@ -2960,8 +2960,8 @@ function setKeyless(table) {
         document.getElementById('status_progress').innerHTML = ''
         document.getElementById('settingui').innerHTML = ''
         localStorage.setItem("UISETTING", JSON.stringify(usersetting));
-        $("#settingui").append(settingsui);
-        if (globalconfig['status'] && globalconfig['status']['table']) {
+        $("#settingui").append(settingstring);
+        if (globalconfig['status'] && globalconfig['status']['data']) {
             SetStatusOrder(globalconfig['status'])
         }
     }
@@ -2974,8 +2974,8 @@ function setKeyless(table) {
         document.getElementById('status_progress').innerHTML = ''
         document.getElementById('settingui').innerHTML = ''
         localStorage.setItem("UISETTING", JSON.stringify(usersetting));
-        $("#settingui").append(settingsui);
-        if (globalconfig['status'] && globalconfig['status']['table']) {
+        $("#settingui").append(settingstring);
+        if (globalconfig['status'] && globalconfig['status']['data']) {
             SetStatusOrder(globalconfig['status'])
         }
         changeallclass(setting['iconshape'])
@@ -2989,7 +2989,7 @@ function setKeyless(table) {
         document.getElementById('status_progress').innerHTML = ''
         document.getElementById('settingui').innerHTML = ''
         localStorage.setItem("UISETTING", JSON.stringify(usersetting));
-        $("#settingui").append(settingsui);
+        $("#settingui").append(settingstring);
         $('#logo').html('')
         $('#voip_1').html('')
         $('#uibar').html('')
@@ -2998,7 +2998,7 @@ function setKeyless(table) {
             NormalUI()
             document.getElementById("statusnormal").style.display = 'block';
         }
-        if (globalconfig['status'] && globalconfig['status']['table']) {
+        if (globalconfig['status'] && globalconfig['status']['data']) {
             SetStatusOrder(globalconfig['status'])
         }
         if (statusui == 'normal') {
@@ -3030,8 +3030,8 @@ function setKeyless(table) {
         document.getElementById('status_progress').innerHTML = ''
         document.getElementById('settingui').innerHTML = ''
         localStorage.setItem("UISETTING", JSON.stringify(usersetting));
-        $("#settingui").append(settingsui);
-        if (globalconfig['status'] && globalconfig['status']['table']) {
+        $("#settingui").append(settingstring);
+        if (globalconfig['status'] && globalconfig['status']['data']) {
             SetStatusOrder(globalconfig['status'])
         }
     }
@@ -3066,8 +3066,8 @@ function setKeyless(table) {
             document.getElementById('statusv3').innerHTML = ''
             document.getElementById('status_progress').innerHTML = ''
             document.getElementById('settingui').innerHTML = ''
-            $("#settingui").append(settingsui);
-            if (globalconfig['status'] && globalconfig['status']['table']) {
+            $("#settingui").append(settingstring);
+            if (globalconfig['status'] && globalconfig['status']['data']) {
                 SetStatusOrder(globalconfig['status'])
             }
             var temp = {}
@@ -3144,7 +3144,7 @@ function setKeyless(table) {
     }
 
     function reimportsetting(c) {
-        $("#settingui").append(settingsui);
+        $("#settingui").append(settingstring);
         console.log("Checking User Setting...")
         globalconfig = c
         const sett = JSON.parse(localStorage.getItem("UISETTING"))
@@ -3229,10 +3229,10 @@ function setKeyless(table) {
     } 
     var toggle = undefined
     function SetStatusOrder(t) {
-        if (t['table'] == undefined) { return }
-        statcache = t['table']
+        if (t['data'] == undefined) { return }
+        statcache = t['data']
         console.log("status ordering")
-        var s = t['table']
+        var s = t['data']
         statleft = t['float']
         var offsetplus = -35
         var statuses = s

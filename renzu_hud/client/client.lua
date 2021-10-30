@@ -9,6 +9,7 @@
 ESX = nil
 local getdata = false
 CreateThread(function()
+	LocalPlayer.state:set('playerloaded', false,true)
 	if config.framework == 'ESX' then
 		while ESX == nil do TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end) Wait(0) end
 		while ESX.GetPlayerData().job == nil do Wait(0) end
@@ -38,7 +39,7 @@ CreateThread(function()
 	DecorRegister("INERTIA", 1);DecorRegister("DRIVEFORCE", 1);DecorRegister("TOPSPEED", 1);DecorRegister("STEERINGLOCK", 1);DecorRegister("MAXGEAR", 1);DecorRegister("TRACTION", 1);DecorRegister("TRACTION2", 1);DecorRegister("TRACTION3", 1);DecorRegister("TRACTION4", 1);DecorRegister("TRACTION5", 1)
 	if not DecorIsRegisteredAsType("MANUAL", 1) then DecorRegister("MANUAL", 1) end
 	DecorRegister("PLAYERLOADED", 1);DecorRegister("CHARSLOT", 1)
-	while not Hud.playerloaded do Wait(1000) end
+	while not LocalPlayer.state.playerloaded do Wait(1000) end
 	while not Hud.receive do Wait(1000) end
 	for type,val in pairs(config.buto) do if Hud.bodystatus then  Hud.bonecategory[type] = Hud.bodystatus[type] else Hud.bonecategory[type] = 0.0 or 0.0 end if not other then Hud.parts[type] = {} for bone,val in pairs(val) do Hud.parts[type][bone] = 0.0 end end end
 	SendNUIMessage({type = "setUpdateBodyStatus",content = Hud.bonecategory})
@@ -160,7 +161,7 @@ end)
 RegisterNetEvent('renzu_hud:charslot')
 AddEventHandler('renzu_hud:charslot', function(charid)
 	Hud.charslot = charid
-	while not Hud.playerloaded do
+	while not LocalPlayer.state.playerloaded do
 		Wait(100)
 	end
 	Wait(2000)
@@ -174,7 +175,9 @@ CreateThread(function()
 	-- loaded events
 	RegisterNetEvent('esx:playerLoaded')
 	AddEventHandler('esx:playerLoaded', function(xPlayer)
-		Hud.playerloaded = true
+		Wait(1000)
+		LocalPlayer.state:set('playerloaded', true,true)
+		LocalPlayer.state.playerloaded = true
 		Wait(2000)
 		print("ESX")
 		Hud.lastped = PlayerPedId()
@@ -190,7 +193,9 @@ CreateThread(function()
 
 	RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
 	AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
-		Hud.playerloaded = true
+		Wait(1000)
+		LocalPlayer.state:set('playerloaded', true,true)
+		LocalPlayer.state.playerloaded = true
 		Wait(2000)
 		print("QB")
 		Hud.lastped = PlayerPedId()
@@ -207,7 +212,9 @@ CreateThread(function()
 	RegisterNetEvent('playerSpawned')
 	AddEventHandler('playerSpawned', function(spawn)
 		if config.framework ~= 'ESX' and config.framework ~= 'QBCORE' then
-			Hud.playerloaded = true
+			Wait(1000)
+			LocalPlayer.state:set('playerloaded', true,true)
+			LocalPlayer.state.playerloaded = true
 			print("PLAYERLOADED")
 			Wait(2000)
 			Hud.lastped = PlayerPedId()
@@ -234,7 +241,7 @@ CreateThread(function()
 			TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
 			getdata = true
 		end
-		Hud.playerloaded = true
+		LocalPlayer.state.playerloaded = true
 		SendNUIMessage({content = true, type = 'playerloaded'})
 	end
 	Wait(500)
@@ -245,12 +252,12 @@ CreateThread(function()
 			getdata = true
 		end
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
-		Hud.playerloaded = true
+		LocalPlayer.state.playerloaded = true
 		SendNUIMessage({content = true, type = 'pedface'})
 		SendNUIMessage({content = true, type = 'playerloaded'})
 	elseif Hud:isplayer() and config.forceplayerload then
 		Wait(10000)
-		Hud.playerloaded = true
+		LocalPlayer.state.playerloaded = true
 		print("isplayer f")
 		Wait(2000)
 		Hud.lastped = PlayerPedId()
@@ -269,15 +276,15 @@ CreateThread(function()
 			getdata = true
 		end
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
-		Hud.playerloaded = true
+		LocalPlayer.state.playerloaded = true
 		SendNUIMessage({content = true, type = 'pedface'})
 		SendNUIMessage({content = true, type = 'playerloaded'})
 	end
-	while not Hud.playerloaded do
+	while not LocalPlayer.state.playerloaded do
 		Wait(1000)
 	end
 
-	while Hud.playerloaded do -- dev purpose when restarting script, either you uncomment this or Hud.left it , it doesnt matter.
+	while LocalPlayer.state.playerloaded do -- dev purpose when restarting script, either you uncomment this or Hud.left it , it doesnt matter.
 		Wait(20000)
 		if not DecorExistOn(PlayerPedId(), "PLAYERLOADED") then
 			DecorRemove(Hud.lastped,"PLAYERLOADED")
@@ -294,7 +301,7 @@ end)
 
 --- NEW HUD FUNC
 RegisterNUICallback('requestface', function(data, cb)
-	while not Hud.playerloaded do
+	while not LocalPlayer.state.playerloaded do
 		Wait(1000)
 	end
 	Wait(5000)
@@ -311,6 +318,7 @@ RegisterNUICallback('requestface', function(data, cb)
 end)
 
 CreateThread(function()
+	while not LocalPlayer.state.playerloaded do Wait(100) end
 	Wait(1000)
 	for k,v in pairs(config.statusordering) do
 		if v.enable then
@@ -406,6 +414,7 @@ CreateThread(function()
 end)
 
 CreateThread(function()
+	while not LocalPlayer.state.playerloaded do Wait(100) end
 	Wait(2000)
 	SetPlayerUnderwaterTimeRemaining(Hud.pid,9999)
 	SetPedMaxTimeUnderwater(Hud.ped,99999)
@@ -481,7 +490,7 @@ CreateThread(function()
 		end)
 	end
 	if config.enablestatus or not config.enablestatus and config.statusui == 'normal' then
-		while not Hud.playerloaded do Wait(100) end
+		while not LocalPlayer.state.playerloaded do Wait(100) end
 		Hud:updateplayer(true)
 	end
 end)
@@ -516,6 +525,7 @@ RegisterNUICallback('getoutvehicle', function(data, cb)
 end)
 
 CreateThread(function()
+	while not LocalPlayer.state.playerloaded do Wait(100) end
 	local enable_status = config.enablestatus
 	local ordering = config.statusordering
 	local placing = config.statusplace
@@ -533,12 +543,12 @@ CreateThread(function()
 	SendNUIMessage({type = "setStatusType",content = status_type})
 	Wait(500)
 	print(placing,ordering)
-	SendNUIMessage({type = "SetStatusOrder",content = {['table'] = ordering, ['float'] = placing}})
+	SendNUIMessage({type = "SetStatusOrder",content = {['data'] = ordering, ['float'] = placing}})
 	Wait(1000)
 	Hud.reorder = true
-	while not Hud.playerloaded do Citizen.Wait(100) print("loading") end
+	while not LocalPlayer.state.playerloaded do Citizen.Wait(100) print("loading") end
 	Wait(100)
-	local tbl = {['table'] = ordering, ['float'] = placing}
+	local tbl = {['data'] = ordering, ['float'] = placing}
 	if config.enable_carui then
 		SendNUIMessage({type = 'setCarui', content = config.carui})
 	end
@@ -933,7 +943,7 @@ end)
 --ETC
 CreateThread(function()
 	local count = 0
-	while not Hud.playerloaded or count < 5 do -- REAL WAY TO REMOVE HEALTHBAR AND ARMOR WITHOUT USING THE LOOP ( LOAP minimap.gfx first ) then on spawn load the circlemap
+	while not LocalPlayer.state.playerloaded or count < 5 do -- REAL WAY TO REMOVE HEALTHBAR AND ARMOR WITHOUT USING THE LOOP ( LOAP minimap.gfx first ) then on spawn load the circlemap
 		count = count + 1
 		Wait(1000)
 	end
@@ -1110,6 +1120,7 @@ CreateThread(function()
 end)
 
 CreateThread(function()
+	while not LocalPlayer.state.playerloaded do Wait(100) end
 	Wait(1000)
 	local enable_w = false
 	if config.enablestatus then
@@ -1147,7 +1158,7 @@ RegisterNetEvent('renzu_hud:bodystatus')
 AddEventHandler('renzu_hud:bodystatus', function(status,other)
 	checkingpatient = other
 	local status = status
-	while not Hud.playerloaded do Wait(100) end
+	while not LocalPlayer.state.playerloaded do Wait(100) end
 	SendNUIMessage({type = "setBodyParts",content = config.healtype})
 	local status = status
 	Hud.receive = true
@@ -1198,14 +1209,14 @@ AddEventHandler('renzu_hud:bodystatus', function(status,other)
 end)
 
 CreateThread(function()
-	while not Hud.playerloaded do
+	while not LocalPlayer.state.playerloaded do
 		Wait(100)
 	end
 	if config.bodystatus then
 		Citizen.Wait(1000)
 		while DecorGetBool(PlayerPedId(), "PLAYERLOADED") ~= 1 do
 			Citizen.Wait(500)
-			if Hud.playerloaded then
+			if LocalPlayer.state.playerloaded then
 				DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 				break
 			end
@@ -1544,6 +1555,7 @@ end)
 temp_advstat = {}
 CreateThread(function()
 	Wait(1000)
+	while not LocalPlayer.state.playerloaded do Wait(100) end
 	if config.wheelstancer then
 		while Hud.veh_stats == nil do
 			Wait(100)
@@ -2104,7 +2116,7 @@ RegisterNUICallback('hidecarlock', function(data, cb)
 	})
 	Hud.keyless = true
 	SendNUIMessage({
-		type = "settingui",
+		type = "SettingHud",
 		content = {config = config.userconfig, bool = false}
 	})
 	settingbool = false
@@ -2178,13 +2190,14 @@ end)
 
 --clothes
 CreateThread(function()
+	while not LocalPlayer.state.playerloaded do Wait(100) end
 	Wait(500)
 	--print("CLOTHING")
 	if config.clothing then
 		while DecorGetBool(PlayerPedId(), "PLAYERLOADED") ~= 1 do
 			Citizen.Wait(100)
 			--print(DecorGetBool(PlayerPedId(), "PLAYERLOADED"))
-			if Hud.playerloaded then
+			if LocalPlayer.state.playerloaded then
 				DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 				break
 			end
@@ -2505,7 +2518,7 @@ end)
 RegisterCommand(config.settingcommand, function(source, args, raw)
 	settingbool = not settingbool
 	SendNUIMessage({
-		type = "settingui",
+		type = "SettingHud",
 		content = {config = config.userconfig, bool = settingbool}
 	})
 	SetNuiFocus(settingbool,settingbool)
