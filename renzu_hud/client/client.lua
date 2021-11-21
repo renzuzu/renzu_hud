@@ -605,6 +605,13 @@ CreateThread(function()
 			Hud:EnterVehicleEvent(true,Hud.vehicle)
 		end
 		SendNUIMessage({ type = 'Talking', content = NetworkIsPlayerTalking(PlayerId()) })
+		if Hud.vehicle == 0 and Hud.mode ~= 'Normal' then 
+			Hud.mode = 'NORMAL'
+			SendNUIMessage({
+				type = "setMode",
+				content = Hud.mode
+			})
+		end
 		Wait(config.car_mainloop_sleep)
 	end
 end)
