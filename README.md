@@ -1,5 +1,6 @@
 # renzu_hud
-Fivem HUD - Advanced FIVEM HUD (SEMI ALL IN ONE UI) (idle 0.01ms - 0.02ms (i9-9900k))
+- Fivem HUD - UI Framework include Street HUD, Status Hud, Speedometer Hud, Weapon Hud, Body Hud and many more.
+- Design to work without framework or using popular choice Qbcore and ESX framework.
 # Features
 - Advanced Player Status System
 - Draggable UI Status,Car HUD (position will restore upon reconnect)
