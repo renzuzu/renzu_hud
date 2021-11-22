@@ -1,5 +1,5 @@
 -- BODY STATUS
-config.bodystatus = true -- ENABLE BODY STATUS FUNCTION AND UI?
+config.bodystatus = false -- ENABLE BODY STATUS FUNCTION AND UI?
 config.checkbodycommandjob = 'ambulance' -- allowed jobs to use the bodysystem treatment
 config.damageadd = 1 -- HOW MUCH THE VALUE WE WANT TO SAVE TO DATABASE FOR EACH DAMAGE RECEIVE?
 config.weaponsonly = false -- Body Status Damages applies from weapons only? eg. pistol,etc anything with bullets. else it all applies to weapons,bullets, melee combat, falling in high grounds like posts,ram by a car etc..

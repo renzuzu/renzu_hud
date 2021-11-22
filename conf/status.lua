@@ -13,17 +13,17 @@ config.QbcoreStatusDefault = false -- if true will use metadatas as default you 
 config.statusv2_sleep = 1000 -- 1sec
 config.statusnotify = true
 config.driving_affect_status = true -- should the status will be affected during Driving a vehicle?
-config.driving_affected_status = 'sanity' -- change whatever status you want to be affected during driving
+config.driving_affected_status = 'stress' -- change whatever status you want to be affected during driving
 config.driving_status_mode = 'remove' -- (add, remove) add will add a value to status, remove will remove a status value.
 config.driving_status_val = 10000 -- status value to add/remove
 config.driving_status_radius = 200 -- driving distance to add status
 config.firing_affect_status = true -- Firing Weapons affects status?
-config.firing_affected_status = 'sanity' -- Affected Status during gunplay
+config.firing_affected_status = 'stress' -- Affected Status during gunplay
 config.firing_status_mode = 'add' -- Status Function (add,remove) add will add a value to status, remove will remove a status value.
 config.firing_statusaddval = 5000 -- value to add when firing a weapons
 config.firing_bullets = 100 -- number of bullets or firing events to trigger the status function.
 config.killing_affect_status = true -- do you want the status to be affected when you kill some player , ped, animals.
-config.killing_affected_status = 'sanity'
+config.killing_affected_status = 'stress'
 config.killing_status_mode = 'add' -- (add,remove) add will add a value to status, remove will remove a status value.
 config.killing_status_val = 5000 -- status value to add/remove per kill
 config.running_affect_status = true -- if player is running (not sprint) status will affected?
@@ -31,11 +31,11 @@ config.running_affected_status = 'thirst' -- change this to whatever status you 
 config.running_status_mode = 'remove' -- should add or remove? its up to you. affected status if running
 config.running_status_val = 100 -- how much we add / remove to the status?
 config.melee_combat_affect_status = true -- melee attack like punch,kick,pistolwhiping,etc can affect the status?
-config.melee_combat_affected_status = 'sanity' -- type of status
+config.melee_combat_affected_status = 'stress' -- type of status
 config.melee_combat_status_mode = 'remove' -- status remove or add?
 config.melee_combat_status_val = 10000 -- value to add/remove
 config.parachute_affect_status = true -- while parachuting mode can add status?
-config.parachute_affected_status = 'sanity' -- type of status
+config.parachute_affected_status = 'stress' -- type of status
 config.parachute_status_mode = 'remove' -- status remove or add?
 config.parachute_status_val = 10000 -- value to add/remove
 --status standalone purpose (use this only if you need it)
@@ -77,7 +77,7 @@ config.statusordering = { -- SET enable = false to disable the status (the statu
 	[4] = {type = 1, enable = false, status = 'stress', hideifmax = false, min_val_hide = 50, custom = true, value = 0, startvalue = 0, statusremove = 0, notify_lessthan = true, notify_message = 'i see some dragons', notify_value = 80, display = 'block', offset = '275', i_id_1_color = 'rgb(255, 16, 68)',bg = 'rgb(57,59,60)', fa = 'fad fa-head-side-brain', i_id_2_color = 'rgba(35, 255, 101, 0.84)'},
 	[5] = {type = 1, enable = true, status = 'stamina', hideifmax = true, min_val_hide = 100, custom = false, value = 0, notify_lessthan = false, notify_message = 'running makes me thirsty', notify_value = 20, display = 'block', offset = '275', i_id_1_color = 'rgb(16, 255, 136)',bg = 'rgb(57,59,60)', fa = 'fad fa-running', i_id_2_color = 'rgba(0, 119, 57, 0.94)'},
 	[6] = {type = 1, enable = true, status = 'oxygen', hideifmax = true, min_val_hide = 100, custom = false, value = 0, notify_lessthan = false, notify_message = 'my oxygen is almost gone', notify_value = 20, display = 'block', offset = '275', i_id_1_color = 'rgb(15, 227, 255)',bg = 'rgb(57,59,60)', fa = 'fad fa-lungs', i_id_2_color = 'rgba(8, 76, 85, 0.78)'},
-	[7] = {type = 1, enable = true, status = 'energy', hideifmax = true, min_val_hide = 50, custom = true, value = 0, startvalue = 1000000, statusremove = 100, notify_lessthan = false, notify_message = 'i am very tired', notify_value = 20, display = 'block', offset = '275', i_id_1_color = 'rgb(233, 233, 233)',bg = 'rgb(57,59,60)', fa = 'fas fa-snooze', i_id_2_color = 'color:rgb(243, 57, 0)'},
+	[7] = {type = 1, enable = true, status = 'energy', hideifmax = false, min_val_hide = 50, custom = true, value = 0, startvalue = 1000000, statusremove = 100, notify_lessthan = false, notify_message = 'i am very tired', notify_value = 20, display = 'block', offset = '275', i_id_1_color = 'rgb(233, 233, 233)',bg = 'rgb(57,59,60)', fa = 'fas fa-snooze', i_id_2_color = 'color:rgb(243, 57, 0)'},
 	[8] = {type = 1, enable = true, status = 'voip', hideifmax = false, custom = false, value = 0, notify_lessthan = false, notify_message = 'silent mode', notify_value = 0, display = 'block', offset = '275', i_id_1_color = 'rgb(255, 255, 255)',bg = 'rgb(57,59,60)', fa = 'fas fa-microphone', i_id_2_color = 'rgba(251, 29, 9, 0.3)'},
 	
 	--SAMPLE ONLY

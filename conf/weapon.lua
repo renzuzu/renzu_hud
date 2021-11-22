@@ -1,5 +1,5 @@
 --WEAPON UI
-config.weaponsui = true -- enable weapon ui
+config.weaponsui = false -- enable weapon ui
 config.crosshairenable = true -- enable custom crosshair
 config.crosshair = 1 -- index number of custom crosshair ( 1-5 )
 config.ammoupdatedelay = 300 -- delay update for bullets ui

@@ -1,5 +1,5 @@
 --clothes
-config.use_esx_accesories = true -- use esx accesories for mask,helmet. (ESX FRAMEWORK)
+config.use_esx_accesories = false -- use esx accesories for mask,helmet. (ESX FRAMEWORK)
 -- PERMANENT HELMET AND MASK
 -- this is optional only if you want the mask and helmet to be permanent instead of using your clothes settings, ex. wearing a cap, but you want/need a helmet soon.
 -- using this https://github.com/esx-framework/esx_accessories ( saving to datastore instead from skinchanger table) -- rights belong to esx framework

@@ -46,7 +46,7 @@ config.mapurl = 'https://github.com/renzuzu/carmap/blob/main/carmap/atlas.webp?r
 --credits https://github.com/jgardner117/gtav-interactive-map
 
 --OVERHEAT FUNC
-config.engineoverheat = true -- ENGINE EXPLODE AND OVERHEAT FEATURE (IF REVING 9200 RPM ABOVE Engine Temperature will rise, explode it if too hot , temp value = 150)
+config.engineoverheat = false -- ENGINE EXPLODE AND OVERHEAT FEATURE (IF REVING 9200 RPM ABOVE Engine Temperature will rise, explode it if too hot , temp value = 150)
 config.dangerrpm = 0.92 -- 9200 rpm, above this level temp will rise
 config.addheat = 10 -- additional temp for everytime the dangerrpm is reach
 config.overheatmin = 150 -- engine will explode when the temperature rise to this level
@@ -156,14 +156,14 @@ config.fuelusage = {
 	[0.0] = 0.0,
 }
 
-config.enablecarcontrol = true -- car functions
+config.enablecarcontrol = false -- car functions
 config.allowoutsideofvehicle = true -- allow car control outside of vehicle (nearest vehicle and lastvehicle)
 config.enableairsuspension = true -- adjustable vehicle height
 config.airsuspension_item = true -- if true airsuspension func will not work if its not installed
 config.enableneontoggle = true -- toggable neon lights
 config.wheelstancer = true -- allow players to adjust the wheelxoffset and wheelyrotation
 --NITRO
-config.enablenitro = true
+config.enablenitro = false
 config.nitro_sound = true -- enable sound on nitro | default: true
 config.nitrocost = 0.05 -- value to deduct per frame
 config.nitroboost = 15.0 -- x15 torque
@@ -191,7 +191,7 @@ config.purge_size = 1.0
 config.purge_paticle_name = "ent_sht_steam" -- particle name | default: "ent_sht_steam"
 
 --WHEELSYSTEM
-config.enabletiresystem = true -- Enable Tire System, Custom Tire Health System, Saved in DB, Sync all to player, using adv_stat table in database
+config.enabletiresystem = false -- Enable Tire System, Custom Tire Health System, Saved in DB, Sync all to player, using adv_stat table in database
 config.tirebrandnewhealth = 1000 -- health of a brand new tires, this is not the vehicle health tires from GTA NATIVE!
 config.tirewear = 1 -- wear value every 100 radius
 config.tirestress = 2 -- wear value everytime you stress your tire, using burnouts, curving with high speed etc...
@@ -220,12 +220,12 @@ config.carjackdistance = 5
 -- you need to install cd_keymaster if you enable carjacking (my version: same func but theme color is similar to this hud https://github.com/renzuzu/cd_keymaster or default original https://github.com/dsheedes/cd_keymaster)
 
 --carstatus
-config.carstatus = true -- use car status system, shows vehicle infos etc..
+config.carstatus = false -- use car status system, shows vehicle infos etc..
 config.carstatus_jobonly = false -- allowed the car status ui only to designated jobs
 config.carstatus_job = 'mechanic'
 
 --ENGINE SYSTEM
-config.customengine = true -- enable/disable custom vehicle engine, custom sounds
+config.customengine = false -- enable/disable custom vehicle engine, custom sounds
 config.enable_commands = true -- standalone purpose. usage: /installengine engine_blista ( you must be near on vehicle hood/engine location )
 -- commands permmision is located at config.commanditem_permission
 config.enable_engine_prop = true -- use engine stand and engine prop while installing engine.

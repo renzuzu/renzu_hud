@@ -39,7 +39,7 @@ config.commanditem_permission = { -- item command permission -- standalone purpo
 	'df845523fc29c5159ece179359f22a741ca2ca9a',
 	'license:df845523fc29c5159ece179359f22a741ca2ca9a',
 }
-config.identifier = 'license:' -- identifier format
+config.identifier = 'license:' -- standalone purpose, carlock
 --MULTI CHARACTER START -- set config.multichar = false if you are not using any multi character ( configuring this is needed to avoid problems saving to database )
 config.multichar = false -- KASHACTERS, cd_multicharacter, etc...
 --IMPORTANT PART IF USING Multicharacter
@@ -56,6 +56,7 @@ config.enablestatus = true -- enable/disable status v1 ( icons,progress status )
 config.enablecompass = true -- enable/disable compass
 
 -- minimap
+config.radarwhiledriving = true
 config.useminimapeverytime = false -- FORCE display radarmap all the time? (USE THIS ONLY IF Some of your other script use displayradar(FALSE) , its advisable to disable this config instead remove it on your other script, default GTA show the Minimap everytime)
 config.usecircleminimap = true -- display oval minimap instead of box radar map?
 config.removemaphealthandarmor = false -- FORCE REMOVE HEALTHBAR AND ARMOR FROM MINIMAP (This will cause more infinite loop just to disable the hp and armor, will cause more Cpu ms at resmon) -- USE THIS ONLY IF minimap.gfx is not working for you, its on the stream folder, it remove health and armor automatically

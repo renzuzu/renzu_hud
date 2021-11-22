@@ -614,6 +614,12 @@ CreateThread(function()
 			local veh = Entity(Hud.vehicle).state
 			veh:set('hudemode', Hud.mode, true)
 		end
+		local radarEnabled = config.radarwhiledriving and IsRadarEnabled()
+		if config.radarwhiledriving and not IsPedInAnyVehicle(PlayerPedId()) and radarEnabled then
+			DisplayRadar(false)
+		elseif config.radarwhiledriving and IsPedInAnyVehicle(PlayerPedId()) and not radarEnabled then
+			DisplayRadar(true)
+		end
 		Wait(config.car_mainloop_sleep)
 	end
 end)
@@ -1150,12 +1156,16 @@ CreateThread(function()
 end)
 
 RegisterCommand(config.commands['bodystatus'], function()
-	Hud:BodyUi()
-	SendNUIMessage({type = "setUpdateBodyStatus",content = Hud.bonecategory})
+	if config.bodystatus then
+		Hud:BodyUi()
+		SendNUIMessage({type = "setUpdateBodyStatus",content = Hud.bonecategory})
+	end
 end, false)
 
 RegisterCommand(config.commands['bodystatus_other'], function()
-	Hud:CheckPatient()
+	if config.bodystatus then
+		Hud:CheckPatient()
+	end
 end, false)
 
 CreateThread(function()
