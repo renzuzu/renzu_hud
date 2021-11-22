@@ -611,6 +611,8 @@ CreateThread(function()
 				type = "setMode",
 				content = Hud.mode
 			})
+			local veh = Entity(Hud.vehicle).state
+			veh:set('hudemode', Hud.mode, true)
 		end
 		Wait(config.car_mainloop_sleep)
 	end

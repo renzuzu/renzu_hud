@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport">
+    <title>Renzu HUD</title>
+    <link href="https://fonts.googleapis.com/css?family=Cabin+Sketch:bold" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+    <script src="https://kit.fontawesome.com/44e6403392.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="css/compass.css" />
+    <link rel="stylesheet" href="css/map.css" type="text/css">
+    <link href="css/default.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="css/simple-notify.css" />
+    <link rel="stylesheet" href="css/slider.css" />
+  </head>
+  <body style="margin:0; overflow:hidden;display:none;" id="uibody">
+    <div id="logo">
+      
+    </div>
+    <div><img id="statusnormal" style="z-index:999;position:absolute;right:-20px;top:-10px;opacity:1;height:160px;" src="img/status.png" />
+      <span id="voip_1" class="fa-stack fa-2x" style='font-size:15px;position:absolute;right:60px;top:85px;color:rgba(144, 144, 144, 0.876);z-index:1132;'>
+        
+      </span>
+    </div>
+    <div id="status_bars" style="position:absolute;top:120px;right:10px;">
+      <ul style="list-style: none;" id="status_progress"></ul>
+    </div>
+    <div id="status"></div>
+    <div id="status2" style="opacity:0.9"></div>
+    <div id="statusv3" style="position:absolute;margin-right: 10px;inset:unset !important;"></div>
+    <div id="carcontrolui" style="display:none;z-index:900;position:absolute;right:-140px;top:-200px;opacity:1.0;height:650px;"></div>
+    <div id="keyless" style="display:none;"></div>
+    <div id="uibar">
+      
+    </div>
+    <div id="statusbar">
+      <div class="food-bar"><span class="bar"><span class="food_progress" id="hungerbar"></span></span></div>
+      <div class="water-bar"><span class="bar"><span class="water_progress" id="thirstbar"></span></span></div>
+      <div class="stress-bar"><span class="bar"><span class="stress_progress" id="stressbar"></span></span></div>
+      <div class="stamina-bar"><span class="bar"><span class="stamina_progress" id="staminabar"></span></span></div>
+      <div class="oxygen-bar"><span class="bar"><span class="oxygen_progress" id="oxygenbar"></span></span></div>
+      <div class="energy-bar"><span class="bar"><span class="energy_progress" id="energybar"></span></span></div>
+    </div>
+    <div id="radio" style="display:none;">
+      <img src="img/radioui.png" style="opacity:0.7;">
+      <small id="mic-radio">AMBULANCE DISPATCH #1</small>
+    </div>
+    <div id="compass" style="position:absolute;top:20px;left:10px;display:none;">
+      <img src="img/compassui.png" style="opacity:0.7;">
+    </div>
+    <div id="location" style="display:none;"></div>
+    <div id="simple" style="display:block;position:absolute;right:-4.5%;bottom:-20px;width:25%;height: 18.5vw;"></div>
+    <div id="minimal" style="display:none;position:absolute;right:-0.5vw;bottom:-40px;width:30vw;height:22.3vw;opacity:0.65"></div>
+    <div id="modern" style="display:none; display: block;position: absolute;right: -0.5vw;bottom: 40px;width: 30vw;height: 22.3vw;opacity: 1;"></div>
+    <div id="bodyui" style="display:none;"></div>
+    <div id="carstatusui" style="display:block;"></div>
+    <div id="weaponui" style="display:block;"></div>
+    <div id="shift" style="bottom:35%;position:absolute;right:-46px;background-repeat: no-repeat !important;">
+      <div id="shifter" style="background-repeat: no-repeat !important;height:150px;width:150px; background-size:90px 130px !important;opacity:0.81;"></div>
+    </div>
+    <div id="clothe" style="position:absolute;top:30%;left:30%;bottom:50%;z-index:99999;height:70vh;width:700px;display:none;"></div>
+    <div id="turbohuddiv" class="turbo_boost" stype></div>
+    <div class="wrapper" id="settingui" style="display: none;z-index: 1111;"></div>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/2.0.6/velocity.min.js"></script>
+    <script src="js/demo.js"></script>
+    <script src="js/simple-notify.min.js"></script>
+  </body>
+</html>

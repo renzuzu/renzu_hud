@@ -2137,9 +2137,11 @@ function Hud:Boost(hasturbo)
 end
 
 function Hud:vehiclemode()
+	local veh = Entity(self.vehicle).state
 	PlaySoundFrontend(-1, 'NAV_UP_DOWN', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 0)
 	if self.mode == 'NORMAL' then
 		self.mode = 'SPORTS'
+		veh:set('hudemode', self.mode, true)
 		SendNUIMessage({
 			type = "setMode",
 			content = self.mode
@@ -2198,6 +2200,7 @@ function Hud:vehiclemode()
 		end)
 	elseif self.mode == 'SPORTS' and self.invehicle then
 		self.mode = 'DRIFT'
+		veh:set('hudemode', self.mode, true)
 		SendNUIMessage({
 			type = "setMode",
 			content = self.mode
@@ -2218,6 +2221,7 @@ function Hud:vehiclemode()
 		end)
 	elseif self.mode == 'DRIFT' and self.invehicle then
 		self.mode = 'ECO'
+		veh:set('hudemode', self.mode, true)
 		SendNUIMessage({
 			type = "setMode",
 			content = self.mode
@@ -2266,6 +2270,7 @@ function Hud:vehiclemode()
 		end)
 	else
 		self.mode = 'NORMAL'
+		veh:set('hudemode', self.mode, true)
 		SendNUIMessage({
 			type = "setMode",
 			content = self.mode
@@ -2284,8 +2289,20 @@ function Hud:ToggleDrift()
 			nondrift[value[1]] = GetVehicleHandlingFloat(self.vehicle, "CHandlingData", value[1])
 		end
 	end
-	while self.mode == 'DRIFT' do
-		for index, value in ipairs(config.drift_handlings) do
+	local NonDrift = function(nondrift)
+		local veh = self:getveh()
+		for index, value in pairs(nondrift) do
+			if index == 'vecInertiaMultiplier' or index == 'vecCentreOfMassOffset' then
+				SetVehicleHandlingVector(veh, "CHandlingData", index, value)
+			elseif value then
+				SetVehicleHandlingFloat(veh, "CHandlingData", index, tonumber(value))
+			end
+			SetVehicleEnginePowerMultiplier(veh, 1.0) -- do not remove this, its a trick for flatvel
+		end
+		self:applyVehicleMods(veh,nondrift['fDriveBiasFront'])
+	end
+	local Drift = function(handling)
+		for index, value in ipairs(handling) do
 			if value[1] == 'fInitialDriveMaxFlatVel' and self.vehicle ~= 0 then
 				SetVehicleHandlingField(self.vehicle, "CHandlingData", value[1], tonumber(value[2]))
 			elseif value[1] == 'vecInertiaMultiplier' or value[1] == 'vecCentreOfMassOffset' and self.vehicle ~= 0 then
@@ -2297,18 +2314,25 @@ function Hud:ToggleDrift()
 		end
 		--print(GetVehicleHandlingFloat(self.vehicle, "CHandlingData", 'fDriveInertia'),config.drift_handlings[1][1])
 		self:applyVehicleMods(self.vehicle ~= 0 and self.vehicle or self:getveh(),0.0)
+	end
+	while self.mode == 'DRIFT' and self.invehicle do
+		local Speed = GetEntitySpeed(self.vehicle)
+		if Speed < 40 then
+			Drift(config.drift_handlings)
+		elseif Speed > 50 then
+			local veh = Entity(self.vehicle).state
+			self.mode = 'NORMAL'
+			veh:set('hudemode', self.mode, true)
+			SendNUIMessage({
+				type = "setMode",
+				content = self.mode
+			})
+		else
+			NonDrift(nondrift)
+		end
 		Wait(500)
 	end
-	local veh = self:getveh()
-	for index, value in pairs(nondrift) do
-		if index == 'vecInertiaMultiplier' or index == 'vecCentreOfMassOffset' then
-			SetVehicleHandlingVector(veh, "CHandlingData", index, value)
-		elseif value then
-			SetVehicleHandlingFloat(veh, "CHandlingData", index, tonumber(value))
-		end
-		SetVehicleEnginePowerMultiplier(veh, 1.0) -- do not remove this, its a trick for flatvel
-	end
-	self:applyVehicleMods(veh,nondrift['fDriveBiasFront'])
+	NonDrift(nondrift)
 end
 
 function Hud:applyVehicleMods(veh,wheel) -- https://forum.cfx.re/t/cant-change-setvehiclehandlingfloat-transforming-vehicle-to-awd-fivem-bug/3393188
@@ -3748,7 +3772,7 @@ function Hud:SetEngineSpecs(veh, model)
 						if not self.manual2 then
 							SetVehStats(self.vehicle , "CHandlingData", "fInitialDriveForce", v * multiplier)
 						end
-					elseif k == 'fInitialDriveMaxFlatVel' then
+					elseif k == 'fInitialDriveMaxFlatVel' and not self.mode == 'DRIFT' then
 						self:GetHandling(self:GetPlate(self.vehicle )).maxspeed = v
 						if not self.manual then
 							mult = 1.0
