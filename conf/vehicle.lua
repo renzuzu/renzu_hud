@@ -349,27 +349,28 @@ config.blacklistvehicle = {
 	'16', -- planes
 	'21', -- trains
 }
-config.driftmodeAddpower = false
 config.drift_handlings = {
-	{'fDriveInertia', 3.000000},
-	{'fInitialDriveForce', 2.200000},
-	{'fInitialDragCoeff',2.500000},
+	{'fInitialDriveMaxFlatVel',380.000000},
+	-- {'fDriveInertia', 3.000000},
+	-- {'fInitialDriveForce', 2.200000},
+	{'fMass', 700.000000},
+	{'fInitialDragCoeff',0.500000},
 	{'fPercentSubmerged',85.000000},
 	{'vecCentreOfMassOffset', vector3(0.000000,-0.100000,-0.100000)},
 	{'vecInertiaMultiplier', vector3(1.200000,1.400000,2.000000)},
 	{'fDriveBiasFront',0.000000},
-	{'fClutchChangeRateScaleUpShift',90.300000},
-	{'fClutchChangeRateScaleDownShift',90.300000},
-	{'fInitialDriveMaxFlatVel',360.000000},
+	{'fClutchChangeRateScaleUpShift',51.300000},
+	{'fClutchChangeRateScaleDownShift',51.300000},
+	--{'fInitialDriveMaxFlatVel',380.000000},
 	{'fSteeringLock',55.000000},
-	{'fTractionCurveMax',1.140000,0.840000},
-	{'fTractionCurveMin',1.400000,1.400000},
-	{'fTractionCurveLateral',24.500000},
-	{'fTractionSpringDeltaMax',0.130000},
-	{'fLowSpeedTractionLossMult',0.000000},
+	{'fTractionCurveMax',0.840000,0.840000},
+	{'fTractionCurveMin',1.000000,1.400000},
+	{'fTractionCurveLateral',45.500000},
+	{'fTractionSpringDeltaMax',0.110000},
+	{'fLowSpeedTractionLossMult',-0.200000},
 	{'fCamberStiffnesss',0.000000},
 	{'fTractionBiasFront',0.420000},
-	{'fTractionLossMult',0.950000},
+	{'fTractionLossMult',0.850000},
 	{'fSuspensionForce',2.200000},
 	{'fSuspensionCompDamp',2.200000},
 	{'fSuspensionReboundDamp',2.100000},
@@ -382,8 +383,9 @@ config.drift_handlings = {
 	{'fRollCentreHeightFront',0.150000},
 	{'fRollCentreHeightRear',0.150000},
 }
-if not config.driftmodeAddpower then
-	print(config.drift_handlings[1][1])
-	config.drift_handlings[1][1] = nil
-	config.drift_handlings[1][2] = nil
-end
+-- if not config.driftmodeAddpower then
+-- 	-- print(config.drift_handlings[1][1])
+-- 	-- config.drift_handlings[1][1] = nil
+-- 	-- config.drift_handlings[1][2] = nil
+-- 	-- print(config.drift_handlings[1][1])
+-- end

@@ -2304,7 +2304,7 @@ function Hud:ToggleDrift()
 	local Drift = function(handling)
 		for index, value in ipairs(handling) do
 			if value[1] == 'fInitialDriveMaxFlatVel' and self.vehicle ~= 0 then
-				SetVehicleHandlingField(self.vehicle, "CHandlingData", value[1], tonumber(value[2]))
+				--SetVehicleHandlingField(self.vehicle, "CHandlingData", value[1], tonumber(value[2]))
 			elseif value[1] == 'vecInertiaMultiplier' or value[1] == 'vecCentreOfMassOffset' and self.vehicle ~= 0 then
 				SetVehicleHandlingVector(self.vehicle, "CHandlingData", value[1], tonumber(value[2]))
 			elseif value[1] and self.vehicle ~= 0 then
@@ -2315,6 +2315,20 @@ function Hud:ToggleDrift()
 		--print(GetVehicleHandlingFloat(self.vehicle, "CHandlingData", 'fDriveInertia'),config.drift_handlings[1][1])
 		self:applyVehicleMods(self.vehicle ~= 0 and self.vehicle or self:getveh(),0.0)
 	end
+	CreateThread(function()
+		while self.mode == 'DRIFT' and self.invehicle do
+			if self:angle(self.vehicle ) >= 5 and self:angle(self.vehicle ) <= 38 and GetEntityHeightAboveGround(self.vehicle ) <= 1.5 then
+				SetVehicleHandlingField(self.vehicle, "CHandlingData", 'fInitialDriveMaxFlatVel', config.drift_handlings[1][2])
+				SetVehicleEnginePowerMultiplier(self.vehicle, 1.0) -- do not remove this, its a trick for flatvel
+				self:ForceVehicleGear (self.vehicle, GetVehicleCurrentGear(self.vehicle) > 1 and GetVehicleCurrentGear(self.vehicle) -1 or GetVehicleCurrentGear(self.vehicle))
+				SetVehicleHighGear(self.vehicle,GetVehicleHighGear(self.vehicle))
+			else
+				SetVehicleHandlingField(self.vehicle, "CHandlingData", 'fInitialDriveMaxFlatVel', nondrift['fInitialDriveMaxFlatVel'])
+				SetVehicleEnginePowerMultiplier(self.vehicle, 1.0) -- do not remove this, its a trick for flatvel
+			end
+			Wait(100)
+		end
+	end)
 	while self.mode == 'DRIFT' and self.invehicle do
 		local Speed = GetEntitySpeed(self.vehicle)
 		if Speed < 40 then
@@ -2327,8 +2341,6 @@ function Hud:ToggleDrift()
 				type = "setMode",
 				content = self.mode
 			})
-		else
-			NonDrift(nondrift)
 		end
 		Wait(500)
 	end

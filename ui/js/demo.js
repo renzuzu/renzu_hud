@@ -1055,8 +1055,8 @@ function setBodyParts(table) {
     });
 }
 
-var carcontrolstring = `<div id="carcontrolinfo">Car Control:</div>
-<img style="z-index:900;position:absolute;right:440px;top:200px;opacity:0.4;height:800px;" src="img/carcontrol_bg.png" />
+var carcontrolstring = `
+<img style="z-index:900;position:absolute;right:440px;top:200px;opacity:0.2;height:800px;" src="img/carcontrol_bg.png" />
 <img id="carcontrol" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.8;height:400px;" src="img/carcontrol.png" />
 <img id="carcontrol2" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:1.0;height:400px;" src="img/carcontrol2.png" />
 <img id="hood" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/hood.png" />
