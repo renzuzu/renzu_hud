@@ -21,7 +21,7 @@
 - Neon Color Control
 - Neon Color Multiple Effects
 - Seatbelt System
-- Drive Mode - Sports or Eco or Normal
+- Drive Mode - Sports or Eco or Normal, Drift Mode
 - Built in Car GPS
 - Mileage System
 - Nitro System
