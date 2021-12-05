@@ -240,7 +240,7 @@ function Hud:EnterVehicleEvent(state,vehicle)
 			end
 			Wait(200)
 			self.cansmoke = true
-			local functions <close> = self:inVehicleFunctions()
+			self:inVehicleFunctions()
 			Wait(100)
 			if self.manual then
 				SendNUIMessage({
@@ -279,7 +279,7 @@ function Hud:EnterVehicleEvent(state,vehicle)
 		self.rpm = 0
 		marcha = 0
 		--print(self.lastplate,"LAST PLATE")
-		if self.veh_stats[self.lastplate] ~= nil then
+		if self.veh_stats and self.veh_stats[self.lastplate] ~= nil then
 			self.veh_stats[self.lastplate].entity = nil
 			self.currentengine[self.lastplate] = nil
 			self.lastplate = nil
@@ -498,6 +498,7 @@ function Hud:RpmandSpeedLoop()
 		end
 		while self.ped == nil do
 			Wait(1000)
+			self.ped = PlayerPedId()
 		end
 		SendNUIMessage({
 			type = "SetMetrics",
@@ -771,8 +772,8 @@ function Hud:get_veh_stats(v,p)
 	while not LocalPlayer.state.loaded do
 		Wait(10)
 	end
-	while self.veh_stats == nil do Wait(1) self.veh_stats = LocalPlayer.state.adv_stat end
-	self.veh_stats = LocalPlayer.state.adv_stat
+	while self.veh_stats == nil do Wait(1) self.veh_stats = LocalPlayer.state.adv_stat and LocalPlayer.state.adv_stat or {} end
+	self.veh_stats = LocalPlayer.state.adv_stat or {}
 	--while self.veh_stats[self.plate] == nil do Wait(10) self.veh_ end
 	if v ~= nil and p ~= nil then
 		self.vehicle  = v
@@ -1582,8 +1583,9 @@ function Hud:SendNuiSeatBelt()
 			while config.enableseatbeltfunc and self.belt and self.invehicle do
 				local sleep = 5
 				if self.belt then
-					DisableControlAction(0,75)
-				end
+					DisableControlAction(1, 75, true)  -- Disable exit vehicle when stop
+					DisableControlAction(27, 75, true) -- Disable exit vehicle when Driving
+								end
 				Wait(sleep)
 			end
 			Session[1],Session[2] = 0.0,0.0

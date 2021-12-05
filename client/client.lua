@@ -11,8 +11,8 @@ local getdata = false
 CreateThread(function()
 	LocalPlayer.state:set('playerloaded', false,true)
 	if config.framework == 'ESX' then
-		while ESX == nil do TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end) Wait(0) end
-		while ESX.GetPlayerData().job == nil do Wait(0) end
+		while ESX == nil do TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end) Wait(100) end
+		while ESX.GetPlayerData().job == nil do Wait(100) end
 		ESX.PlayerData = ESX.GetPlayerData()
 		xPlayer = ESX.GetPlayerData()
 		Wait(1000)
@@ -171,63 +171,64 @@ AddEventHandler('renzu_hud:charslot', function(charid)
 	DecorSetFloat(PlayerPedId(), "CHARSLOT", Hud.charslot*1.0) -- fuck bug in int type
 end)
 
+-- loaded events
+RegisterNetEvent('esx:playerLoaded')
+AddEventHandler('esx:playerLoaded', function(xPlayer)
+	Wait(1000)
+	LocalPlayer.state:set('playerloaded', true,true)
+	LocalPlayer.state.playerloaded = true
+	Wait(2000)
+	print("ESX")
+	Hud.lastped = PlayerPedId()
+	if not getdata then
+		TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
+		getdata = true
+	end
+	DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
+	Wait(5000)
+	SendNUIMessage({content = true, type = 'pedface'})
+	SendNUIMessage({content = true, type = 'playerloaded'})
+end)
+
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
+AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
+	Wait(1000)
+	LocalPlayer.state:set('playerloaded', true,true)
+	LocalPlayer.state.playerloaded = true
+	Wait(2000)
+	print("QB")
+	Hud.lastped = PlayerPedId()
+	if not getdata then
+		TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
+		getdata = true
+	end
+	DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
+	Wait(5000)
+	SendNUIMessage({content = true, type = 'pedface'})
+	SendNUIMessage({content = true, type = 'playerloaded'})
+end)
+
+RegisterNetEvent('playerSpawned')
+AddEventHandler('playerSpawned', function(spawn)
+	if config.framework ~= 'ESX' and config.framework ~= 'QBCORE' then
+		Wait(1000)
+		LocalPlayer.state:set('playerloaded', true,true)
+		LocalPlayer.state.playerloaded = true
+		print("PLAYERLOADED")
+		Wait(2000)
+		Hud.lastped = PlayerPedId()
+		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
+		if not getdata then
+			TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
+			getdata = true
+		end
+		Wait(5000)
+		SendNUIMessage({content = true, type = 'pedface'})
+		SendNUIMessage({content = true, type = 'playerloaded'})
+	end
+end)
+
 CreateThread(function()
-	-- loaded events
-	RegisterNetEvent('esx:playerLoaded')
-	AddEventHandler('esx:playerLoaded', function(xPlayer)
-		Wait(1000)
-		LocalPlayer.state:set('playerloaded', true,true)
-		LocalPlayer.state.playerloaded = true
-		Wait(2000)
-		print("ESX")
-		Hud.lastped = PlayerPedId()
-		if not getdata then
-			TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
-			getdata = true
-		end
-		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
-		Wait(5000)
-		SendNUIMessage({content = true, type = 'pedface'})
-		SendNUIMessage({content = true, type = 'playerloaded'})
-	end)
-
-	RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
-	AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
-		Wait(1000)
-		LocalPlayer.state:set('playerloaded', true,true)
-		LocalPlayer.state.playerloaded = true
-		Wait(2000)
-		print("QB")
-		Hud.lastped = PlayerPedId()
-		if not getdata then
-			TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
-			getdata = true
-		end
-		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
-		Wait(5000)
-		SendNUIMessage({content = true, type = 'pedface'})
-		SendNUIMessage({content = true, type = 'playerloaded'})
-	end)
-
-	RegisterNetEvent('playerSpawned')
-	AddEventHandler('playerSpawned', function(spawn)
-		if config.framework ~= 'ESX' and config.framework ~= 'QBCORE' then
-			Wait(1000)
-			LocalPlayer.state:set('playerloaded', true,true)
-			LocalPlayer.state.playerloaded = true
-			print("PLAYERLOADED")
-			Wait(2000)
-			Hud.lastped = PlayerPedId()
-			DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
-			if not getdata then
-				TriggerServerEvent("renzu_hud:getdata",Hud.charslot)
-				getdata = true
-			end
-			Wait(5000)
-			SendNUIMessage({content = true, type = 'pedface'})
-			SendNUIMessage({content = true, type = 'playerloaded'})
-		end
-	end)
 	Wait(1000)
 	if Hud.charslot == nil and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0.0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= nil then
 		Hud.charslot = Hud:round(DecorGetFloat(PlayerPedId(),"CHARSLOT"))
@@ -755,7 +756,8 @@ RegisterCommand(config.commands['car_seatbelt'], function()
 						Hud:Notify('success','Seatbelt',"Seatbelt has been attached")
 					end
 					while Hud.belt and Hud.invehicle and config.seatbelt_2 do
-						DisableControlAction(0,75)
+						DisableControlAction(1, 75, true)  -- Disable exit vehicle when stop
+						DisableControlAction(27, 75, true) -- Disable exit vehicle when Driving
 						Wait(4)
 					end
 					Hud.belt = false
@@ -2229,7 +2231,6 @@ CreateThread(function()
 		while Hud:tablelength(Hud.dummyskin1) <= 2 do
 			TriggerEvent('skinchanger:getSkin', function(current) Hud.dummyskin1 = current end)
 			Wait(1000)
-			print("dummy")
 		end
 		Hud:SaveCurrentClothes(true)
 		skinsave = false

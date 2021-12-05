@@ -195,24 +195,26 @@ SyncStat = function(stat)
 	for i=0, GetNumPlayerIndices()-1 do
 		--if IsPlayerAceAllowed(GetPlayerFromIndex(i), "ace.test") then  
 		local ply = Player(GetPlayerFromIndex(i))
-		ply.state.adv_stat = stat
-		local temp = {}
-		for k,v in pairs(stat) do
-			if v.entity ~= nil then
-				if temp[k] == nil then
-					temp[k] = {}
-				end
-				temp[k].entity = v.entity
-				temp[k].plate = k
-				if v.height ~= nil then
-					temp[k].height = v.height
-				end
-				if v.engine ~= nil then
-					temp[k].engine = v.engine
+		if ply and ply.state then
+			ply.state.adv_stat = stat
+			local temp = {}
+			for k,v in pairs(stat) do
+				if v.entity ~= nil then
+					if temp[k] == nil then
+						temp[k] = {}
+					end
+					temp[k].entity = v.entity
+					temp[k].plate = k
+					if v.height ~= nil then
+						temp[k].height = v.height
+					end
+					if v.engine ~= nil then
+						temp[k].engine = v.engine
+					end
 				end
 			end
+			ply.state.onlinevehicles = temp
 		end
-		ply.state.onlinevehicles = temp
 	end
 end
 
@@ -309,11 +311,11 @@ AddEventHandler("renzu_hud:getdata", function(slot, fetchslot)
 		if Renzu[tonumber(source)] == nil then
 			CreatePlayer(source)
 		end
-	local ply = Player(source)
-	-- ply.state.adv_stat = adv_table
-	SyncStat(adv_table)
+		--local ply = Player(source)
+		-- ply.state.adv_stat = adv_table
 		--TriggerClientEvent('renzu_hud:receivedata', source, adv_table, PlayerIdentifier(source))
 	end
+	SyncStat(adv_table)
 end)
 
 RegisterServerEvent("renzu_hud:smokesync")
