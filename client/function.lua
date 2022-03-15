@@ -546,9 +546,9 @@ function Hud:NuiRpm()
 		while self.invehicle do
 			local sleep = 2500
 			if self.vehicle  ~= nil and self.vehicle  ~= 0 then
-				sleep = config.Rpm_sleep
+				sleep = tonumber(config.Rpm_sleep)
 				if self.rpm < 0.21 then
-				Wait(config.idle_rpm_speed_sleep)
+				Wait(tonumber(config.idle_rpm_speed_sleep))
 				end
 				if newrpm ~= self.rpm or newrpm == nil or newspeed == nil or newspeed ~= self.speed then
 					newrpm = self.rpm
@@ -556,21 +556,6 @@ function Hud:NuiRpm()
 						type = "SetVehData",
 						content = vtable
 					})
-					-- Wait(config.Rpm_sleep_2)
-					-- SendNUIMessage({
-					-- 	type = "SetVehData",
-					-- 	content = vtable
-					-- })
-					-- Wait(config.Rpm_sleep_2)
-					-- SendNUIMessage({
-					-- 	type = "SetVehData",
-					-- 	content = vtable
-					-- })
-					-- Wait(config.Rpm_sleep_2)
-					-- SendNUIMessage({
-					-- 	type = "SetVehData",
-					-- 	content = vtable
-					-- })
 				end
 			end
 			Wait(sleep)
