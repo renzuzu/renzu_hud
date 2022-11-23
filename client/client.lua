@@ -23,8 +23,16 @@ CreateThread(function()
 		local Proxy = module("vrp","lib/Proxy")
 		vRP = Proxy.getInterface("vRP")
 	elseif config.framework == 'QBCORE' then
-		QBCore = exports['qb-core']:GetSharedObject()
-		while QBCore == nil do Wait(0) end
+		while not QBCore do
+		    pcall(function() QBCore =  exports['qb-core']:GetCoreObject() end)
+		    if not QBCore then
+			pcall(function() QBCore =  exports['qb-core']:GetSharedObject() end)
+		    end
+		    if not QBCore then
+			TriggerEvent('QBCore:GetObject', function(obj) QBCore = obj end)
+		    end
+		    Citizen.Wait(1)
+		end
 		QBCore.Functions.GetPlayerData(function(PlayerData)
 			xPlayer = PlayerData
             if PlayerData ~= nil and PlayerData.job ~= nil then
