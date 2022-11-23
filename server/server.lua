@@ -103,7 +103,16 @@ Citizen.CreateThread(function()
 		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 	end
 	if config.framework == 'QBCORE' then
-		QBCore = exports['qb-core']:GetSharedObject()
+		while not QBCore do
+		    pcall(function() QBCore =  exports['qb-core']:GetCoreObject() end)
+		    if not QBCore then
+			pcall(function() QBCore =  exports['qb-core']:GetSharedObject() end)
+		    end
+		    if not QBCore then
+			TriggerEvent('QBCore:GetObject', function(obj) QBCore = obj end)
+		    end
+		    Citizen.Wait(1)
+		end
 	end
 	results = SQLQuery(config.Mysql,'fetchAll',"SELECT stats,plate,owner FROM vehicle_status", {})
 	if #results > 0 then
