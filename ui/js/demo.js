@@ -389,7 +389,7 @@ function setRpm(percent) {
     if (setting['carhud'] && setting['carhud']['refreshrate'] > 170) {
         $('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 35, delay: 23}).velocity({ 'stroke-dashoffset': to }, {duration: 24, delay: 24}).velocity({ 'stroke-dashoffset': to }, {duration: 24, delay: 23})
     } else if (setting['carhud'] && setting['carhud']['refreshrate'] > 70) {
-        $('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15}).velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15}).velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15})
+        $('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 1, delay: 0}).velocity({ 'stroke-dashoffset': to }, {duration: 1, delay: 0}).velocity({ 'stroke-dashoffset': to }, {duration: 1, delay: 0})
     } else if (setting['carhud'] && setting['carhud']['refreshrate'] <= 20) {
         //$('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 0, delay: 0})
         e.style.strokeDashoffset = to;
@@ -479,7 +479,7 @@ function setSpeed(s) {
     if (setting['carhud'] && setting['carhud']['refreshrate'] > 170) {
         $('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 35, delay: 25}).velocity({ 'stroke-dashoffset': to }, {duration: 24, delay: 23}).velocity({ 'stroke-dashoffset': to }, {duration: 24, delay: 23})
     } else if (setting['carhud'] && setting['carhud']['refreshrate'] > 70) {
-        $('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15}).velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15}).velocity({ 'stroke-dashoffset': to }, {duration: 5, delay: 15})
+        $('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 1, delay: 0}).velocity({ 'stroke-dashoffset': to }, {duration: 1, delay: 0}).velocity({ 'stroke-dashoffset': to }, {duration: 1, delay: 0})
     } else if (setting['carhud'] && setting['carhud']['refreshrate'] <= 20) {
         //$('.speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 0, delay: 0})
         e.style.strokeDashoffset = to;
