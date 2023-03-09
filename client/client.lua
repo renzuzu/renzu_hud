@@ -168,7 +168,6 @@ AddEventHandler('esx:playerLoaded', function(xPlayer)
 	LocalPlayer.state:set('playerloaded', true,true)
 	LocalPlayer.state.playerloaded = true
 	Wait(2000)
-	print("ESX")
 	Hud.lastped = PlayerPedId()
 	DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 	Wait(5000)
@@ -182,7 +181,6 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
 	LocalPlayer.state:set('playerloaded', true,true)
 	LocalPlayer.state.playerloaded = true
 	Wait(2000)
-	print("QB")
 	Hud.lastped = PlayerPedId()
 	DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 	Wait(5000)
@@ -196,7 +194,6 @@ AddEventHandler('playerSpawned', function(spawn)
 		Wait(1000)
 		LocalPlayer.state:set('playerloaded', true,true)
 		LocalPlayer.state.playerloaded = true
-		print("PLAYERLOADED")
 		Wait(2000)
 		Hud.lastped = PlayerPedId()
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
@@ -210,18 +207,15 @@ CreateThread(function()
 	Wait(1000)
 	if Hud.charslot == nil and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= 0.0 and DecorGetFloat(PlayerPedId(),"CHARSLOT") ~= nil then
 		Hud.charslot = Hud:round(DecorGetFloat(PlayerPedId(),"CHARSLOT"))
-		----print("CHARSLOT")
 	else
 		Citizen.Wait(4000)
 	end
 	if DecorExistOn(PlayerPedId(), "PLAYERLOADED") and Hud.charslot ~= nil then
-		print("PLAYERLOADED")
 		LocalPlayer.state.playerloaded = true
 		SendNUIMessage({content = true, type = 'playerloaded'})
 	end
 	Wait(500)
 	if DecorExistOn(PlayerPedId(), "PLAYERLOADED") and config.loadedasmp and Hud:isplayer() then
-		print("ISMP")
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 		LocalPlayer.state.playerloaded = true
 		SendNUIMessage({content = true, type = 'pedface'})
@@ -229,7 +223,6 @@ CreateThread(function()
 	elseif Hud:isplayer() and config.forceplayerload then
 		Wait(10000)
 		LocalPlayer.state.playerloaded = true
-		print("isplayer f")
 		Wait(2000)
 		Hud.lastped = PlayerPedId()
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
@@ -237,7 +230,6 @@ CreateThread(function()
 		SendNUIMessage({content = true, type = 'pedface'})	
 		SendNUIMessage({content = true, type = 'playerloaded'})
 	elseif DecorExistOn(PlayerPedId(), "PLAYERLOADED") then
-		print("already loaded")
 		DecorSetBool(PlayerPedId(), "PLAYERLOADED", true)
 		LocalPlayer.state.playerloaded = true
 		SendNUIMessage({content = true, type = 'pedface'})
@@ -291,7 +283,6 @@ CreateThread(function()
 		local vitals = {}
 		AddEventHandler("esx_status:onTick", function(vitals) -- use renzu_status
 			vitals = vitals
-			print(vitals,'gago')
 			if vitals[1] ~= nil then -- esx status (if index int is not nil, its a normal esx_status) else its renzu_status
 				if Hud.esx_status == nil then
 					for k,v in ipairs(config.statusordering) do -- replace int to string name
@@ -323,11 +314,9 @@ CreateThread(function()
 
 			if config.registerautostatus and not registered then
 				DecorRegister("STATUSR", 1)
-				print("REGISTER START")
 				for k,v in pairs(config.statusordering) do -- register all status
 					if v.enable and v.custom and register[v.status] == nil and not DecorGetBool(PlayerPedId(), "STATUSR") then
 						local remove_value = v.statusremove
-						print("Auto Status Register: ",v.status,v.startvalue,v.statusremove)
 						TriggerEvent('esx_status:registerStatus', v.status, tonumber(v.startvalue), '#CFAD0F', function(status)
 							return true
 							end, function(status)
@@ -343,7 +332,6 @@ CreateThread(function()
 			local hunger = 0
 			local thirst = 0
 			local stress = 0
-			print("QBFUCK")
 			CreateThread(function()
 				while true do
 					--TriggerEvent("QBCore:GetObject", function(obj) QBCore = obj end)
@@ -361,7 +349,6 @@ CreateThread(function()
 									statusqb[k] = v
 								end
 							end
-							--print("BUILD IN",statusqb,statusqb.hunger,statusqb.thirst,statusqb.stress)
 							Hud:UpdateStatus(false,statusqb)
 						end
 					end)
@@ -491,7 +478,6 @@ CreateThread(function()
 	--SendNUIMessage({type = "uiconfig", content = uiconf})
 	SendNUIMessage({type = "setStatusType",content = status_type})
 	Wait(500)
-	print(placing,ordering)
 	SendNUIMessage({type = "SetStatusOrder",content = {['data'] = ordering, ['float'] = placing}})
 	Wait(1000)
 	Hud.reorder = true
@@ -501,7 +487,6 @@ CreateThread(function()
 	if config.enable_carui then
 		SendNUIMessage({type = 'setCarui', content = config.carui})
 	end
-	print("Player Loaded SUCCESS")
 	Wait(500)
 	SendNUIMessage({type = "setCompass",content = config.enablecompass})
 	Wait(500)
@@ -534,17 +519,13 @@ CreateThread(function()
 		Hud:EnterVehicleEvent(true,Hud.vehicle)
 	end
 	--WHEN RESTARTED IN CAR
-	print("WAW")
 	local l = 0
-	--print("starting thread")
 	Hud.notloaded = false
 	while true do
 		Hud.ped = PlayerPedId()
 		Hud.vehicle = GetVehiclePedIsIn(Hud.ped)
-		print("LOOP")
 		if config.enablestatus or not config.enablestatus and config.statusui == 'normal' then
 			Hud:updateplayer()
-			print("UPDATE")
 		end
 		if Hud.invehicle and Hud.vehicle == 0 then
 			Hud:EnterVehicleEvent(false)
@@ -609,14 +590,11 @@ AddEventHandler('gameEventTriggered', function (name, args)
 		end
 	end
 	if name == 'CEventNetworkPlayerEnteredVehicle' then
-		print("ENTER VEHICLE",args[1],Hud.pid,args[2])
-		print(args[2], GetVehiclePedIsIn(PlayerPedId()))
 		if args[1] == PlayerId() and config.enable_carui or args[2] == GetVehiclePedIsIn(PlayerPedId()) and config.enable_carui then
 			Hud.vehicle = args[2]
 			Hud:EnterVehicleEvent(true,args[2])
 		end
 	end
-	--print(name)
 end)
 
 -- SEATBELT
@@ -957,7 +935,6 @@ RegisterCommand(config.commands['carheadlight'], function(source, args, raw)
 	elseif off == 1 then
 		light = 0
 	end
-	print(off,low,high)
 	newlight = light
 	SendNUIMessage({
 	type = "setHeadlights",

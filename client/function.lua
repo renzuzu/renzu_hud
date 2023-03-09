@@ -43,7 +43,6 @@ function Hud:isplayer()
 	local mpm = GetHashKey("mp_m_freemode_01")
 	local mpf = GetHashKey("mp_f_freemode_01")
 	local model = GetEntityModel(PlayerPedId())
-	--print(model,"MODEL")
 	if model == mpm then
 		return true
 	elseif model == mpf then
@@ -110,7 +109,6 @@ end
 function Hud:UpdateStatus(export,vitals)
 	if not export and vitals == nil then return end
 	self.vitals = vitals
-	print('gago 1')
 	if export and config.framework == 'QBCORE' and self.esx_status ~= nil or export and config.framework ~= 'QBCORE' and self.esx_status ~= nil then
 		if not self.esx_status then
 			self.vitals = exports['renzu_status']:GetStatus(self.statuses)
@@ -143,7 +141,6 @@ function Hud:UpdateStatus(export,vitals)
 					SetPlayerUnderwaterTimeRemaining(self.pid,0)
 					SetPedMaxTimeUnderwater(self.ped,0)
 				end
-				--print(v1.value)
 			end
 			if v1.custom and self.statusloop <= 1  then
 				if self.vitals and self.vitals[v1.status] ~= nil and self.vitals[v1.status] then
@@ -225,9 +222,7 @@ function Hud:EnterVehicleEvent(state,vehicle)
 				SetNuiFocus(false,false)
 				Wait(100)
 				SetVehicleEngineOn(vehicle,true,false,true)
-				--print("starting engine")
 				while not GetIsVehicleEngineRunning do
-					--print("starting")
 					SetVehicleEngineOn(vehicle,true,false,true)
 					Wait(0)
 				end
@@ -269,7 +264,6 @@ function Hud:EnterVehicleEvent(state,vehicle)
 			content = light
 		})
 	else
-		--print("outveh loop")
 		self.globaltopspeed = nil
 		self.entering = false
 		self.start = false
@@ -278,7 +272,6 @@ function Hud:EnterVehicleEvent(state,vehicle)
 		self.speed = 0
 		self.rpm = 0
 		marcha = 0
-		--print(self.lastplate,"LAST PLATE")
 		if self.veh_stats and self.veh_stats[self.lastplate] ~= nil then
 			self.veh_stats[self.lastplate].entity = nil
 			self.currentengine[self.lastplate] = nil
@@ -481,11 +474,9 @@ function Hud:NuiCarhpandGas()
 			self.plate = GetVehicleNumberPlateText(self.vehicle )
 			if self.vehicle  ~= nil and self.vehicle  ~= 0 then
 				self.hp = GetVehicleEngineHealth(self.vehicle )
-				--print(self.hp)
 				self.gasolina = GetVehicleFuelLevel(self.vehicle )
 				wait = config.NuiCarhpandGas_sleep
 				if self.gasolina ~= newgas or newgas == nil then
-					--print("car fuel")
 					SendNUIMessage({
 						type = "setFuelLevel",
 						content = self.gasolina
@@ -493,7 +484,6 @@ function Hud:NuiCarhpandGas()
 					newgas = self.gasolina
 				end
 				if newcarhealth ~= self.hp or newcarhealth == nil then
-					--print("carhp")
 					SendNUIMessage({
 						hud = "setCarhp",
 						content = self.hp
@@ -531,7 +521,6 @@ function Hud:NuiCarhpandGas()
 				local hood = 0
 				local trunk = 0
 				if self.vehicle  ~= nil and self.vehicle  ~= 0 then
-					----print(GetVehicleDoorStatus(self.vehicle ))
 					for i = 0, 6 do
 						Wait(100)
 						if GetVehicleDoorAngleRatio(self.vehicle ,i) ~= 0.0 then
@@ -685,7 +674,6 @@ end
 function Hud:NuiShowMap(force)
 	CreateThread(function()
 		Wait(2000)
-		print(config.carui,"MAP")
 		if config.centercarhud == 'map' and config.carui == 'modern' or force then
 			Wait(1000)
 			while not self.start and config.push_start and not force do
@@ -697,9 +685,7 @@ function Hud:NuiShowMap(force)
 			self.ismapopen =  true
 			Wait(250)
 			while self.invehicle do
-				--print("map ui")
 				local sleep = 2000
-				--print(GetNuiCursorPosition())
 				if config.carui ~= 'modern' and not force then
 					break
 				end
@@ -717,7 +703,6 @@ function Hud:NuiShowMap(force)
 							x = xz,
 							y = yz
 						}
-						--print("send coords map ui")
 						SendNUIMessage({map = true, type = "updatemapa",content = table})
 						--SendNUIMessage({map = true, type = 'bukas'})
 					end
@@ -843,7 +828,6 @@ end
 local firstload = 0
 function Hud:updateplayer(instant)
 	self.ped = PlayerPedId()
-	print('updateplayer')
 	health = (GetEntityHealth(self.ped)-100) * 0.99
 	armor = GetPedArmour(self.ped) * 0.99
 	self.pid = PlayerId()
@@ -1060,7 +1044,6 @@ function Hud:entervehicle()
 		local p = PlayerPedId()
 		local mycoords = GetEntityCoords(p)
 		if not IsPedInAnyVehicle(p) and IsAnyVehicleNearPoint(mycoords.x,mycoords.y,mycoords.z,10.0) then
-			--print("ENTERING")
 			v = GetVehiclePedIsEntering(p)
 			local c = 0
 			while not GetVehiclePedIsTryingToEnter(p) or GetVehiclePedIsTryingToEnter(p) == 0 do
@@ -1069,7 +1052,6 @@ function Hud:entervehicle()
 					break
 				end
 				c = c + 10
-				--print(GetVehiclePedIsTryingToEnter(p))
 				Wait(0)
 			end
 			local count = 0
@@ -1077,9 +1059,7 @@ function Hud:entervehicle()
 				self.entering = true
 				Wait(1)
 				count = count + 1
-				--print(count)
 				SetVehicleEngineOn(self:getveh(),false,true,true)
-				--print("waiting to get in")
 				if GetVehiclePedIsTryingToEnter(p) ~= 0 then
 					v = GetVehiclePedIsTryingToEnter(p)
 				end
@@ -1087,12 +1067,10 @@ function Hud:entervehicle()
 			if config.enable_carui_perclass and config.carui_perclass[GetVehicleClass(v)] ~= 'modern' or not config.enable_carui_perclass and config.carui ~= 'modern' then self.entering = false SetVehicleEngineOn(self:getveh(),false,true,false) return end
 			if GetPedInVehicleSeat(v, -1) == p and not GetIsVehicleEngineRunning(v) and config.enable_carui_perclass and config.carui_perclass[GetVehicleClass(v)]  == 'modern' or GetPedInVehicleSeat(v, -1) == p and not GetIsVehicleEngineRunning(v) and not config.enable_carui_perclass and config.carui == 'modern' then
 				self.entering = true
-				--print("Disable auto self.start")
 				SetVehicleEngineOn(v,false,true,true)
 				while not self.start and IsPedInAnyVehicle(p) do
 					if not self.start and IsVehicleEngineStarting(v) then
 						SetVehicleEngineOn(v,false,true,true)
-						--print("not started yet")
 					end
 					Wait(0)
 				end
@@ -1298,7 +1276,6 @@ function Hud:setStatusEffect()
 		for k,v in pairs(config.status_animation) do
 			Wait(0)
 			if IsEntityPlayingAnim(self.ped, v.dict, v.name, 3) then
-				--print("LOADED")
 				TriggerEvent('esx_status:'..v.mode..'', v.status, v.val)
 				Citizen.Wait(1000)
 			end
@@ -1472,17 +1449,13 @@ function Hud:WeaponStatus()
 						break
 					end
 					while IsPedShooting(self.ped) or IsPlayerFreeAiming(self.pid) do
-						--print("firing")
 						sleep = 100
-						--print("self.shooting")
 						self.shooting = true
 						if config.enablestatus and config.killing_affect_status then
 							val, ent = GetEntityPlayerIsFreeAimingAt(self.pid)
-							----print("self.shooting")
 							if lastent ~= nil and lastent ~= 0 then
 								if not killed[lastent] and IsEntityDead(lastent) and GetPedSourceOfDeath(lastent) == self.ped then
 									killed[lastent] = true
-									--print("LAST ENTITY IS DEAD "..lastent.."")
 									lastent = nil
 									TriggerEvent('esx_status:'..config.killing_status_mode..'', config.killing_affected_status, config.killing_status_val)
 									Citizen.Wait(100)
@@ -1495,10 +1468,8 @@ function Hud:WeaponStatus()
 						if config.enablestatus and count > config.firing_bullets then
 							count = 0
 							TriggerEvent('esx_status:'..config.firing_status_mode..'', config.firing_affected_status, config.firing_statusaddval)
-							----print("STATUS ADDED")
 						end
 						count = count + 1
-						----print(count)
 						lastent = ent
 						self.shooting = true
 						self:WeaponLoop()
@@ -1512,7 +1483,6 @@ function Hud:WeaponStatus()
 						Wait(sleep)
 					end
 					self:WeaponLoop()
-					----print("aiming")
 					Citizen.Wait(sleep)
 				end
 				if self.weaponui then
@@ -1671,9 +1641,7 @@ function Hud:CarStatus()
 	for i = 0, numwheel - 1 do
 		tirehealth = tirehealth + self.veh_stats[self.plate][tostring(i)].tirehealth
 	end
-	--print(tirehealth)
 	local total_tirehealth = tirehealth / (config.tirebrandnewhealth * numwheel) * 100
-	--print(total_tirehealth)
 	local trannytype = self.veh_stats[self.plate].manual
 	if trannytype then
 		trannytype = 'Manual'
@@ -1753,7 +1721,6 @@ function Hud:DefineCarUI(ver)
 end
 
 RegisterNUICallback('openmap', function(data, cb)
-	print("open map")
 	Hud:NuiShowMap(true)
 	cb(true)
 end)
