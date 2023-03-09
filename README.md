@@ -1,5 +1,5 @@
 # renzu_hud
-- Fivem HUD - UI Framework include Street HUD, Status Hud, Speedometer Hud, Weapon Hud, Body Hud and many more.
+- Fivem HUD - UI Framework include Street HUD, Status Hud, Speedometer Hud, Weapon Hud and many more.
 - Design to work without framework or using popular choice Qbcore and ESX framework.
 # Features
 - Advanced Player Status System
@@ -8,40 +8,13 @@
 - Multi CarHUD Version (Simple, Minimal, Modernized)
 - Weapon HUD
 - Street HUD
-- Advanced Fuel System (required renzu_fuel to disable your current fuel management)
-- Engine Overheat System
-- Engine Swap System (Performance and sound)
 - Car Status
-- Car Control
-- Clothing System
-- Vehicle Keyless System
-- Body Status System
-- WheelStancer
-- AirSuspension
-- Neon Color Control
-- Neon Color Multiple Effects
 - Seatbelt System
-- Drive Mode - Sports or Eco or Normal, Drift Mode
 - Built in Car GPS
-- Mileage System
-- Nitro System
-- Advanced Tire System with items
-- Advanced Turbo System with items
-- Water and Engine Oil System (WIP)
-- Manual Transmission
 - Waypoint Large Marker
-- Distance to Waypoint Calculation to UI
-- Clock
-- Gear
 - RPM Text and Radial Bar
 - Speedometer Text and Radialbar
-- Fuel tank meter
-- Vehicle Health Meter
 
--much more not included yet..
-
-#Maximum Possible Optimisation
-Client Side Lua and Javascript Side
 # Main UI preview
 - Settings
 ```
@@ -65,9 +38,4 @@ Client Side Lua and Javascript Side
 - EDIT conf/main.lua config.framework = 'ESX' (Select ESX, STANDALONE, QBCORE)
 
 # TODOS
-- Settings UI ✔️
-- Fix Css
-- Translation
-- Other Framework integration
-- More Optimisation
-- Bug Fixing if any
+- v2

@@ -110,12 +110,12 @@ end
 function Hud:UpdateStatus(export,vitals)
 	if not export and vitals == nil then return end
 	self.vitals = vitals
-	if self.notloaded then return end
-	if export and not config.QbcoreStatusDefault and config.framework == 'QBCORE' and self.esx_status ~= nil or export and config.framework ~= 'QBCORE' and self.esx_status ~= nil then
+	print('gago 1')
+	if export and config.framework == 'QBCORE' and self.esx_status ~= nil or export and config.framework ~= 'QBCORE' and self.esx_status ~= nil then
 		if not self.esx_status then
 			self.vitals = exports['renzu_status']:GetStatus(self.statuses)
 		end
-	elseif export and config.framework == 'QBCORE' and config.QbcoreStatusDefault then
+	elseif export and config.framework == 'QBCORE' then
 		QBCore.Functions.GetPlayerData(function(PlayerData)
 			if PlayerData ~= nil and PlayerData.metadata ~= nil then
 				hunger, thirst, stress = PlayerData.metadata["hunger"] * 10000, PlayerData.metadata["thirst"] * 10000, PlayerData.metadata["stress"] * 10000
@@ -250,7 +250,7 @@ function Hud:EnterVehicleEvent(state,vehicle)
 			end
 			SendNUIMessage({
 				type = "setDifferential",
-				content = GetVehStats(vehicle, "CHandlingData","fDriveBiasFront")
+				content = GetVehicleHandlingFloat(vehicle, "CHandlingData","fDriveBiasFront")
 			})
 		end
 		self.invehicle = true
@@ -342,84 +342,7 @@ function Hud:DefaultHandling()
 end
 
 function Hud:SavevehicleHandling()
-	while self.vehicle  == nil or self.vehicle  == 0 do
-		Wait(100)
-	end
-	self.plate = self:GetPlate(self.vehicle )
-	if not DecorExistOn(self.vehicle , "INERTIA") then
-		self.finaldrive = GetVehStats(self.vehicle , "CHandlingData","fDriveInertia")
-		DecorSetFloat(self.vehicle , "INERTIA", self.finaldrive)
-	else
-		SetVehicleHandlingField(self.vehicle , "CHandlingData", "fDriveInertia", DecorGetFloat(self.vehicle ,"INERTIA"))
-		self.finaldrive = DecorGetFloat(self.vehicle ,"INERTIA")
-	end
 
-	if not DecorExistOn(self.vehicle , "DRIVEFORCE") then
-		self.flywheel = GetVehStats(self.vehicle , "CHandlingData","fInitialDriveForce")
-		DecorSetFloat(self.vehicle , "DRIVEFORCE", self.flywheel)
-	else
-		SetVehicleHandlingField(self.vehicle , "CHandlingData", "fInitialDriveForce", DecorGetFloat(self.vehicle ,"DRIVEFORCE"))
-		self.flywheel = DecorGetFloat(self.vehicle ,"DRIVEFORCE")
-	end
-	if not DecorExistOn(self.vehicle , "TOPSPEED") then
-		self.maxspeed = GetVehStats(self.vehicle , "CHandlingData","fInitialDriveMaxFlatVel")
-		DecorSetFloat(self.vehicle , "TOPSPEED", self.maxspeed)
-		--print("Vehicle Data Saved")
-	else
-		SetVehicleHandlingField(self.vehicle , "CHandlingData", "fInitialDriveMaxFlatVel", DecorGetFloat(self.vehicle ,"TOPSPEED"))
-		self.maxspeed = DecorGetFloat(self.vehicle ,"TOPSPEED")
-	end
-
-	if not DecorExistOn(self.vehicle , "MAXGEAR") then
-		self.maxgear = GetVehicleHandlingInt(self.vehicle , "CHandlingData","nInitialDriveGears")
-		DecorSetInt(self.vehicle , "MAXGEAR", self.maxgear)
-	else
-		SetVehicleHandlingField(self.vehicle , "CHandlingData", "nInitialDriveGears", DecorGetInt(self.vehicle ,"MAXGEAR"))
-		self.maxgear = DecorGetInt(self.vehicle ,"MAXGEAR")
-		--print(self.maxgear)
-	end
-
-	if not DecorExistOn(self.vehicle , "TRACTION") then
-		self.traction = GetVehStats(self.vehicle , "CHandlingData","fTractionCurveMin")
-		DecorSetFloat(self.vehicle , "TRACTION", self.traction)
-	else
-		SetVehicleHandlingField(self.vehicle , "CHandlingData", "fTractionCurveMin", DecorGetFloat(self.vehicle ,"TRACTION"))
-		self.traction = DecorGetFloat(self.vehicle ,"TRACTION")
-	end
-	
-	if not DecorExistOn(self.vehicle , "TRACTION2") then
-		self.traction2 = GetVehStats(self.vehicle , "CHandlingData","fTractionCurveLateral")
-		DecorSetFloat(self.vehicle , "TRACTION2", self.traction2)
-	else
-		SetVehicleHandlingField(self.vehicle , "CHandlingData", "fTractionCurveLateral", DecorGetFloat(self.vehicle ,"TRACTION2"))
-		self.traction2 = DecorGetFloat(self.vehicle ,"TRACTION2")
-	end
-
-	if not DecorExistOn(self.vehicle , "TRACTION3") then
-		traction3 = GetVehStats(self.vehicle , "CHandlingData","fLowSpeedTractionLossMult")
-		DecorSetFloat(self.vehicle , "TRACTION3", traction3)
-	else
-		SetVehicleHandlingField(self.vehicle , "CHandlingData", "fLowSpeedTractionLossMult", DecorGetFloat(self.vehicle ,"TRACTION3"))
-		traction3 = DecorGetFloat(self.vehicle ,"TRACTION3")
-	end
-
-	if not DecorExistOn(self.vehicle , "TRACTION4") then
-		traction4 = GetVehStats(self.vehicle , "CHandlingData","fTractionLossMult")
-		DecorSetFloat(self.vehicle , "TRACTION4", traction4)
-	else
-		SetVehicleHandlingField(self.vehicle , "CHandlingData", "fTractionLossMult", DecorGetFloat(self.vehicle ,"TRACTION4"))
-		traction4 = DecorGetFloat(self.vehicle ,"TRACTION4")
-	end
-
-	if not DecorExistOn(self.vehicle , "TRACTION5") then
-		traction5 = GetVehStats(self.vehicle , "CHandlingData","fTractionCurveMax")
-		DecorSetFloat(self.vehicle , "TRACTION5", traction5)
-	else
-		SetVehicleHandlingField(self.vehicle , "CHandlingData", "fTractionCurveMax", DecorGetFloat(self.vehicle ,"TRACTION5"))
-		traction5 = DecorGetFloat(self.vehicle ,"TRACTION5")
-	end
-
-	self.handlings[self.plate] = {finaldrive = tonumber(self.finaldrive), flywheel = tonumber(self.flywheel), maxspeed = tonumber(self.maxspeed), maxgear = tonumber(self.maxgear), traction = tonumber(self.traction), traction2 = tonumber(self.traction2), traction3 = tonumber(traction3), traction4 = tonumber(traction4), traction5 = tonumber(traction5)}
 end
 
 --ASYNC function Hud:CALL VEHICLE LOOPS
@@ -428,9 +351,8 @@ function Hud:inVehicleFunctions()
 		while not self.invehicle do
 			Wait(1) -- lets wait self.invehicle to = true
 		end
-		self:SavevehicleHandling()
-		self:get_veh_stats(self.vehicle ,self:GetPlate(self.vehicle ))
-		SetForceHdVehicle(self.vehicle , true)
+		--self:get_veh_stats(self.vehicle ,self:GetPlate(self.vehicle ))
+		--SetForceHdVehicle(self.vehicle , true)
 		self:RpmandSpeedLoop()
 		self:NuiRpm()
 		self:NuiCarhpandGas()
@@ -440,23 +362,10 @@ function Hud:inVehicleFunctions()
 		if config.WaypointMarkerLarge then
 			self:NuiDistancetoWaypoint()
 		end
-		self:NuiMileAge()
 		if not config.enable_carui_perclass then
 			self:NuiShowMap()
 		end
-		self:NuiEngineTemp()
-		self:fuelusagerun()
 		self:SendNuiSeatBelt()
-		self:NuiWheelSystem()
-		if not self.manual and self.manualstatus and DecorGetBool(self.vehicle , "MANUAL") then
-			--print("Starting self.manual")
-			self:startmanual()
-		end
-		self:SetVehicleOnline()
-		-- SendNUIMessage({
-		-- 	type = "inVehicle",
-		-- 	content = vtable
-		-- })
 		return
 	end)
 end
@@ -473,22 +382,7 @@ Creation(function()
 	end)
 end)
 
-RenzuCommand('test', function(source, args, raw)
-	bool = not bool
-	SetNuiFocus(bool,false)
-	SetNuiFocusKeepInput(bool)
-end)
-
 function Hud:SetVehicleOnline() -- for vehicle loop
-	while self.veh_stats[self.plate] == nil do
-		Wait(100)
-	end
-	self.plate = self:GetPlate(self.vehicle )
-	if self.veh_stats[self.plate] ~= nil then
-		self.veh_stats[self.plate].entity = VehToNet(self.vehicle )
-		TriggerServerEvent('renzu_hud:savedata', self.plate, self.veh_stats[tostring(self.plate)],true)
-		LocalPlayer.state:set( --[[keyName]] 'adv_stat', --[[value]] self.veh_stats, --[[replicate to server]] true)
-	end
 end
 
 function Hud:RpmandSpeedLoop()
@@ -606,10 +500,18 @@ function Hud:NuiCarhpandGas()
 					})
 					newcarhealth = self.hp
 				end
+				SendNUIMessage({
+					type = "setMileage",
+					content = Entity(self.vehicle).state?.mileage or 0
+				})
+				SendNUIMessage({
+					type = "setTemp",
+					content = GetVehicleEngineTemperature(self.vehicle )
+				})
 				if self.manual then
 					self.gear = self.savegear
 				else
-					self.gear = GetGear(self.vehicle )
+					self.gear = GetVehicleCurrentGear(self.vehicle )
 				end
 				if self.newgear ~= self.gear or self.newgear == nil then
 					self.newgear = self.gear
@@ -753,245 +655,11 @@ function Hud:GetVehicleStat(plate)
 end
 
 function Hud:get_veh_stats(v,p)
-	--if self.veh_stats[plate] ~= nil then return end
-	while not LocalPlayer.state.loaded do
-		Wait(10)
-	end
-	while self.veh_stats == nil do Wait(1) self.veh_stats = LocalPlayer.state.adv_stat and LocalPlayer.state.adv_stat or {} end
-	self.veh_stats = LocalPlayer.state.adv_stat or {}
-	--while self.veh_stats[self.plate] == nil do Wait(10) self.veh_ end
-	if v ~= nil and p ~= nil then
-		self.vehicle  = v
-		self.plate = p
-	end
-	local lets_save = false
-	if self.plate ~= nil and self.veh_stats[self.plate] == nil then
-		print("CREATING VEHSTATS")
-		lets_save = true
-		self.veh_stats[self.plate] = {}
-		self.veh_stats[self.plate].plate = self.plate
-		self.veh_stats[self.plate].mileage = 0
-		self.veh_stats[self.plate].oil = 100
-		self.veh_stats[self.plate].coolant = 100
-		self.veh_stats[self.plate].nitro = 0
-		local numwheel = GetVehicleNumberOfWheels(self.vehicle )
-		for i = 0, numwheel - 1 do
-			if self.veh_stats[self.plate][tostring(i)] == nil then
-				self.veh_stats[self.plate][tostring(i)] = {}
-			end
-			self.veh_stats[self.plate][tostring(i)].tirehealth = config.tirebrandnewhealth
-		end
-	end
-	if self.veh_stats[self.plate].coolant == nil then
-		self.veh_stats[self.plate].coolant = 100
-	end
-	if self.veh_stats[self.plate].oil == nil then
-		self.veh_stats[self.plate].oil = 100
-	end
-	if self.veh_stats[self.plate].nitro == nil then
-		self.veh_stats[self.plate].nitro = 0
-	end
-	if self.veh_stats[self.plate].turbo == nil then
-		self.veh_stats[self.plate].turbo = 'default'
-	end
-	if self.veh_stats[self.plate].manual == nil then
-		self.veh_stats[self.plate].manual = false
-	end
-	if self.veh_stats[self.plate].tires == nil then
-		self.veh_stats[self.plate].tires = 'default'
-	end
-	if self.veh_stats[self.plate].engine == nil then
-		self.veh_stats[self.plate].engine = 'default'
-	end
-	if self.veh_stats[self.plate].engine ~= nil and self.veh_stats[self.plate].engine ~= 'default' and self.currentengine[self.plate] ~= GetHashKey(tostring(self.veh_stats[self.plate].engine)) and self.invehicle then
-		self:SetEngineSpecs(self.vehicle , GetHashKey(tostring(self.veh_stats[self.plate].engine)))
-		print("new ENGINE",self.veh_stats[self.plate].engine)
-		Citizen.Wait(1500)
-	end
-	if self.veh_stats[self.plate].tires ~= nil and self.veh_stats[self.plate].tires ~= 'default' and self.invehicle then
-		self:TireFunction(self.veh_stats[self.plate].tires)
-	end
-	if self.veh_stats[self.plate].manual and not self.manual and self.invehicle then
-		TriggerEvent('renzu_hud:manual', self.veh_stats[self.plate].manual)
-	end
-	if self.veh_stats[self.plate].turbo ~= nil and self.veh_stats[self.plate].turbo ~= 'default' and not self.alreadyturbo and self.invehicle then
-		TriggerEvent('renzu_hud:hasturbo', self.veh_stats[self.plate].turbo)
-		self.alreadyturbo = true
-	end
-	local numwheel = GetVehicleNumberOfWheels(self.vehicle )
-	for i = 0, numwheel - 1 do
-		if self.veh_stats[self.plate][tostring(i)] == nil then
-			self.veh_stats[self.plate][tostring(i)] = {}
-			self.veh_stats[self.plate][tostring(i)].tirehealth = config.tirebrandnewhealth
-		end
-	end
-	if lets_save then
-		TriggerServerEvent('renzu_hud:savedata', saveplate, self.veh_stats[tostring(saveplate)])
-		LocalPlayer.state:set( --[[keyName]] 'adv_stat', --[[value]] self.veh_stats, --[[replicate to server]] true)
-		lets_save = false -- why?
-	end
+	
 end
 
 function Hud:NuiMileAge()
-	local lastve = nil
-	local savemile = false
-	local saveplate = nil
-	CreateThread(function()
-		local count = 0
-		while not LocalPlayer.state.playerloaded and count < 3 do
-			Wait(1000)
-			count = count + 1
-		end
-		if not LocalPlayer.state.playerloaded then
-			TriggerServerEvent("renzu_hud:getdata",self.charslot)
-		end
-		Wait(1000)
-		while self.veh_stats == nil and self.invehicle do
-			Wait(100)
-		end
-		CreateThread(function()
-			oldnitro = nil
-			while self.invehicle do
-				local wait = 10000
-				--local self.plate = tostring(GetVehicleNumberPlateText(self.vehicle ))
-				while self.veh_stats[self.plate] == nil and self.invehicle do
-					Wait(1000)
-				end
-				nitros = self.veh_stats[self.plate].nitro
-				if oldnitro == nil or oldnitro ~= nitros then
-					oldnitro = self.veh_stats[self.plate].nitro
-					SendNUIMessage({
-						type = "setNitro",
-						content = nitros
-					})
-				end
-				local mileage = self.veh_stats[self.plate].mileage
-				self.degrade = 1.0
-				while mileage >= config.mileagemax do
-					wait = 1
-					--print(mileage)
-					self.degrade = config.degrade_engine
-					while self.mode == 'SPORTS' or self.mode == 'ECO' do
-						wait = 1000
-						if not self.invehicle then
-							break
-						end
-						self.degrade = config.degrade_engine
-						Wait(wait)
-					end
-					SetVehicleBoost(self.vehicle , config.degrade_engine)
-					Wait(wait)
-				end
-				Wait(wait)
-			end
-		end)
-		--print("NUI DATA")
-		tirecache = {}
-		newmileage = nil
-		while self.invehicle do
-			Wait(config.mileage_update)
-			
-			
-			local driver = GetPedInVehicleSeat(self.vehicle , -1)
-			if self.vehicle  ~= nil and self.vehicle  ~= 0 and driver == self.ped then
-				-- local self.plate = tostring(GetVehicleNumberPlateText(self.vehicle ))
-				--self.plate = string.gsub(self.plate, '^%s*(.-)%s*$', '%1')
-				local newPos = GetEntityCoords(self.ped)
-				savemile = true
-				lastve = GetVehiclePedIsIn(self.ped, false)
-				if self.plate ~= nil then
-					saveplate = self.plate
-					if self.veh_stats[self.plate] == nil then
-						self:get_veh_stats()
-					end
-					--print(self.veh_stats[self.plate].coolant)
-					if self.plate ~= nil and self.veh_stats[self.plate].plate == self.plate then
-						if oldPos == nil then
-							oldPos = newPos
-						end
-						if oldPos2 == nil then
-							oldPos2 = newPos
-						end
-						if oldPos3 == nil then
-							oldPos3 = newPos
-						end
-						local dist = #(newPos-oldPos)
-						if dist > 10.0 then
-							self.veh_stats[self.plate].mileage = self.veh_stats[self.plate].mileage+(( dist / 1000 ) * config.mileage_speed) -- dist = meter / 1000 = kmh, this might be inaccurate
-							oldPos = newPos
-							if config.useturboitem and self.veh_stats[self.plate].turbo_health ~= nil then
-								self.veh_stats[self.plate].turbo_health = self.veh_stats[self.plate].turbo_health - (( dist / 1000 ) * config.mileage_speed)
-							end
-						end
-						if config.enabletiresystem then
-							local dist3 = #(newPos-oldPos3)
-							local ct = GetGameTimer()
-							if dist3 > config.driving_status_radius then
-								oldPos3 = newPos
-								local numwheel = GetVehicleNumberOfWheels(self.vehicle )
-								for i = 0, numwheel - 1 do
-									Wait(100)
-									if self.veh_stats[self.plate][tostring(i)] ~= nil and self.veh_stats[self.plate][tostring(i)].tirehealth > 0 then
-										local bonuswear = 0.0
-										if config.wearspeedmultiplier then
-											bonuswear = (self.speed / 20)
-										end
-										self.veh_stats[self.plate][tostring(i)].tirehealth = self.veh_stats[self.plate][tostring(i)].tirehealth - (config.tirewear + bonuswear)
-									end
-									if self.veh_stats[self.plate][tostring(i)] ~= nil and self.veh_stats[self.plate][tostring(i)].tirehealth <= 0 then
-										SetVehicleWheelHealth(self.vehicle , i, GetVehicleWheelHealth(self.vehicle ,i) - config.tirewear)
-										if config.reducetraction then
-											SetVehicleHandlingField(self.vehicle , "CHandlingData", "fTractionCurveMin", self:GetHandling(self:GetPlate(self.vehicle )).traction * config.curveloss)
-											SetVehicleHandlingField(self.vehicle , "CHandlingData", "fTractionCurveLateral", self:GetHandling(self:GetPlate(self.vehicle )).traction2 * config.acceleratetractionloss)
-										end
-									end
-									--print("reduct tires")
-									--self.Notify("Tire Wear: Wheel #"..i.." - "..self.veh_stats[self.plate][tostring(i)].tirehealth.."")
-									local wheeltable = {
-										['index'] = i,
-										['tirehealth'] = self.veh_stats[self.plate][tostring(i)].tirehealth
-									}
-									if tirecache[i] == nil or tirecache[i] < ct then
-										tirecache[i] = ct + 5000
-										SendNUIMessage({
-											type = "setWheelHealth",
-											content = wheeltable
-										})
-									end
-								end
-							end
-						end
-						if config.driving_affect_status then
-							local dist2 = #(newPos-oldPos2)
-							if dist2 > config.driving_status_radius then
-								oldPos2 = newPos
-								TriggerEvent('esx_status:'..config.driving_status_mode..'', config.driving_affected_status, config.driving_status_val)
-							end
-						end
-						if newmileage ~= nil and newmileage+0.5 < Round(self.veh_stats[self.plate].mileage) or newmileage == nil then
-							newmileage = self.veh_stats[self.plate].mileage
-							SendNUIMessage({
-								type = "setMileage",
-								content = self.veh_stats[self.plate].mileage
-							})
-						end
-					end
-				end
-			elseif savemile and lastve ~= nil and saveplate ~= nil then
-				savemile = false
-				TriggerServerEvent('renzu_hud:savedata', saveplate, self.veh_stats[tostring(saveplate)])
-				LocalPlayer.state:set( --[[keyName]] 'adv_stat', --[[value]] self.veh_stats, --[[replicate to server]] true)
-				Wait(1000)
-				lastve = nil
-				saveplate = nil
-			else
-				Wait(1000)
-			end
-		end
-		tirecache = nil
-		--TerminateThisThread()
-		return
-	end)
+
 end
 
 function Hud:NuiVehicleHandbrake()
@@ -1082,7 +750,6 @@ function Hud:getveh()
 			v = GetClosestVehicle(GetEntityCoords(PlayerPedId()), 5.000, 0, 70)
 			count = count - 1
 			Wait(400)
-			--print("fucker")
 		end
 	end
 	return tonumber(v)
@@ -1101,223 +768,13 @@ end
 local smokes = {}
 
 function Hud:StartSmoke(ent)
-	self:Notify('error','Engine',"Engine too Hot")
-    CreateThread(function()
-		local ent = ent
-		while GetVehicleEngineTemperature(ent) > config.overheatmin do
-			local Smoke = 0
-			local part1 = false
-			CreateThread(function()
-				self:LoadPTFX('core')
-				Smoke = self:Renzu_Hud(0xDDE23F30CC5A0F03, 'ent_amb_stoner_vent_smoke', ent, 0.05, 0, 0, 0, 0, 0, 28, 0.4, false, false, false, 0, 0, 0, 0)
-				RemoveNamedPtfxAsset("core")
-				part1 = true
-			end)
-			while not part1 do
-				Wait(1011)
-			end
-			Wait(400)
-			table.insert(smokes, {handle = Smoke})
-			self:RemoveParticles()
-			Wait(500)
-		end
-		self.refresh = false
-		Wait(5000)
-		return
-    end)
 end
 
 function Hud:RemoveParticles()
-	CreateThread(function()
-		for _,parts in pairs(smokes) do
-			--print("removing "..parts.handle.."")
-			if parts.handle ~= nil and parts.handle ~= 0 and self:isparticleexist(parts.handle) then
-				self:stopparticles(parts.handle, true)
-				smokes[_].handle = nil
-				smokes[_] = nil
-			else
-				smokes[_] = nil
-			end
-		end
-		smokes = {}
-		return
-	end)
-end
-
-function Hud:usefuckingshit(val)
-    return self:Renzu_Hud(0x6C38AF3693A69A91, val)
-end
-
-function Hud:isparticleexist(val)
-    return self:Renzu_Hud(0x74AFEF0D2E1E409B, val)
-end
-
-function Hud:stopparticles(val,bool)
-    return self:Renzu_Hud(0x8F75998877616996, val, 0)
-end
-
-function Hud:startfuckingbullshit(effect, ent, shit1, shit2, shit3, shit4, shit5, shit6, bone, size, fuck1, fuck2, fuck3)
-    return self:Renzu_Hud(0xDDE23F30CC5A0F03, effect, ent, shit1, shit2, shit3, shit4, shit5, shit6, bone, size, fuck1, fuck2, fuck3, 0, 0, 0, 0)
 end
 
 function Hud:NuiEngineTemp()
-	--NUI ENGINE TEMPERATURE STATUS
-	CreateThread(function()
-		while self.veh_stats == nil or self.veh_stats[self.plate] == nil do
-			Wait(100)
-		end
-		local newtemp = 0
-		if GetVehicleEngineTemperature(self.vehicle ) < config.overheatmin then
-			RemoveParticleFxFromEntity(self.vehicle )
-		end
-		--PREVENT PLAYER VEHICLE FOR STARTING UP A VERY HOT ENGINE
-		local toohot = false
-		CreateThread(function()
-			while GetVehicleEngineTemperature(self.vehicle ) > config.overheatmin and self.invehicle do
-				--print("still hot")
-				toohot = true
-				SetVehicleCurrentRpm(self.vehicle , 0.0)
-				SetVehicleEngineOn(self.vehicle ,false,true,true)
-				Wait(0)
-			end
-			-- IF ENGINE IS OKAY REPEAT BELOW LOOP IS BROKEN DUE TO toohot boolean
-			if toohot and GetVehicleEngineTemperature(self.vehicle ) < config.overheatmin then
-				self:NuiEngineTemp()
-				--TerminateThisThread()
-			end
-			return
-		end)
-		Wait(1000)
-		--self.triggered = false
-		local vehiclemodel = GetEntityModel(self.vehicle )
-		while self.invehicle and not toohot do
-			local sleep = 2000
-			
-			
-			newtemp = nil
-			if self.vehicle  ~= nil and self.vehicle  ~= 0 then
-				--print(self.veh_stats[self.plate].coolant)
-				sleep = 4000
-				local temp = GetVehicleEngineTemperature(self.vehicle )
-				local overheat = false
-				while self.rpm > config.dangerrpm and config.engineoverheat and not config.driftcars[vehiclemodel] do
-					--self.rpm = VehicleRpm(self.vehicle )
-					Wait(1000)
-					--print("Overheat")
-					SetVehicleEngineCanDegrade(self.vehicle , true)
-					SetVehicleEngineTemperature(self.vehicle , GetVehicleEngineTemperature(self.vehicle ) + config.addheat)
-					if newtemp ~= GetVehicleEngineTemperature(self.vehicle ) or newtemp == nil then
-						newtemp = GetVehicleEngineTemperature(self.vehicle )
-						SendNUIMessage({
-						type = "setTemp",
-						content = GetVehicleEngineTemperature(self.vehicle )
-						})
-						if self.plate ~= nil and GetVehicleEngineTemperature(self.vehicle ) >= config.overheatmin and self.veh_stats[self.plate].coolant ~= nil and self.veh_stats[self.plate].coolant <= 20 then
-							explosion = 0
-							explode = PlaySoundFromEntity(GetSoundId(), "Engine_fail", self.vehicle , "DLC_PILOT_ENGINE_FAILURE_SOUNDS", 0, 0)
-							SetVehicleEngineTemperature(self.vehicle , GetVehicleEngineTemperature(self.vehicle ) + config.overheatadd)
-							if not self.triggered then
-								self.triggered = true
-								TriggerServerEvent("renzu_hud:smokesync", VehToNet(self.vehicle ), GetEntityCoords(self.vehicle ,false))
-							end
-							self:Notify('error','Engine',"Engine Problem")
-							while explosion < 500 do
-								--print("explode")
-								SetVehicleCurrentRpm(self.vehicle , 0.0)
-								SetVehicleEngineOn(self.vehicle ,false,true,true)
-								explosion = explosion + 1
-								Wait(0)
-							end
-							--removeFCK()
-							Wait(500)
-							smokeonhood = false
-							if not overheat then
-								overheat = true
-								CreateThread(function()
-										Wait(5000)
-										if self.vehicle  == 0 then
-											self.vehicle  = GetVehiclePedIsIn(self.ped,true)
-										end
-										Wait(1000)
-										SetVehicleEngineOn(self.vehicle ,false,true,true)
-										if self.cansmoke and self.invehicle then
-											--self.StartSmoke(self.vehicle )
-										end
-									--end
-									Wait(1000)
-									smokeonhood = true
-									--TerminateThisThread()
-								end)
-							end
-							explosion = 0
-							Wait(3000)
-							if GetVehicleEngineTemperature(self.vehicle ) < config.overheatmin then
-								StopSound(explode)
-								ReleaseSoundId(explode)
-							end
-						elseif GetVehicleEngineTemperature(self.vehicle ) >= config.overheatmin and self.veh_stats[self.plate] ~= nil and (self.veh_stats[self.plate].coolant ~= nil and self.veh_stats[self.plate].coolant >= 20) then
-							self.veh_stats[self.plate].coolant = self.veh_stats[self.plate].coolant - config.reduce_coolant
-							SendNUIMessage({
-								type = "setCoolant",
-								content = self.veh_stats[self.plate].coolant
-							})
-						end
-					end
-					--print(temp)
-				end
-				--print(temp)
-				if newtemp ~= nil and newtemp + 2 < temp or newtemp ~= nil and newtemp > temp + 2 or newtemp == nil then
-					newtemp = temp
-					SendNUIMessage({
-						type = "setTemp",
-						content = temp
-					})
-				end
-			end
-			Wait(sleep)
-		end
-		Wait(2000)
-		while self.invehicle do
-			Wait(111)
-		end
-		Wait(1000)
-		overheatoutveh = false
-		--removeFCK()
-		Wait(1000)
-		CreateThread(function()
-			while GetVehicleEngineTemperature(GetVehiclePedIsIn(self.ped,true)) > config.overheatmin and not toohot do
-				overheatoutveh = true
-				while not smokeonhood do
-					Wait(111)
-				end
-				self.vehicle  = GetVehiclePedIsIn(self.ped,true)
-				--print("SMOKING")
-				local done = false
-				Wait(5000)
-				self:Notify('warning','Engine System',"Engine Temp: "..GetVehicleEngineTemperature(GetVehiclePedIsIn(self.ped,true)).."")
-				Wait(1000)
-			end
-			overheatoutveh = false
-			--TerminateThisThread()
-			return
-		end)
-		Wait(2000)
-		while overheatoutveh do
-			Wait(100)
-		end
-		local cleanup = false
-		--removeFCK()
-		if not cleanup then
-			--RemoveParticleFxFromEntity(self.vehicle )
-		end
-		self.refresh = true
-		--RemoveParticleFxInRange(GetWorldPositionOfEntityBone(GetVehiclePedIsIn(self.ped,true), 28),20.0)
-		--RemoveParticleFxFromEntity(getveh())
-		Wait(2000)
-		self.triggered = false
-		--TerminateThisThread()
-		return
-	end)
+
 end
 
 function Hud:Myinfo()
@@ -1385,7 +842,8 @@ end
 
 local firstload = 0
 function Hud:updateplayer(instant)
-	if self.ped == nil then return end
+	self.ped = PlayerPedId()
+	print('updateplayer')
 	health = (GetEntityHealth(self.ped)-100) * 0.99
 	armor = GetPedArmour(self.ped) * 0.99
 	self.pid = PlayerId()
@@ -1410,22 +868,22 @@ function Hud:updateplayer(instant)
 end
 
 function Hud:haveseatbelt()
-local vc = GetVehicleClass(self.vehicle )
-return (vc >= 0 and vc <= 7) or (vc >= 9 and vc <= 12) or (vc >= 17 and vc <= 20)
+	local vc = GetVehicleClass(self.vehicle )
+	return (vc >= 0 and vc <= 7) or (vc >= 9 and vc <= 12) or (vc >= 17 and vc <= 20)
 end	
 
 function Hud:looking(entity)
-local hr = GetEntityHeading(entity) + 90.0
-if hr < 0.0 then
-	hr = 360.0 + hr
-end
-hr = hr * 0.0174533
-return { x = math.cos(hr) * 2.0, y = math.sin(hr) * 2.0 }
+	local hr = GetEntityHeading(entity) + 90.0
+	if hr < 0.0 then
+		hr = 360.0 + hr
+	end
+	hr = hr * 0.0174533
+	return { x = math.cos(hr) * 2.0, y = math.sin(hr) * 2.0 }
 end
 
 function Hud:forwardvect(speed)
-self.speed = self.speed / 10
-return GetEntityForwardVector(self:getveh()) * self.speed
+	self.speed = self.speed / 10
+	return GetEntityForwardVector(self:getveh()) * self.speed
 end
 
 function Hud:DoblackOut()
@@ -1508,7 +966,7 @@ end
 function Hud:SendNuiSeatBelt()
 	Citizen.Wait(300)
 	if config.seatbelt_2 then
-		SetFlyThroughWindscreenParams(config.seatbeltminspeed, 12.2352, 0.0, 0.0)
+		SetFlyThroughWindscreenParams(35.0, 45.0, 17.0, 2000.0)
 		SetPedConfigFlag(PlayerPedId(), 32, true)
 	end
 	if self.vehicle  ~= nil and self.vehicle  ~= 0 and config.enableseatbeltfunc and not config.seatbelt_2 then
@@ -1686,10 +1144,7 @@ function Hud:drawTxt(text,font,x,y,scale,r,g,b,a)
 end
 
 function Hud:turbolevel(value, lvl)
-    if value > lvl then
-        return lvl
-    end
-    return value
+
 end
 
 function Hud:maxnum(b, rpm)
@@ -1700,7 +1155,6 @@ function Hud:maxnum(b, rpm)
         return 0.0
     end
     return self:turbolevel(b, self.turbo)
-
 end
 function Hud:maxforce(b, min)
     if b > 1.5 then
@@ -1721,689 +1175,35 @@ function Hud:Round(num,numDecimalPlaces)
 end
 
 function Hud:Fuel()
-	if IsVehicleEngineOn(self.vehicle ) and rpm ~= nil and rpm > 0 then
-		self.rpm = self.rpm
-		self.gear = GetGear(self.vehicle )
-		local engineload = (self.rpm * (self.gear / 10))
-		local formulagasusage = 1.0
-		if config.usecustomfuel and config.mileage_affect_gasusage then
-			currentmileage = self.veh_stats[self.plate].mileage
-			formulagasusage = 1 + (currentmileage/config.mileagemax)
-		end
-		--print(formulagasusage,"formula")
-		local boostgas = config.boost
-		if config.turbo_boost_usage and self.boost > config.boost_min_level_usage then
-			config.boost = self.boost * (engineload / (GetVehicleTurboPressure(self.vehicle ) * self.rpm))
-		end
-		local result = (config.fuelusage[self.Round(self.rpm,1)] * (config.classes[GetVehicleClass(self.vehicle )] or 1.0) / 15) * (formulagasusage)
-		local advformula = result + (result * engineload)
-		if self.mode == 'SPORTS' or config.turbo_boost_usage and self.boost > config.boost_min_level_usage then
-			advformula = advformula * (1 + config.boost)
-		end
-		if self.mode == 'ECO' then
-			advformula = advformula * config.eco
-		end
-		--print("FUEL USAGE: "..result..", ADV: "..advformula.." EngineLoad: "..engineload.."")
-		SetVehicleFuelLevel(self.vehicle ,GetVehicleFuelLevel(self.vehicle ) - advformula)
-		DecorSetFloat(self.vehicle ,config.fueldecor,GetVehicleFuelLevel(self.vehicle))
-		config.boost = boostgas
-	end
+
 end
 
 function Hud:fuelusagerun()
-	CreateThread(function()
-		if config.usecustomfuel then
-			if not self.regdecor and not DecorExistOn(vehicle,config.fueldecor) then
-				self.regdecor = true
-				DecorRegister(config.fueldecor,1)
-			end
-			while self.invehicle do
-				Wait(2000)
-				if GetPedInVehicleSeat(self.vehicle ,-1) == self.ped then
-					self:Fuel(self.vehicle )
-				end
-			end
-		end
-		return
-	end)
+
 end
 
 function Hud:turboboost(gear)
-	local engineload = 0.05
-	if gear == 1 then
-		engineload = 0.21
-	elseif gear == 2 then
-		engineload = 0.25
-	elseif gear == 3 then
-		engineload = 0.35
-	elseif gear == 4 then
-		engineload = 0.45
-	elseif gear == 5 then
-		engineload = 0.45
-	elseif gear == 6 then
-		engineload = 0.45
-	end
-	return engineload 
+
 end
 
 function Hud:Boost(hasturbo)
-	self.newgear = 0
-	self.rpm = VehicleRpm(self.vehicle )
-	self.gear = GetGear(self.vehicle )
-	self.boost = 1.0
-	local boost_pressure = 0.0
-	CreateThread(function()
-		while self.invehicle do
-			local sleep = 2000
-			
-			if self.vehicle  ~= 0 then
-				sleep = 10
-				self.rpm = VehicleRpm(self.vehicle )
-				self.gear = GetGear(self.vehicle )
-			end
-			Wait(sleep)
-		end
-		return
-	end)
-	if hasturbo and config.turbo_boost[self.veh_stats[self.plate].turbo] > config.boost then
-		self.turbo = config.turbo_boost[self.veh_stats[self.plate].turbo]
-		ToggleVehicleMod(self.vehicle , 18, true)
-	else
-		self.turbo = config.boost
-	end
-	local torque = 0
-	CreateThread(function()
-		--print("starting boost func")
-		local turbo_type = tostring(self.veh_stats[self.plate].turbo or 'default')
-		local lag = 0
-		while hasturbo and self.invehicle do
-			local sleep = 2000
-			--local ply = PlayerPedId()
-			local reset = true
-			
-			if self.vehicle  ~= 0 then
-				sleep = 50
-				self.boost = 1.0
-				self.newgear = self.gear
-				local vehicleSpeed = 0
-				self.rpm2 = self.rpm
-				local engineload = (self.rpm / (self.gear / 10)) / 100
-				if self.rpm > 1.15 then
-				elseif self.rpm > 0.1 then
-					self.rpm = (self.rpm * self.turbo)
-				elseif self.rpm < 0.0 then
-					self.rpm = 0.2
-				end
-				if self.rpm2 < 0.0 then
-					self.rpm2 = 0.2
-				end
-				--print("RPM",self.rpm,"LAG",lag)
-				if tonumber(self.rpm2) > 0.3 then
-					--local speed = VehicleSpeed(self.vehicle ) * 3.6
-					if sound and IsControlJustReleased(1, 32) then
-						StopSound(soundofnitro)
-						ReleaseSoundId(soundofnitro)
-						sound = false
-					end
-
-					local pressure = 0.5
-					if not IsControlPressed(0, 32) then
-						lag = 0
-					end
-					if IsControlPressed(1, 32) and self.plate ~= nil and self.veh_stats[self.plate] ~= nil then
-						if not sound then
-							soundofnitro = PlaySoundFromEntity(GetSoundId(), "Flare", self.vehicle , "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
-							sound = true
-						end
-						--print(engineload,"ENGINELOAD")
-						--SetVehicleHandlingField(self.vehicle , "CHandlingData", "fInitialDriveMaxFlatVel", oldtopspeed*3.500000)
-						local turbolag = 5 + config.turbo_boost[turbo_type]
-						self.maxspeed = self.maxspeed
-						if self.maxspeed > 200 then
-							self.maxspeed = 200
-						end
-						local lag = 0
-						while self.veh_stats[self.plate] ~= nil and IsControlPressed(1, 32) do
-							--while self.veh_stats[self.plate] ~= nil and lag < (config.lagamount[turbo_type] * config.turbo_boost[turbo_type]) and (engineload / ((self.maxspeed) / (config.lagamount[turbo_type] * lag))) < turboboost(self.gear) and IsControlPressed(1, 32) do
-							local localrpm = GetVehicleCurrentRpm(self.vehicle )
-							local load = (self.gear * localrpm) * ((self.flywheel + self.finaldrive))
-							engineload = tonumber((localrpm * (self.gear / turbolag)))
-							--ShowHelpNotification(tostring(engineload), true, 1, 5)
-							if tonumber(engineload) then
-								--engineload =  tonumber(maxnum(((self.rpm2 + 0.1) * config.turbo_boost[tostring(self.veh_stats[self.plate].turbo)])) * (1 + engineload))
-								lag = (lag + (10.08 * localrpm)) * (localrpm * load)
-								if lag > config.lagamount[turbo_type] then
-									lag = config.lagamount[turbo_type]
-								end
-								power_percent = lag / config.lagamount[turbo_type]
-								--print("RPM2",self.rpm,"PERCENT",power_percent)
-								if engineload > 0.0 and engineload < 10.0 and tonumber(engineload) then
-									pressure = ((tonumber(config.turbo_boost[turbo_type] * power_percent)) + engineload) * power_percent
-									if turbo_type == 'sports' then -- temporary to correct sports value
-										pressure = pressure * 1.4
-									end
-									SetVehicleTurboPressure(self.vehicle , pressure)
-									boost_pressure = GetVehicleTurboPressure(self.vehicle )
-									if boost_pressure > config.turbo_boost[turbo_type] then
-										boost_pressure = config.turbo_boost[turbo_type]
-									end
-								end
-							end
-							local boosttemp = 0.1 + (self.rpm2 / 2)
-							if boosttemp < 0.3 then
-								boosttemp = 0.3
-							end
-							--SetVehicleBoost(self.vehicle , boosttemp)
-							Wait(10)
-							--self.Notify('success',"PRESSURE",lag)
-							--self.drawTxt("BOOST lag:  "..lag.."",4,0.5,0.93,0.50,255,255,255,180)
-							--self.drawTxt("BOOST engineload:  "..boost_pressure.."",4,0.5,0.83,0.50,255,255,255,180)
-							if IsControlPressed(1, 32) and self.rpm > 0.4 and not RCR(1, 32) then
-								self.pressed = true
-								if self.boost < 1.0 then
-									self.boost = 1.0
-								end
-								if self.boost < 0.0 or self.boost > 45.0 then
-									self.boost = 1.0
-								end
-								--boost_pressure = GetVehicleTurboPressure(self.vehicle )
-								self.boost = (boost_pressure)
-								if config.turbogauge and self.turbo ~= nil and boost_pressure ~= nil and boost_pressure > 0 then
-									SendNUIMessage({
-										type = "setTurboBoost",
-										content = {
-											['speed'] = boost_pressure,
-											['max'] = self.turbo
-										}
-									})
-									Wait(1)
-								end
-								--self.Notify('success',"PRESSURE",lag)
-								--print(self.rpm2 > 0.65 , self.rpm2 < 0.95 , self.turbosound < 500 , self.gear ~= self.oldgear , power_percent <= 1.0)
-								if config.boost_sound and self.rpm2 > 0.65 and self.rpm2 < 0.95 and self.turbosound < 500 and self.gear == self.oldgear and power_percent < 1.0 then
-									self.turbosound = self.turbosound + 1
-									SetVehicleBoostActive(self.vehicle , 1, 0)
-									Wait(10)
-									SetVehicleBoostActive(self.vehicle , 0, 0)
-								else
-									self.turbosound = 0
-								end
-								self.oldgear = self.gear
-							end
-						end
-						--self.drawTxt("BOOST pressure:  "..pressure.."",4,0.5,0.79,0.50,255,255,255,180)
-						if config.boost_sound and self.rpm2 > 0.65 and self.rpm2 < 0.95 and self.turbosound < 500 and self.gear == self.oldgear and power_percent <= 1.0 then
-							self.turbosound = self.turbosound + 1
-							SetVehicleBoostActive(self.vehicle , true, false)
-							Wait(5)
-							SetVehicleBoostActive(self.vehicle , false, false)
-						else
-							self.turbosound = 0
-						end
-						self.oldgear = self.gear
-					else
-						if sound then
-							StopSound(soundofnitro)
-							ReleaseSoundId(soundofnitro)
-							sound = false
-						end
-						Wait(500) -- TURBO LAG
-					end
-					if reset and not IsControlPressed(1, 32) then
-						SetVehicleTurboPressure(self.vehicle , 0.0)
-					end
-					SetVehicleTurboPressure(self.vehicle , pressure)
-					boost_pressure = GetVehicleTurboPressure(self.vehicle )
-					if self.gear == 0 then
-						self.gear = 1
-					end
-					self.boost = (boost_pressure * 1)
-					--print(self.boost)
-					-- if IsControlPressed(1, 32) and self.rpm > 0.4 and not RCR(1, 32) then
-					-- 	self.pressed = true
-					-- 	if self.boost < 1.0 then
-					-- 		self.boost = 1.0
-					-- 	end
-					-- 	if self.boost < 0.0 or self.boost > 45.0 then
-					-- 		self.boost = 1.0
-					-- 	end
-					-- 	if config.turbogauge and turbo ~= nil and boost_pressure ~= nil and boost_pressure > 0 then
-					-- 		SendNUIMessage({
-					-- 			type = "setTurboBoost",
-					-- 			content = {
-					-- 				['speed'] = boost_pressure / 2.65,
-					-- 				['max'] = turbo
-					-- 			}
-					-- 		})
-					-- 		Wait(1)
-					-- 	end
-					-- else
-					-- 	Wait(100)
-					-- end
-					if GetVehicleThrottleOffset(self.vehicle ) <= 0.0 then
-						Wait(200)
-						self.pressed = false
-						local t = {
-							['speed'] = 0.0,
-							['max'] = self.turbo
-						}
-						SendNUIMessage({
-							type = "setTurboBoost",
-							content = t
-						})
-						Wait(10)
-					end
-					if self.degrade ~= 1.0 then -- config.turbo_boost[self.veh_stats[self.plate].turbo]
-						if self.plate ~= nil and self.veh_stats[self.plate] and config.turbo_boost[turbo_type] > config.boost then
-							boostlevel = config.turbo_boost[turbo_type]
-						else
-							boostlevel = config.boost
-						end
-						self.boost = self.boost * (self.degrade / boostlevel)
-					end
-					--ShowHelpNotification(self.boost, true, 1, 5)
-				else
-					self.rpm = VehicleRpm(self.vehicle )
-					Wait(100)
-				end
-			end
-			Wait(sleep)
-		end
-		return
-	end)
-	-- CreateThread(function()
-	-- 	local self.pressed = false
-	-- 	while self.invehicle do
-	-- 		if IsControlPressed(1, 32) and self.rpm > 0.4 and not RCR(1, 32) then
-	-- 			self.pressed = true
-	-- 			if self.boost < 1.0 then
-	-- 				self.boost = 1.0
-	-- 			end
-	-- 			if self.boost < 0.0 or self.boost > 45.0 then
-	-- 				self.boost = 1.0
-	-- 			end
-	-- 			if config.turbogauge then
-	-- 				SendNUIMessage({
-	-- 					type = "setTurboBoost",
-	-- 					content = {
-	-- 						['speed'] = boost_pressure / 2.65,
-	-- 						['max'] = turbo
-	-- 					}
-	-- 				})
-	-- 				Wait(1)
-	-- 			end
-	-- 		else
-	-- 			Wait(100)
-	-- 		end
-	-- 		if GetVehicleThrottleOffset(self.vehicle ) <= 0.0 then
-	-- 			Wait(200)
-	-- 			self.pressed = false
-	-- 			local t = {
-	-- 				['speed'] = 0.0,
-	-- 				['max'] = turbo
-	-- 			}
-	-- 			SendNUIMessage({
-	-- 				type = "setTurboBoost",
-	-- 				content = t
-	-- 			})
-	-- 			Wait(10)
-	-- 		end
-	-- 		Citizen.Wait(7)
-	-- 	end
-	-- end)
-
-	CreateThread(function()
-		self.pressed = false
-		local turbo_type = tostring(self.veh_stats[self.plate].turbo or 'default')
-		while self.invehicle do
-			local sleep = 100
-			if self.mode ~= 'SPORTS' and not hasturbo then
-				break
-			end
-			if IsControlPressed(1, 32) and self.rpm > 0.4 and not RCR(1, 32) then
-				sleep = 5
-				self.pressed = true
-				if self.boost < 1.0 then
-					self.boost = 1.0
-				end
-				if self.boost < 0.0 or self.boost > 45.0 then
-					self.boost = 1.0
-				end
-				if self.mode == 'SPORTS' and not hasturbo then
-					if self.mode ~= 'SPORTS' then
-						break
-					end
-					SetVehicleBoost(self.vehicle , 1.0 + config.boost)
-				else
-					SetVehicleBoost(self.vehicle , 1+self.boost * (config.turbo_boost[turbo_type] + self.maxgear - self.gear))
-				end
-			else
-				Wait(100)
-			end
-			Citizen.Wait(sleep)
-		end
-		SendNUIMessage({
-			type = "setShowTurboBoost",
-			content = false
-		})
-		self.alreadyturbo = false
-		self.globaltopspeed = nil
-		self.topspeedmodifier = 1.0
-		self.busy = true
-		Wait(100)
-		self.vehicle  = self:getveh()
-		if DoesEntityExist(self.vehicle ) and self:GetHandling(self:GetPlate(self.vehicle )).flywheel ~= 0.0 and self:GetHandling(self:GetPlate(self.vehicle )).finaldrive ~= 0.0 then
-			SetVehicleHandlingField(self.vehicle , "CHandlingData", "fInitialDriveMaxFlatVel", self:GetHandling(self:GetPlate(self.vehicle )).maxspeed)
-			SetVehStats(self.vehicle , "CHandlingData", "fDriveInertia", self:GetHandling(self:GetPlate(self.vehicle )).finaldrive)
-			SetVehStats(self.vehicle , "CHandlingData", "fInitialDriveForce", self:GetHandling(self:GetPlate(self.vehicle )).flywheel)
-			while not GetVehStats(self.vehicle , "CHandlingData","fDriveInertia") == self:GetHandling(self:GetPlate(self.vehicle )).finaldrive and self.invehicle do
-				if self.GetHandling(self:GetPlate(self.vehicle )).finaldrive ~= nil then
-					SetVehStats(self.vehicle , "CHandlingData", "fDriveInertia", self:GetHandling(self:GetPlate(self.vehicle )).finaldrive)
-				end
-				Wait(0)
-			end
-			while not GetVehStats(self.vehicle , "CHandlingData","fInitialDriveForce") == self:GetHandling(self:GetPlate(self.vehicle )).flywheel and self.invehicle do
-				if self.GetHandling(self:GetPlate(self.vehicle )).flywheel ~= nil then
-					SetVehStats(self.vehicle , "CHandlingData", "fInitialDriveForce", self:GetHandling(self:GetPlate(self.vehicle )).flywheel)
-				end
-				Wait(0)
-			end
-		end
-		SetVehicleEnginePowerMultiplier(self.vehicle , 1.0) -- just incase
-		self.busy = false
-		StopSound(soundofnitro)
-		ReleaseSoundId(soundofnitro)
-		if self.propturbo ~= nil then
-			--print("deleting")
-			self:ReqAndDelete(self.propturbo,true)
-			self.propturbo = nil
-		end
-		self.boost = 1.0
-		return
-	end)
+	
 end
 
 function Hud:vehiclemode()
-	local veh = Entity(self.vehicle).state
-	PlaySoundFrontend(-1, 'NAV_UP_DOWN', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 0)
-	if self.mode == 'NORMAL' then
-		self.mode = 'SPORTS'
-		veh:set('hudemode', self.mode, true)
-		SendNUIMessage({
-			type = "setMode",
-			content = self.mode
-		})
-		Wait(500)
-		self:Notify('success','Vehicle Mode',"Sports self.mode Activated")
-		while self.busy do
-			Wait(10)
-		end
-		self.rpm = VehicleRpm(self.vehicle )
-		self.gear = GetGear(self.vehicle )
-		CreateThread(function()
-			self.newgear = 0
-			while self.mode == 'SPORTS' and self.invehicle do
-				local sleep = 2000
-				--local ply = PlayerPedId()
-				
-				if self.vehicle  ~= 0 then
-					sleep = 10
-					self.rpm = VehicleRpm(self.vehicle )
-					self.gear = GetGear(self.vehicle )
-					self.topspeedmodifier = config.topspeed_multiplier
-				end
-				Wait(sleep)
-			end
-			return
-		end)
 
-		local sound = false
-		CreateThread(function()
-			self.newgear = 0
-			olddriveinertia = self:GetHandling(self:GetPlate(self.vehicle )).finaldrive
-			oldriveforce = self:GetHandling(self:GetPlate(self.vehicle )).flywheel
-			oldtopspeed = self:GetHandling(self:GetPlate(self.vehicle )).maxspeed -- normalize
-			local fixedshit = (config.topspeed_multiplier * 1.0)
-			local old = oldtopspeed * 1.0
-			self.turbosound = 0
-			self.oldgear = 0
-			local fo = oldtopspeed * 0.64
-			if config.sports_increase_topspeed then
-				if GetVehicleMod(self.vehicle ,13) > 0 then
-					local bonus = (self:GetHandling(self:GetPlate(self.vehicle )).maxspeed * config.topspeed_multiplier)
-					self.globaltopspeed = bonus * 1.5
-				else
-					self.globaltopspeed = self:GetHandling(self:GetPlate(self.vehicle )).maxspeed * config.topspeed_multiplier
-				end
-				SetVehicleHandlingField(self.vehicle , "CHandlingData", "fInitialDriveMaxFlatVel", self.globaltopspeed)
-			end
-			self.plate = GetVehicleNumberPlateText(self.vehicle)
-			--self.plate = string.gsub(self.plate, '^%s*(.-)%s*$', '%1')
-			while self.mode == 'SPORTS' and config.turbo_boost[self.veh_stats[self.plate].turbo] > config.boost and self.invehicle do
-				Citizen.Wait(1000) -- do nothing turbo torque is more higher
-			end
-			self:Boost()
-			return
-		end)
-	elseif self.mode == 'SPORTS' and self.invehicle then
-		self.mode = 'DRIFT'
-		veh:set('hudemode', self.mode, true)
-		SendNUIMessage({
-			type = "setMode",
-			content = self.mode
-		})
-		Wait(500)
-		self:Notify('success','Vehicle Mode',"DRIFT mode Activated")
-		while self.busy do
-			Wait(10)
-		end
-		local sound = false
-		CreateThread(function()
-			self.busy = true
-			self:ToggleDrift()
-			Wait(500)
-			self.vehicle  = self:getveh()
-			self.busy = false
-			return
-		end)
-	elseif self.mode == 'DRIFT' and self.invehicle then
-		self.mode = 'ECO'
-		veh:set('hudemode', self.mode, true)
-		SendNUIMessage({
-			type = "setMode",
-			content = self.mode
-		})
-		Wait(500)
-		self:Notify('success','Vehicle Mode',"ECO self.mode Activated")
-		while self.busy do
-			Wait(10)
-		end
-		local sound = false
-		CreateThread(function()
-			local olddriveinertia = 1.0
-			olddriveinertia = self:GetHandling(self:GetPlate(self.vehicle )).finaldrive
-			SetVehStats(self.vehicle , "CHandlingData", "fDriveInertia", config.eco)
-			while self.mode == 'ECO' and self.invehicle do
-				local sleep = 2000
-				local reset = true
-				
-				if self.vehicle  ~= 0 then
-					sleep = 7
-					if IsControlPressed(1, 32) then
-						local power = config.eco+0.4
-						if self.degrade ~= 1.0 then
-							power = power * self.degrade
-						end
-						SetVehStats(self.vehicle , "CHandlingData", "fDriveInertia", config.eco)
-						SetVehicleBoost(self.vehicle , (config.eco+0.4))
-					end
-				end
-				Wait(sleep)
-			end
-			self.busy = true
-			Wait(100)
-			self.vehicle  = self:getveh()
-			if DoesEntityExist(self.vehicle ) and self:GetHandling(self:GetPlate(self.vehicle )).finaldrive ~= 0.0 then
-				SetVehStats(self.vehicle , "CHandlingData", "fDriveInertia", self:GetHandling(self:GetPlate(self.vehicle )).finaldrive)
-				while not GetVehStats(self.vehicle , "CHandlingData","fDriveInertia") == self:GetHandling(self:GetPlate(self.vehicle )).finaldrive and self.invehicle do
-					SetVehStats(self.vehicle , "CHandlingData", "fDriveInertia", self:GetHandling(self:GetPlate(self.vehicle )).finaldrive)
-					Wait(0)
-				end
-			end
-			self.busy = false
-			StopSound(soundofnitro)
-			ReleaseSoundId(soundofnitro)
-			return
-		end)
-	else
-		self.mode = 'NORMAL'
-		veh:set('hudemode', self.mode, true)
-		SendNUIMessage({
-			type = "setMode",
-			content = self.mode
-		})
-		self:Notify('success','Vehicle Mode',"Normal Mode Restored")
-	end
 end
 
 function Hud:ToggleDrift()
-	local nondrift = {}
-	local currentveh = self.vehicle
-	for index, value in ipairs(config.drift_handlings) do
-		if value[1] == 'vecInertiaMultiplier' or value[1] == 'vecCentreOfMassOffset' then
-			nondrift[value[1]] = GetVehicleHandlingVector(self.vehicle, "CHandlingData", value[1])
-		elseif value[1] then
-			nondrift[value[1]] = GetVehicleHandlingFloat(self.vehicle, "CHandlingData", value[1])
-		end
-	end
-	local NonDrift = function(nondrift)
-		local veh = self:getveh()
-		for index, value in pairs(nondrift) do
-			if index == 'vecInertiaMultiplier' or index == 'vecCentreOfMassOffset' then
-				SetVehicleHandlingVector(veh, "CHandlingData", index, value)
-			elseif value then
-				SetVehicleHandlingFloat(veh, "CHandlingData", index, tonumber(value))
-			end
-			SetVehicleEnginePowerMultiplier(veh, 1.0) -- do not remove this, its a trick for flatvel
-		end
-		self:applyVehicleMods(veh,nondrift['fDriveBiasFront'])
-	end
-	local Drift = function(handling)
-		for index, value in ipairs(handling) do
-			if value[1] == 'fInitialDriveMaxFlatVel' and self.vehicle ~= 0 then
-				--SetVehicleHandlingField(self.vehicle, "CHandlingData", value[1], tonumber(value[2]))
-			elseif value[1] == 'vecInertiaMultiplier' or value[1] == 'vecCentreOfMassOffset' and self.vehicle ~= 0 then
-				SetVehicleHandlingVector(self.vehicle, "CHandlingData", value[1], tonumber(value[2]))
-			elseif value[1] and self.vehicle ~= 0 then
-				SetVehicleHandlingFloat(self.vehicle, "CHandlingData", value[1], tonumber(value[2]))
-			end
-			SetVehicleEnginePowerMultiplier(self.vehicle, 1.0) -- do not remove this, its a trick for flatvel
-		end
-		--print(GetVehicleHandlingFloat(self.vehicle, "CHandlingData", 'fDriveInertia'),config.drift_handlings[1][1])
-		self:applyVehicleMods(self.vehicle ~= 0 and self.vehicle or self:getveh(),0.0)
-	end
-	CreateThread(function()
-		while self.mode == 'DRIFT' and self.invehicle do
-			if self:angle(self.vehicle ) >= 5 and self:angle(self.vehicle ) <= 38 and GetEntityHeightAboveGround(self.vehicle ) <= 1.5 then
-				SetVehicleHandlingField(self.vehicle, "CHandlingData", 'fInitialDriveMaxFlatVel', config.drift_handlings[1][2])
-				SetVehicleEnginePowerMultiplier(self.vehicle, 1.0) -- do not remove this, its a trick for flatvel
-				self:ForceVehicleGear (self.vehicle, GetVehicleCurrentGear(self.vehicle) > 1 and GetVehicleCurrentGear(self.vehicle) -1 or GetVehicleCurrentGear(self.vehicle))
-				SetVehicleHighGear(self.vehicle,GetVehicleHighGear(self.vehicle))
-			else
-				SetVehicleHandlingField(self.vehicle, "CHandlingData", 'fInitialDriveMaxFlatVel', nondrift['fInitialDriveMaxFlatVel'])
-				SetVehicleEnginePowerMultiplier(self.vehicle, 1.0) -- do not remove this, its a trick for flatvel
-			end
-			Wait(100)
-		end
-	end)
-	while self.mode == 'DRIFT' and self.invehicle do
-		local Speed = GetEntitySpeed(self.vehicle)
-		if Speed < 40 then
-			Drift(config.drift_handlings)
-		elseif Speed > 50 then
-			local veh = Entity(self.vehicle).state
-			self.mode = 'NORMAL'
-			veh:set('hudemode', self.mode, true)
-			SendNUIMessage({
-				type = "setMode",
-				content = self.mode
-			})
-		end
-		Wait(500)
-	end
-	NonDrift(nondrift)
+
 end
 
 function Hud:applyVehicleMods(veh,wheel) -- https://forum.cfx.re/t/cant-change-setvehiclehandlingfloat-transforming-vehicle-to-awd-fivem-bug/3393188
-    -- Do this shit is necessary to apply the HandlingFloat
-    SetVehicleModKit(veh,0)
-	for i = 0 , 35 do
-		SetVehicleMod(veh,i,GetVehicleMod(veh,i),false)
-	end
-	if wheel == 0.0 then
-		for i = 0 , 3 do
-			SetVehicleWheelIsPowered(veh,i,i > 1)
-		end
-	elseif wheel == 1.0 then
-		for i = 0 , 3 do
-			SetVehicleWheelIsPowered(veh,i,i < 1)
-		end
-	else
-		for i = 0 , 3 do
-			SetVehicleWheelIsPowered(veh,i,true)
-		end
-	end
+
 end
 
 function Hud:differential()
-	----print("self.pressed")
-	local diff = GetVehStats(self.vehicle , "CHandlingData","fDriveBiasFront")
-	if diff > 0.01 and diff < 0.9 and self.old_diff == nil and not self.togglediff then -- default 4wd
-		self.old_diff = diff -- save old
-		diff = 0.0 -- change to rearwheel
-		self.togglediff = true
-		self:Notify('success','Vehicle Differential',"RWD Activated")
-	elseif self.old_diff ~= nil and self.togglediff then
-		diff = self.old_diff
-		SetVehStats(self.vehicle , "CHandlingData", "fDriveBiasFront", diff)
-		self.togglediff = false
-		self.old_diff = nil
-		self:Notify('success','Vehicle Differential',"Default Differential Activated")
-	elseif diff == 1.0 and not self.togglediff and self.old_diff == nil then -- Front Wheel Drive
-		--print("FWD")
-		diff =  0.5
-		self.old_diff = 1.0
-		self.togglediff = true
-		self:Notify('success','Vehicle Differential',"AWD Activated")
-	elseif diff == 0.0 and not self.togglediff and self.old_diff == nil then -- Rear Wheel Drive
-		self.old_diff = 0.0
-		diff = 0.5
-		self.togglediff = true
-		self:Notify('success','Vehicle Differential',"AWD Activated")
-	end
-	if self.togglediff then
-		PlaySoundFrontend(-1, 'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 0)
-	else
-		PlaySoundFrontend(-1, 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', 0)
-	end
-	SendNUIMessage({
-		type = "setDifferential",
-		content = diff
-	})
-	Wait(500)
-	CreateThread(function()
-		SetVehStats(self.vehicle , "CHandlingData", "fDriveBiasFront", diff)
-		self:applyVehicleMods(self.vehicle, diff)
-		while self.togglediff and self.invehicle do
-			Wait(1000)
-		end
-		Wait(300)
-		if not self.invehicle then
-			self.togglediff = false
-			self.old_diff = 0
-		end
-		return
-	end)
+
 end
 
 function Hud:Notify(type,title,message)
@@ -2444,7 +1244,7 @@ function Hud:Cruisecontrol()
 			type = "setCruiseControl",
 			content = self.cruising
 		})
-		local topspeed = self:GetHandling(self:GetPlate(self.vehicle )).maxspeed * 0.64
+		local topspeed = GetVehicleHandlingFloat(self.vehicle,'CHandlingData', 'fInitialDriveMaxFlatVel') * 0.64
 		local speed = VehicleSpeed(self.vehicle )
 		if self.cruising then
 			text = "locked to "..(speed*3.6).." kmh"
@@ -2575,284 +1375,40 @@ end
 -- BODY STATUS
 
 function Hud:CheckPatient()
-	if xPlayer.job ~= nil and xPlayer.job.name == config.checkbodycommandjob then
-		local players, myPlayer = {}, PlayerId()
-		for k,player in ipairs(GetActivePlayers()) do
-			self.ped = GetPlayerPed(player)
-			if DoesEntityExist(self.ped) and player ~= myPlayer then
-				table.insert(players, player)
-			end
-		end
-		local closest,dist
-		for k,v in pairs(players) do
-			local o_id = GetPlayerServerId(v)
-			if o_id ~= GetPlayerServerId(PlayerId()) then
-				local curDist = #(GetPlayerPed(v) - GetEntityCoords(self.ped))
-				if not dist or curDist < dist then
-					closest = o_id
-					dist = curDist
-				end
-			end
-		end
-		if closest ~= nil then
-			self:BodyUi(closest)
-		else
-			self:Notify('success','Body System',"No Player Around")
-		end
-	else
-		self:Notify('success','Body System',"No Access to CheckBody")
-	end
+
 end
 
 checkingpatient = false
 function Hud:BodyUi(target)
-	--print(target)
-	self.healing = target
-	if target ~= nil then
-		checkingpatient = true
-		TriggerServerEvent('renzu_hud:checkbody', tonumber(target))
-	end
-	self.bodyui = not self.bodyui
-	if target == nil then
-		SendNUIMessage({
-			type = "setShowBodyUi",
-			content = self.bodyui
-		})
-	end
-	Wait(100)
-	if target ~= nil then
-		while self.bodyui do
-			Wait(100)
-		end
-		checkingpatient = false
-		TriggerServerEvent('renzu_hud:checkbody')
-	end
+
 end
 
 function Hud:BodyLoop()
-	if checkingpatient then return end
-	if self.receive == 'new' then return end
-	Citizen.Wait(2500)
-	
-	self.pid = self.pid
-	if self.bonecategory["ped_head"] == nil then
-		self.bonecategory["ped_head"] = 0
-	end
-	if self.bonecategory["left_leg"] == nil then
-		self.bonecategory["left_leg"] = 0
-	end
-	if self.bonecategory["right_leg"] == nil then
-		self.bonecategory["right_leg"] = 0
-	end
-	if self.bonecategory["ped_body"] == nil then
-		self.bonecategory["ped_body"] = 0
-	end
-	if self.bonecategory["left_hand"] == nil then
-		self.bonecategory["left_hand"] = 0
-	end
-	if self.bonecategory["right_hand"] == nil then
-		self.bonecategory["right_hand"] = 0
-	end
-	if not self.head and self.bonecategory["ped_head"] > 0 then
-		SetTimecycleModifier(config.headtimecycle)
-		SetTimecycleModifierStrength(math.min(self.bonecategory["ped_head"] * 0.4, 1.1))
-		self.head = true
-		self:Notify('error','Body System',"Head has been damaged")
-	elseif self.bonecategory["ped_head"] <= 0 then
-		ClearTimecycleModifier()
-		ClearExtraTimecycleModifier()
-		if self.head then
-			ClearTimecycleModifier()
-			self.head = false 
-		end
-	end
-	if self.bonecategory["ped_body"] > 0 then
-		if not self.body then
-			self:bodydamage()
-			self:Notify('error','Body System',"Chest has been damaged")
-		end
-		self.body = true
-		SetPlayerHealthRechargeMultiplier(self.pid, 0.0)
-	elseif self.body then
-		self.body = false
-	else
-		self.body = false
-	end
-	if self.bonecategory["right_hand"] > 0 or self.bonecategory["left_hand"] > 0 then
-		if not self.arm then
-			self:armdamage()
-			self:Notify('error','Body System',"Arm has been damaged")
-		end
-		self.arm = true
-		if self.bonecategory["left_hand"] < self.bonecategory["right_hand"] then  
-			self.armbone = self.bonecategory["right_hand"]
-		else 
-			self.armbone2 = self.bonecategory["left_hand"]
-		end
-	else
-		self.armbone = 0
-		self.armbone2 = 0
-		self.arm = false
-	end
-	if self.bonecategory and self.bonecategory["left_leg"] and self.bonecategory["right_leg"] and (self.bonecategory["left_leg"] >= 2 or self.bonecategory["right_leg"] >= 2) then
-		if not self.leg then
-			RequestAnimSet("move_m@injured")
-			self:legdamage()
-			self:Notify('error','Body System',"Leg has been damaged")
-		end
-		self.leg = true
-		SetPedMoveRateOverride(self.ped, 0.6)
-		SetPedMovementClipset(self.ped, "move_m@injured", true)
-	elseif self.leg then
-		self.leg = false
-		Wait(2000)
-		ResetPedMovementClipset(self.ped)
-		ResetPedWeaponMovementClipset(self.ped)
-		ResetPedStrafeClipset(self.ped)
-		SetPedMoveRateOverride(self.ped, 1.0)
-	else
-		self.leg = false
-	end
+
 end
 
 function Hud:bodydamage()
-	CreateThread(function()
-		while self.body do
-			Citizen.Wait(5000)
-			if config.disabledsprint then
-				SetPlayerSprint(self.pid, false)
-			end
-			if config.disabledregen then
-				SetPlayerHealthRechargeMultiplier(self.pid, 0.0)
-			end
-			if health ~= nil and health > 55.0 then
-				SetEntityHealth(PlayerPedId(),(GetEntityHealth(self.ped)) - config.chesteffect_healthdegrade)
-			end
-		end
-		SetPlayerHealthRechargeMultiplier(self.pid, 1.0)
-		SetPlayerSprint(self.pid, true)
-	end)
-	return
+
 end
 
 function Hud:recoil(r)
-	tv = 0
-	if GetFollowPedCamViewMode() ~= 4 then
-		Wait(0)
-		p = GetGameplayCamRelativePitch()
-		SetGameplayCamRelativePitch(p+0.3, (self.bonecategory["left_hand"] + self.bonecategory["right_hand"] / 5) * config.firstperson_armrecoil)
-		tv = tv+0.1
-	else
-		Wait(0)
-		p = GetGameplayCamRelativePitch()
-		if r > 0.1 then
-			SetGameplayCamRelativePitch(p+0.6, (self.bonecategory["left_hand"] + self.bonecategory["right_hand"] / 5) * config.firstperson_armrecoil)
-			tv = tv+0.6
-		else
-			SetGameplayCamRelativePitch(p+0.016, 0.333)
-			tv = tv+0.1
-		end
-	end
+
 end
 
 function Hud:armdamage() -- self.vehicle 
-	CreateThread(function()
-		local oldveh = nil
-		while self.arm do
-			if config.melee_decrease_damage then
-				while IsPedInMeleeCombat(self.ped) do
-					Citizen.Wait(5)
-					SetPlayerMeleeWeaponDamageModifier(self.pid, config.melee_damage_decrease)
-				end
-			end
-			while self.invehicle do
-				if self.vehicle  ~= nil and self.vehicle  ~= 0 then
-					if oldveh ~= self.vehicle  then
-						steeringlock = GetVehStats(self.vehicle , "CHandlingData","fSteeringLock")
-						DecorSetFloat(self.vehicle , "STEERINGLOCK", steeringlock)
-						if self.bonecategory["left_hand"] > 0 or self.bonecategory["right_hand"] > 0 then
-							local steer = (steeringlock - (self.bonecategory["left_hand"] + self.bonecategory["right_hand"]))
-							if steer < 5.0 then
-								steer = 5.0
-							end
-							SetVehStats(self.vehicle , "CHandlingData", "fSteeringLock", (steer * config.armdamage_invehicle_effect))
-						end
-					end
-				end
-				Citizen.Wait(2000)
-				oldveh = self.vehicle 
-			end
-			if oldveh ~= nil then
-				oldveh = nil
-				SetVehStats(self:getveh(), "CHandlingData", "fSteeringLock", DecorGetFloat(self:getveh(),"STEERINGLOCK")) -- the back the original stats
-			end
-			Citizen.Wait(3000) -- Wait until self.ped goes off to self.vehicle  or until self.arm is in pain.
-		end
-		SetVehStats(self:getveh(), "CHandlingData", "fSteeringLock", DecorGetFloat(self:getveh(),"STEERINGLOCK")) -- the back the original stats
-		return
-	end)
+
 end
 
 function Hud:legdamage()
-	CreateThread(function()
-		while self.leg do
-			Citizen.Wait(5)
-			if config.legeffect_disabledjump and not self.invehicle then
-				DisableControlAction(0,22,true)
-			end
-			SetPedMoveRateOverride(PlayerPedId(), config.legeffectmovement	)
-			SetPedMovementClipset(PlayerPedId(), "move_m@injured", true)
-		end
-		return
-	end)
+
 end
 
 function Hud:CheckBody()  
-	local ok, id = GetPedLastDamageBone(self.ped)
-	if ok then
-		for damagetype,val in pairs(config.buto) do
-			Wait(0)
-			for bone,index in pairs(val) do
-				if index == id and self.lastdamage ~= id then 
-					self.lastdamage = id
-					return bone,damagetype
-				end
-			end
-		end
-	end
-	return false
+
 end
 
 function Hud:BodyMain()
-	if health == nil then
-		health = GetEntityHealth(PlayerPedId()) -100
-	end
-	self.life = health
-	if health ~= nil and self.life < self.oldlife then
-		local index,bodytype = nil, nil
-		if not config.weaponsonly or not HasEntityBeenDamagedByWeapon(self.ped, 0 , 1) and HasEntityBeenDamagedByWeapon(self.ped, 0 , 2) and config.weaponsonly then
-			index,bodytype = self:CheckBody()
-			--if isWeapon(GetPedCauseOfDeath(PlayerPedId())) then
-			if index and bodytype then
-				if index ~= nil and self.parts[tostring(bodytype)] ~= nil and self.parts[tostring(bodytype)][tostring(index)] ~= nil and self.bonecategory ~= nil and self.bonecategory[tostring(bodytype)] ~= nil then
-					self.parts[bodytype][index] = self.parts[bodytype][index] + config.damageadd
-					self.bonecategory[bodytype] = self.bonecategory[bodytype] + config.damageadd
-					--print("saving")
-					SendNUIMessage({
-						type = "setUpdateBodyStatus",
-						content = self.bonecategory
-					})
-					if self.bonecategory['ped_head'] > 0 and config.bodyinjury_status_affected then
-						TriggerEvent('esx_status:'..config.headbone_status_mode..'', config.headbone_status, self.bonecategory['ped_head'] * config.headbone_status_value)
-					end
-					ApplyPedBlood(self.ped, GetPedBoneIndex(self.ped,index), 0.0, 0.0, 0.0, "wound_sheet")
-					Citizen.InvokeNative(0x8EF6B7AC68E2F01B, PlayerPedId())
-					TriggerServerEvent('renzu_hud:savebody', self.bonecategory)
-				end
-			end
-		end
-	end
-	self.oldlife = GetEntityHealth(self.ped) -100
+
 end
 
 function Hud:Makeloading(msg,ms)
@@ -2869,77 +1425,11 @@ function Hud:Makeloading(msg,ms)
 end
 
 function Hud:CarControl()
-	if self.busy then return end
-	self.isbusy = true
-	self.vehicle  = self:getveh()
-	if self.vehicle  ~= 0 and #(GetEntityCoords(self.ped) - GetEntityCoords(self.vehicle )) < 15 and GetVehicleDoorLockStatus(self.vehicle ) == 1 then
-		local door = {}
-		local window = {}
-		for i = 0, 6 do
-			Wait(10)
-			door[i] = false
-			if GetVehicleDoorAngleRatio(self.vehicle ,i) ~= 0.0 then
-				----print("Door",GetVehicleDoorAngleRatio(self.vehicle ,i))
-				door[i] = true
-			end
-		end
-		for i = 0, 3 do
-			window[i] = false
-			if not IsVehicleWindowIntact(self.vehicle ,i) and GetWorldPositionOfEntityBone(self.vehicle ,GetEntityBoneIndexByName(self.vehicle ,self.windowbones[i])).x ~= 0.0 then
-				window[i] = true
-			end
-		end
 
-		self.carcontrol = not self.carcontrol
-		local offset = {}
-		local rotation = {}
-		for i=0, 4 do
-			offset[i] = GetVehicleWheelXOffset(self.vehicle,i)
-			rotation[i] = GetVehicleWheelYRotation(self.vehicle,i)
-		end
-		SendNUIMessage({
-			type = "setShowCarcontrol",
-			content = {bool = self.carcontrol, offset = offset, rotation = rotation, height = GetVehicleSuspensionHeight(self.vehicle)}
-		})
-		SendNUIMessage({
-			type = "setDoorState",
-			content = door
-		})
-		SendNUIMessage({
-			type = "setWindowState",
-			content = window
-		})
-		Wait(500)
-		SetNuiFocus(self.carcontrol,self.carcontrol)
-		SetNuiFocusKeepInput(self.carcontrol)
-		self.isbusy = false
-		CreateThread(function()
-			while self.carcontrol do
-				self:whileinput()
-				Wait(5)
-			end
-			SetNuiFocusKeepInput(false)
-			return
-		end)
-	else
-		if GetVehicleDoorLockStatus(self.vehicle ) ~= 1 then
-			self:Notify('warning','Carcontrol System',"No Unlock Vehicle Nearby")
-		else
-			self:Notify('warning','Carcontrol System',"No Nearby Vehicle")
-		end
-	end
 end
 
 function Hud:shuffleseat(index)
-	if self.invehicle then
-		TaskWarpPedIntoVehicle(self.ped,self.vehicle ,index)
-	else
-		CreateThread(function()
-			self:entervehicle()
-			return
-		end)
-		TaskEnterVehicle(self.ped, self:getveh(), 10.0, index, 2.0, 0)
-	end
+
 end
 
 function Hud:requestcontrol(veh)
@@ -3086,519 +1576,60 @@ end
 --NOS --
 
 function Hud:EnableNitro()
-	CreateThread(function()
-		while self.invehicle and self.nitromode do
-			local cansleep = 2000
-			if self.veh_stats[self.plate] ~= nil and self.veh_stats[self.plate].nitro ~= nil and self.hasNitro and self.invehicle and self.veh_stats[self.plate].nitro > 1 then
-				if GetPedInVehicleSeat(self.vehicle , -1) == self.ped then
-					cansleep = 1
-					if self.veh_stats[self.plate].nitro > 5 and RCP(0, 21) and not RCR2(0, 21) then
-						SetVehicleEngineHealth(self.vehicle , GetVehicleEngineHealth(self.vehicle ) - 0.05)
-						if self.veh_stats[self.plate].nitro - 0.02 > 0 then
-							if not self.pressed then
-								self.pressed = true
-								if self.speed > 5 then
-									SetTimecycleModifier("ship_explosion_underwater")
-									SetExtraTimecycleModifier("StreetLightingJunction")
-									SetExtraTimecycleModifierStrength(0.1)
-									SetTimecycleModifierStrength(0.1)
-									--StartScreenEffect('MP_Celeb_Preload_Fade', 0, true)
-								end
-								TriggerServerEvent("renzu_hud:nitro_flame", VehToNet(self.vehicle ), GetEntityCoords(self.vehicle ))
-							end
-							SetVehicleEngineTorqueMultiplier(self.vehicle , config.nitroboost * 2 * self.rpm)
-							self.veh_stats[self.plate].nitro = self.veh_stats[self.plate].nitro - config.nitrocost
-							SendNUIMessage({
-								type = "setNitro",
-								content = self.veh_stats[self.plate].nitro
-							})
-							--TriggerEvent("laptop:nos", self.n_boost)
-							if config.nitro_sound and self.speed > 5 then
-								SetVehicleBoostActive(self.vehicle , 1)
-							end
-						else
-							self.veh_stats[self.plate].nitro = 0
-						end
-					else
-						if config.nitro_sound then
-							SetVehicleBoostActive(self.vehicle , 0)
-						end
-					end
-					if self.pressed and IsControlJustReleased(0, 21) and not RCP(0, 21) then
-						Wait(100)
-						TriggerServerEvent("renzu_hud:nitro_flame_stop", VehToNet(self.vehicle ), GetEntityCoords(self.vehicle ))
-						self.pressed = false
-						ClearExtraTimecycleModifier()
-						ClearTimecycleModifier()
-						StopScreenEffect('MP_Celeb_Preload_Fade')
-						RemoveParticleFxFromEntity(self.vehicle )
-						local vehcoords = GetEntityCoords(self.vehicle )
-						Citizen.Wait(1)
-						--RemoveParticleFxInRange(vehcoords.x,vehcoords.y,vehcoords.z,100.0)
-						self.light_trail_isfuck = false
-						self.purgefuck[VehToNet(self.vehicle )] = false
-						collectgarbage()
-					end
-				end
-			end
-			Wait(cansleep)
-		end
-		return
-	end)
+
 end
 
 function Hud:angle(veh)
-	if not veh then return false end
-	local vx,vy,vz = table.unpack(GetEntityVelocity(veh))
-	local modV = math.sqrt(vx*vx + vy*vy)
 
-
-	local rx,ry,rz = table.unpack(GetEntityRotation(veh,0))
-	local sn,cs = -math.sin(math.rad(rz)), math.cos(math.rad(rz))
-
-	if GetEntitySpeed(veh)* 3.6 < 20 or GetVehicleCurrentGear(veh) == 0 then return 0,modV end --self.speed over 25 km/h
-
-	local cosX = (sn*vx + cs*vy)/modV
-	return math.deg(math.acos(cosX))*0.5, modV
 end
 
 --WHEEL SYSTEM
 function Hud:NuiWheelSystem()
-	CreateThread(function()
-		while self.veh_stats == nil or self.veh_stats[self.plate] == nil do
-			Citizen.Wait(100)
-		end
-		while self.invehicle and config.enabletiresystem do
-			local numwheel = GetVehicleNumberOfWheels(self.vehicle )
-			sleep = 500
-			for i = 0, numwheel - 1 do
-				Wait(10)
-				if self.plate ~= nil and self.rpm > config.minrpm_wheelspin_detect and self.speed > 1 and (self.rpm * 100.0) < (self:tractioncontrol(WheelSpeed(self.vehicle ,i) * 3.6,GetGear(self.vehicle ), true) * 85.0) then
-					if self.veh_stats[self.plate][tostring(i)] ~= nil and self.veh_stats[self.plate][tostring(i)].tirehealth > 0 then
-						self.veh_stats[self.plate][tostring(i)].tirehealth = self.veh_stats[self.plate][tostring(i)].tirehealth - config.tirestress
-					end
-					--self.Notify("Tire Stress: Wheel #"..i.." - "..self.veh_stats[self.plate][tostring(i)].tirehealth.."")
-					if GetVehicleWheelHealth(self.vehicle , i) <= 0 and config.bursttires then
-						SetVehicleTyreBurst(self.vehicle , i, true, 0)
-					end
-				end
-			end
-			if self.speed ~= nil and self.speed > config.minspeed_curving and self:angle(self.vehicle ) >= config.minimum_angle_for_curving and self:angle(self.vehicle ) <= 18 and GetEntityHeightAboveGround(self.vehicle ) <= 1.5 then
-				for i = 0, numwheel - 1 do
-					Wait(10)
-					if self.veh_stats[self.plate][tostring(i)] ~= nil and self.veh_stats[self.plate][tostring(i)].tirehealth > 0 then
-						self.veh_stats[self.plate][tostring(i)].tirehealth = self.veh_stats[self.plate][tostring(i)].tirehealth - config.tirestress
-					end
-					--self.Notify('warning','Tire System',"Tire Stress2: Wheel #"..i.." - "..self.veh_stats[self.plate][tostring(i)].tirehealth.."")
-					if GetVehicleWheelHealth(self.vehicle , i) <= 0 and config.bursttires then
-						SetVehicleTyreBurst(self.vehicle , i, true, 0)
-					end
-				end
-			end
-			Citizen.Wait(sleep)
-		end
-		return
-	end)
+
 end
 
 function Hud:tireanimation()
-	--CarregarObjeto("anim@heists@box_carry@","idle","hei_prop_heist_box",50,28422)
-	local prop = 'prop_wheel_tyre'
 
-	RequestModel(GetHashKey(prop))
-	while not HasModelLoaded(GetHashKey(prop)) do
-		Citizen.Wait(10)
-	end
-
-	local dict = 'anim@heists@box_carry@'
-	local anim = 'idle'
-	RequestAnimDict(dict)
-	while not HasAnimDictLoaded(dict) do
-		Citizen.Wait(10)
-	end
-	TaskPlayAnim(self.ped,dict,anim,3.0,3.0,-1,50,0,0,0,0)
-	local coords = GetOffsetFromEntityInWorldCoords(self.ped,0.0,0.0,-5.0)
-	self.proptire = CreateObject(GetHashKey(prop),coords.x,coords.y,coords.z,true,true,true)
-	SetEntityCollision(self.proptire,false,false)
-	AttachEntityToEntity(self.proptire,self.ped,GetPedBoneIndex(self.ped,28422),0.0,0.0,0.0,0.0,0.0,0.0,false,false,false,false,2,true)
-	Citizen.InvokeNative(0xAD738C3085FE7E11,self.proptire,true,true)
 end
 
 function Hud:turboanimation(type)
-	--CarregarObjeto("anim@heists@box_carry@","idle","hei_prop_heist_box",50,28422)
-	local prop = 'smallturbo'
-	local offset = -0.75
-	local offsetz = 0.245
-	if type == 'racing' then
-		prop = 'bigturbo'
-		offset = -1.85
-		offsetz = 0.45
-	elseif type == 'sports' then
-		prop = 'mediumturbo'
-		offset = -1.15
-		offsetz = 0.285
-	elseif type == 'street' then
-		prop = 'smallturbo'
-		offset = -0.80
-	end
-	RequestModel(GetHashKey(prop))
-	while not HasModelLoaded(GetHashKey(prop)) do
-		Citizen.Wait(10)
-	end
-	local coords = GetOffsetFromEntityInWorldCoords(self.ped,0.0,0.0,-5.0)
-	if self.propturbo ~= nil then
-		--print("deleting")
-		self:ReqAndDelete(self.propturbo,true)
-		self.propturbo = nil
-	end
-	if config.turboprop and self.propturbo == nil then
-		self.propturbo = CreateObjectNoOffset(GetHashKey(prop),coords.x,coords.y,coords.z,true,true,true)
-		SetEntityCollision(self.propturbo,true,true)
-		AttachEntityToEntity(self.propturbo,self:getveh(),GetEntityBoneIndexByName(self:getveh(),'neon_f'),0.3,offset,offsetz,0.0,0.0,90.0,true,false,false,false,70,true)
-		Citizen.InvokeNative(0xAD738C3085FE7E11,self.propturbo,true,true)
-	end
+
 end
 
 function Hud:TireFunction(type)
-	if type ~= 'default' then
-		SetVehicleHandlingFloat(self.vehicle , "CHandlingData", "fLowSpeedTractionLossMult", DecorGetFloat(self.vehicle ,"TRACTION3") * config.wheeltype[type].fLowSpeedTractionLossMult) -- self.start burnout less = traction
-		SetVehicleHandlingFloat(self.vehicle , "CHandlingData", "fTractionLossMult", DecorGetFloat(self.vehicle ,"TRACTION4") * config.wheeltype[type].fTractionLossMult)  -- asphalt mud less = traction
-		SetVehicleHandlingFloat(self.vehicle , "CHandlingData", "fTractionCurveMin", DecorGetFloat(self.vehicle ,"TRACTION") * config.wheeltype[type].fTractionCurveMin) -- accelaration grip
-		SetVehicleHandlingFloat(self.vehicle , "CHandlingData", "fTractionCurveMax", DecorGetFloat(self.vehicle ,"TRACTION5") * config.wheeltype[type].fTractionCurveMax) -- cornering grip
-		SetVehicleHandlingFloat(self.vehicle , "CHandlingData", "fTractionCurveLateral", DecorGetFloat(self.vehicle ,"TRACTION2") * config.wheeltype[type].fTractionCurveLateral) -- curve lateral grip
-	end
+
 end
 
 carjacking = false
 function Hud:Carlock()
-	if not self.keyless then return end
-	while self.veh_stats == nil do
-		Wait(100)
-		self.veh_stats = LocalPlayer.state.adv_stat
-	end
-	if not self.veh_stats_loaded then
-		self:get_veh_stats()
-	end
-	local foundveh = false
-	if self.keyless then
-		self.keyless = not self.keyless
-		local vehicles = {}
-		local checkindentifier, myidentifier = nil, nil
-		local mycoords = GetEntityCoords(PlayerPedId(), false)
-		local foundvehicle = {}
-		local min = -1
-		for k,v in pairs(GetGamePool('CVehicle')) do
-			if #(mycoords - GetEntityCoords(v, false)) < config.carlock_distance then
-				self.plate = GetVehicleNumberPlateText(v)
-				if self.veh_stats[self.plate] ~= nil and self.veh_stats[self.plate].owner ~= nil and LocalPlayer.state.identifier ~= nil then
-					checkindentifier = string.gsub(self.veh_stats[self.plate].owner, 'Char5', '')
-					checkindentifier = string.gsub(checkindentifier, 'Char4', '')
-					checkindentifier = string.gsub(checkindentifier, 'Char3', '')
-					checkindentifier = string.gsub(checkindentifier, 'Char2', '')
-					checkindentifier = string.gsub(checkindentifier, 'Char1', '')
-					checkindentifier = string.gsub(checkindentifier, 'char5', '')
-					checkindentifier = string.gsub(checkindentifier, 'char4', '')
-					checkindentifier = string.gsub(checkindentifier, 'char3', '')
-					checkindentifier = string.gsub(checkindentifier, 'char2', '')
-					checkindentifier = string.gsub(checkindentifier, 'char1', '')
-					checkindentifier = string.gsub(checkindentifier, 'steam', '')
-					checkindentifier = string.gsub(checkindentifier,":","")
-					checkindentifier = string.gsub(checkindentifier, string.gsub(config.identifier,":",""), '')
-					myidentifier = string.gsub(LocalPlayer.state.identifier, 'steam', '')
-					myidentifier = string.gsub(LocalPlayer.state.identifier, string.gsub(config.identifier,":",""), '')
-					myidentifier = string.gsub(myidentifier,":","")
-					myidentifier = string.gsub(myidentifier, 'Char5', '')
-					myidentifier = string.gsub(myidentifier, 'Char4', '')
-					myidentifier = string.gsub(myidentifier, 'Char3', '')
-					myidentifier = string.gsub(myidentifier, 'Char2', '')
-					myidentifier = string.gsub(myidentifier, 'Char1', '')
-					myidentifier = string.gsub(myidentifier, 'char5', '')
-					myidentifier = string.gsub(myidentifier, 'char4', '')
-					myidentifier = string.gsub(myidentifier, 'char3', '')
-					myidentifier = string.gsub(myidentifier, 'char2', '')
-					myidentifier = string.gsub(myidentifier, 'char1', '')
-					myidentifier = string.gsub(myidentifier, 'steam', '')
-					if self.veh_stats[self.plate] ~= nil and checkindentifier == myidentifier then
-						foundvehicle[self.plate] = {}
-						foundvehicle[self.plate].entity = v
-						foundvehicle[self.plate].plate = self.plate
-						if checkindentifier ~= nil then
-							foundvehicle[self.plate].owner = myidentifier
-						end
-						foundvehicle[self.plate].distance = #(mycoords - GetEntityCoords(v, false))
-					end
-				end
-			end
-		end
 
-		local near = -1
-		local nearestveh = nil
-		local nearestplate = nil
-		for k,v in pairs(foundvehicle) do
-			if near == -1 or near > v.distance then
-				near = v.distance
-				nearestveh = v.entity
-				nearestplate = v.plate
-				if v.owner ~= nil and near < 20 then
-					nearestowner = v.owner
-				end
-			end
-		end
-		if near ~= -1 and near <= 20 and nearestowner ~= nil and myidentifier ~= nil and nearestowner == myidentifier then
-			local table = {
-				['type'] = 'connect',
-				['bool'] = true,
-				['vehicle'] = nearestveh,
-				['plate'] = nearestplate,
-				['state'] = GetVehicleDoorLockStatus(nearestveh)
-			}
-			SendNUIMessage({
-				type = "setKeyless",
-				content = table
-			})
-			foundveh = true
-			self:Notify('success','Vehicle Lock System','Owned Vehicle Found with Plate # '..nearestplate..'')
-			Wait(200)
-			SetNuiFocus(true,true)
-		end
-		self.keyless = not self.keyless
-		Wait(500)
-		if foundveh then
-			SendNUIMessage({
-				type = "setShowKeyless",
-				content = self.keyless
-			})
-		elseif config.enable_carjacking and not carjacking then
-			self.keyless = true
-			carjacking = true
-			local bone = GetEntityBoneIndexByName(self:getveh(),'door_dside_f')
-			if self:getveh() ~= 0 and #(GetEntityCoords(self.ped) - GetWorldPositionOfEntityBone(self:getveh(),bone)) < config.carjackdistance and GetVehicleDoorLockStatus(self:getveh()) ~= 1 then
-				self.playanimation('creatures@rottweiler@tricks@','petting_franklin')
-				local carnap = exports["cd_keymaster"]:StartKeyMaster()
-				--print(carnap)
-				if carnap then
-					--print("good")
-					SetVehicleNeedsToBeHotwired(self:getveh(),true)
-					TaskEnterVehicle(self.ped, self:getveh(), 10.0, -1, 2.0, 0)
-					TriggerServerEvent("renzu_hud:synclock", VehToNet(self:getveh()), 'carjack', GetEntityCoords(self.ped))
-				else
-					SetVehicleNeedsToBeHotwired(self:getveh(),true)
-					TaskEnterVehicle(self.ped, self:getveh(), 10.0, -1, 2.0, 0)
-					SetVehicleAlarm(self:getveh(), 1)
-					StartVehicleAlarm(self:getveh())
-					SetVehicleAlarmTimeLeft(self:getveh(), 180000)
-					CreateIncidentWithEntity(7,self.ped,3,100.0)
-					PlayPoliceReport("SCRIPTED_SCANNER_REPORT_CAR_STEAL_2_01",0.0)
-					TriggerServerEvent("renzu_hud:synclock", VehToNet(self:getveh()), 'force', GetEntityCoords(self.ped))
-				end
-			elseif GetVehicleDoorLockStatus(self:getveh()) == 1 then
-				SetVehicleNeedsToBeHotwired(self:getveh(),true)
-				TaskEnterVehicle(self.ped, self:getveh(), 10.0, -1, 2.0, 0)
-			end
-			ClearPedTasks(self.ped)
-			carjacking = false
-		else
-			self.keyless = true
-			self:Notify('error','Vehicle Lock System',' No Vehicle in area')
-		end
-	else
-		SetNuiFocus(false,false)
-	end
 end
 
 function Hud:playsound(vehicle,max,file,maxvol)
-	local volume = maxvol
-	local mycoord = GetEntityCoords(self.ped)
-	local distIs  = tonumber(string.format("%.1f", #(mycoord - vehicle)))
-	if (distIs <= max) then
-		distPerc = distIs / max
-		volume = (1-distPerc) * maxvol
-		local table = {
-			['file'] = file,
-			['volume'] = volume
-		}
-		SendNUIMessage({
-			type = "playsound",
-			content = table
-		})
-	end
+
 end
 
 function Hud:whileinput()
-	DisableControlAction(1, 1, true)
-	DisableControlAction(1, 2, true)
-	DisableControlAction(1, 18, true)
-	DisableControlAction(1, 68, true)
-	DisableControlAction(1, 69, true)
-	DisableControlAction(1, 70, true)
-	DisableControlAction(1, 91, true)
-	DisableControlAction(1, 92, true)
-	DisableControlAction(1, 24, true)
-	DisableControlAction(1, 25, true)
-	DisableControlAction(1, 14, true)
-	DisableControlAction(1, 15, true)
-	DisableControlAction(1, 16, true)
-	DisableControlAction(1, 17, true)
-	DisablePlayerFiring(self.pid, true)
+
 end
 
 function Hud:Clothing()
-	clothing = not clothing
-	local table = {
-		['bool'] = clothing,
-		['equipped'] = self.clothestate
-	}
-	SendNUIMessage({
-		type = "setShowClothing",
-		content = table
-	})
-	SetNuiFocusKeepInput(clothing)
-	SetNuiFocus(clothing,clothing)
 
-	if clothing then
-		CreateThread(function()
-			while clothing do
-				self:whileinput()
-				Wait(0)
-			end
-			return
-		end)
-	end
 end
 
 function Hud:checkaccesories(accessory, changes) -- being used if ESX ACCESORIES IS enable - (mask,helmet from datastore instead of skinchangers Characters) copyright to LINK https://github.com/esx-framework/esx_accessories/blob/e812dde63bcb746e9b49bad704a9c9174d6329fa/client/main.lua#L30
-	local state = false
-	local load = false
-	while ESX == nil do
-		Wait(100)
-	end
-	ESX.TriggerServerCallback('esx_accessories:get2', function(hasAccessory, accessorySkin)
-		local _accessory = string.lower(accessory)
-		if hasAccessory then
-			local skin = changes
-			local mAccessory = -1
-			local mColor = 0
 
-			if _accessory == "mask" then
-				mAccessory = 0
-			end
-
-			if _accessory == "mask" or _accessory == "helmet" then
-				mAccessory = accessorySkin[''.._accessory.. '_1']
-				mColor = accessorySkin[''.._accessory.. '_2']
-			end
-
-			self.oldclothes[''.._accessory.. '_1'] = mAccessory
-			self.oldclothes[''.._accessory.. '_2'] = mColor
-			self.saveclothe[''.._accessory.. '_1'] = mAccessory
-			self.saveclothe[''.._accessory.. '_2'] = mColor
-			state = true
-			self:Notify("success","Clothe System","Variant Loaded "..accessory.." "..mColor.." "..mAccessory.."")
-		else
-			state = false
-			self:Notify("warning","Clothe System","No Variant for this type "..accessory.."")
-		end
-		load = true
-	end, accessory)
-
-	while not load do
-		Wait(100)
-	end
-	return state
 end
 
 function Hud:SaveCurrentClothes(firstload)
-	TriggerEvent('skinchanger:getSkin', function(current)
-		if self.oldclothes == nil then
-			self.oldclothes = current
-		else
-			for k,v in pairs(current) do
-				if self.buclothes ~= nil and current[k] ~= self.buclothes[k] and config.clothing[k] ~= nil and config.clothing[k]['default'] ~= v then -- check if old clothes is changed
-					self.oldclothes[k] = v
-					self.buclothes[k] = v
-				end
-			end
-		end
-		if self.buclothes == nil then
-			self.buclothes = {}
-			self.buclothes = current
-		end
-		--self.oldclothes = current
-		Wait(100)
-		if config.use_esx_accesories and firstload then
-			if self:checkaccesories('Mask', self.oldclothes) then
-				self.hasmask = true
-			end
-			Wait(1000)
-			--check if there is a helmet from datastore
-			if self:checkaccesories('Helmet', self.oldclothes) then
-				self.hashelmet = true
-			end
-		elseif not firstload and config.use_esx_accesories then
-			if self.saveclothe['mask_1'] ~= nil and self.saveclothe['mask_1'] ~= self.oldclothes['mask_1'] and config.clothing['mask_1']['default'] == self.oldclothes['mask_1'] then
-				self.oldclothes['mask_1'] = self.saveclothe['mask_1']
-			elseif self.saveclothe['mask_1'] ~= nil and self.saveclothe['mask_1'] ~= self.oldclothes['mask_1'] and config.clothing['mask_1']['default'] ~= self.oldclothes['mask_1'] then
-				if self:checkaccesories('Mask', self.oldclothes) then
-					self.hasmask = true
-				end
-			end
-			if self.saveclothe['helmet_1'] ~= nil and self.saveclothe['helmet_1'] ~= self.oldclothes['helmet_1'] and config.clothing['helmet_1']['default'] == self.oldclothes['helmet_1'] then
-				self.oldclothes['helmet_1'] = self.saveclothe['helmet_1']
-			elseif self.saveclothe['helmet_1'] ~= nil and self.saveclothe['helmet_1'] ~= self.oldclothes['helmet_1'] and config.clothing['helmet_1']['default'] ~= self.oldclothes['helmet_1'] then
-				if self:checkaccesories('Helmet', self.oldclothes) then
-					self.hashelmet = true
-				end
-			end
-		end
-		Wait(1000)
-	end)
-	while self.oldclothes == nil do
-		print("OLDCLOTHESNIL")
-		Wait(0)
-	end
-	if firstload then
-		self:ClotheState()
-	end
+
 end
 
 function Hud:ClotheState()
-	if self.oldclothes == nil then return end
-	for k,v in pairs(self.oldclothes) do
-		if config.clothing[k] then
-			if self.oldclothes[k] == config.clothing[k]['default'] then
-				self.clothestate[k] = false
-			else
-				self.clothestate[k] = true
-			end
-			if k == 'mask_1' and self.hasmask and self.oldclothes['mask_1'] ~= config.clothing['mask_1']['default'] then
-				self.clothestate[k] = false
-			end
-			if k == 'helmet_1' and self.hashelmet and self.oldclothes['helmet_1'] ~= config.clothing['helmet_1']['default'] then
-				self.clothestate[k] = false
-			end
-		end
-	end
 end
 
 function Hud:TaskAnimation(t)
-	if self.imbusy then
-		self.imbusy = false
-		local Ped = self.ped
-		while not HasAnimDictLoaded(t.dictionary) do
-			RequestAnimDict(t.dictionary)
-			Citizen.Wait(5)
-		end
-		if IsPedInAnyVehicle(Ped) then
-			t.speed = 51
-		end
-		TaskPlayAnim(Ped, t.dictionary, t.name, 3.0, 3.0, t.duration, t.speed, 0, false, false, false)
-		local delay = t.duration-500 
-		if delay < 500 then
-			delay = 500
-		end
-		Citizen.Wait(delay) 
-		self.imbusy = true
-	end
+
 end
 
 function Hud:CarStatus()
@@ -3680,188 +1711,16 @@ function Hud:tostringplate(plate)
     end
 end
 
--- function Hud:closestveh(coords)
---     --for k,vv in pairs(GetGamePool('CVehicle')) do
---         for k,v in pairs(self.onlinevehicles) do
--- 			if v.entity ~= nil and NetworkDoesEntityExistWithNetworkId(v.entity) then
--- 				local vv = NetToVeh(v.entity)
--- 				local vehcoords = GetEntityCoords(vv)
--- 				local dist = #(coords-vehcoords)
--- 				local plate = GetVehicleNumberPlateText(vv)
--- 				--anti desync
--- 				if k ~= nil and v.engine ~= nil and v.engine ~= 'default' then
--- 					if not self.syncveh[vv] and tostringplate(plate) == tostringplate(k) and self.syncengine[tostringplate(k)] ~= nil then
--- 						self.syncengine[tostringplate(k)] = nil
--- 					end
--- 					if dist < 100 and self.syncengine[tostringplate(k)] ~= v.engine and vv ~= nil then
--- 						if tostringplate(plate) == tostringplate(k) then
--- 							--print("engine sound",v.engine,vv)
--- 							if config.custom_engine_enable and config.custom_engine[GetHashKey(v.engine)] ~= nil then
--- 								ForceVehicleEngineAudio(vv, config.custom_engine[GetHashKey(v.engine)].soundname)
--- 							else
--- 								ForceVehicleEngineAudio(vv, tostring(v.engine))
--- 							end
--- 							self.syncengine[tostringplate(k)] = v.engine
--- 							self.syncveh[vv] = v.engine
--- 						end
--- 					end
--- 				end
--- 			end
---         end
---     --end
--- end
-
--- function Hud:SyncVehicleSound()
--- 	if self.veh_stats == nil then return end
--- 	Citizen.CreateThread(function()
--- 		Wait(1000)
--- 		closestveh(GetEntityCoords(self.ped))
--- 		return
--- 	end)
--- end
-
 function Hud:SetEngineSpecs(veh, model)
-	if GetPedInVehicleSeat(veh, -1) == self.ped then
-		self.enginespec = false
-		--print("INSIDE LOOP")
-		self.currentengine[self.plate] = model
-		Wait(1300)
-		Citizen.CreateThread(function()
-			local model = model
-			local handling = self:GetHandlingfromModel(model)
-			local getcurrentvehicleweight = GetVehStats(self.vehicle , "CHandlingData","fMass")
-			local multiplier = 1.0
-			multiplier = (handling['fMass'] / getcurrentvehicleweight)
-			self.enginespec = true
-			Wait(10)
-			if tonumber(handling['nInitialDriveGears']) > GetVehicleHandlingInt(self.vehicle , "CHandlingData","nInitialDriveGears") then
-				-- another anti weird bug ( if the new engine gears is > the existing one, the existing old max gear persist, so we use this native below to cheat the bug)
-				SetVehicleHighGear(self.vehicle ,tonumber(handling['nInitialDriveGears']) )
-				Citizen.InvokeNative(0x8923dd42, self.vehicle , tonumber(handling['nInitialDriveGears']) )
-				self:Renzu_Hud(setcurrentgearhash & 0xFFFFFFFF, self.vehicle , tonumber(handling['nInitialDriveGears']) )
-				self:Renzu_Hud(nextgearhash & 0xFFFFFFFF, self.vehicle , tonumber(handling['nInitialDriveGears']) )
-				Wait(11)
-				self:Renzu_Hud(setcurrentgearhash & 0xFFFFFFFF, self.vehicle , 1)
-			end
-			while self.enginespec do
-				--print(multiplier)
-				for k,v in pairs(handling) do
-					if k == 'nInitialDriveGears' then
-						self:GetHandling(self:GetPlate(self.vehicle )).maxgear = v
-						----print("gear")
-						gears = tonumber(v)
-						if gears < 6 and tonumber(GetVehicleMod(self.vehicle ,13)) > 0 then
-							gears = tonumber(v) + 1
-						end
-						SetVehicleHandlingInt(self.vehicle , "CHandlingData", "nInitialDriveGears", gears)
-						SetVehicleHandlingField(self:getveh(), 'CHandlingData', "nInitialDriveGears", gears)
-						--SetVehicleHighGear(self.vehicle , v)
-					elseif k == 'fDriveInertia' then
-						self:GetHandling(self:GetPlate(self.vehicle )).finaldrive = v
-						--print("final drive",self.GetHandling(self:GetPlate(self.vehicle )).finaldrive, multiplier,handling['fMass'], getcurrentvehicleweight)
-						if multiplier < 0.8 then -- weight does not affect reving power
-							m = 0.8
-						else
-							m = multiplier
-						end
-						SetVehStats(self.vehicle , "CHandlingData", "fDriveInertia", v * m)
-					elseif k == 'fInitialDriveForce' then
-						--multiplier is on everytime, this will produce realistic result, ex. Sanchez Engine to self.vehicle . sanchez is a bike/motorcycle, it have a less weight compare to sedan vehicles, so sanchez will produce very low acceleration on sedan cars
-						self:GetHandling(self:GetPlate(self.vehicle )).flywheel = v
-						if not self.manual2 then
-							SetVehStats(self.vehicle , "CHandlingData", "fInitialDriveForce", v * multiplier)
-						end
-					elseif k == 'fInitialDriveMaxFlatVel' and not self.mode == 'DRIFT' then
-						self:GetHandling(self:GetPlate(self.vehicle )).maxspeed = v
-						if not self.manual then
-							mult = 1.0
-							if tonumber(GetVehicleMod(self.vehicle ,13)) > 0 then
-								mult = 1.25
-							end
-							if not self.manual2 then
-								SetVehicleHandlingField(self.vehicle , "CHandlingData", "fInitialDriveMaxFlatVel", v * mult)
-							end
-						end
-					elseif k ~= 'fMass' then
-						SetVehStats(self.vehicle , "CHandlingData", tostring(k), v * 1.0)
-						--SetVehicleHandlingField(self:getveh(), 'CHandlingData', tostring(k), tonumber(v))
-					end
-					--SetVehicleHandlingField(self:getveh(), 'CHandlingData', tostring(k), tonumber(v))
-				end
-				SetVehicleEnginePowerMultiplier(self.vehicle , 1.0) -- needed if maxvel and inertia is change, weird.. this can be call once only to trick the bug, but this is a 1 sec loop it doesnt matter.
-				
-				Wait(1000)
-			end
-			return
-		end)
-	end
-	--SetVehicleHandlingField()
+
 end
 
 function Hud:GetHandlingfromModel(model)
-	local model = model
-	if config.custom_engine_enable and config.custom_engine[model] ~= nil then
-		if config.custom_engine[model].turboinstall then
-			ToggleVehicleMod(self.vehicle , 18, true)
-		end
-		local t = {
-			['fDriveInertia'] = tonumber(config.custom_engine[model].fDriveInertia),
-			['nInitialDriveGears'] = tonumber(config.custom_engine[model].nInitialDriveGears),
-			['fInitialDriveForce'] = tonumber(config.custom_engine[model].fInitialDriveForce),
-			['fClutchChangeRateScaleUpShift'] = tonumber(config.custom_engine[model].fClutchChangeRateScaleUpShift),
-			['fClutchChangeRateScaleDownShift'] = tonumber(config.custom_engine[model].fClutchChangeRateScaleDownShift),
-			['fInitialDriveMaxFlatVel'] = tonumber(config.custom_engine[model].fInitialDriveMaxFlatVel),
-			['fMass'] = tonumber(config.custom_engine[model].fMass),
-		}
-		return t
-	else
-		for k,v in pairs(self.vehiclehandling) do
-			--print(v.VehicleModels[1],model)
-			if GetHashKey(v.VehicleModels[1]) == model then
-				local t = {
-					['fDriveInertia'] = tonumber(v.DriveInertia),
-					['nInitialDriveGears'] = tonumber(v.InitialDriveGears),
-					['fInitialDriveForce'] = tonumber(v.InitialDriveForce),
-					['fClutchChangeRateScaleUpShift'] = tonumber(v.ClutchChangeRateScaleUpShift),
-					['fClutchChangeRateScaleDownShift'] = tonumber(v.ClutchChangeRateScaleDownShift),
-					['fInitialDriveMaxFlatVel'] = tonumber(v.InitialDriveMaxFlatVel),
-					['fMass'] = tonumber(v.Mass),
-				}
-				return t
-			end
-		end
-	end
-	return false
+
 end
 
 function Hud:ReqAndDelete(object, detach)
-	--if DoesEntityExist(object) then
-		NetworkRequestControlOfEntity(object)
-		local attempt = 0
-		while not NetworkHasControlOfEntity(object) and attempt < 100 do
-			NetworkRequestControlOfEntity(object)
-			Citizen.Wait(11)
-			attempt = attempt + 1
-		end
-		if detach then
-			DetachEntity(self:getveh(), 0, false)
-			DetachEntity(object, 0, false)
-		end
-		local count = 0
-		SetEntityAsNoLongerNeeded(object)
-		while DoesEntityExist(object) and count < 100 do -- delete loop
-			count = count + 1
-			SetEntityAlpha(object, 1, true)
-			SetEntityAsMissionEntity(object)
-			DeleteEntity(object)
-			Wait(100)
-			--print("deleting")
-		end
-		if DoesEntityExist(object) then -- if onesync is broken :D
-			--print("teleporting")
-			SetEntityCoords(object,0.0,0.0,0.0)
-		end
-	--end
+
 end
 
 function Hud:DefineCarUI(ver)
@@ -3901,114 +1760,11 @@ end)
 
 standmodel , enginemodel = nil, nil
 function Hud:repairengine(plate)
-	self.vehicle  = self:getveh()
-	local prop_stand = 'prop_engine_hoist'
-	local prop_engine = 'prop_car_engine_01'
-	--print("engine repair")
-	Citizen.Wait(200)
-	local bone = GetEntityBoneIndexByName(self.vehicle ,'engine')
-	local d1,d2 = GetModelDimensions(GetEntityModel(self.vehicle ))
-	local stand = GetOffsetFromEntityInWorldCoords(self.vehicle , 0.0,d2.y+0.4,0.0)
-	local obj = nil
 
-	local veh_heading = GetEntityHeading(self.vehicle )
-	local veh_coord = GetEntityCoords(self.vehicle ,false)
-	local x,y,z = table.unpack(GetWorldPositionOfEntityBone(self.vehicle , bone))
-	local animDict = "anim@amb@business@meth@meth_monitoring_cooking@cooking@"
-	RequestAnimDict(animDict)
-	while not HasAnimDictLoaded(animDict) do 
-		Wait(1)
-		RequestAnimDict(animDict)
-	end
-	self:requestmodel('bkr_prop_meth_sacid')
-	local animPos, targetHeading = GetAnimInitialOffsetPosition(animDict, "chemical_pour_long_cooker", x,y,z, 0.0,0.0,veh_heading, 0, 2), 52.8159
-	local ax,ay,az = table.unpack(animPos)
-	local rx,ry,rz = table.unpack(GetEntityForwardVector(self.vehicle ) * 1.5)
-	local realx,realy,realz = x - ax , y - ay , z - az
-	local coordf = veh_coord + GetEntityForwardVector(self.vehicle ) * 3.0
-	standmodel = CreateObject(GetHashKey(prop_stand),coordf,true,true,true)
-	obj = standmodel
-	standprop = obj
-	SetEntityAsMissionEntity(obj, true, true)
-	--print("spawn stand")
-	SetEntityNoCollisionEntity(self.vehicle , obj, false)
-	SetEntityHeading(obj, GetEntityHeading(self.vehicle ))
-	PlaceObjectOnGroundProperly(obj)
-	FreezeEntityPosition(obj, true)
-	SetEntityCollision(obj, false, true)
-	while not DoesEntityExist(obj) do
-		Citizen.Wait(100)
-	end
-	local d21 = GetModelDimensions(GetEntityModel(obj))
-	local stand = GetOffsetFromEntityInWorldCoords(obj, 0.0,d21.y+0.2,0.0)
-	Citizen.Wait(500)
-	local engine_r = GetEntityBoneRotation(self.vehicle , bone)
-	enginemodel = CreateObject(GetHashKey(prop_engine),stand.x+0.27,stand.y-0.2,stand.z+1.45,true,true,true)
-	AttachEntityToEntity(enginemodel,self.vehicle ,GetEntityBoneIndexByName(self.vehicle ,'neon_f'),0.0,-0.45,1.5,0.0,90.0,0.0,true,false,false,false,70,true)
-	--AttachEntityToEntity(enginemodel,self.vehicle ,bone,0.0,0.0,0.0,0.0,0.0,0.0,false,false,false,false,1,false)
-	carryModel2 = enginemodel
-	engineprop = carryModel2
-	--SetEntityHeading(engineprop, 0)
-	SetEntityAsMissionEntity(engineprop, true, true)
-	--print("spawn engine")
-	SetEntityNoCollisionEntity(self.vehicle , carryModel2, false)
-	FreezeEntityPosition(carryModel2, true)
-	SetEntityNoCollisionEntity(carryModel2, obj, false)
-	SetEntityCollision(carryModel2, false, true)
 end
 
 function Hud:SyncWheelAndSound(sounds,wheels)
-	local coords = GetEntityCoords(PlayerPedId())
-	while LocalPlayer.state.onlinevehicles == nil do Wait(1) print(LocalPlayer.state.onlinevehicles) end
-	for k,v in pairs(LocalPlayer.state.onlinevehicles) do
-		v.plate = string.gsub(v.plate, "^%s*(.-)%s*$", "%1")
-		local pl = string.gsub(self:tostringplate(GetVehicleNumberPlateText(NetToVeh(v.entity))), "^%s*(.-)%s*$", "%1")
-		if v.entity ~= nil and NetworkDoesEntityExistWithNetworkId(v.entity) and v.plate == pl then
-			local vv = NetToVeh(v.entity)
-			local vehcoords = GetEntityCoords(vv)
-			local dist = #(coords-vehcoords)
-			local plate = string.gsub(self:tostringplate(GetVehicleNumberPlateText(vv)), "^%s*(.-)%s*$", "%1")
-			--plate = string.gsub(plate, "%s+", "")
-			if wheels then
-				if self.nearstancer[plate] == nil then
-					self.nearstancer[plate] = {entity = vv, dist = dist, plate = plate}
-				end
-				self.nearstancer[plate].dist = dist
-				self.nearstancer[plate].entity = vv
-				self.nearstancer[plate].speed = GetEntitySpeed(vv) * 3.6
-				if v.height ~= nil and not self.nearstancer[plate].wheeledit then
-					SetVehicleSuspensionHeight(vv,v.height)
-				end
-			end
-			if sounds and k ~= nil and v.engine ~= nil and v.engine ~= 'default' then
-				if not self.syncveh[vv] and self:tostringplate(plate) == self:tostringplate(k) and self.syncengine[self:tostringplate(k)] ~= nil then
-					self.syncengine[self:tostringplate(k)] = nil
-				end
-				if dist < 100 and self.syncengine[self:tostringplate(k)] ~= v.engine and vv ~= nil then
-					if self:tostringplate(plate) == self:tostringplate(k) then
-						--print("engine sound",v.engine,vv)
-						if config.custom_engine_enable and config.custom_engine[GetHashKey(v.engine)] ~= nil then
-							ForceVehicleEngineAudio(vv, config.custom_engine[GetHashKey(v.engine)].soundname)
-						else
-							ForceVehicleEngineAudio(vv, tostring(v.engine))
-						end
-						self.syncengine[self:tostringplate(k)] = v.engine
-						self.syncveh[vv] = v.engine
-					end
-				end
-			end
-		elseif not NetworkDoesEntityExistWithNetworkId(v.entity) then
-			local temp = LocalPlayer.state.onlinevehicles
-			temp[k] = nil
-			LocalPlayer.state:set('onlinevehicles', temp, true)
-		end
-	end
-	for k,v in pairs(self.nearstancer) do
-		if v.dist > 250 or not DoesEntityExist(v.entity) then
-			--print(v.plate,"deleted")
-			self.nearstancer[k] = nil
-		end
-	end
+
 end
 
 function Hud:Renzu_Function(func)

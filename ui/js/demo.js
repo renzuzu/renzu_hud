@@ -472,10 +472,6 @@ function setSpeed(s) {
     let value = speed;
     let to = length * ((100 - value) / 100);
     val = to / 1000
-    //e.style.strokeDashoffset = to;
-    //$('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 20, delay: 20}).velocity({ 'stroke-dashoffset': to }, {duration: 15, delay: 23}).velocity({ 'stroke-dashoffset': to }, {duration: 20, delay: 23})
-    //$('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 2, delay: 5}).velocity({ 'stroke-dashoffset': to }, {duration: 2, delay: 5}).velocity({ 'stroke-dashoffset': to }, {duration: 1, delay: 5})
-    //$('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 30, delay: 60})
     if (setting['carhud'] && setting['carhud']['refreshrate'] > 170) {
         $('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 35, delay: 25}).velocity({ 'stroke-dashoffset': to }, {duration: 24, delay: 23}).velocity({ 'stroke-dashoffset': to }, {duration: 24, delay: 23})
     } else if (setting['carhud'] && setting['carhud']['refreshrate'] > 70) {
@@ -495,8 +491,6 @@ function setSpeed(s) {
 function setCoolant(percent) {
     var water = (percent);
     rpm2 = water.toFixed(0)
-    ////console.log(rpm2)
-    //document.getElementById("rpmmeter").innerHTML = ""+rpm2+"";
     var e = document.getElementById("coolantpath");
     if (e) {
         let length = e.getTotalLength();
@@ -576,7 +570,6 @@ function playsoundSeatbelt(bool) {
 }
 
 function setMileage(value) {
-    ////////console.log(value)
     mileage = value.toFixed(0);
     if (mileage >= 1000) {
         document.getElementById("mileage").style.margin = '0 2px 0 0'
@@ -586,16 +579,12 @@ function setMileage(value) {
         document.getElementById("mileage").style.margin = '0 15px 0 0'
     }
 
-    //color
     var e = document.getElementById("oilpath");
     if (mileage >= 5000 && mileage < 10000) {
-        //e.style.stroke = 'yellow'
         document.getElementById("mileage").style.color = 'yellow'
     } else if(mileage >=10000){
-        //e.style.stroke = '#C85A17'
         document.getElementById("mileage").style.color = '#C85A17'
     } else {
-        //e.style.stroke = 'lime'
         document.getElementById("mileage").style.color = 'rgba(182, 182, 182, 0.582)'
     }
     document.getElementById("mileage").innerHTML = ''+mileage+''
@@ -740,33 +729,15 @@ function setStart(bool) {
 }
 
 function setDoor(s) {
-    if (s == 2) {
-        document.getElementById('dooropen').style.display = 'block'
-        document.getElementById('doorclose').style.display = 'none'
-    } else {
-        document.getElementById('dooropen').style.display = 'none'
-        document.getElementById('doorclose').style.display = 'block'
-    }
+
 }
 
 function setHood(s) {
-    if (s == 2 && document.getElementById('hoodopen')) {
-        document.getElementById('hoodopen').style.display = 'block'
-        document.getElementById('hoodclose').style.display = 'none'
-    } else if (document.getElementById('hoodopen')) {
-        document.getElementById('hoodopen').style.display = 'none'
-        document.getElementById('hoodclose').style.display = 'block'
-    }
+
 }
 
 function setTrunk(s) {
-    if (s == 2 && document.getElementById('trunkopen')) {
-        document.getElementById('trunkopen').style.display = 'block'
-        document.getElementById('trunkclose').style.display = 'none'
-    } else if (document.getElementById('trunkopen')) {
-        document.getElementById('trunkopen').style.display = 'none'
-        document.getElementById('trunkclose').style.display = 'block'
-    }
+
 }
 
 function setBrake(s) {
@@ -784,14 +755,10 @@ function CarMap(detalye) {
     var table = detail.content
     var r = document.querySelector(':root');
     if (detail.type == "updatemapa") {
-        //////console.log("updating map ui")
         $(".centermap").css("transform", "rotate(" + table.myheading + "deg)");
         $("#carblip").css("transform", "translateX(-50%) translateY(50%) rotate(" + table.camheading + "deg)");
-        //console.log(table.y,table.x)
         r.style.setProperty('--Y', table.y);
         r.style.setProperty('--X', table.x);
-        //$(":root").css("--Y", table.y);
-        //$(":root").css("--X", table.x);
     } else {
         if (detail.type == "sarado") {
             $(".carhudmap").fadeOut();
@@ -840,26 +807,7 @@ function setTemp(temp) {
 }
 
 function setMode(value,c) {
-    if (carui == undefined) {
-        carui = c
-    }
-    if (carui == 'minimal') {
-        //document.getElementById("simple").innerHTML = '';
-        document.getElementById("mode").innerHTML = value;
-        document.getElementById("modediv").style.right = '61%';
-        document.getElementById("modediv").style.bottom = '49%';
-        document.getElementById("modediv").style.fontSize = '0.5vw';
-    } else if (carui == 'modern') {
-        document.getElementById("mode").innerHTML = value;
-    } else if (carui == 'simple') {
-        //document.getElementById("minimal").innerHTML = '';
-        document.getElementById("mode").innerHTML = value;
-        document.getElementById("modediv").style.right = '61%';
-        document.getElementById("modediv").style.bottom = '49%';
-        document.getElementById("modediv").style.fontSize = '0.5vw';
-    }
-    document.getElementById(""+carui+"").style.display = ''+carui+'';
-    document.getElementById(""+carui+"").style.opacity = '0.65';
+    document.getElementById("modediv").style.opacity = '0.0';
 }
 
 function setDifferential(value) {
@@ -883,374 +831,25 @@ function setCruiseControl(bool) {
     }
 }
 var cachebody = undefined
-var bodystring = `<div id="bodyinfo">Body Status:</div>
-<img style="z-index:900;position:absolute;right:440px;top:100px;opacity:0.7;height:650px;" src="img/bodybg.png" />
-<div class="pulse" style="z-index: 1111;"></div>
-<img id="bodystatus" style="z-index:1001;position:absolute;right:500px;top:100px;opacity:1;height:550px;" src="img/bodyui.png" />
-<i onclick="healpart('chest')" class="fad fa-first-aid" id="ped_body_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:632px;top:178px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
-<i onclick="healpart('head')" class="fad fa-first-aid" id="ped_head_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:811px;top:177px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
-<i onclick="healpart('arm')" class="fad fa-first-aid" id="right_hand_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:856px;top:309px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
-<i onclick="healpart('arm')" class="fad fa-first-aid" id="left_hand_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:578px;top:306px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
-<i onclick="healpart('leg')" class="fad fa-first-aid" id="left_leg_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:807px;top:441.8px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
-<i onclick="healpart('leg')" class="fad fa-first-aid" id="right_leg_heal" style="--fa-secondary-color:#c30707;-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1002;position:absolute;right:624px;top:441.8px;opacity:0.0;font-size:50px;color:#e7e7e7;"></i>
-<img id="ped_body" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:632px;top:178px;opacity:0.0;height:100px;" src="img/chest.png" />
-<img id="ped_head" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:811px;top:177px;opacity:0.0;height:100px;" src="img/head.png" />
-<img id="right_hand" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:856px;top:309px;opacity:0.0;height:110px;" src="img/rightarm.png" />
-<img id="left_hand" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:578px;top:306px;opacity:0.0;height:110px;" src="img/leftarm.png" />
-<img id="left_leg" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:807px;top:441.8px;opacity:0.0;height:110px;" src="img/rightleg.png" />
-<img id="right_leg" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(255, 5, 5));z-index:1001;position:absolute;right:624px;top:441.8px;opacity:0.0;height:110px;" src="img/leftleg.png" />
-<span id="ped_body_status" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:657px;border-radius:5px;top:280px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/chest.png">Normal</span>
-<span id="ped_head_status" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:835px;top:280px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/head.png">Normal</span>
-<span id="right_hand_status" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:890px;top:414px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/rightarm.png">Normal</span>
-<span id="left_hand_status" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:608px;top:412px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/leftarm.png">Normal</span>
-<span id="left_leg_status" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:840px;top:544.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/rightleg.png">Normal</span>
-<span id="right_leg_status" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:654px;top:545.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;background:rgba(0, 0, 0, 0.555); padding:5px;overflow:hidden;" src="img/leftleg.png">Normal</span>`
 function setShowBodyUi(bool) {
-    if (bool) {
-        document.getElementById('bodyui').style.display = 'block'
-        $('#bodyui').append(bodystring)
-        $("#bodystatus").fadeIn();
-        setTimeout(function(){
-            setBodyParts(cachebody)
-        }, 533);
-    } else {
-        document.getElementById('bodyui').style.display = 'none'
-        $('#bodyui').html('')
-        $("#bodystatus").fadeOut();
-    }
+
 }
 
 function pulse(stroke) {
-    var pulsespeed = '2s'
-    if (stroke == 'red') {
-        pulsespeed = '1s'
-    } else if (stroke == 'orange') {
-        pulsespeed = '1s'
-    } else if (stroke == 'yelow') {
-        pulsespeed = '2s'
-    } else if (stroke == 'green') {
-        pulsespeed = '2s'
-    } else if (stroke == 'lime') {
-        pulsespeed = '2s'
-    }
-    var pulseurl = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200px 100px" enable-background="new 0 0 200px 100px" xml:space="preserve"><polyline fill="none" stroke-width="3px" stroke="'+stroke+'" points="2.4,58.7 70.8,58.7 76.1,46.2 81.1,58.7 89.9,58.7 93.8,66.5 102.8,22.7 110.6,78.7 115.3,58.7 126.4,58.7 134.4,54.7 142.4,58.7 197.8,58.7 "/></svg>'
-    var addRule = (function(style){
-        var sheet = document.head.appendChild(style).sheet;
-        return function(selector, css){
-            var propText = Object.keys(css).map(function(p){
-                return p+":"+css[p]
-            }).join(";");
-            sheet.insertRule(selector + "{" + propText + "}", sheet.cssRules.length);
-        }
-    })(document.createElement("style"));
 
-    addRule(".pulse:after", {
-        content: "''",
-        display: "block",
-        background: "url('"+pulseurl+"') 0 0 no-repeat;",
-        width: "100%",
-        height: "100%",
-        position: "absolute",
-        "-webkit-animation": "2s pulse linear infinite",
-        "-moz-animation": "2s pulse linear infinite",
-        "-o-animation": "2s pulse linear infinite",
-        animation: ""+pulsespeed+" pulse linear infinite",
-        clip: "rect(0, 0, 100px, 0)"
-    });
 }
 
 var bodystatus = {}
 function setUpdateBodyStatus(table) {
-    bodystatus = table
-    var totalpain = 0
-    for (const key in table) {
-        var val = table[key] * 0.1;
-        ////////console.log(val)
-        if (val == undefined) {
-            val = 0.0
-        }
-        if(key) {
-            if (document.getElementById(''+key+'_status') == undefined) { return }
-            document.getElementById(''+key+'_heal').style.zIndex = '0';
-            document.getElementById(''+key+'_heal').style.opacity = '0.0';
-            if (val < 0.29 && val >= 0.1) {
-                val = 0.29
-            }
-            totalpain = totalpain + val
-            document.getElementById(key).style.opacity = val;
-            //console.log(key,val)
-            if (val > 0.9) {
-                document.getElementById(''+key+'_status').innerHTML = 'Severe';
-            } else if (val > 0.7) {
-                document.getElementById(''+key+'_status').innerHTML = 'Damaged';
-            } else if (val > 0.5) {
-                document.getElementById(''+key+'_status').innerHTML = 'Injured';
-            } else if (val > 0.3) {
-                document.getElementById(''+key+'_status').innerHTML = 'inPain';
-            } else if (val >= 0.29) {
-                document.getElementById(''+key+'_status').innerHTML = 'Small Pain';
-            } else if(val <= 0) {
-                document.getElementById(''+key+'_status').innerHTML = 'Normal';
-            }
-            if (val >= 0.29 && isambulance) {
-                document.getElementById(''+key+'_heal').style.opacity = '0.5';
-                document.getElementById(''+key+'_heal').style.zIndex = '1222';
-            } else {
-                document.getElementById(''+key+'_heal').style.opacity = '0.0';
-                document.getElementById(''+key+'_heal').style.zIndex = '0';
-            }
-            if (totalpain > 4) {
-                pulse('red')
-            } else if(totalpain > 3) {
-                pulse('orange')
-            } else if (totalpain > 2) {
-                pulse('yellow')
-            } else if (totalpain > 1) {
-                pulse('green')
-            } else {
-                pulse('lime')
-            }
-        }
-    }
+
 }
 
 function setBodyParts(table) {
-    ////////console.log("bodyparts")
-    cachebody = table
-    $(document).ready(function(){
-        for (const key in table) {
-            if (key == 'arm') {
-                for (const key2 in table[key]) {
-                    var idname = ""+table[key][key2]+"_heal"
-                    ////////console.log(idname)
-                    $("#"+idname+"").hover(function(){
-                        $(this).css("opacity", "1.0");
-                        ////////console.log("hover")
-                        }, function(){
-                        $(this).css("opacity", "0.5");
-                    });
-                }
-            } else if (key == 'leg') {
-                for (const key2 in table[key]) {
-                    var idname = ""+table[key][key2]+"_heal"
-                    ////////console.log(idname)
-                    $("#"+idname+"").hover(function(){
-                        $(this).css("opacity", "1.0");
-                        ////////console.log("hover")
-                        }, function(){
-                        $(this).css("opacity", "0.5");
-                    });
-                }
-            } else {
-                var idname = ""+table[key]+"_heal"
-                ////////console.log(idname)
-                $("#"+idname+"").hover(function(){
-                    $(this).css("opacity", "1.0");
-                    ////////console.log("hover")
-                    }, function(){
-                    $(this).css("opacity", "0.5");
-                });
-            }
-        }
-    });
+
 }
 
-var carcontrolstring = `
-<img style="z-index:900;position:absolute;right:440px;top:200px;opacity:0.2;height:800px;" src="img/carcontrol_bg.png" />
-<img id="carcontrol" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.8;height:400px;" src="img/carcontrol.png" />
-<img id="carcontrol2" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:1.0;height:400px;" src="img/carcontrol2.png" />
-<img id="hood" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/hood.png" />
-<span id="hoodclick" onclick="Carcontrolcallbackui('door','4');" style="z-index:1021;position:absolute;right:745px;top:290px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
-<img id="trunk" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/trunk.png" />
-<span id="" onclick="Carcontrolcallbackui('door','5');" style="z-index:1021;position:absolute;right:745px;top:590px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
-<img id="rearleftdoor" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/rearleftdoor.png" />
-<span id="" onclick="Carcontrolcallbackui('door','2');" style="z-index:1021;position:absolute;right:890px;top:400px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
-<img id="rearwindow" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/rearwindow.png" />
-<span id="" onclick="Carcontrolcallbackui('window','2');" style="z-index:1021;position:absolute;right:645px;top:554px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
-<img id="frontwindow" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/frontwindow.png" />
-<span id="" onclick="Carcontrolcallbackui('window','1');" style="z-index:1021;position:absolute;right:599px;top:479px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
-<img id="rearseat" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/rearseat.png" />
-<span id="" onclick="Carcontrolcallbackui('seat','2');" style="z-index:1021;position:absolute;right:840px;top:557px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
-<img id="frontseat" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/frontseat.png" />
-<span id="" onclick="Carcontrolcallbackui('seat','1');" style="z-index:1021;position:absolute;right:890px;top:485px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
-<img id="rearrightdoor" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/rearrightdoor.png" />
-<span id="" onclick="Carcontrolcallbackui('door','3');" style="z-index:1021;position:absolute;right:600px;top:390px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
-<img id="frontrightdoor" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/frontrightdoor.png" />
-<span id="" onclick="Carcontrolcallbackui('door','1');" style="z-index:1021;position:absolute;right:650px;top:320px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
-<img id="frontleftdoor" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/frontleftdoor.png" />
-<span id="" onclick="Carcontrolcallbackui('door','0');" style="z-index:1021;position:absolute;right:840px;top:325px;opacity:1.0;height:60px; background:#00000000;border-radius:50%;height:60px;width:60px;"></span>
-<img id="engine" style="z-index:1001;position:absolute;right:575px;top:270px;opacity:0.0;height:400px;" src="img/engine_true.png" />
-<span id="" onclick="Carcontrolcallbackui('engine','0');" style="z-index:1021;position:absolute;right:694px;top:390px;opacity:1.0;height:160px; background:#00000000;border-radius:50%;height:160px;width:160px;"></span>
-<div id="morecontrol" style="z-index:1001;position:absolute;right:515px;bottom:-390px;opacity:1.0;height:400px;width:450px;padding:10px;">
-  <div id="airsusinfo">Air Suspension:</div>
-  <div class="range-slider" id="suspension">
-    <input class="range-slider__range" step="0.1" type="range" value="15" min="0" max="30">
-      <span class="range-slider__value">100</span>
-    </div>
-    <div id="neoninfo">Neon Lights:</div>
-    <div class="switch switch-blue" style="position: absolute;top:90px;left:10px;">
-      <input type="radio" class="switch-input" name="neon" value="on" id="week2" checked>
-        <label for="week2" class="switch-label switch-label-off">ON</label>
-        <input type="radio" class="switch-input" name="neon" value="off" id="month2">
-          <label for="month2" class="switch-label switch-label-on">OFF</label>
-          <span class="switch-selection"></span>
-        </div>
-        <div id="neoninfo1">Neon Effect 1:</div>
-        <div class="switch switch-blue" style="position: absolute;top:90px;left:140px;">
-          <input type="radio" class="switch-input" name="neoneffect1" value="on" id="neoneffect1">
-            <label for="neoneffect1" class="switch-label switch-label-off">ON</label>
-            <input type="radio" class="switch-input" name="neoneffect1" value="off" id="neoneffect1off" checked>
-              <label for="neoneffect1off" class="switch-label switch-label-on">OFF</label>
-              <span class="switch-selection"></span>
-            </div>
-            <div id="neoninfo2">Neon Effect 2:</div>
-            <div class="switch switch-blue" style="position: absolute;top:90px;left:270px;">
-              <input type="radio" class="switch-input" name="neoneffect2" value="on" id="neoneffect2">
-                <label for="neoneffect2" class="switch-label switch-label-off">ON</label>
-                <input type="radio" class="switch-input" name="neoneffect2" value="off" id="neoneffect2off" checked>
-                  <label for="neoneffect2off" class="switch-label switch-label-on">OFF</label>
-                  <span class="switch-selection"></span>
-                </div>
-                <div id="wheeloffsetfrontdiv">Wheel Offset Front:</div>
-                <div style="position:absolute;top:100px;" class="range-slider" id="wheeloffsetfront">
-                  <input class="range-slider__range" type="range" step="0.1" value="0.0" min="0.0" max="2.0">
-                    <span style="display:none;" class="range-slider__value">100</span>
-                  </div>
-                  <div id="wheeloffsetreardiv">Wheel Offset Rear:</div>
-                  <div style="position:absolute;top:134px;" class="range-slider" id="wheeloffsetrear">
-                    <input class="range-slider__range" type="range" step="0.1" value="0.0" min="0.0" max="2.0">
-                      <span style="display:none;" class="range-slider__value">100</span>
-                    </div>
-                    <div id="wheelrotationfrontdiv">Wheel Rotation Front:</div>
-                    <div style="position:absolute;top:168px;" class="range-slider" id="wheelrotationfront">
-                      <input class="range-slider__range" type="range" step="0.1" value="0.0" min="0.0" max="2.0">
-                        <span style="display:none;" class="range-slider__value">100</span>
-                      </div>
-                      <div id="wheelrotationreardiv">Wheel Rotation Rear:</div>
-                      <div style="position:absolute;top:198px;" class="range-slider" id="wheelrotationrear">
-                        <input class="range-slider__range" type="range" step="0.1" value="0.0" min="0.0" max="2.0">
-                          <span style="display:none;" class="range-slider__value">100</span>
-                        </div>
-                        <div id="wheelsettingdiv">Wheel Settings:</div>
-                        <div class="switch switch-blue" style="position: absolute;top:285px;left:150px;">
-                          <input type="radio" class="switch-input" name="wheelsetting" value="on" id="wheelsetting">
-                            <label for="wheelsetting" class="switch-label switch-label-off">ON</label>
-                            <input type="radio" class="switch-input" name="wheelsetting" value="off" id="wheelsettingoff" checked>
-                              <label for="wheelsettingoff" class="switch-label switch-label-on">OFF</label>
-                              <span class="switch-selection"></span>
-                            </div>
-                          </div>`
 function setShowCarcontrol(table) {
-    if (table.bool) {
-        document.getElementById('carcontrolui').style.display = 'block'
-        $('#carcontrolui').append(carcontrolstring)
-        $("#carcontrol").fadeIn();
 
-        // more carcontrols
-    const settings = {
-        fill: '#1abc9c',
-        background: '#d7dcdf' };
-        const suspension = document.querySelectorAll('#suspension');
-        Array.prototype.forEach.call(suspension, slider => {
-            slider.querySelector('input').addEventListener('input', event => {
-                slider.querySelector('span').innerHTML = event.target.value * 0.01;
-                applyFill(event.target);
-                post("setvehicleheight",{val:event.target.value * 0.01})
-            });
-            applyFill(slider.querySelector('input'));
-        });
-    
-        const wheeloffsetfront = document.querySelectorAll('#wheeloffsetfront');
-        Array.prototype.forEach.call(wheeloffsetfront, slider => {
-            console.log(table.offset[1],table.offset['0'])
-            slider.querySelector('input').value = table.offset[1]
-            slider.querySelector('input').addEventListener('input', event => {
-                slider.querySelector('span').innerHTML = event.target.value * 0.01;
-                applyFill(event.target);
-                //console.log(event.target.value)
-                post("setvehiclewheeloffsetfront",{val:event.target.value})
-            });
-            applyFill(slider.querySelector('input'));
-        });
-    
-        const wheeloffsetrear = document.querySelectorAll('#wheeloffsetrear');
-        Array.prototype.forEach.call(wheeloffsetrear, slider => {
-            slider.querySelector('input').value = table.offset[1]
-            slider.querySelector('input').addEventListener('input', event => {
-                slider.querySelector('span').innerHTML = event.target.value * 0.01;
-                applyFill(event.target);
-                //console.log(event.target.value)
-                post("setvehiclewheeloffsetrear",{val:event.target.value})
-            });
-            applyFill(slider.querySelector('input'));
-        });
-    
-        const wheelrotationfront = document.querySelectorAll('#wheelrotationfront');
-        Array.prototype.forEach.call(wheelrotationfront, slider => {
-            slider.querySelector('input').value = table.rotation[1]
-            slider.querySelector('input').addEventListener('input', event => {
-                slider.querySelector('span').innerHTML = event.target.value * 0.01;
-                applyFill(event.target);
-                post("setvehiclewheelrotationfront",{val:event.target.value})
-            });
-            applyFill(slider.querySelector('input'));
-        });
-    
-        const wheelrotationrear = document.querySelectorAll('#wheelrotationrear');
-        Array.prototype.forEach.call(wheelrotationrear, slider => {
-            slider.querySelector('input').value = table.rotation[1]
-            slider.querySelector('input').addEventListener('input', event => {
-                slider.querySelector('span').innerHTML = event.target.value * 0.01;
-                applyFill(event.target);
-                post("setvehiclewheelrotationrear",{val:event.target.value})
-            });
-            applyFill(slider.querySelector('input'));
-        });
-    
-        $('input[type=radio][name=wheelsetting]').change(function() {
-            if (this.value == 'on') {
-                //console.log("ON")
-                post("wheelsetting",{bool:false})
-            } else {
-                //console.log("OFF")
-                post("wheelsetting",{bool:true})
-            }
-        });
-        
-        $('input[type=radio][name=neon]').change(function() {
-            if (this.value == 'on') {
-                ////////console.log("ON")
-                post("setvehicleneon",{bool:true})
-            } else {
-                ////////console.log("OFF")
-                post("setvehicleneon",{bool:false})
-            }
-        });
-    
-        $('input[type=radio][name=neoneffect1]').change(function() {
-            if (this.value == 'on') {
-                ////////console.log("ON")
-                post("setneoneffect1",{bool:true})
-            } else {
-                ////////console.log("OFF")
-                post("setneoneffect1",{bool:false})
-            }
-        });
-    
-        $('input[type=radio][name=neoneffect2]').change(function() {
-            if (this.value == 'on') {
-                ////////console.log("ON")
-                post("setneoneffect2",{bool:true})
-            } else {
-                ////////console.log("OFF")
-                post("setneoneffect2",{bool:false})
-            }
-        });
-    } else {
-        $('#carcontrolui').html('')
-        document.getElementById('carcontrolui').style.display = 'none'
-        $("#carcontrol").fadeOut();
-    }
 }
 
 function post(name,data){
@@ -1370,80 +969,7 @@ function setWindowState(table) {
 }
 
 function Carcontrolcallbackui(type,index) {
-    ////////console.log("callback car control")
-    if (type == 'window') {
-        bool = !bool
-        if (index == 2) {
-            post("setVehicleWindow2",{})
-            showhidecontrolui(bool,'rearwindow')
-        } else {
-            post("setVehicleWindow1",{})
-            showhidecontrolui(bool,'frontwindow')
-        }
-    }
-    if (type == 'seat') {
-        //showhidecontrolui(bool,indexname(index))
-        if (index == 2) {
-            post("setVehicleSeat2",{})
-        } else {
-            post("setVehicleSeat1",{})
-        }
-    }
-    if (type == 'engine') {
-        if (bool) {
-            bool = false
-        } else {
-            bool = true
-        }
-        //showhidecontrolui(bool,indexname(index))
-        post("setVehicleEnginestate",{bool:bool,index:index})
-    }
-    if (type == 'door') {
-        if (index == 4 && hood == false) {
-            hood = true
-            bool = true
-        } else if (index == 4 && hood) {
-            hood = false
-            bool = false
-        }
-        if (index == 5 && trunk == false) {
-            trunk = true
-            bool = true
-        } else if (index == 5 && trunk) {
-            trunk = false
-            bool = false
-        }
-        if (index == 0 && frontleftdoor == false) {
-            frontleftdoor = true
-            bool = true
-        } else if (index == 0 && frontleftdoor) {
-            frontleftdoor = false
-            bool = false
-        }
-        if (index == 1 && frontrightdoor == false) {
-            frontrightdoor = true
-            bool = true
-        } else if (index == 1 && frontrightdoor) {
-            frontrightdoor = false
-            bool = false
-        }
-        if (index == 2 && rearleftdoor == false) {
-            rearleftdoor = true
-            bool = true
-        } else if (index == 2 && rearleftdoor) {
-            rearleftdoor = false
-            bool = false
-        }
-        if (index == 3 && rearrightdoor == false) {
-            rearrightdoor = true
-            bool = true
-        } else if (index == 3 && rearrightdoor) {
-            rearrightdoor = false
-            bool = false
-        }
-        showhidecontrolui(bool,indexname(index))
-        post("setVehicleDoor",{bool:bool,index:index})
-    }
+
 }
 
 function setWeapon(weapon) {
@@ -2127,8 +1653,8 @@ function setCarui(ver) {
                 document.getElementById("simple").style.display = 'block';
             }
             document.getElementById("rpmtext").style.right = '68%';
-            document.getElementById("rpmtext").style.bottom = '55%';
-            document.getElementById("rpmtext").style.fontSize = '0.3vw';
+            document.getElementById("rpmtext").style.bottom = '52%';
+            document.getElementById("rpmtext").style.fontSize = '0.35vw';
             document.getElementById("mode").style.fontSize = '0.55vw';
             document.getElementById("tempicon").style.right = '23.5%';
             document.getElementById("tempicon").style.bottom = '57%';
@@ -2307,9 +1833,6 @@ function setStatusUI(t) {
         if (document.getElementById("voip_1")) {
             document.getElementById("voip_1").innerHTML = '';
         }
-        //document.getElementById("mic").style.right = '363px';
-        //document.getElementById("mic-color").style.width = '15px';
-        //document.getElementById("mic-color").style.height = '27px';
     } else if (t['enable']) {
         if(document.getElementById("voipdiv")) {
             document.getElementById("voipdiv").remove()
@@ -2321,28 +1844,23 @@ function setStatusUILocation(table) {
     if (locache == undefined) {
         locache = table   
     }
-    ////////console.log("MOVE UI")
     if (!RestoreStatusPosition()) {
         if (table['top']) {
-            //////console.log(table['top'])
             document.getElementById("statusv3").style.top = ''+table['top']+'';
         } else {
             document.getElementById("statusv3").style.top = 'unset';
         }
         if (table['right']) {
-            //////console.log(table['right'])
             document.getElementById("statusv3").style.right = ''+table['right']+'';
         } else {
             document.getElementById("statusv3").style.right = 'unset';
         }
         if (table['bottom']) {
-            //////console.log(table['bottom'])
             document.getElementById("statusv3").style.bottom = ''+table['bottom']+'';
         } else {
             document.getElementById("statusv3").style.bottom = 'unset';
         }
         if (table['left']) {
-            //////console.log(table['left'])
             document.getElementById("statusv3").style.left = ''+table['left']+'';
         } else {
             document.getElementById("statusv3").style.left = 'unset';
@@ -2392,104 +1910,26 @@ function setMoveStatusUi(bool) {
 }
 
 function setNitro(nitro) {
-    if (carui !== 'minimal') { return }
-    var e = document.getElementById("nitropath");
-    let length = e.getTotalLength();
-    let value = nitro;
-    let to = length * ((100 - value) / 100);
-    val = to / 1000
-    //e.style.strokeDashoffset = to;
-    $('#nitropath').velocity({ 'stroke-dashoffset': to }, {duration: 15, delay: 5})
+
 }
 
 function setWheelHealth(table) {
-        var index = table[['index']]
-        var val = 1 - table[['tirehealth']] / 1000
-        if (carui == 'minimal') {
-            document.getElementById("wheel"+index+"").style.opacity = ''+val+'';
-        }
+
 }
 
-var keystring = `<div id="lockbg" style="background:#1f1717; height:220px;width:80px; position:absolute;bottom:55px;right:122px;z-index:1100;"></div>
-<div id="foundcar" style="display:none;background:#01f10d; height:30px;width:70px; position:absolute;bottom:225px;right:122px;z-index:1101;"></div>
-<div id="carlock" style="display:none;background:#0099ff; height:30px;width:70px; position:absolute;bottom:185px;right:132px;z-index:1101;"></div>
-<div onclick="carlockcallback('lock');" style="display:block;background:#079cff00; height:30px;width:70px; position:absolute;bottom:185px;right:132px;z-index:1111;"></div>
-<div id="carunlock" style="display:none;background:#fa260a; height:30px;width:70px; position:absolute;bottom:145px;right:132px;z-index:1101;"></div>
-<div onclick="carlockcallback('unlock');" style="display:block;background:#fa260a00; height:30px;width:70px; position:absolute;bottom:145px;right:132px;z-index:1111;"></div>
-<div id="allopen" style="display:none;background:#face0a; height:30px;width:70px; position:absolute;bottom:105px;right:132px;z-index:1101;"></div>
-<div onclick="carlockcallback('openall');" style="display:block;background:rgba(0, 0, 0, 0); height:30px;width:70px; position:absolute;bottom:105px;right:132px;z-index:1111;"></div>
-<div id="alarm" style="display:none;background:#fa0a46; height:30px;width:70px; position:absolute;bottom:65px;right:132px;z-index:1101;"></div>
-<div onclick="carlockcallback('alarm');" style="display:block;background:#ec003b00; height:30px;width:70px; position:absolute;bottom:65px;right:132px;z-index:1111;"></div>
-<img id="keyless_renzu" style="z-index:1101;position:absolute;right:10px;bottom:10px;opacity:1.0;height:300px;" src="img/carlock.png" />`
 function setShowKeyless(bool) {
-    if (bool) {
-        document.getElementById("keyless").style.display = 'block';
-    } else {
-        $('#keyless').html('')
-        document.getElementById("keyless").style.display = 'none';
-    }
+
 }
 
 var currentvehicle = undefined
 var openall = false
 var alarm = false
 function carlockcallback(type) {
-    ////////console.log("callback car keyless system")
-    if (type == 'lock') {
-        post("setvehiclelock",{vehicle:currentvehicle})
-        ////////console.log("locking")
-        document.getElementById("carlock").style.display = 'block';
-        document.getElementById("carunlock").style.display = 'none';
-    }
-    if (type == 'unlock') {
-        post("setvehicleunlock",{vehicle:currentvehicle})
-        ////////console.log("unlocking")
-        document.getElementById("carunlock").style.display = 'block';
-        document.getElementById("carlock").style.display = 'none';
-    }
-    if (type == 'openall') {
-        openall = !openall
-        //////console.log(openall)
-        post("setvehicleopendoors",{vehicle:currentvehicle, bool:openall})
-        ////////console.log("openall")
-        if (openall) {
-            document.getElementById("allopen").style.display = 'block';
-        } else {
-            document.getElementById("allopen").style.display = 'none';
-        }
-    }
-    if (type == 'alarm') {
-        alarm = !alarm
-        //////console.log(alarm)
-        post("setvehiclealarm",{vehicle:currentvehicle, bool:alarm})
-        ////////console.log("alarm")
-        if (alarm) {
-            document.getElementById("alarm").style.display = 'block';
-        } else {
-            document.getElementById("alarm").style.display = 'none';
-        }
-    }
+
 }
 
 function setKeyless(table) {
-    var type = table['type']
-    var bool = table['bool']
-    var vehicle = table['vehicle']
-    var plate = table['plate']
-    var doorstatus = table['state']
-    $('#keyless').append(keystring)
-    if (type == 'connect') {
-        currentvehicle = vehicle
-        document.getElementById("foundcar").style.display = 'block';
-        if (doorstatus == 2) {
-            document.getElementById("carlock").style.display = 'block';
-            document.getElementById("carunlock").style.display = 'none';
-        }
-        if (doorstatus == 1) {
-            document.getElementById("carunlock").style.display = 'block';
-            document.getElementById("carlock").style.display = 'none';
-        }
-    }
+
 }
 
     pressfuck = 0
@@ -2497,53 +1937,15 @@ function setKeyless(table) {
     var pressedkey2 = false
     var pressedkey3 = false
     document.onkeyup = function (data) {
-        if (data.keyCode == '76' || data.keyCode == '27') { // Escape key 76 = L (Change the 76 to whatever keycodes you want to hide the carlock ui LINK https://css-tricks.com/snippets/javascript/javascript-keycodes/)
-            if (pressfuck == 1) {
-                if (document.getElementById("foundcar")) {
-                    document.getElementById("foundcar").style.display = 'none';
-                    document.getElementById("carunlock").style.display = 'none';
-                    document.getElementById("carlock").style.display = 'none';
-                }
-                post("hidecarlock",{})
-                pressfuck = 0
-            }
-            pressfuck = 1
-        }
+
         if (data.keyCode == '70') {
             $.post(`https://${GetParentResourceName()}/getoutvehicle`, {}, function(data) {});
             pressedkey1 = 0
         }
-        if (data.keyCode == '144' || data.keyCode == '27') {
-            if (pressedkey2) {
-                pressedkey2 = false
-                console.log('pressed')
-                $.post(`https://${GetParentResourceName()}/closecarcontrol`, {}, function(data) {});
-            }
-            // if (!pressedkey2) {
-            //     pressedkey2 = true
-            // }
-        }
-        if (data.keyCode == '75' || data.keyCode == '76') {
-            if (pressedkey3) {
-                pressedkey3 = false
-                $.post(`https://${GetParentResourceName()}/hideclothing`, {}, function(data) {});
-            }
-        }
     };
 
     function playsound(table) {
-        var file = table['file']
-        var volume = table['volume']
-        var audioPlayer = null;
-        if (audioPlayer != null) {
-            audioPlayer.pause();
-        }
-        if (volume == undefined) {
-            volume = 0.8
-        }
-        audioPlayer = new Audio("./sounds/" + file + ".ogg");
-        audioPlayer.volume = volume;
-        audioPlayer.play();
+
     }
 
     function SetNotify(table) {
@@ -2558,26 +1960,20 @@ function setKeyless(table) {
     }
 
     function unsetradio() {
-        //$('input[type=radio][name=wheelsetting]').val('off')
-        //console.log("unset")
         $("input[type=radio][name=wheelsetting][value='off']").prop("checked", true);
-        //post("wheelsetting",{bool:true})
     }
 
     function setMapVersion(table) {
         var type = table['type']
         var custom = table['custom']
         if (custom) {
-            //console.log("its custom")
             $("#mapimg").attr("src", ""+table['link']+"")
         } else {
-            //console.log("hosted img",type)
             $("#mapimg").attr("src", "img/"+type+".webp")
         }
     }
 
     function setRadioChannel(channel) {
-        //////console.log(channel)
         if (channel !== false && channel !== undefined) {
             document.getElementById("radio").style.display = 'block';
             document.getElementById("mic-radio").innerHTML = ''+channel+'';
@@ -2599,122 +1995,23 @@ function setKeyless(table) {
     }
 
     var state = {}
-
-    var clothes = `<li style="position:absolute;left:0;top:0;" id="variants_helmet_1" onclick="CallbackCLothing('helmet_1','helmet_2');">
-    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%);-webkit-text-stroke:4px rgb(190, 53, 48)'></i>
-      <i class="fad fa-helmet-battle" style="position:relative;margin-left:100%;;font-size:2.2vw;color:#ffffff"></i>
-    </span>
-  </li>
-  <li style="position:absolute;left:0;top:20%;" id="variants_glasses_1" onclick="CallbackCLothing('glasses_1','glasses_2');">
-    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
-      <i class="fal fa-sunglasses" style="position:relative;margin-left:109%;;font-size:2.0vw;color:#ffffff"></i>
-    </span>
-  </li>
-  <li style="position:absolute;left:0;top:40%;" id="variants_chain_1" onclick="CallbackCLothing('chain_1','chain_2');">
-    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
-      <i class="fad fa-scarf" style="position:relative;margin-left:115%;;font-size:2.0vw;color:#ffffff"></i>
-    </span>
-  </li>
-  <li style="position:absolute;left:0;top:60%;" id="variants_watches_1" onclick="CallbackCLothing('watches_1','watches_2');">
-    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
-      <i class="fad fa-watch" style="position:relative;margin-left:120%;;font-size:2.0vw;color:#ffffff"></i>
-    </span>
-  </li>
-  <li style="position:absolute;left:0;top:80%;" id="variants_mask_1" onclick="CallbackCLothing('mask_1','mask_2');">
-    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
-      <i class="fad fa-hockey-mask" style="position:relative;margin-left:120%;;font-size:2.0vw;color:#ffffff"></i>
-    </span>
-  </li>
-  <li style="position:absolute;left:30%;top:80%;" id="variants_reset" onclick="ResetClothes();">
-    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
-      <i class="fas fa-redo-alt" style="position:relative;margin-left:120%;;font-size:2.0vw;color:#ffffff"></i>
-    </span>
-  </li>
-  <li style="position:absolute;left:60%;top:0;" id="variants_torso_1" onclick="CallbackCLothing('torso_1','torso_2');">
-    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
-      <i class="fad fa-user-tie" style="position:relative;margin-left:120%;;font-size:2.0vw;color:#ffffff"></i>
-    </span>
-  </li>
-  <li style="position:absolute;left:60%;top:20%;" id="variants_tshirt_1" onclick="CallbackCLothing('tshirt_1','tshirt_2');">
-    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
-      <i class="fad fa-tshirt" style="position:relative;margin-left:107%;;font-size:2.0vw;color:#ffffff"></i>
-    </span>
-  </li>
-  <li style="position:absolute;left:60%;top:40%;" id="variants_bproof_1" onclick="CallbackCLothing('bproof_1','bproof_2');">
-    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
-      <i class="fad fa-user-shield" style="position:relative;margin-left:108%;;font-size:2.0vw;color:#ffffff"></i>
-    </span>
-  </li>
-  <li style="position:absolute;left:60%;top:60%;" id="variants_pants_1" onclick="CallbackCLothing('pants_1','pants_2');">
-    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
-      <i style="position:relative;margin-left:110%;">
-        <svg viewBox="-120 0 448 448"
-          xmlns="http://www.w3.org/2000/svg">
-          <path fill="#ffffff" stroke="grey" d="m0 448h72.59375l23.40625-304.617188c.324219-4.164062 3.796875-7.378906 7.976562-7.378906 4.175782 0 7.652344 3.214844 7.976563 7.378906l23.453125 304.617188h72.59375v-368.640625c-24.527344-3.566406-43.792969-22.832031-47.359375-47.359375h-16.640625v40c0 13.253906-10.746094 24-24 24h-16c-4.417969 0-8-3.582031-8-8v-56h-48.640625c-3.566406 24.527344-22.832031 43.792969-47.359375 47.359375zm0 0"/>
-          <path d="m0 0h96v16h-96zm0 0"/>
-          <path d="m0 63.199219c15.699219-3.234375 27.964844-15.5 31.199219-31.199219h-31.199219zm0 0"/>
-          <path d="m144 0h64v16h-64zm0 0"/>
-          <path d="m208 32h-31.199219c3.234375 15.699219 15.5 27.964844 31.199219 31.199219zm0 0"/>
-          <path d="m112 0h16v16h-16zm0 0"/>
-          <path d="m128 72v-40h-16v48h8c4.417969 0 8-3.582031 8-8zm0 0"/>
-        </svg>
-      </i>
-    </span>
-  </li>
-  <li style="position:absolute;left:60%;top:80%;" id="variants_shoes_1" onclick="CallbackCLothing('shoes_1','shoes_2');">
-    <span class="fa-stack fa-2x" style='font-size:0.9vw;color:rgba(58, 58, 58, 0.876);'>
-      <i class="fad fa-square fa-stack-2x" style='font-size:2.9vw;color:rgb(20 25 27 / 46%)'></i>
-      <i class="fad fa-boot" style="position:relative;margin-left:115%;;font-size:2.0vw;color:#ffffff"></i>
-    </span>
-  </li>`
-
-
     function setShowClothing(table) {
-        if (table['bool']) {
-            state = table['equipped']
-            $('#clothe').append(clothes)
-            document.getElementById("clothe").style.display = 'block';
-        } else {
-            $('#clothe').html('')
-            document.getElementById("clothe").style.display = 'none';
-        }
+
     }
     function setClotheState(table) {
-        ////////console.log("clothe",table['bool'])
-        if (!table['bool']) {
-            //$("#variants_"+table['variant']+"").css("--fa-secondary-color", 'red');
-            $("#variants_"+table['variant']+"").addClass("clotheoff");
-            //////////console.log("red color","variants_"+table['variant']+"")
-        } else {
-            $("#variants_"+table['variant']+"").removeClass("clotheoff")
-            //$("#variants_"+table['variant']+"").css("--fa-secondary-color", 'unset');   
-        }
+
     }
 
     function ResetClotheState(table) {
-        for (const key in table) {
-            $("#variants_"+key+"").css("--fa-secondary-color", 'unset'); 
-        }
+
     }
 
     function CallbackCLothing(variant,variant2) {
-        $.post('https://renzu_hud/ChangeClothes', JSON.stringify({
-            variant : variant, variant2: variant2, state: state[variant]
-        }))
+
     }
 
     function ResetClothes() {
-        $.post('https://renzu_hud/resetclothing', JSON.stringify({}))
+
     }
 
     function hasClass(element, className) {
@@ -3539,80 +2836,12 @@ function setKeyless(table) {
         });
     }
 
-    var turbostring = `<div class="turbo_hud">
-    <div class="boost_div-bg"></div>
-    <div class="boost_div">
-      <svg class="circle" width="50" height="50" style="transform: rotate(-75deg) scale(2.5);">
-        <circle class="test1" stroke="#FFFFFF" stroke-width="3" style="stroke-opacity: 0.2;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="20 100" stroke-dashoffset="0"/>
-        <circle class="test2" stroke="#FFFFFF" stroke-width="3" style="stroke-opacity: 0.2;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="10 100" stroke-dashoffset="0"/>
-        <circle class="test3" stroke="#FFFFFF" stroke-width="3" style="stroke-opacity: 0.2;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="20 100" stroke-dashoffset="0"/>
-        <circle class="test4" stroke="#FFFFFF" stroke-width="3" style="stroke-opacity: 0.2;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="17 100" stroke-dashoffset="0"/>
-        <circle class="progress1" stroke="rgb(52, 147, 255)" stroke-width="3" style="stroke-opacity: 1;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="0 100" stroke-dashoffset="0"/>
-        <circle class="progress2" stroke="rgb(52, 147, 255)" stroke-width="3" style="stroke-opacity: 1;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="0 100" stroke-dashoffset="0"/>
-        <circle class="progress4" stroke="rgb(52, 147, 255)" stroke-width="3" style="stroke-opacity: 1;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="0 100" stroke-dashoffset="0"/>
-        <circle class="progress3 boost" stroke="rgb(52, 147, 255)" stroke-width="1.8" style="stroke-opacity: 1;" fill="transparent" r="18" cx="30" cy="30" stroke-dasharray="0 180" stroke-dashoffset="0"/>
-        <defs>
-          <linearGradient id="gradient">
-            <stop offset="30%" stop-color="#FF0245" />
-            <stop offset="100%" stop-color="#BBFFFE" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <div class="boost_text">
-        <p>0</p>
-        <small>BOOST</small>
-      </div>
-      <div class="section-conex"></div>
-    </div>
-  </div>`
     function setShowTurboBoost(bool,s) {
-        ////////console.log("show turbo")
-        if (!s) {
-            featstate['turbohud'] = bool
-        }
-        if (bool && setting['carhud'] && setting['carhud']['turbohud'] && featstate['turbohud']) {
-            //////console.log(bool)
-            $('#turbohuddiv').append(turbostring)
-            $('.turbo_hud').fadeIn('fast');
-        } else {
-            if (!s) {
-                featstate['turbohud'] = false
-            }
-            $('#turbohuddiv').html('')
-            $('.turbo_hud').fadeOut('fast');
-        }
+
     }
 
     function setTurboBoost(table) {
-        let data = table
-        if(!setting['carhud']['turbohud']) { return }
-        //$('.turbo_hud').fadeIn('fast');
-        //////console.log(data['speed'])
-        if (data['speed']) {
-            if (data['speed'] < 0) {
-                data['speed'] = 0
-            }
-            if (String(parseInt(data['speed'])).length == 0x2) {
-                $('.turbo_hud .boost_div .boost_text').css('left', '1px');
-            } else if (String(parseInt(data['speed'])).length == 0x3) {
-                $('.turbo_hud .boost_div .boost_text').css('left', '-0.1px');
-            } else {
-                $('.turbo_hud .boost_div .boost_text').css('left', '0px');
-            }
-            if (data['speed'] < 0) {
-                data['speed'] = 0
-            }
-            $('div.boost_text > p').html((data['speed']).toFixed(1));
-        } else if (!data['speed']) {
-            $('div.boost_text > p').html(0x0);
-        }
-        if (data['max']) {
-            if (data['speed'] < 0) {
-                data['speed'] = 0
-            }
-            var kupal = (0x48 * (data['speed'] / data['max']) * ' 180').toFixed(1);
-            $('div.boost_div > svg > circle.progress3').attr('stroke-dasharray', ''+(data['speed'] / 2.8) * 100 +' 180');
-        }
+
     }
 
     var carstatusstring = `<div id="carinfo">Car Status:</div>
@@ -3688,13 +2917,10 @@ function setKeyless(table) {
     }
     
     function setShooting(sleep) {
-        //setInterval(function(){ post("setShooting",{}) }, sleep);
     }
 
     function NuiLoop() {
-        // setInterval(function(){ 
-        //     post("NuiLoop",{})
-        // }, 2000);
+
     }
 
     function Drag(bool) {

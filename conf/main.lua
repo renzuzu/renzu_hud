@@ -9,48 +9,6 @@
 ---------------------------------------------------------https://github.com/renzuzu/renzu_hud------------------------------------------
 config = {}
 config.gamebuild = 'auto' -- if 2189 pedshot transparent and 1604 or < 2000 = Enter vehicle game event will not work, we will use normal pedshot ( gamebuild is what you set on your server start example: +set sv_enforceGameBuild 2189, available build 1604, 2060, 2189 and more.) this is important if you are using UI Normal with Ped Face.
-config.framework = 'ESX' -- ESX | QBCORE | VRP | STANDALONE (VRP not supported yet, but you can use standalone, it will work!)
-config.Mysql = 'mysql-async' -- 'ghmattisql' | 'mysql-async' | 'oxmysql'
-config.weight_type = false -- ESX item weight or limit type
-config.vehicle_table = 'owned_vehicles' -- change this if you use different sql table for player vehicles (note identifier steam is always being used here)
-config.Owner_column = 'owner' -- owner column name for identifier eg.steam hex,licensed
-config.ESX_Items = { -- important to change job, weight. (job = false means its available to use for everyone) -- do not change the array name ex. ['nitro'], you can change the name = 'nitro'
-	['nitro'] = {name = 'nitro', event = 'renzu_hud:addnitro', value = false, weight = 1, label = 'Nitro', job = false},
-	['coolant'] = {name = 'coolant', event = 'renzu_hud:coolant', value = false, weight = 1, label = 'Coolant', job = false},
-	['engineoil'] = {name = 'engineoil', event = 'renzu_hud:oil', value = false, weight = 1, label = 'Engine Oil', job = 'mechanic'},
-	['turbo_street'] = {name = 'turbo_street', event = 'renzu_hud:install_turbo', value = 'street', weight = 1, label = 'Street Turbine', job = 'mechanic'},
-	['turbo_sports'] = {name = 'turbo_sports', event = 'renzu_hud:install_turbo', value = 'sports', weight = 1, label = 'Sports Turbine', job = 'mechanic'},
-	['turbo_racing'] = {name = 'turbo_racing', event = 'renzu_hud:install_turbo', value = 'racing', weight = 1, label = 'Racing Turbine', job = 'mechanic'},
-	['head_brace'] = {name = 'head_brace', event = 'renzu_hud:healbody', value = 'head', weight = 1, label = 'Head Brace', job = false},
-	['leg_bandage'] = {name = 'leg_bandage', event = 'renzu_hud:healbody', value = 'leg', weight = 1, label = 'Leg Bandage', job = false},
-	['arm_bandage'] = {name = 'arm_bandage', event = 'renzu_hud:healbody', value = 'arm', weight = 1, label = 'Arm Bandage', job = false},
-	['body_bandage'] = {name = 'body_bandage', event = 'renzu_hud:healbody', value = 'chest', weight = 1, label = 'Body Bandage', job = false},
-	['street_tirekit'] = {name = 'street_tirekit', event = 'renzu_hud:installtire', value = 'default', weight = 1, label = 'Street Tire Kit', job = 'mechanic'},
-	['sports_tirekit'] = {name = 'sports_tirekit', event = 'renzu_hud:installtire', value = 'sports', weight = 1, label = 'Sports Tire Kit', job = 'mechanic'},
-	['racing_tirekit'] = {name = 'racing_tirekit', event = 'renzu_hud:installtire', value = 'racing', weight = 1, label = 'Racing Tires Kit', job = 'mechanic'},
-	['drag_tirekit'] = {name = 'drag_tirekit', event = 'renzu_hud:installtire', value = 'drag', weight = 1, label = 'Drag Tires Kit', job = 'mechanic'},
-	['manual_tranny'] = {name = 'manual_tranny', event = 'renzu_hud:manual', value = true, weight = 1, label = 'Manual Trannsmition', job = 'mechanic'},
-	['automatic_tranny'] = {name = 'automatic_tranny', event = 'renzu_hud:manual', value = false, weight = 1, label = 'Automatic Tranny', job = 'mechanic'},
-}
-config.enable_commands_as_item = true -- if you are not using ESX, you can enable this, you can type /useitem nitro (for example) -- standalone purpose without ESX
-config.commanditem_permission = { -- item command permission -- standalone purpose!
-	'steam:11000013ec77a2e', -- steam hex id, change this to yours, you can add as many as you want
-	'steam:11000013ec77a2e',
-	'df845523fc29c5159ece179359f22a741ca2ca9a',
-	'license:df845523fc29c5159ece179359f22a741ca2ca9a',
-}
-config.identifier = 'license:' -- standalone purpose, carlock
---MULTI CHARACTER START -- set config.multichar = false if you are not using any multi character ( configuring this is needed to avoid problems saving to database )
-config.multichar = false -- KASHACTERS, cd_multicharacter, etc...
---IMPORTANT PART IF USING Multicharacter
--- if multichar_advanced is false == using steam: format or the config.identifier
-config.multichar_advanced = true -- Using Permanent Char1,Char2 up to Char5 identifier from database. ( This means the identifier reads by ESX or other framework will have Char1:BLAHBLAHBLAH instead of steam:BLAHBLAHBLAH ( from xPlayer.identifier for example))
-config.characterchosenevent = 'kashactersS:CharacterChosen' -- this event contains charid (IMPORTANT and will read only if using advanced)
-config.charprefix = 'Char' -- dont change unless you know what you are doing
---loadedasmp will use the charslot from user_lastcharacter, kashacters and other multicharacter have this.
-config.loadedasmp = false -- if player model is mp player, pass the loaded event to server ( naturally if player model is PLAYER_ZERO its mean you are on the loading screen or in the character select page of your multicharacter script. )
-config.forceplayerload = false -- false playerloaded event (use this only if you experience hud not loading at all, and if you dont use multicharacter or else you will get server error about player nil value)
---MULTI CHAR END
 --MAIN UI CONFIG START
 config.enablestatus = true -- enable/disable status v1 ( icons,progress status ) -- this will disable all status functions
 config.enablecompass = true -- enable/disable compass
@@ -65,29 +23,6 @@ config.removemaphealthandarmor = false -- FORCE REMOVE HEALTHBAR AND ARMOR FROM 
 config.border = { r = 255; g = 255; b = 255; a = 0.65; size = 2.5; }; config.current = { r = 9; g = 222; b = 1; a = 0.9; size = 1.0; }; config.crossing = { r = 255; g = 233; b = 233; a = 0.9; size = 1.1; }; config.direction = { r = 255; g = 233; b = 233; a = 0.9; size = 2.5; }; config.position = { offsetX = 17; offsetY = 1.2; };
 
 config.vehicleCheck = true
-
--- GEAR FUNCTION
-nextgearhash = `SET_VEHICLE_NEXT_GEAR`
-setcurrentgearhash = `SET_VEHICLE_CURRENT_GEAR`
-function SetRpm(veh, val)
-    Renzu_Hud(0x2A01A8FC, veh, val)
-end
-function SetVehicleNextGear(veh, gear)
-    Renzu_Hud(nextgearhash & 0xFFFFFFFF, veh, gear)
-end
-function SetVehicleCurrentGear(veh, gear)
-    Renzu_Hud(setcurrentgearhash & 0xFFFFFFFF, veh, gear)
-end
-
-function Renzu_SetGear(vehicle, gear)
-    if gear >= 6 then
-        gear = 6
-    end
-	if gear < 0 then
-		gear = 1
-	end
-    Hud:ForceVehicleGear(vehicle, gear)
-end
 
 function LockSpeed(veh,speed)
     Renzu_Hud(0x0E46A3FCBDE2A1B1, veh, speed)
@@ -117,26 +52,16 @@ function RCP(int,pad)
     return Renzu_Hud(0xF3A21BCD95725A4A, int, pad)
 end
 
-function GetVehStats(veh,field,stat)
-    return Renzu_Hud(0x642FC12F, veh, field, stat, ReturnFloat)
-end
-
 function GetCamhead()
     return Renzu_Hud(0x743607648ADD4587, ReturnFloat)
-end
-
-function SetVehStats(veh,field,stat,float)
-    Renzu_Hud(0x488C86D2, veh, field, stat, float)
 end
 
 function SetVehicleBoost(vehicle,val)
 	Renzu_Hud(0xB59E4BD37AE292DB, vehicle,val)
 end
 
-function GetGear(vehicle)
-	return Renzu_Hud(0xB4F4E566, vehicle, ReturnInt)
-end
 function build()  return GetGameBuildNumber() end
+config.framework = GetResourceState('es_extended') == 'started' and 'ESX' or GetResourceState('qb-core') == 'started' and 'QBCORE' or 'STANDALONE'
 --config.gamebuild = build()
 -------------------------------------------https://github.com/renzuzu/renzu_hud----------------------------------------------------------
 --------------------------------------------------------------VARIABLES------------------------------------------------------------------

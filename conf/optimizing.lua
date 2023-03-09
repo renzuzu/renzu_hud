@@ -6,12 +6,12 @@ config.lights_sleep = 1000
 config.direction_sleep = 2500
 config.NuiCarhpandGas_sleep = 2500
 config.car_mainloop_sleep = 1000
-config.rpm_speed_loop = 10
+config.rpm_speed_loop = 40
 config.idle_rpm_speed_sleep = 151
 config.Rpm_sleep = 130 -- around 10-20-50-200 is a good value (depends on UTILS animation ms)
-config.Rpm_sleep_2 = 5
+config.Rpm_sleep_2 = 45
 config.Speed_sleep = 151
-config.Speed_sleep_2 = 11
+config.Speed_sleep_2 = 41
 
 --UTILS UI SETTINGS -- the default settings is optimized for CPU usage, (DEFAULT: 'unset',0ms,'unset') Use this if you know else leave default.
 -- THIS PART AFFECT OVERALL CPU USAGE FROM TASK MANAGER
