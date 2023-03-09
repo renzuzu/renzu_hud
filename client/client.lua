@@ -304,7 +304,7 @@ CreateThread(function()
 			else
 				Hud.esx_status = false
 			end
-			if not config.framework == 'QBCORE' then
+			if config.framework ~= 'QBCORE' then
 				Hud:UpdateStatus(false,vitals)
 			end
 
