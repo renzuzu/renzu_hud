@@ -255,12 +255,6 @@ RegisterNUICallback('requestface', function(data, cb)
 	while not LocalPlayer.state.playerloaded do
 		Wait(1000)
 	end
-	Wait(5000)
-	TriggerEvent('skinchanger:getSkin', function(current) Hud.dummyskin = current end)
-	while Hud:tablelength(Hud.dummyskin) <= 2 do
-		TriggerEvent('skinchanger:getSkin', function(current) Hud.dummyskin = current end)
-		Wait(1000)
-	end
 	while not Hud:isplayer() do
 		Wait(1000)
 	end
