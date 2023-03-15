@@ -764,16 +764,6 @@ end
 
 function Hud:Myinfo()
 	if config.framework == 'ESX' then
-		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
-		while ESX == nil do
-			TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
-			Wait(0)
-		end
-
-		while ESX.GetPlayerData().job == nil do
-			Wait(0)
-		end
-
 		ESX.PlayerData = ESX.GetPlayerData()
 		xPlayer = ESX.PlayerData
 		local money = 0
@@ -1012,7 +1002,7 @@ function Hud:SendNuiSeatBelt()
 				if self.belt then
 					DisableControlAction(1, 75, true)  -- Disable exit vehicle when stop
 					DisableControlAction(27, 75, true) -- Disable exit vehicle when Driving
-								end
+				end
 				Wait(sleep)
 			end
 			Session[1],Session[2] = 0.0,0.0
