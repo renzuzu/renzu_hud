@@ -31,26 +31,27 @@ var pedfacecache = "https://nui-img/pedmugshot_01/pedmugshot_01?t123"
 let globalconfig = {}
 usersetting['carhud'] = {}
 setting['carhud'] = {}
+
 function pedface(force) {
-    console.log("REQUESTING",force)
+    console.log("REQUESTING", force)
     if (pedfacetimer == 0 || Date.now() > pedfacetimer) {
         pedfacetimer = Date.now() + 5000
-        $.post(`https://${GetParentResourceName()}/requestface`, JSON.stringify({force:force}), function(data) {
-            console.log("POSTED",data)
+        $.post(`https://${GetParentResourceName()}/requestface`, JSON.stringify({ force: force }), function(data) {
+            console.log("POSTED", data)
             let face = data;
             if (face) {
-                console.log("URL",face)
+                console.log("URL", face)
                 let url = 'https://nui-img/' + face + '/' + face + '?t=' + String(Math.round(new Date().getTime() / 1000));
                 if (face !== 'none') {
                     pedfacecache = url
                 }
                 if (face == 'none') {
-                    url = pedfacecache;   // assuming theres a cache
+                    url = pedfacecache; // assuming theres a cache
                 }
                 console.log(url)
-                $("#pedface").attr("src", ""+url+"")
+                $("#pedface").attr("src", "" + url + "")
 
-            }  
+            }
         });
     } else {
         $("#pedface").attr("src", pedfacecache)
@@ -74,18 +75,18 @@ $(document).on('keydown', function(e) {
         //console.log(key);
         //or some other code
     }
-  $(this).on('keyup', function() {
-    if (keyPressed === true) {
-      keyPressed = false;
-      //console.log('Key no longer held down');
-      //or some other code
-    }
-  });
+    $(this).on('keyup', function() {
+        if (keyPressed === true) {
+            keyPressed = false;
+            //console.log('Key no longer held down');
+            //or some other code
+        }
+    });
 });
 
-$(document).on('click','#start',function(){
+$(document).on('click', '#start', function() {
     ////////console.log("START")
-    $.post(`https://${GetParentResourceName()}/pushtostart`, {}, function(data) {}); 
+    $.post(`https://${GetParentResourceName()}/pushtostart`, {}, function(data) {});
 });
 
 var pressedkey = 0
@@ -94,26 +95,26 @@ const time = new Date().toLocaleTimeString();
 function setArmor(s) {
     if (statusui == 'simple' && !statusbars['health']) {
         if (status_type == 'icons' && document.getElementById("armorval")) {
-            document.getElementById("armorval").style.clip = 'rect('+toclip(s)+', 100px, 100px, 0)'
+            document.getElementById("armorval").style.clip = 'rect(' + toclip(s) + ', 100px, 100px, 0)'
         } else if (status_type !== 'icons') {
             SetProgressCircle('armorval', s * 0.99)
         }
-    } else if(document.getElementById("armorbar")) {
-        document.getElementById("armorbar").style.width = ''+s * 0.99+'%'
+    } else if (document.getElementById("armorbar")) {
+        document.getElementById("armorbar").style.width = '' + s * 0.99 + '%'
     }
 }
 
 function setHp(s) {
     if (statusui == 'simple' && !statusbars['health']) {
         if (status_type == 'icons' && document.getElementById("healthval")) {
-            document.getElementById("healthval").style.clip = 'rect('+toclip(s)+', 100px, 100px, 0)'
+            document.getElementById("healthval").style.clip = 'rect(' + toclip(s) + ', 100px, 100px, 0)'
         } else if (status_type !== 'icons') {
             SetProgressCircle('healthval', s * 0.99)
         }
-    } else if(document.getElementById("healthbar")) {
-        document.getElementById("healthbar").style.width = ''+s * 0.99+'%'
-        var perc = s * 0.99+'%'
-        //$('#healthbar').velocity({ width: "50px" })
+    } else if (document.getElementById("healthbar")) {
+        document.getElementById("healthbar").style.width = '' + s * 0.99 + '%'
+        var perc = s * 0.99 + '%'
+            //$('#healthbar').velocity({ width: "50px" })
     }
 }
 
@@ -124,16 +125,16 @@ function setMic(type) {
         did = 'voipdiv'
         if (type == 1) {
             val = 20
-            //$("#microphone").css("color", 'rgb(227, 250, 22)');
+                //$("#microphone").css("color", 'rgb(227, 250, 22)');
             $("#voipval").attr('style', "stroke:rgb(227, 250, 22)")
         } else if (type == 2) {
             val = 50
             $("#voipval").attr('style', "stroke:rgb(23, 255, 15)")
-            //$("#microphone").css("color", 'rgb(255, 35, 6)');
+                //$("#microphone").css("color", 'rgb(255, 35, 6)');
         } else if (type == 3) {
             val = 100
             $("#voipval").attr('style', "rgb(255, 35, 6)")
-            //$("#microphone").css("color", 'rgb(23, 255, 15)');
+                //$("#microphone").css("color", 'rgb(23, 255, 15)');
         }
         SetProgressCircle('voipval', val)
     } else {
@@ -141,21 +142,21 @@ function setMic(type) {
     }
     switch (type) {
         case 1:
-        new Notify ({status: 'success',title: 'Voice System',text: 'VOIP : Whisper Mode',autoclose: true})
-        $("#"+did+"").css("color", 'rgb(227, 250, 22)');
-        break;
+            new Notify({ status: 'success', title: 'Voice System', text: 'VOIP : Whisper Mode', autoclose: true })
+            $("#" + did + "").css("color", 'rgb(227, 250, 22)');
+            break;
         case 2:
-        new Notify ({status: 'success',title: 'Voice System',text: 'VOIP : Normal Mode',autoclose: true})
-        $("#"+did+"").css("color", 'rgb(23, 255, 15)');
-        break;    
+            new Notify({ status: 'success', title: 'Voice System', text: 'VOIP : Normal Mode', autoclose: true })
+            $("#" + did + "").css("color", 'rgb(23, 255, 15)');
+            break;
         case 3:
-        new Notify ({status: 'success',title: 'Voice System',text: 'VOIP : Shout Mode',autoclose: true})
-        $("#"+did+"").css("color", 'rgb(255, 35, 6)');
-        break;
+            new Notify({ status: 'success', title: 'Voice System', text: 'VOIP : Shout Mode', autoclose: true })
+            $("#" + did + "").css("color", 'rgb(255, 35, 6)');
+            break;
         default:
-        new Notify ({status: 'success',title: 'Voice System',text: 'VOIP : Normal Mode',autoclose: true})
-        $("#"+did+"").css("color", 'rgb(23, 255, 15)');
-        break;
+            new Notify({ status: 'success', title: 'Voice System', text: 'VOIP : Normal Mode', autoclose: true })
+            $("#" + did + "").css("color", 'rgb(23, 255, 15)');
+            break;
     }
 }
 
@@ -163,10 +164,10 @@ function setFuelLevel(value) {
     var max = 100;
     var total = value / max
     var gas = total * 100
-    //////////console.log("GASUI")
+        //////////console.log("GASUI")
     if (carui == 'modern') {
         ////////console.log(carui);
-    document.getElementById("gasbar").style.width = ''+gas+'%'
+        document.getElementById("gasbar").style.width = '' + gas + '%'
     } else if (carui == 'minimal') {
         var e = document.getElementById("gasbar");
         if (e) {
@@ -174,12 +175,12 @@ function setFuelLevel(value) {
             ////////console.log(gas)
             let to = length * ((93 - gas) / 100);
             //e.style.strokeDashoffset = to;
-            $('#gasbar').velocity({ 'stroke-dashoffset': to }, {duration: 230, delay: 60})
+            $('#gasbar').velocity({ 'stroke-dashoffset': to }, { duration: 230, delay: 60 })
         }
     } else if (carui == 'simple' && document.getElementById("gasbar")) {
         var opacity = 1.0 - (gas * 0.01)
-        document.getElementById("gasbar").style.clip = 'rect('+toclip(gas)+', 100px, 100px, 0)'
-        document.getElementById("gasbg").style.opacity = ''+opacity+''
+        document.getElementById("gasbar").style.clip = 'rect(' + toclip(gas) + ', 100px, 100px, 0)'
+        document.getElementById("gasbg").style.opacity = '' + opacity + ''
     }
 }
 
@@ -192,27 +193,27 @@ function setCarhp(value) {
             ////////console.log(hp)
             let to = length * ((100 - hp) / 100);
             //e.style.strokeDashoffset = to;
-            $('#carhealthbar').velocity({ 'stroke-dashoffset': to }, {duration: 450, delay: 60})
+            $('#carhealthbar').velocity({ 'stroke-dashoffset': to }, { duration: 450, delay: 60 })
         }
-    } else if(carui == 'modern') {
-        document.getElementById("carhealthbar").style.width = ''+hp+'%'
+    } else if (carui == 'modern') {
+        document.getElementById("carhealthbar").style.width = '' + hp + '%'
     } else if (carui == 'simple') {
         var opacity = 1.0 - (hp * 0.01)
-        document.getElementById("carhealthbg").style.opacity = ''+opacity+''
-        document.getElementById("carhealthbar").style.clip = 'rect('+toclip(hp)+', 100px, 100px, 0)'
+        document.getElementById("carhealthbg").style.opacity = '' + opacity + ''
+        document.getElementById("carhealthbar").style.clip = 'rect(' + toclip(hp) + ', 100px, 100px, 0)'
     }
 }
 
 function onMessageRecieved(event) {
     let item = event;
-    
+
     if (item && item.type === 'streetLabel:MSG') {
         if (!item.active) {
             $("#container").hide();
         } else {
             $("#container").show();
 
-            let direction	= item.direction;
+            let direction = item.direction;
             let zone = item.zone;
             let street = item.street;
 
@@ -221,7 +222,7 @@ function onMessageRecieved(event) {
             $('#street').text(street);
         }
     }
-    
+
     if (item && item.type === 'streetLabel:DATA') {
         let container = document.getElementById('container');
 
@@ -233,8 +234,8 @@ function onMessageRecieved(event) {
         let zone = [item.zone.r, item.zone.g, item.zone.b, item.zone.a];
         let street = [item.street.r, item.street.g, item.street.b, item.street.a];
 
-        for (let i=0; i < borderDOM.length; i++) {
-            borderDOM[i].style.color = 'rgba('+border.join(', ')+')';
+        for (let i = 0; i < borderDOM.length; i++) {
+            borderDOM[i].style.color = 'rgba(' + border.join(', ') + ')';
             borderDOM[i].style.fontSize = item.border.size + 'vh';
         }
     }
@@ -248,6 +249,7 @@ var status_move = []
 var move_count = []
 
 var statuscache = {}
+
 function setStatus(t) {
     var table = t['data']
     var type = t['type']
@@ -258,44 +260,44 @@ function setStatus(t) {
     }
     for (const i in table) {
         move_count[i] = i
-        if (table[i].rpuidiv == undefined) { table[i].rpuidiv = table[i].status+'bar' }
+        if (table[i].rpuidiv == undefined) { table[i].rpuidiv = table[i].status + 'bar' }
         if (document.getElementById(table[i].rpuidiv) && table[i].rpuidiv !== 'armorbar' && table[i].rpuidiv !== 'healthbar') {
-            document.getElementById(table[i].rpuidiv).style.width = ''+table[i].value+'%'
+            document.getElementById(table[i].rpuidiv).style.width = '' + table[i].value + '%'
         }
-        if (status_type == 'icons' && document.getElementById(table[i].status+'val') && table[i].rpuidiv !== 'armorbar' && table[i].rpuidiv !== 'healthbar') {
-            document.getElementById(table[i].status+'val').style.clip = 'rect('+toclip(table[i].value)+', 100px, 100px, 0)'
-        } else if (status_type !== 'icons' && table[i].type == 1 && statuscache[table[i].status] !== table[i].value*1.01 && table[i].status !== 'health' && table[i].status !== 'armor' || status_type !== 'icons' && table[i].type == 1 && statuscache[table[i].status] == undefined && table[i].status !== 'health' && table[i].status !== 'armor') {
+        if (status_type == 'icons' && document.getElementById(table[i].status + 'val') && table[i].rpuidiv !== 'armorbar' && table[i].rpuidiv !== 'healthbar') {
+            document.getElementById(table[i].status + 'val').style.clip = 'rect(' + toclip(table[i].value) + ', 100px, 100px, 0)'
+        } else if (status_type !== 'icons' && table[i].type == 1 && statuscache[table[i].status] !== table[i].value * 1.01 && table[i].status !== 'health' && table[i].status !== 'armor' || status_type !== 'icons' && table[i].type == 1 && statuscache[table[i].status] == undefined && table[i].status !== 'health' && table[i].status !== 'armor') {
             statuscache[table[i].status] = table[i].value
-            SetProgressCircle(table[i].status+'val', table[i].value*0.9999)
-            //console.log(table[i].status,table[i].value)
+            SetProgressCircle(table[i].status + 'val', table[i].value * 0.9999)
+                //console.log(table[i].status,table[i].value)
         }
         if (table[i].value >= 80 && table[i].status == 'stress') {
-            document.getElementById(table[i].status+'blink').style.setProperty("-webkit-filter", "drop-shadow(5px 5px 5px rgba(255, 5, 5, 1.0)");
-            document.getElementById(table[i].status+'blink').style.color = "rgb(255, 5, 5)";
+            document.getElementById(table[i].status + 'blink').style.setProperty("-webkit-filter", "drop-shadow(5px 5px 5px rgba(255, 5, 5, 1.0)");
+            document.getElementById(table[i].status + 'blink').style.color = "rgb(255, 5, 5)";
         } else if (table[i].value <= 40 && table[i].status !== 'stress' && table[i].status !== 'voip' && table[i].status !== 'armor' && table[i].type == 1) {
-            if (document.getElementById(table[i].status+'blink')) {
-                document.getElementById(table[i].status+'blink').style.color = "rgb(255, 5, 5)";
-                document.getElementById(table[i].status+'blink').style.setProperty("-webkit-filter", "drop-shadow(5px -1px 5px rgba(255, 5, 5, 1.0)");
+            if (document.getElementById(table[i].status + 'blink')) {
+                document.getElementById(table[i].status + 'blink').style.color = "rgb(255, 5, 5)";
+                document.getElementById(table[i].status + 'blink').style.setProperty("-webkit-filter", "drop-shadow(5px -1px 5px rgba(255, 5, 5, 1.0)");
             }
-        } else if (document.getElementById(table[i].status+'blink')) {
-            document.getElementById(table[i].status+'blink').style.color = "rgb(177 177 177 / 13%)";
-            document.getElementById(table[i].status+'blink').style.setProperty("-webkit-filter", "drop-shadow(15px -1px 22px rgba(255, 5, 5, 0.0)");
+        } else if (document.getElementById(table[i].status + 'blink')) {
+            document.getElementById(table[i].status + 'blink').style.color = "rgb(177 177 177 / 13%)";
+            document.getElementById(table[i].status + 'blink').style.setProperty("-webkit-filter", "drop-shadow(15px -1px 22px rgba(255, 5, 5, 0.0)");
         }
-        if (setting['status'] && setting['status'][table[i].status] !== undefined && setting['status'][table[i].status].hideifmax && setting['status'][table[i].status].type == 1 && document.getElementById(table[i].status+'div')) {
-            if(table[i].min_val_hide == undefined) { table[i].min_val_hide = 100 }
+        if (setting['status'] && setting['status'][table[i].status] !== undefined && setting['status'][table[i].status].hideifmax && setting['status'][table[i].status].type == 1 && document.getElementById(table[i].status + 'div')) {
+            if (table[i].min_val_hide == undefined) { table[i].min_val_hide = 100 }
             if (table[i].value >= setting['status'][table[i].status].min_val_hide && table[i].status !== 'armor' && table[i].status !== 'stress' && table[i].type == 1 || table[i].value <= setting['status'][table[i].status].min_val_hide && table[i].status !== 'armor' && table[i].status == 'stress' && table[i].type == 1) {
-                document.getElementById(table[i].status+'div').style.display = 'none'
-            } else if (table[i].type == 1 && document.getElementById(table[i].status+'div')) {
-                document.getElementById(table[i].status+'div').style.display = 'block'
-                //console.log(table[i].status,table[i].value)
+                document.getElementById(table[i].status + 'div').style.display = 'none'
+            } else if (table[i].type == 1 && document.getElementById(table[i].status + 'div')) {
+                document.getElementById(table[i].status + 'div').style.display = 'block'
+                    //console.log(table[i].status,table[i].value)
                 if (table[i].status == 'armor' && statusui !== 'simple' || table[i].status == 'armor' && statusui == 'simple' && table[i].value == 0) {
-                    document.getElementById(table[i].status+'div').style.display = 'none'
+                    document.getElementById(table[i].status + 'div').style.display = 'none'
                 } else if (table[i].status == 'armor' && statusui == 'simple' && table[i].value > 0) {
-                    document.getElementById(table[i].status+'div').style.display = 'block'
+                    document.getElementById(table[i].status + 'div').style.display = 'block'
                 }
             }
-        } else if (document.getElementById(table[i].status+'div')) {
-            document.getElementById(table[i].status+'div').style.display = 'block'
+        } else if (document.getElementById(table[i].status + 'div')) {
+            document.getElementById(table[i].status + 'div').style.display = 'block'
         }
     }
 }
@@ -325,13 +327,14 @@ var status_string = `<div id="status_prog">
 <div id="info">My Info:</div>
 <div id="stats">My Status:</div>
 </div>`
+
 function setShowstatus(t) {
     var bool = t['bool']
     var enable = t['enable']
     if (bool) {
         $('#status').append(status_string)
         $("#status").fadeIn();
-        setTimeout(function(){
+        setTimeout(function() {
             $("#statusbar").fadeIn();
             if (!enable) {
                 document.getElementById('status_prog').style.display = 'none'
@@ -343,7 +346,7 @@ function setShowstatus(t) {
     } else {
         $('#status').html('')
         $("#statusbar").fadeOut();
-        setTimeout(function(){
+        setTimeout(function() {
             $("#status").fadeOut();
         }, 333);
     }
@@ -358,7 +361,8 @@ function setShowstatusv2(bool) {
     }
 }
 
-var oldrpm = 0, cntSi = 0;
+var oldrpm = 0,
+    cntSi = 0;
 var newrpm = 0
 var oldp = 0
 
@@ -366,17 +370,18 @@ var r = 0
 var run = false
 var v1 = 5
 var v2 = 15
+
 function setRpm(percent) {
     if (rpmanimation) { return }
     var rpm = (percent * 100);
     rpm2 = rpm.toFixed(0) * 100
     if (carui == 'modern') {
-        document.getElementById("rpmmeter").innerHTML = ""+rpm2+"";
+        document.getElementById("rpmmeter").innerHTML = "" + rpm2 + "";
     }
     var e = document.getElementById("rpmpath");
     let length = e.getTotalLength();
     let to = length * ((100 - rpm) / 100);
-    //e.style.strokeDashoffset = to;
+    e.style.strokeDashoffset = to;
     if (percent > 0.9) {
         e.style.stroke = 'red';
     } else if (percent > 0.7) {
@@ -386,22 +391,6 @@ function setRpm(percent) {
     } else {
         e.style.stroke = 'white';
     }
-    if (setting['carhud'] && setting['carhud']['refreshrate'] > 170) {
-        $('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 35, delay: 23}).velocity({ 'stroke-dashoffset': to }, {duration: 24, delay: 24}).velocity({ 'stroke-dashoffset': to }, {duration: 24, delay: 23})
-    } else if (setting['carhud'] && setting['carhud']['refreshrate'] > 70) {
-        $('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 1, delay: 0}).velocity({ 'stroke-dashoffset': to }, {duration: 1, delay: 0}).velocity({ 'stroke-dashoffset': to }, {duration: 1, delay: 0})
-    } else if (setting['carhud'] && setting['carhud']['refreshrate'] <= 20) {
-        //$('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 0, delay: 0})
-        e.style.strokeDashoffset = to;
-    } else if (setting['carhud']['refreshrate'] <= 30) {
-        $('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 0, delay: 0})
-    } else if (setting['carhud']['refreshrate'] <= 70) {
-        $('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: v1, delay: v2})
-    } else {
-        $('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: v1, delay: v2}).velocity({ 'stroke-dashoffset': to }, {duration: v1, delay: v2}).velocity({ 'stroke-dashoffset': to }, {duration: v1, delay: v2})
-    }
-    //$('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 15, delay: 20}).velocity({ 'stroke-dashoffset': to }, {duration: 20, delay: 20}).velocity({ 'stroke-dashoffset': to }, {duration: 20, delay: 20})
-    //$('.rpm').velocity({ 'stroke-dashoffset': to }, {duration: 15, delay: 20}).velocity({ 'stroke-dashoffset': to }, {duration: 15, delay: 21}).velocity({ 'stroke-dashoffset': to }, {duration: 20, delay: 23})
 }
 
 function SetVehData(table) {
@@ -415,6 +404,7 @@ function SetVehData(table) {
 
 var metrics = 'kmh'
 var settingcarui = 'none'
+
 function setSpeed(s) {
     if (speedanimation) { return }
     var type = carui
@@ -433,7 +423,7 @@ function setSpeed(s) {
         // document.getElementById("speed_minimal").style.display = "block";
         // document.getElementById("speed").style.display = "none";
         document.getElementById("speedmeter").style.right = "20%";
-        document.getElementById("speedmeter").style.fontSize  = "1.5vw";
+        document.getElementById("speedmeter").style.fontSize = "1.5vw";
         document.getElementById("speedmeter").style.bottom = "50%";
         if (takbo >= 100) {
             right = '45%'
@@ -454,7 +444,7 @@ function setSpeed(s) {
         }
     } else if (type == 'simple' && settingcarui !== 'simple') {
         document.getElementById("speedmeter").style.right = "20%";
-        document.getElementById("speedmeter").style.fontSize  = "1.5vw";
+        document.getElementById("speedmeter").style.fontSize = "1.5vw";
         document.getElementById("speedmeter").style.bottom = "50%";
         if (takbo >= 100) {
             right = '45%'
@@ -462,7 +452,7 @@ function setSpeed(s) {
             right = '45.5%'
         } else {
             right = '47%'
-        }  
+        }
     }
     //console.log(right)
     document.getElementById("speedmeter").style.right = right;
@@ -472,20 +462,7 @@ function setSpeed(s) {
     let value = speed;
     let to = length * ((100 - value) / 100);
     val = to / 1000
-    if (setting['carhud'] && setting['carhud']['refreshrate'] > 170) {
-        $('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 35, delay: 25}).velocity({ 'stroke-dashoffset': to }, {duration: 24, delay: 23}).velocity({ 'stroke-dashoffset': to }, {duration: 24, delay: 23})
-    } else if (setting['carhud'] && setting['carhud']['refreshrate'] > 70) {
-        $('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 1, delay: 0}).velocity({ 'stroke-dashoffset': to }, {duration: 1, delay: 0}).velocity({ 'stroke-dashoffset': to }, {duration: 1, delay: 0})
-    } else if (setting['carhud'] && setting['carhud']['refreshrate'] <= 20) {
-        //$('.speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 0, delay: 0})
-        e.style.strokeDashoffset = to;
-    } else if (setting['carhud']['refreshrate'] <= 30) {
-        $('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: 0, delay: 0})
-    } else if (setting['carhud']['refreshrate'] <= 70) {
-        $('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: v1, delay: v2})
-    } else {
-        $('#speedpath').velocity({ 'stroke-dashoffset': to }, {duration: v1, delay: v2}).velocity({ 'stroke-dashoffset': to }, {duration: v1, delay: v2}).velocity({ 'stroke-dashoffset': to }, {duration: v1, delay: v2})
-    }
+    e.style.strokeDashoffset = to;
 }
 
 function setCoolant(percent) {
@@ -497,30 +474,31 @@ function setCoolant(percent) {
         let value = water;
         let to = length * ((100 - value) / 100);
         val = to / 1000
-        //e.style.strokeDashoffset = to;
-        $('#coolantpath').velocity({ 'stroke-dashoffset': to }, {duration: 450, delay: 60})
+            //e.style.strokeDashoffset = to;
+        $('#coolantpath').velocity({ 'stroke-dashoffset': to }, { duration: 450, delay: 60 })
     }
 }
 
 var manual = false
+
 function setShow(table) {
     if (table['bool']) {
         invehicle = true
-        $("#"+carui+"").animate({
+        $("#" + carui + "").animate({
             opacity: "0.65"
-        },400);
+        }, 400);
         setHeadlights(0)
         if (carui == 'modern') {
-            post("openmap",{})
+            post("openmap", {})
         }
-        document.getElementById(""+carui+"").style.display = 'block'
+        document.getElementById("" + carui + "").style.display = 'block'
     } else {
         invehicle = false
-        $("#"+carui+"").animate({
+        $("#" + carui + "").animate({
             opacity: "0"
-        },400);
-        document.getElementById(""+carui+"").style.display = 'none'
-        //clearInterval(loopfuck);
+        }, 400);
+        document.getElementById("" + carui + "").style.display = 'none'
+            //clearInterval(loopfuck);
     }
     RestoreCarPosition()
 }
@@ -531,19 +509,19 @@ function setHeadlights(v) {
         document.getElementById("onlight").style.display = 'block'
         document.getElementById("highlight").style.display = 'none'
         if (carui == 'modern') { return }
-        document.getElementById(""+carui+"_light").style.setProperty("-webkit-filter", "drop-shadow(1px 1px 3px rgba(3, 137, 246, 1.0)");
+        document.getElementById("" + carui + "_light").style.setProperty("-webkit-filter", "drop-shadow(1px 1px 3px rgba(3, 137, 246, 1.0)");
     } else if (v == 2) {
         document.getElementById("offlight").style.display = 'none'
         document.getElementById("onlight").style.display = 'none'
         document.getElementById("highlight").style.display = 'block'
         if (carui == 'modern') { return }
-        document.getElementById(""+carui+"_light").style.setProperty("-webkit-filter", "drop-shadow(1px 1px 3px rgba(3, 137, 246, 1.0)");
+        document.getElementById("" + carui + "_light").style.setProperty("-webkit-filter", "drop-shadow(1px 1px 3px rgba(3, 137, 246, 1.0)");
     } else {
         document.getElementById("offlight").style.display = 'block'
         document.getElementById("onlight").style.display = 'none'
         document.getElementById("highlight").style.display = 'none'
         if (carui == 'modern') { return }
-        document.getElementById(""+carui+"_light").style.setProperty("-webkit-filter", "drop-shadow(1px -1px 0.4px rgba(255, 255, 255, 0.822))");
+        document.getElementById("" + carui + "_light").style.setProperty("-webkit-filter", "drop-shadow(1px -1px 0.4px rgba(255, 255, 255, 0.822))");
     }
 }
 
@@ -582,12 +560,12 @@ function setMileage(value) {
     var e = document.getElementById("oilpath");
     if (mileage >= 5000 && mileage < 10000) {
         document.getElementById("mileage").style.color = 'yellow'
-    } else if(mileage >=10000){
+    } else if (mileage >= 10000) {
         document.getElementById("mileage").style.color = '#C85A17'
     } else {
         document.getElementById("mileage").style.color = 'rgba(182, 182, 182, 0.582)'
     }
-    document.getElementById("mileage").innerHTML = ''+mileage+''
+    document.getElementById("mileage").innerHTML = '' + mileage + ''
 }
 
 function setWaydistance(value) {
@@ -606,7 +584,7 @@ function setWaydistance(value) {
     } else {
         document.getElementById("distext").innerHTML = 'DIS'
     }
-    document.getElementById("distance").innerHTML = ''+dis+''
+    document.getElementById("distance").innerHTML = '' + dis + ''
 }
 
 function setTime(format) {
@@ -614,17 +592,17 @@ function setTime(format) {
     if (!document.getElementById("timetext")) { return }
     if (format.hour > 12) {
         cur = 'Pm'
-        document.getElementById("timetext").innerHTML = ' Pm' 
+        document.getElementById("timetext").innerHTML = ' Pm'
     } else {
         cur = 'Am'
-        document.getElementById("timetext").innerHTML = ' Am' 
+        document.getElementById("timetext").innerHTML = ' Am'
     }
-    var formatdate = ''+format.hour+':'+format.min+''
+    var formatdate = '' + format.hour + ':' + format.min + ''
     if (cur == 'Pm' && format.hour > 12) {
         format.hour = format.hour - 12
-        formatdate = ''+format.hour+':'+format.min+''
+        formatdate = '' + format.hour + ':' + format.min + ''
     }
-    document.getElementById("time").innerHTML = ''+formatdate+'' 
+    document.getElementById("time").innerHTML = '' + formatdate + ''
 }
 
 function setGear(gear) {
@@ -650,7 +628,7 @@ function setGear(gear) {
         gear = '6th'
     }
     if (document.getElementById("gear")) {
-        document.getElementById("gear").innerHTML = ''+gear+''
+        document.getElementById("gear").innerHTML = '' + gear + ''
     }
 }
 
@@ -660,11 +638,11 @@ function numberWithCommas(x) {
 
 function setInfo(table) {
     if (document.getElementById("idnumlabel") == undefined) { return }
-    document.getElementById("idnumlabel").innerHTML = 'Citizen ID#: '+table.id+''
-    document.getElementById("joblabel").innerHTML = ''+table.job+': '+table.joblabel+''
-    document.getElementById("moneylabel").innerHTML = ''+numberWithCommas(table.money)+''
-    document.getElementById("black_moneylabel").innerHTML = ''+numberWithCommas(table.black)+''
-    document.getElementById("banklabel").innerHTML = ''+numberWithCommas(table.bank)+''
+    document.getElementById("idnumlabel").innerHTML = 'Citizen ID#: ' + table.id + ''
+    document.getElementById("joblabel").innerHTML = '' + table.job + ': ' + table.joblabel + ''
+    document.getElementById("moneylabel").innerHTML = '' + numberWithCommas(table.money) + ''
+    document.getElementById("black_moneylabel").innerHTML = '' + numberWithCommas(table.black) + ''
+    document.getElementById("banklabel").innerHTML = '' + numberWithCommas(table.bank) + ''
 }
 
 function setSignal(value) {
@@ -673,7 +651,7 @@ function setSignal(value) {
         document.getElementById('left').style.color = 'white'
         document.getElementById('right').style.opacity = '0.2'
         document.getElementById('right').style.color = 'white'
-        setTimeout(function(){
+        setTimeout(function() {
             $("#left").fadeIn();
             $("#right").fadeIn();
             document.getElementById('left').style.opacity = '1'
@@ -684,13 +662,13 @@ function setSignal(value) {
     } else {
         document.getElementById(value).style.opacity = '0.2'
         document.getElementById(value).style.color = 'white'
-        setTimeout(function(){
-            $("#"+value+"").fadeIn();
+        setTimeout(function() {
+            $("#" + value + "").fadeIn();
             document.getElementById(value).style.opacity = '1'
             document.getElementById(value).style.color = 'lime'
         }, 433);
     }
-    setTimeout(function(){
+    setTimeout(function() {
         document.getElementById('left').style.opacity = '0.2'
         document.getElementById('left').style.color = 'white'
         document.getElementById('right').style.opacity = '0.2'
@@ -698,7 +676,7 @@ function setSignal(value) {
     }, 733);
 }
 
-function setManual(bool,s) {
+function setManual(bool, s) {
     manual = bool
     if (!s) {
         featstate['manualhud'] = bool
@@ -706,14 +684,14 @@ function setManual(bool,s) {
     if (bool && setting['carhud']['manualhud'] && featstate['manualhud']) {
         $("#shift").animate({
             opacity: "1"
-        },400);
+        }, 400);
     } else {
         if (!s) {
             featstate['manualhud'] = false
         }
         $("#shift").animate({
             opacity: "0"
-        },400);
+        }, 400);
     }
 }
 
@@ -721,11 +699,11 @@ function setShift(gear) {
     $("#shifter").css(
         "background-image",
         'url("shifter/' + gear + '.webp")'
-      );
+    );
 }
 
 function setStart(bool) {
-      $("#carui").attr("src", "img/carui_"+bool+".png")
+    $("#carui").attr("src", "img/carui_" + bool + ".png")
 }
 
 function setDoor(s) {
@@ -762,16 +740,16 @@ function CarMap(detalye) {
     } else {
         if (detail.type == "sarado") {
             $(".carhudmap").fadeOut();
-            setTimeout(function(){
+            setTimeout(function() {
                 $("#gps").fadeOut();
                 $("#gps").css("display", "none");
                 $(".centermap").css("display", "none");
                 $(".carhudmap").css("display", "none");
             }, 333);
         }
-        if (detail.type =="bukas") {
+        if (detail.type == "bukas") {
             $("#gps").fadeIn();
-            setTimeout(function(){
+            setTimeout(function() {
                 $(".carhudmap").fadeIn();
                 $(".centermap").css("display", "block");
                 $("#gps").css("display", "block");
@@ -785,7 +763,7 @@ function setTemp(temp) {
     ////console.log(carui,"temp")
     var temp = temp - 50
     if (carui == 'modern') {
-        document.getElementById("cartempbar").style.width = ''+temp+'%'
+        document.getElementById("cartempbar").style.width = '' + temp + '%'
     } else {
         var e = document.getElementById("cartempbar");
         if (e) {
@@ -801,12 +779,12 @@ function setTemp(temp) {
             } else {
                 e.style.stroke = 'skyblue';
             }
-            $('#cartempbar').velocity({ 'stroke-dashoffset': to }, {duration: 250, delay: 60})
+            $('#cartempbar').velocity({ 'stroke-dashoffset': to }, { duration: 250, delay: 60 })
         }
     }
 }
 
-function setMode(value,c) {
+function setMode(value, c) {
     document.getElementById("modediv").style.opacity = '0.0';
 }
 
@@ -831,6 +809,7 @@ function setCruiseControl(bool) {
     }
 }
 var cachebody = undefined
+
 function setShowBodyUi(bool) {
 
 }
@@ -840,6 +819,7 @@ function pulse(stroke) {
 }
 
 var bodystatus = {}
+
 function setUpdateBodyStatus(table) {
 
 }
@@ -852,16 +832,16 @@ function setShowCarcontrol(table) {
 
 }
 
-function post(name,data){
-	var name = name;
-	var data = data;
-	$.post("https://renzu_hud/"+name,JSON.stringify(data));
+function post(name, data) {
+    var name = name;
+    var data = data;
+    $.post("https://renzu_hud/" + name, JSON.stringify(data));
 }
 
-function healpart(data){
-	var name = name;
-	var data = data;
-	$.post("https://renzu_hud/healpart",JSON.stringify({part:data}));
+function healpart(data) {
+    var name = name;
+    var data = data;
+    $.post("https://renzu_hud/healpart", JSON.stringify({ part: data }));
 }
 
 function indexname(index) {
@@ -897,13 +877,13 @@ function windowname(index) {
     }
 }
 
-function showhidecontrolui(bool,id) {
+function showhidecontrolui(bool, id) {
     if (bool) {
-        document.getElementById(''+id+'').style.opacity = '1.0'
-        $("#"+id+"").fadeIn();
+        document.getElementById('' + id + '').style.opacity = '1.0'
+        $("#" + id + "").fadeIn();
     } else {
-        document.getElementById(''+id+'').style.display = '0.0'
-        $("#"+id+"").fadeOut();
+        document.getElementById('' + id + '').style.display = '0.0'
+        $("#" + id + "").fadeOut();
     }
 }
 
@@ -917,7 +897,7 @@ var rearrightdoor = false
 var rearwindow = false
 var frontwindow = false
 
-function setBool(index,type) {
+function setBool(index, type) {
     if (type == 'door') {
         if (index == 0) {
             frontleftdoor = true
@@ -952,8 +932,8 @@ function setDoorState(table) {
     for (const key in table) {
         if (key <= 5 && table[key] == true) {
             var bool = table[key];
-            setBool(key,'door')
-            showhidecontrolui(bool,indexname(key))
+            setBool(key, 'door')
+            showhidecontrolui(bool, indexname(key))
         }
     }
 }
@@ -962,21 +942,21 @@ function setWindowState(table) {
     for (const key in table) {
         if (key <= 3 && table[key] == true) {
             var bool = table[key];
-            setBool(key,'window')
-            showhidecontrolui(bool,windowname(key))
+            setBool(key, 'window')
+            showhidecontrolui(bool, windowname(key))
         }
     }
 }
 
-function Carcontrolcallbackui(type,index) {
+function Carcontrolcallbackui(type, index) {
 
 }
 
 function setWeapon(weapon) {
     //////////console.log(""+weapon+".png")
-    var url = "img/weapons/"+weapon+".webp"
+    var url = "img/weapons/" + weapon + ".webp"
     $("#weaponimg").attr("src", url)
-    setTimeout(function(){
+    setTimeout(function() {
         if (document.getElementById("weaponimg")) {
             var x = document.getElementById("weaponimg").naturalWidth
             if (x > 200 && x < 300) {
@@ -993,6 +973,7 @@ function setWeapon(weapon) {
 }
 
 oldto = 55
+
 function setAmmo(table) {
     var max = table['max'];
     var ammo = table['clip'];
@@ -1006,11 +987,11 @@ function setAmmo(table) {
         let value = bullets;
         let to = length * ((100 - value) / 100);
         val = to / 1000
-        //e.style.strokeDashoffset = to;
+            //e.style.strokeDashoffset = to;
         if (to == oldto) { return }
         oldto = to
-        $('#weaponpath').velocity({ 'stroke-dashoffset': to }, {duration: 50, delay: 10})
-        document.getElementById("ammotext").innerHTML = ''+table['ammo']+'';
+        $('#weaponpath').velocity({ 'stroke-dashoffset': to }, { duration: 50, delay: 10 })
+        document.getElementById("ammotext").innerHTML = '' + table['ammo'] + '';
     }
 }
 
@@ -1025,7 +1006,8 @@ var weaponstring = `<img style="z-index:900;position:absolute;right:10px;bottom:
 <div class="crosshair-wrapper">
   <img style="display:none;" id="crosshair" src="img/crosshair_1.png" class="crosshair"/>
 </div>`
-function setWeaponUi(bool,s) {
+
+function setWeaponUi(bool, s) {
     if (!s || s == undefined) {
         featstate['weaponhud'] = bool
     }
@@ -1038,7 +1020,7 @@ function setWeaponUi(bool,s) {
             featstate['weaponhud'] = false
         }
         $('#weaponui').html('')
-        //document.getElementById("weaponui").style.display = 'none';
+            //document.getElementById("weaponui").style.display = 'none';
         $("#weaponui").fadeOut();
     }
 }
@@ -1046,7 +1028,7 @@ function setWeaponUi(bool,s) {
 function setCrosshair(val) {
     if (val <= 5 && document.getElementById("crosshair")) {
         document.getElementById("crosshair").style.display = 'block';
-        var url = "img/crosshair_"+val+".png"
+        var url = "img/crosshair_" + val + ".png"
         $("#crosshair").attr("src", url)
     }
 }
@@ -1578,6 +1560,7 @@ values="1.000  0.000  0.000  0.000  0.000
 <div style="display:none;" id="diffdiv">
   <span id="diff">OFF</span>
 </div>`
+
 function setCarui(ver) {
     document.getElementById("modern").innerHTML = '';
     document.getElementById("simple").innerHTML = '';
@@ -1589,7 +1572,7 @@ function setCarui(ver) {
         console.log("User setting")
     }
     document.getElementById(ver).innerHTML = ''
-    setTimeout(function(){
+    setTimeout(function() {
         document.getElementById(ver).innerHTML = carui_element[ver]
         if (ver == 'minimal') {
             document.getElementById("speedtext").style.fontWeight = '100';
@@ -1689,7 +1672,7 @@ function setCarui(ver) {
             document.getElementById("diffdiv").style.background = '#00000000';
             document.getElementById("diffdiv").style.fontSize = '0.4vw';
         }
-        setMode('NORMAL',carui)
+        setMode('NORMAL', carui)
         if (setting['iconshape']) {
             class_icon = setting['iconshape']
         }
@@ -1702,7 +1685,7 @@ function setCarui(ver) {
 
         el.addEventListener('animationend', function() {
             rpmanimation = false
-            //console.log('transition end')
+                //console.log('transition end')
         });
         const el2 = document.querySelector('.carhud');
         el2.addEventListener('transitionrun', function() {
@@ -1712,7 +1695,7 @@ function setCarui(ver) {
 
         el2.addEventListener('transitionend', function() {
             speedanimation = false
-            //console.log('transition end')
+                //console.log('transition end')
         });
     }, 333);
 }
@@ -1728,6 +1711,7 @@ var compassstring = `<div id="container">
   <p id="street" style="position:fixed;top:48px;left:77px;width:150px;font-size:8px !important; color:rgba(255, 233, 233, 0.9) !important; padding-top:-10px;"></p>
 </div>
 </div>`
+
 function setCompass(bool) {
     if (bool && setting['streethud']) {
         $('#location').append(compassstring)
@@ -1834,7 +1818,7 @@ function setStatusUI(t) {
             document.getElementById("voip_1").innerHTML = '';
         }
     } else if (t['enable']) {
-        if(document.getElementById("voipdiv")) {
+        if (document.getElementById("voipdiv")) {
             document.getElementById("voipdiv").remove()
         }
     }
@@ -1842,26 +1826,26 @@ function setStatusUI(t) {
 
 function setStatusUILocation(table) {
     if (locache == undefined) {
-        locache = table   
+        locache = table
     }
     if (!RestoreStatusPosition()) {
         if (table['top']) {
-            document.getElementById("statusv3").style.top = ''+table['top']+'';
+            document.getElementById("statusv3").style.top = '' + table['top'] + '';
         } else {
             document.getElementById("statusv3").style.top = 'unset';
         }
         if (table['right']) {
-            document.getElementById("statusv3").style.right = ''+table['right']+'';
+            document.getElementById("statusv3").style.right = '' + table['right'] + '';
         } else {
             document.getElementById("statusv3").style.right = 'unset';
         }
         if (table['bottom']) {
-            document.getElementById("statusv3").style.bottom = ''+table['bottom']+'';
+            document.getElementById("statusv3").style.bottom = '' + table['bottom'] + '';
         } else {
             document.getElementById("statusv3").style.bottom = 'unset';
         }
         if (table['left']) {
-            document.getElementById("statusv3").style.left = ''+table['left']+'';
+            document.getElementById("statusv3").style.left = '' + table['left'] + '';
         } else {
             document.getElementById("statusv3").style.left = 'unset';
         }
@@ -1924,6 +1908,7 @@ function setShowKeyless(bool) {
 var currentvehicle = undefined
 var openall = false
 var alarm = false
+
 function carlockcallback(type) {
 
 }
@@ -1932,153 +1917,155 @@ function setKeyless(table) {
 
 }
 
-    pressfuck = 0
-    var pressedkey1 = 0
-    var pressedkey2 = false
-    var pressedkey3 = false
-    document.onkeyup = function (data) {
+pressfuck = 0
+var pressedkey1 = 0
+var pressedkey2 = false
+var pressedkey3 = false
+document.onkeyup = function(data) {
 
-        if (data.keyCode == '70') {
-            $.post(`https://${GetParentResourceName()}/getoutvehicle`, {}, function(data) {});
-            pressedkey1 = 0
-        }
-    };
-
-    function playsound(table) {
-
+    if (data.keyCode == '70') {
+        $.post(`https://${GetParentResourceName()}/getoutvehicle`, {}, function(data) {});
+        pressedkey1 = 0
     }
+};
 
-    function SetNotify(table) {
-        ////////console.log("notify")
-        new Notify ({status: table['type'],title: table['title'],text: table['message'],autoclose: true})
+function playsound(table) {
+
+}
+
+function SetNotify(table) {
+    ////////console.log("notify")
+    new Notify({ status: table['type'], title: table['title'], text: table['message'], autoclose: true })
+}
+
+function applyFill(slider) {
+    const percentage = 100 * (slider.value - slider.min) / (slider.max - slider.min);
+    const bg = `linear-gradient(90deg, #0099ff ${percentage}%, #222222 ${percentage + 0.1}%)`;
+    slider.style.background = bg;
+}
+
+function unsetradio() {
+    $("input[type=radio][name=wheelsetting][value='off']").prop("checked", true);
+}
+
+function setMapVersion(table) {
+    var type = table['type']
+    var custom = table['custom']
+    if (custom) {
+        $("#mapimg").attr("src", "" + table['link'] + "")
+    } else {
+        $("#mapimg").attr("src", "img/" + type + ".webp")
     }
+}
 
-    function applyFill(slider) {
-        const percentage = 100 * (slider.value - slider.min) / (slider.max - slider.min);
-        const bg = `linear-gradient(90deg, #0099ff ${percentage}%, #222222 ${percentage + 0.1}%)`;
-        slider.style.background = bg;
-    }
-
-    function unsetradio() {
-        $("input[type=radio][name=wheelsetting][value='off']").prop("checked", true);
-    }
-
-    function setMapVersion(table) {
-        var type = table['type']
-        var custom = table['custom']
-        if (custom) {
-            $("#mapimg").attr("src", ""+table['link']+"")
-        } else {
-            $("#mapimg").attr("src", "img/"+type+".webp")
-        }
-    }
-
-    function setRadioChannel(channel) {
-        if (channel !== false && channel !== undefined) {
-            document.getElementById("radio").style.display = 'block';
-            document.getElementById("mic-radio").innerHTML = ''+channel+'';
-            if (statusui == 'simple') {
-                document.getElementById("radio").style.top = '25px';
-                document.getElementById("radio").style.right = '20px';
-                if (statleft == 'top-right') {
-                    document.getElementById("statusv3").style.right = '320px';
-                }
-                $("#radio").fadeIn();
-            }
-        } else {
+function setRadioChannel(channel) {
+    if (channel !== false && channel !== undefined) {
+        document.getElementById("radio").style.display = 'block';
+        document.getElementById("mic-radio").innerHTML = '' + channel + '';
+        if (statusui == 'simple') {
+            document.getElementById("radio").style.top = '25px';
+            document.getElementById("radio").style.right = '20px';
             if (statleft == 'top-right') {
-                document.getElementById("statusv3").style.right = '90px';
+                document.getElementById("statusv3").style.right = '320px';
             }
-            //document.getElementById("radio").style.display = 'none';
-            $("#radio").fadeOut();
+            $("#radio").fadeIn();
+        }
+    } else {
+        if (statleft == 'top-right') {
+            document.getElementById("statusv3").style.right = '90px';
+        }
+        //document.getElementById("radio").style.display = 'none';
+        $("#radio").fadeOut();
+    }
+}
+
+var state = {}
+
+function setShowClothing(table) {
+
+}
+
+function setClotheState(table) {
+
+}
+
+function ResetClotheState(table) {
+
+}
+
+function CallbackCLothing(variant, variant2) {
+
+}
+
+function ResetClothes() {
+
+}
+
+function hasClass(element, className) {
+    return (' ' + element.className + ' ').indexOf(' ' + className + ' ') > -1;
+}
+
+function changeallclass(s) {
+    class_icon = s
+    if (lasticon !== undefined && lasticon == class_icon || lasticon == class_icon) { return }
+    if (lasticon == undefined) {
+        lasticon = 'octagon'
+    }
+    const all = document.getElementsByClassName('fa-' + lasticon + '');
+    if (setting['iconshape'] !== undefined) {
+        class_icon = setting['iconshape']
+    }
+    if (lasticon !== class_icon) {
+        for (var i = 0; i < all.length; i++) {
+            const status = all[i].classList.toggle("fa-" + class_icon + "");
+        }
+        for (var i = 0; i < all.length; i++) {
+            all[i].classList.remove("fa-" + lasticon + "");
         }
     }
-
-    var state = {}
-    function setShowClothing(table) {
-
-    }
-    function setClotheState(table) {
-
-    }
-
-    function ResetClotheState(table) {
-
-    }
-
-    function CallbackCLothing(variant,variant2) {
-
-    }
-
-    function ResetClothes() {
-
-    }
-
-    function hasClass(element, className) {
-        return (' ' + element.className + ' ').indexOf(' ' + className+ ' ') > -1;
-    }
-
-    function changeallclass(s) {
-        class_icon = s
-        if (lasticon !== undefined && lasticon == class_icon || lasticon == class_icon) { return }
-        if (lasticon == undefined) {
-            lasticon = 'octagon'
+    if (class_icon !== 'circle' && class_icon !== 'octagon') {
+        var icon = document.getElementsByClassName('default');
+        for (var i = 0; i < icon.length; i++) {
+            icon[i].classList.toggle("square");
         }
-        const all = document.getElementsByClassName('fa-'+lasticon+'');
-        if (setting['iconshape'] !== undefined) {
-            class_icon = setting['iconshape']
-        }
-        if (lasticon !== class_icon) {
-            for (var i = 0; i < all.length; i++) {
-                const status = all[i].classList.toggle("fa-"+class_icon+"");
-            }
-            for (var i = 0; i < all.length; i++) {
-                all[i].classList.remove("fa-"+lasticon+"");
-            }
-        }
-        if (class_icon !== 'circle' && class_icon !== 'octagon') {
-            var icon = document.getElementsByClassName('default');
-            for (var i = 0; i < icon.length; i++) {
-                icon[i].classList.toggle("square");
-            }
-        }
-        lasticon = class_icon
     }
+    lasticon = class_icon
+}
 
-    function reverseArrayInPlace(array) {
-    for (let i = 0, j = array.length - 1; i < j; i++, j--) 
+function reverseArrayInPlace(array) {
+    for (let i = 0, j = array.length - 1; i < j; i++, j--)
         [array[i], array[j]] = [array[j], array[i]];
-    }
+}
 
-    function SetProgressCircle(id,percent) {
-        var rpm = (percent);
-        var e = document.getElementById(id);
-        if (e) {
-            let length = e.getTotalLength();
-            let to = length * ((100 - percent) / 100);
-            //e.style.strokeDashoffset = to;
-            if (id == 'staminaval') {
-                $('#'+id+'').velocity({ 'stroke-dashoffset': to }, {duration: 350, delay: 30})
-            } else {
-                $('#'+id+'').velocity({ 'stroke-dashoffset': to }, {duration: 550, delay: 30})
-            }
-        }
-    }
-
-    function carhudver() {
-        var val = document.getElementById("carhudver").value;
-        if (usersetting['carhud'] == undefined) {
-            usersetting['carhud'] = {}
-        }
-        if (val) {
-            usersetting['carhud']['version'] = val
-        }
-        if (val !== 'auto') {
-            setCarui(val)
+function SetProgressCircle(id, percent) {
+    var rpm = (percent);
+    var e = document.getElementById(id);
+    if (e) {
+        let length = e.getTotalLength();
+        let to = length * ((100 - percent) / 100);
+        //e.style.strokeDashoffset = to;
+        if (id == 'staminaval') {
+            $('#' + id + '').velocity({ 'stroke-dashoffset': to }, { duration: 350, delay: 30 })
+        } else {
+            $('#' + id + '').velocity({ 'stroke-dashoffset': to }, { duration: 550, delay: 30 })
         }
     }
+}
 
-    var settingstring = `<div class="card">
+function carhudver() {
+    var val = document.getElementById("carhudver").value;
+    if (usersetting['carhud'] == undefined) {
+        usersetting['carhud'] = {}
+    }
+    if (val) {
+        usersetting['carhud']['version'] = val
+    }
+    if (val !== 'auto') {
+        setCarui(val)
+    }
+}
+
+var settingstring = `<div class="card">
     <div class="card__header">
       <div class="toolbar">
         <div class="toolbar__item toolbar__item--close"></div>
@@ -2224,569 +2211,574 @@ function setKeyless(table) {
     </div>
   </div>`
 
-    $("#settingui").append(settingstring)
-    function SettingHud(t) {
-        if (t.bool) {
-            document.getElementById('statusv3').innerHTML = ''
-            document.getElementById('status_progress').innerHTML = ''
-            document.getElementById('settingui').innerHTML = ''
-            $("#settingui").append(settingstring);
-            if (globalconfig['status'] && globalconfig['status']['data']) {
-                SetStatusOrder(globalconfig['status'])
-            }
-            document.getElementById('settingui').style.display = 'block'
-            if (setting['iconshape'] !== undefined) {
-                class_icon = setting['iconshape']
-            }
-            lasticon = undefined
-            changeallclass(class_icon)
-        } else {
-            //document.getElementById('statusv3').innerHTML = ''
-            //document.getElementById('status_progress').innerHTML = ''
-            document.getElementById('settingui').innerHTML = '' 
-            document.getElementById('settingui').style.display = 'none'
-        }
-    }
+$("#settingui").append(settingstring)
 
-    function statusversion() {
-        var val = document.getElementById("statusversion").value;
-        status_type = val
-        setting['statusver'] = val
-        usersetting['statusver'] = val
+function SettingHud(t) {
+    if (t.bool) {
         document.getElementById('statusv3').innerHTML = ''
         document.getElementById('status_progress').innerHTML = ''
         document.getElementById('settingui').innerHTML = ''
-        localStorage.setItem("UISETTING", JSON.stringify(usersetting));
         $("#settingui").append(settingstring);
         if (globalconfig['status'] && globalconfig['status']['data']) {
             SetStatusOrder(globalconfig['status'])
         }
-    }
-    function iconshape() {
-        var val = document.getElementById("iconshape").value;
-        class_icon = val
-        setting['iconshape'] = val
-        usersetting['iconshape'] = val
-        document.getElementById('statusv3').innerHTML = ''
-        document.getElementById('status_progress').innerHTML = ''
+        document.getElementById('settingui').style.display = 'block'
+        if (setting['iconshape'] !== undefined) {
+            class_icon = setting['iconshape']
+        }
+        lasticon = undefined
+        changeallclass(class_icon)
+    } else {
+        //document.getElementById('statusv3').innerHTML = ''
+        //document.getElementById('status_progress').innerHTML = ''
         document.getElementById('settingui').innerHTML = ''
-        localStorage.setItem("UISETTING", JSON.stringify(usersetting));
-        $("#settingui").append(settingstring);
-        if (globalconfig['status'] && globalconfig['status']['data']) {
-            SetStatusOrder(globalconfig['status'])
-        }
-        changeallclass(setting['iconshape'])
+        document.getElementById('settingui').style.display = 'none'
     }
-    function uilook() {
-        var val = document.getElementById("uilook").value;
-        statusui = val
-        setting['uilook'] = val
-        usersetting['uilook'] = val
-        document.getElementById('statusv3').innerHTML = ''
-        document.getElementById('status_progress').innerHTML = ''
-        document.getElementById('settingui').innerHTML = ''
-        localStorage.setItem("UISETTING", JSON.stringify(usersetting));
-        $("#settingui").append(settingstring);
-        $('#logo').html('')
-        $('#voip_1').html('')
-        $('#uibar').html('')
-        document.getElementById("statusnormal").style.display = 'none';
-        if (statusui == 'normal') {
-            NormalUI()
-            document.getElementById("statusnormal").style.display = 'block';
-        }
-        if (globalconfig['status'] && globalconfig['status']['data']) {
-            SetStatusOrder(globalconfig['status'])
-        }
-        if (statusui == 'normal') {
-            if (document.getElementById("healthdiv")) {
-                document.getElementById("healthdiv").innerHTML = '';
-            }
-            if (document.getElementById("voipdiv")) {
-                document.getElementById("voipdiv").style.display = 'none';
-            }
-            if (document.getElementById("armordiv")) {
-                document.getElementById("armordiv").innerHTML = '';
-            }
-        }
-    }
-  
-    function speedmetric() {
-        var val = document.getElementById("speedmetric").value;
-        SetMetrics(val,true)
-        usersetting['carhud']['speedmetric'] = val
-    }
+}
 
-    function statustype(st) {
-        var val = document.getElementById(""+st+"statustype").value;
-        if (usersetting['status'] == undefined) { usersetting['status'] = {} }
-        if (usersetting['status'][st] == undefined) { usersetting['status'][st] = {}}
-        setting['status'][st].type = val
-        usersetting['status'][st].type = val
-        document.getElementById('statusv3').innerHTML = ''
-        document.getElementById('status_progress').innerHTML = ''
-        document.getElementById('settingui').innerHTML = ''
-        localStorage.setItem("UISETTING", JSON.stringify(usersetting));
-        $("#settingui").append(settingstring);
-        if (globalconfig['status'] && globalconfig['status']['data']) {
-            SetStatusOrder(globalconfig['status'])
-        }
+function statusversion() {
+    var val = document.getElementById("statusversion").value;
+    status_type = val
+    setting['statusver'] = val
+    usersetting['statusver'] = val
+    document.getElementById('statusv3').innerHTML = ''
+    document.getElementById('status_progress').innerHTML = ''
+    document.getElementById('settingui').innerHTML = ''
+    localStorage.setItem("UISETTING", JSON.stringify(usersetting));
+    $("#settingui").append(settingstring);
+    if (globalconfig['status'] && globalconfig['status']['data']) {
+        SetStatusOrder(globalconfig['status'])
     }
+}
 
-    function SavetoLocal() {
-        post("hidecarlock",{})
-        resetsetting(false)
-        localStorage.setItem("UISETTING", JSON.stringify(usersetting));
+function iconshape() {
+    var val = document.getElementById("iconshape").value;
+    class_icon = val
+    setting['iconshape'] = val
+    usersetting['iconshape'] = val
+    document.getElementById('statusv3').innerHTML = ''
+    document.getElementById('status_progress').innerHTML = ''
+    document.getElementById('settingui').innerHTML = ''
+    localStorage.setItem("UISETTING", JSON.stringify(usersetting));
+    $("#settingui").append(settingstring);
+    if (globalconfig['status'] && globalconfig['status']['data']) {
+        SetStatusOrder(globalconfig['status'])
     }
-    
-    function resetsetting(force) {
-        if (force) {
-            usersetting = {}
-            if (setting['statusver'] == undefined || usersetting['statusver'] == undefined) {
-                status_type = globalconfig['statusver']
-                setting['statusver'] = globalconfig['statusver']
-                usersetting['statusver'] = globalconfig['statusver']
-            }
-            if (setting['uilook'] == undefined || usersetting['uilook'] == undefined) {
-                statusui = globalconfig['uilook']
-                setting['uilook'] = globalconfig['uilook']
-                usersetting['uilook'] = globalconfig['uilook']
-            }
-            if (setting['iconshape'] == undefined || usersetting['iconshape'] == undefined) {
-                class_icon = globalconfig['iconshape']
-                setting['iconshape'] = globalconfig['iconshape']
-                usersetting['iconshape'] = globalconfig['iconshape']
-            }
-            localStorage.removeItem("UISETTING")
-            ResetStorages()
-            NormalUI()
-            document.getElementById('statusv3').innerHTML = ''
-            document.getElementById('status_progress').innerHTML = ''
-            document.getElementById('settingui').innerHTML = ''
-            $("#settingui").append(settingstring);
-            if (globalconfig['status'] && globalconfig['status']['data']) {
-                SetStatusOrder(globalconfig['status'])
-            }
-            var temp = {}
-            temp['bottom'] = '20px'
-            temp['left'] = '20px'
-            setStatusUILocation(temp)
-            if (globalconfig['uilook'] == 'simple') {
-                document.getElementById("uibar").innerHTML = '';
-                document.getElementById("logo").innerHTML = '';
-                document.getElementById("voip_1").innerHTML = '';
-                document.getElementById("statusnormal").style.display = 'none';
-            }
+    changeallclass(setting['iconshape'])
+}
+
+function uilook() {
+    var val = document.getElementById("uilook").value;
+    statusui = val
+    setting['uilook'] = val
+    usersetting['uilook'] = val
+    document.getElementById('statusv3').innerHTML = ''
+    document.getElementById('status_progress').innerHTML = ''
+    document.getElementById('settingui').innerHTML = ''
+    localStorage.setItem("UISETTING", JSON.stringify(usersetting));
+    $("#settingui").append(settingstring);
+    $('#logo').html('')
+    $('#voip_1').html('')
+    $('#uibar').html('')
+    document.getElementById("statusnormal").style.display = 'none';
+    if (statusui == 'normal') {
+        NormalUI()
+        document.getElementById("statusnormal").style.display = 'block';
+    }
+    if (globalconfig['status'] && globalconfig['status']['data']) {
+        SetStatusOrder(globalconfig['status'])
+    }
+    if (statusui == 'normal') {
+        if (document.getElementById("healthdiv")) {
+            document.getElementById("healthdiv").innerHTML = '';
         }
-        if (usersetting['carhud'] == undefined) {
-            usersetting['carhud'] = {}
+        if (document.getElementById("voipdiv")) {
+            document.getElementById("voipdiv").style.display = 'none';
         }
-        if (setting['carhud'] == undefined) {
-            setting['carhud'] = {}
+        if (document.getElementById("armordiv")) {
+            document.getElementById("armordiv").innerHTML = '';
         }
+    }
+}
+
+function speedmetric() {
+    var val = document.getElementById("speedmetric").value;
+    SetMetrics(val, true)
+    usersetting['carhud']['speedmetric'] = val
+}
+
+function statustype(st) {
+    var val = document.getElementById("" + st + "statustype").value;
+    if (usersetting['status'] == undefined) { usersetting['status'] = {} }
+    if (usersetting['status'][st] == undefined) { usersetting['status'][st] = {} }
+    setting['status'][st].type = val
+    usersetting['status'][st].type = val
+    document.getElementById('statusv3').innerHTML = ''
+    document.getElementById('status_progress').innerHTML = ''
+    document.getElementById('settingui').innerHTML = ''
+    localStorage.setItem("UISETTING", JSON.stringify(usersetting));
+    $("#settingui").append(settingstring);
+    if (globalconfig['status'] && globalconfig['status']['data']) {
+        SetStatusOrder(globalconfig['status'])
+    }
+}
+
+function SavetoLocal() {
+    post("hidecarlock", {})
+    resetsetting(false)
+    localStorage.setItem("UISETTING", JSON.stringify(usersetting));
+}
+
+function resetsetting(force) {
+    if (force) {
+        usersetting = {}
         if (setting['statusver'] == undefined || usersetting['statusver'] == undefined) {
             status_type = globalconfig['statusver']
             setting['statusver'] = globalconfig['statusver']
             usersetting['statusver'] = globalconfig['statusver']
         }
         if (setting['uilook'] == undefined || usersetting['uilook'] == undefined) {
-            setting['uilook'] = globalconfig['uilook']
             statusui = globalconfig['uilook']
+            setting['uilook'] = globalconfig['uilook']
             usersetting['uilook'] = globalconfig['uilook']
-            console.log("set default")
         }
         if (setting['iconshape'] == undefined || usersetting['iconshape'] == undefined) {
             class_icon = globalconfig['iconshape']
             setting['iconshape'] = globalconfig['iconshape']
             usersetting['iconshape'] = globalconfig['iconshape']
         }
-        if (setting['streethud'] == undefined || usersetting['streethud'] == undefined) {
-            setting['streethud'] = globalconfig['streethud']
-            usersetting['streethud'] = globalconfig['streethud']
-            setCompass(setting['streethud'])
+        localStorage.removeItem("UISETTING")
+        ResetStorages()
+        NormalUI()
+        document.getElementById('statusv3').innerHTML = ''
+        document.getElementById('status_progress').innerHTML = ''
+        document.getElementById('settingui').innerHTML = ''
+        $("#settingui").append(settingstring);
+        if (globalconfig['status'] && globalconfig['status']['data']) {
+            SetStatusOrder(globalconfig['status'])
         }
-        if (setting['weaponhud'] == undefined && globalconfig['weaponhud'] !== undefined || usersetting['weaponhud'] == undefined) {
-            setting['weaponhud'] = globalconfig['weaponhud']
-            usersetting['weaponhud'] = globalconfig['weaponhud']
-            setWeaponUi(setting['weaponhud'],true)
+        var temp = {}
+        temp['bottom'] = '20px'
+        temp['left'] = '20px'
+        setStatusUILocation(temp)
+        if (globalconfig['uilook'] == 'simple') {
+            document.getElementById("uibar").innerHTML = '';
+            document.getElementById("logo").innerHTML = '';
+            document.getElementById("voip_1").innerHTML = '';
+            document.getElementById("statusnormal").style.display = 'none';
+        }
+    }
+    if (usersetting['carhud'] == undefined) {
+        usersetting['carhud'] = {}
+    }
+    if (setting['carhud'] == undefined) {
+        setting['carhud'] = {}
+    }
+    if (setting['statusver'] == undefined || usersetting['statusver'] == undefined) {
+        status_type = globalconfig['statusver']
+        setting['statusver'] = globalconfig['statusver']
+        usersetting['statusver'] = globalconfig['statusver']
+    }
+    if (setting['uilook'] == undefined || usersetting['uilook'] == undefined) {
+        setting['uilook'] = globalconfig['uilook']
+        statusui = globalconfig['uilook']
+        usersetting['uilook'] = globalconfig['uilook']
+        console.log("set default")
+    }
+    if (setting['iconshape'] == undefined || usersetting['iconshape'] == undefined) {
+        class_icon = globalconfig['iconshape']
+        setting['iconshape'] = globalconfig['iconshape']
+        usersetting['iconshape'] = globalconfig['iconshape']
+    }
+    if (setting['streethud'] == undefined || usersetting['streethud'] == undefined) {
+        setting['streethud'] = globalconfig['streethud']
+        usersetting['streethud'] = globalconfig['streethud']
+        setCompass(setting['streethud'])
+    }
+    if (setting['weaponhud'] == undefined && globalconfig['weaponhud'] !== undefined || usersetting['weaponhud'] == undefined) {
+        setting['weaponhud'] = globalconfig['weaponhud']
+        usersetting['weaponhud'] = globalconfig['weaponhud']
+        setWeaponUi(setting['weaponhud'], true)
+    }
+    for (const i in globalconfig['carhud']) {
+        if (i == 'version' && setting['carhud']['version'] == undefined || i == 'version' && usersetting['carhud']['version'] == undefined) {
+            setting['carhud']['version'] = globalconfig['carhud'][i]
+            usersetting['carhud']['version'] = globalconfig['carhud'][i]
+            carui = setting['carhud']['version']
+            setCarui(setting['carhud']['version'])
+        }
+        if (i == 'speedmetric' && setting['carhud']['speedmetric'] == undefined || i == 'speedmetric' && usersetting['carhud']['speedmetric'] == undefined) {
+            setting['carhud']['speedmetric'] = globalconfig['carhud'][i]
+            usersetting['carhud']['speedmetric'] = globalconfig['carhud'][i]
+            SetMetrics(setting['carhud']['speedmetric'], true)
+        }
+        if (i == 'turbohud' && setting['carhud']['turbohud'] == undefined || i == 'turbohud' && usersetting['carhud']['turbohud'] == undefined) {
+            setting['carhud']['turbohud'] = globalconfig['carhud'][i]
+            usersetting['carhud']['turbohud'] = globalconfig['carhud'][i]
+            setShowTurboBoost(setting['carhud']['turbohud'], true)
+        }
+        if (i == 'manualhud' && setting['carhud']['manualhud'] == undefined || i == 'manualhud' && usersetting['carhud']['manualhud'] == undefined) {
+            setting['carhud']['manualhud'] = globalconfig['carhud'][i]
+            usersetting['carhud']['manualhud'] = globalconfig['carhud'][i]
+            setManual(setting['carhud']['manualhud'], true)
+        }
+        if (i == 'refreshrate' && setting['carhud']['refreshrate'] == undefined && i == 'refreshrate' && usersetting['carhud']['refreshrate'] == undefined) {
+            setting['carhud']['refreshrate'] = globalconfig['carhud'][i]
+            usersetting['carhud']['refreshrate'] = globalconfig['carhud'][i]
+            post("setrefreshrate", { val: setting['carhud']['refreshrate'] })
+        }
+    }
+}
+
+function reimportsetting(c) {
+    $("#settingui").append(settingstring);
+    console.log("Checking User Setting...")
+    globalconfig = c
+    const sett = JSON.parse(localStorage.getItem("UISETTING"))
+    if (sett && sett['uilook']) {
+        usersetting = sett
+        setting = sett
+        for (const i in globalconfig) {
+            if (usersetting[i] == undefined) {
+                usersetting[i] = globalconfig[i]
+            }
+        }
+        if (setting['uilook']) {
+            statusui = usersetting['uilook']
+        }
+        if (setting['iconshape']) {
+            class_icon = usersetting['iconshape']
+        }
+        if (setting['statusver']) {
+            status_type = usersetting['statusver']
+        }
+        //setting = usersetting
+        console.log("User Setting Activated")
+        if (usersetting['carhud']['version']) {
+            post("setcarui", { val: setting['carhud']['version'] })
+            console.log("custom Car HUD")
+        }
+        if (usersetting['carhud']['refreshrate']) {
+            post("setrefreshrate", { val: setting['carhud']['refreshrate'] })
+            console.log("Custom CarHUD Refresh Rate")
         }
         for (const i in globalconfig['carhud']) {
-            if (i == 'version' && setting['carhud']['version'] == undefined || i == 'version' && usersetting['carhud']['version'] == undefined) {
-              setting['carhud']['version'] = globalconfig['carhud'][i]
-              usersetting['carhud']['version'] = globalconfig['carhud'][i]
-              carui = setting['carhud']['version']
-              setCarui(setting['carhud']['version'])
+            if (setting['carhud'] == undefined) {
+                setting['carhud'] = {}
             }
-            if(i == 'speedmetric' && setting['carhud']['speedmetric'] == undefined || i == 'speedmetric' && usersetting['carhud']['speedmetric'] == undefined) {
-              setting['carhud']['speedmetric'] = globalconfig['carhud'][i]
-              usersetting['carhud']['speedmetric'] = globalconfig['carhud'][i]
-              SetMetrics(setting['carhud']['speedmetric'],true)
+            if (i == 'version' && setting['carhud']['version'] == undefined && globalconfig['carhud'][i] !== undefined) {
+                setting['carhud']['version'] = globalconfig['carhud'][i]
+                carui = setting['carhud']['version']
+                setCarui(setting['carhud']['version'])
             }
-            if(i == 'turbohud' && setting['carhud']['turbohud'] == undefined || i == 'turbohud' && usersetting['carhud']['turbohud'] == undefined) {
-              setting['carhud']['turbohud'] = globalconfig['carhud'][i]
-              usersetting['carhud']['turbohud'] = globalconfig['carhud'][i]
-              setShowTurboBoost(setting['carhud']['turbohud'],true)
+            if (i == 'speedmetric' && setting['carhud']['speedmetric'] == undefined && globalconfig['carhud'][i] !== undefined) {
+                setting['carhud']['speedmetric'] = globalconfig['carhud'][i]
+                SetMetrics(setting['carhud']['speedmetric'], true)
             }
-            if(i == 'manualhud' && setting['carhud']['manualhud'] == undefined || i == 'manualhud' && usersetting['carhud']['manualhud'] == undefined) {
-              setting['carhud']['manualhud'] = globalconfig['carhud'][i]
-              usersetting['carhud']['manualhud'] = globalconfig['carhud'][i]
-              setManual(setting['carhud']['manualhud'],true)
+            if (i == 'turbohud' && setting['carhud']['turbohud'] == undefined && globalconfig['carhud'][i] !== undefined) {
+                setting['carhud']['turbohud'] = globalconfig['carhud'][i]
+                setShowTurboBoost(setting['carhud']['turbohud'], true)
             }
-            if(i == 'refreshrate' && setting['carhud']['refreshrate'] == undefined && i == 'refreshrate' && usersetting['carhud']['refreshrate'] == undefined) {
-              setting['carhud']['refreshrate'] = globalconfig['carhud'][i]
-              usersetting['carhud']['refreshrate'] = globalconfig['carhud'][i]
-              post("setrefreshrate",{val:setting['carhud']['refreshrate']})
+            if (i == 'manualhud' && setting['carhud']['manualhud'] == undefined & globalconfig['carhud'][i] !== undefined) {
+                setting['carhud']['manualhud'] = globalconfig['carhud'][i]
+                setManual(setting['carhud']['manualhud'], true)
+            }
+            if (i == 'refreshrate' && setting['carhud']['refreshrate'] == undefined && globalconfig['carhud'][i] !== undefined) {
+                setting['carhud']['refreshrate'] = globalconfig['carhud'][i]
+                post("setrefreshrate", { val: setting['carhud']['refreshrate'] })
             }
         }
+    } else {
+        resetsetting()
     }
+}
 
-    function reimportsetting(c) {
-        $("#settingui").append(settingstring);
-        console.log("Checking User Setting...")
-        globalconfig = c
-        const sett = JSON.parse(localStorage.getItem("UISETTING"))
-        if (sett && sett['uilook']) {
-            usersetting = sett
-            setting = sett
-            for (const i in globalconfig) {
-                if (usersetting[i] == undefined) {
-                    usersetting[i] = globalconfig[i]
-                }
-            }
-            if (setting['uilook']) {
-                statusui = usersetting['uilook']
-            }
-            if (setting['iconshape']) {
-                class_icon = usersetting['iconshape']
-            }
-            if (setting['statusver']) {
-                status_type = usersetting['statusver']
-            }
-            //setting = usersetting
-            console.log("User Setting Activated")
-            if (usersetting['carhud']['version']) {
-                post("setcarui",{val:setting['carhud']['version']})
-                console.log("custom Car HUD")
-            }
-            if (usersetting['carhud']['refreshrate']) {
-                post("setrefreshrate",{val:setting['carhud']['refreshrate']})
-                console.log("Custom CarHUD Refresh Rate")
-            }
-            for (const i in globalconfig['carhud']) {
-                if (setting['carhud'] == undefined) {
-                    setting['carhud'] = {}
-                }
-                if (i == 'version' && setting['carhud']['version'] == undefined && globalconfig['carhud'][i] !== undefined) {
-                  setting['carhud']['version'] = globalconfig['carhud'][i]
-                  carui = setting['carhud']['version']
-                  setCarui(setting['carhud']['version'])
-                }
-                if(i == 'speedmetric' && setting['carhud']['speedmetric'] == undefined && globalconfig['carhud'][i] !== undefined) {
-                  setting['carhud']['speedmetric'] = globalconfig['carhud'][i]
-                  SetMetrics(setting['carhud']['speedmetric'],true)
-                }
-                if(i == 'turbohud' && setting['carhud']['turbohud'] == undefined && globalconfig['carhud'][i] !== undefined) {
-                  setting['carhud']['turbohud'] = globalconfig['carhud'][i]
-                  setShowTurboBoost(setting['carhud']['turbohud'],true)
-                }
-                if(i == 'manualhud' && setting['carhud']['manualhud'] == undefined & globalconfig['carhud'][i] !== undefined) {
-                  setting['carhud']['manualhud'] = globalconfig['carhud'][i]
-                  setManual(setting['carhud']['manualhud'],true)
-                }
-                if(i == 'refreshrate' && setting['carhud']['refreshrate'] == undefined && globalconfig['carhud'][i] !== undefined) {
-                  setting['carhud']['refreshrate'] = globalconfig['carhud'][i]
-                  post("setrefreshrate",{val:setting['carhud']['refreshrate']})
-                }
-            }
-        } else {
-            resetsetting()
-        }
+function changelinecolor(s) {
+    console.log(s)
+}
+
+function componentFromStr(numStr, percent) {
+    var num = Math.max(0, parseInt(numStr, 10));
+    return percent ?
+        Math.floor(255 * Math.min(100, num) / 100) : Math.min(255, num);
+}
+
+function rgbToHex(rgb) {
+    var rgbRegex = /^rgb\(\s*(-?\d+)(%?)\s*,\s*(-?\d+)(%?)\s*,\s*(-?\d+)(%?)\s*\)$/;
+    var result, r, g, b, hex = "";
+    if ((result = rgbRegex.exec(rgb))) {
+        r = componentFromStr(result[1], result[2]);
+        g = componentFromStr(result[3], result[4]);
+        b = componentFromStr(result[5], result[6]);
+
+        hex = "#" + (0x1000000 + (r << 16) + (g << 8) + b).toString(16).slice(1);
     }
-    
-    function changelinecolor(s) {
-        console.log(s)
+    return hex;
+}
+var toggle = undefined
+
+function SetStatusOrder(t) {
+    if (t['data'] == undefined) { return }
+    statcache = t['data']
+    console.log("status ordering")
+    var s = t['data']
+    statleft = t['float']
+    var offsetplus = -35
+    var statuses = s
+    if (setting['status'] == undefined) {
+        setting['status'] = {}
     }
-    function componentFromStr(numStr, percent) {
-        var num = Math.max(0, parseInt(numStr, 10));
-        return percent ?
-            Math.floor(255 * Math.min(100, num) / 100) : Math.min(255, num);
+    if (setting['statusver'] == undefined) {
+        setting['statusver'] = status_type
     }
-    
-    function rgbToHex(rgb) {
-        var rgbRegex = /^rgb\(\s*(-?\d+)(%?)\s*,\s*(-?\d+)(%?)\s*,\s*(-?\d+)(%?)\s*\)$/;
-        var result, r, g, b, hex = "";
-        if ( (result = rgbRegex.exec(rgb)) ) {
-            r = componentFromStr(result[1], result[2]);
-            g = componentFromStr(result[3], result[4]);
-            b = componentFromStr(result[5], result[6]);
-        
-            hex = "#" + (0x1000000 + (r << 16) + (g << 8) + b).toString(16).slice(1);
-        }
-        return hex;
-    } 
-    var toggle = undefined
-    function SetStatusOrder(t) {
-        if (t['data'] == undefined) { return }
-        statcache = t['data']
-        console.log("status ordering")
-        var s = t['data']
-        statleft = t['float']
-        var offsetplus = -35
-        var statuses = s
-        if (setting['status'] == undefined) {
-            setting['status'] = {}
-        }
-        if (setting['statusver'] == undefined) {
-            setting['statusver'] = status_type
-        }
-        if (setting['iconshape'] == undefined) {
-            setting['iconshape'] = class_icon
-        }
-        for (const i in statuses) {
-            if (statuses[i].enable) {
-                var offset = 275
-                if (statuses[0] !== undefined) {
-                    offset = statuses[0].offset
-                } else{
-                    offset = statuses['health'].offset
-                }
-                offsetplus = offsetplus + 35
-                offset = (+offset - +offsetplus)
-                var fa = statuses[i].fa
-                var class1 = statuses[i].i_id_1_class
-                var class2 = statuses[i].i_id_2_class
-                var color1 = statuses[i].i_id_1_color
-                var color2 = statuses[i].i_id_2_color
-                var bg = statuses[i].bg
-                if (localStorage.getItem(""+statuses[i].status+"color2")) {
-                    bg = localStorage.getItem(""+statuses[i].status+"color2")
-                }
-                if (localStorage.getItem(""+statuses[i].status+"color1")) {
-                    color1 = localStorage.getItem(""+statuses[i].status+"color1")
-                }
-                var divid = statuses[i].status+'div'
-                var i_id_1 = statuses[i].status+'val'
-                var i_id_2 = statuses[i].status+'simplebg'
-                var rpuidiv = statuses[i].status+'bar'
-                var blink = statuses[i].status+'blink'
-                var hidemax = statuses[i].min_val_hide
-                if (hidemax == undefined) {
-                    hidemax = 100
-                }
-                if (statleft == 'top-left' || statleft == 'bottom-left') {
-                    float = 'left'
-                } else {
-                    float = 'right'
-                }
-                if (setting['status'][statuses[i].status] == undefined) {
-                    setting['status'][statuses[i].status] = {}
-                }
-                if (usersetting['status'] && usersetting['status'][statuses[i].status] !== undefined) {
-                    setting['status'][statuses[i].status].min_val_hide = usersetting['status'][statuses[i].status].min_val_hide
-                    setting['status'][statuses[i].status].hideifmax = usersetting['status'][statuses[i].status].hideifmax
-                    if (usersetting['status'][statuses[i].status].type == undefined) {
-                        usersetting['status'][statuses[i].status].type = statuses[i].type
-                    }
-                    if (setting['status'][statuses[i].status].hideifmax == undefined) {
-                        setting['status'][statuses[i].status].hideifmax = statuses[i].hideifmax
-                    }
-                    if (usersetting['status'][statuses[i].status].hideifmax == undefined) {
-                        usersetting['status'][statuses[i].status].hideifmax = statuses[i].hideifmax
-                    }
-                    setting['status'][statuses[i].status].type = usersetting['status'][statuses[i].status].type
-                } else {
-                    setting['status'][statuses[i].status].min_val_hide = hidemax
-                    setting['status'][statuses[i].status].hideifmax = statuses[i].hideifmax
-                    setting['status'][statuses[i].status].type = statuses[i].type
-                    if (usersetting['status'] == undefined) {
-                        usersetting['status'] = {}
-                    }
-                    if (usersetting['status'][statuses[i].status] == undefined) { usersetting['status'][statuses[i].status] = {} }
-                    usersetting['status'][statuses[i].status].min_val_hide = hidemax
-                    usersetting['status'][statuses[i].status].hideifmax = statuses[i].hideifmax
+    if (setting['iconshape'] == undefined) {
+        setting['iconshape'] = class_icon
+    }
+    for (const i in statuses) {
+        if (statuses[i].enable) {
+            var offset = 275
+            if (statuses[0] !== undefined) {
+                offset = statuses[0].offset
+            } else {
+                offset = statuses['health'].offset
+            }
+            offsetplus = offsetplus + 35
+            offset = (+offset - +offsetplus)
+            var fa = statuses[i].fa
+            var class1 = statuses[i].i_id_1_class
+            var class2 = statuses[i].i_id_2_class
+            var color1 = statuses[i].i_id_1_color
+            var color2 = statuses[i].i_id_2_color
+            var bg = statuses[i].bg
+            if (localStorage.getItem("" + statuses[i].status + "color2")) {
+                bg = localStorage.getItem("" + statuses[i].status + "color2")
+            }
+            if (localStorage.getItem("" + statuses[i].status + "color1")) {
+                color1 = localStorage.getItem("" + statuses[i].status + "color1")
+            }
+            var divid = statuses[i].status + 'div'
+            var i_id_1 = statuses[i].status + 'val'
+            var i_id_2 = statuses[i].status + 'simplebg'
+            var rpuidiv = statuses[i].status + 'bar'
+            var blink = statuses[i].status + 'blink'
+            var hidemax = statuses[i].min_val_hide
+            if (hidemax == undefined) {
+                hidemax = 100
+            }
+            if (statleft == 'top-left' || statleft == 'bottom-left') {
+                float = 'left'
+            } else {
+                float = 'right'
+            }
+            if (setting['status'][statuses[i].status] == undefined) {
+                setting['status'][statuses[i].status] = {}
+            }
+            if (usersetting['status'] && usersetting['status'][statuses[i].status] !== undefined) {
+                setting['status'][statuses[i].status].min_val_hide = usersetting['status'][statuses[i].status].min_val_hide
+                setting['status'][statuses[i].status].hideifmax = usersetting['status'][statuses[i].status].hideifmax
+                if (usersetting['status'][statuses[i].status].type == undefined) {
                     usersetting['status'][statuses[i].status].type = statuses[i].type
                 }
-                hex = rgbToHex(statuses[i].bg)
-                if (hex == undefined) { hex = '#000000'}
-                //console.log(setting['status'][statuses[i].status].hideifmax)
-                $("#statussetting").append(`<div class="form-item">
+                if (setting['status'][statuses[i].status].hideifmax == undefined) {
+                    setting['status'][statuses[i].status].hideifmax = statuses[i].hideifmax
+                }
+                if (usersetting['status'][statuses[i].status].hideifmax == undefined) {
+                    usersetting['status'][statuses[i].status].hideifmax = statuses[i].hideifmax
+                }
+                setting['status'][statuses[i].status].type = usersetting['status'][statuses[i].status].type
+            } else {
+                setting['status'][statuses[i].status].min_val_hide = hidemax
+                setting['status'][statuses[i].status].hideifmax = statuses[i].hideifmax
+                setting['status'][statuses[i].status].type = statuses[i].type
+                if (usersetting['status'] == undefined) {
+                    usersetting['status'] = {}
+                }
+                if (usersetting['status'][statuses[i].status] == undefined) { usersetting['status'][statuses[i].status] = {} }
+                usersetting['status'][statuses[i].status].min_val_hide = hidemax
+                usersetting['status'][statuses[i].status].hideifmax = statuses[i].hideifmax
+                usersetting['status'][statuses[i].status].type = statuses[i].type
+            }
+            hex = rgbToHex(statuses[i].bg)
+            if (hex == undefined) { hex = '#000000' }
+            //console.log(setting['status'][statuses[i].status].hideifmax)
+            $("#statussetting").append(`<div class="form-item">
                 <div style="position: absolute;
                 left: -25px;
                 font-size: 15px;">
-                <input style="width: 30px;opacity:0.3;" type="color" id="`+statuses[i].status+`color" name="`+statuses[i].status+`color"
-                value="`+rgbToHex(statuses[i].i_id_1_color)+`">
+                <input style="width: 30px;opacity:0.3;" type="color" id="` + statuses[i].status + `color" name="` + statuses[i].status + `color"
+                value="` + rgbToHex(statuses[i].i_id_1_color) + `">
                 </div>
                 <div style="position: absolute;
                 left: -55px;
                 font-size: 15px;">
-                <input style="width: 30px;opacity:0.3;" type="color" id="`+statuses[i].status+`color2" name="`+statuses[i].status+`color"
-                value="`+rgbToHex(statuses[i].bg)+`">
+                <input style="width: 30px;opacity:0.3;" type="color" id="` + statuses[i].status + `color2" name="` + statuses[i].status + `color"
+                value="` + rgbToHex(statuses[i].bg) + `">
                 </div>
-                <label class="form-item__label">`+statuses[i].status+`</label>
+                <label class="form-item__label">` + statuses[i].status + `</label>
                 <div class="slider" style="width:30%;">
-                    <input id="`+statuses[i].status+`range" class="slider__input" type="range" value="`+setting['status'][statuses[i].status].min_val_hide+`" min="0" max="100"/>
-                    <div class="slider__positive" style="width: `+setting['status'][statuses[i].status].min_val_hide+`%;" id="`+statuses[i].status+`widthbar"></div>
+                    <input id="` + statuses[i].status + `range" class="slider__input" type="range" value="` + setting['status'][statuses[i].status].min_val_hide + `" min="0" max="100"/>
+                    <div class="slider__positive" style="width: ` + setting['status'][statuses[i].status].min_val_hide + `%;" id="` + statuses[i].status + `widthbar"></div>
                 </div>
-                <div class="form-item__control toggle" data-id="`+statuses[i].status+`" id="`+statuses[i].status+`toggle">
+                <div class="form-item__control toggle" data-id="` + statuses[i].status + `" id="` + statuses[i].status + `toggle">
                   <div class="toggle__handle"></div>
                 </div>
                 <div class="form-item__control" style="width: 15%;display: inline-flex;">
-                    <select class="control control--select" id="`+statuses[i].status+`statustype" onchange="statustype('`+statuses[i].status+`')">
+                    <select class="control control--select" id="` + statuses[i].status + `statustype" onchange="statustype('` + statuses[i].status + `')">
                         <option selected="selected" value="1">1</option>
                         <option value="0">0</option>
                     </select>
                 </div>
               </div>`);
-                $("#"+statuses[i].status+"color").on("input", function() {
-                    document.getElementById(statuses[i].status+'val').style.stroke = ''+$(this).val()+'';
-                    localStorage.setItem(""+statuses[i].status+"color1", $(this).val());
-                });
-                $("#"+statuses[i].status+"color2").on("input", function() {
-                    document.getElementById(''+statuses[i].status+'fabg').style.color = ''+$(this).val()+'';
-                    localStorage.setItem(""+statuses[i].status+"color2", $(this).val());
-                });
-                if (setting['status'][statuses[i].status] == undefined) { setting['status'][statuses[i].status] = {} }
-                if (document.getElementById(''+statuses[i].status+'statustype')) {
-                    document.getElementById(''+statuses[i].status+'statustype').value = setting['status'][statuses[i].status].type;
-                }
-                if (setting['statusver'] && document.getElementById('statusversion')) {
-                    document.getElementById('statusversion').value = setting['statusver']
-                }
-                if (setting['uilook'] && document.getElementById('uilook')) {
-                    document.getElementById('uilook').value = setting['uilook']
-                }
-                if (setting['iconshape'] && document.getElementById('iconshape')) {
-                    document.getElementById('iconshape').value = setting['iconshape']
-                }
-                if (setting['carhud']['version'] && document.getElementById('carhudver')) {
-                    document.getElementById('carhudver').value = setting['carhud']['version']
-                }
-                if (setting['carhud']['speedmetric'] && document.getElementById('speedmetric')) {
-                    document.getElementById('speedmetric').value = setting['carhud']['speedmetric']
-                }
-                if (setting['status'][statuses[i].status].type == 1) {
-                    var appendto = false
-                    if (localStorage.getItem("statusleft")) {
-                        if (localStorage.getItem("statusleft") > 1000) {
-                            appendto = true
-                        }
+            $("#" + statuses[i].status + "color").on("input", function() {
+                document.getElementById(statuses[i].status + 'val').style.stroke = '' + $(this).val() + '';
+                localStorage.setItem("" + statuses[i].status + "color1", $(this).val());
+            });
+            $("#" + statuses[i].status + "color2").on("input", function() {
+                document.getElementById('' + statuses[i].status + 'fabg').style.color = '' + $(this).val() + '';
+                localStorage.setItem("" + statuses[i].status + "color2", $(this).val());
+            });
+            if (setting['status'][statuses[i].status] == undefined) { setting['status'][statuses[i].status] = {} }
+            if (document.getElementById('' + statuses[i].status + 'statustype')) {
+                document.getElementById('' + statuses[i].status + 'statustype').value = setting['status'][statuses[i].status].type;
+            }
+            if (setting['statusver'] && document.getElementById('statusversion')) {
+                document.getElementById('statusversion').value = setting['statusver']
+            }
+            if (setting['uilook'] && document.getElementById('uilook')) {
+                document.getElementById('uilook').value = setting['uilook']
+            }
+            if (setting['iconshape'] && document.getElementById('iconshape')) {
+                document.getElementById('iconshape').value = setting['iconshape']
+            }
+            if (setting['carhud']['version'] && document.getElementById('carhudver')) {
+                document.getElementById('carhudver').value = setting['carhud']['version']
+            }
+            if (setting['carhud']['speedmetric'] && document.getElementById('speedmetric')) {
+                document.getElementById('speedmetric').value = setting['carhud']['speedmetric']
+            }
+            if (setting['status'][statuses[i].status].type == 1) {
+                var appendto = false
+                if (localStorage.getItem("statusleft")) {
+                    if (localStorage.getItem("statusleft") > 1000) {
+                        appendto = true
                     }
-                    if (setting['statusver'] == 'icons') {
-                        if (appendto) {
-                            $("#statusv3").append('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:27px;position:relative;color:rgba(144, 144, 144, 0.876);float:right; margin-top:4px;margin-left:1px;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:27px;color:'+bg+'"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:26px;color:rgb(177 177 177 / 13%)"></i> <i id="'+i_id_1+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
-                        } else {
-                            $("#statusv3").prepend('<span id="'+divid+'" class="fa-stack fa-2x" style="display:'+statuses[i].display+';font-size:27px;position:relative;color:rgba(144, 144, 144, 0.876);float:left; margin-top:4px;margin-left:1px;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:27px;color:'+bg+'"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:26px;color:rgb(177 177 177 / 13%)"></i> <i id="'+i_id_1+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color1+';z-index:1131;opacity:1.0;"></i> <i id="'+i_id_2+'" class="'+fa+' fa-stack-1x" style="font-size:23px;color:'+color2+';z-index:1130;opacity:1.0;"></i> </span>');
-                        }
+                }
+                if (setting['statusver'] == 'icons') {
+                    if (appendto) {
+                        $("#statusv3").append('<span id="' + divid + '" class="fa-stack fa-2x" style="display:' + statuses[i].display + ';font-size:27px;position:relative;color:rgba(144, 144, 144, 0.876);float:right; margin-top:4px;margin-left:1px;"> <i class="fas fa-octagon fa-stack-2x" id="' + statuses[i].status + 'fabg" style="font-size:27px;color:' + bg + '"></i> <i id="' + blink + '" class="fal fa-octagon fa-stack-2x" style="font-size:26px;color:rgb(177 177 177 / 13%)"></i> <i id="' + i_id_1 + '" class="' + fa + ' fa-stack-1x" style="font-size:23px;color:' + color1 + ';z-index:1131;opacity:1.0;"></i> <i id="' + i_id_2 + '" class="' + fa + ' fa-stack-1x" style="font-size:23px;color:' + color2 + ';z-index:1130;opacity:1.0;"></i> </span>');
                     } else {
-                        if (appendto) {
-                            float = 'right'
-                            $("#statusv3").append('<div id="'+divid+'" style="float:'+float+';height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:1.25vw;color:'+bg+';margin-left:0.2vw;"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:1.41vw;color:rgb(177 177 177 / 13%)"></i> <i id="'+i_id_2+'" class="'+statuses[i].fa+' fa-stack-1x" style="font-size:1.0vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1.19vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.25vw;bottom:-0.312vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.55vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path style="stroke-opacity:0.4;stroke-width:24px;" class="bg" stroke="'+color1+'" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="'+i_id_1+'" class="meter statushud" style="stroke-width:24px;" stroke="'+color1+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
-                        } else {
-                            $("#statusv3").prepend('<div id="'+divid+'" style="float:'+float+';height:2.9vw;width:2.9vw;position:relative;display:'+statuses[i].display+'"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;"> <i class="fas fa-octagon fa-stack-2x" id="'+statuses[i].status+'fabg" style="font-size:1.25vw;color:'+bg+';margin-left:0.2vw;"></i> <i id="'+blink+'" class="fal fa-octagon fa-stack-2x" style="font-size:1.41vw;color:rgb(177 177 177 / 13%)"></i> <i id="'+i_id_2+'" class="'+statuses[i].fa+' fa-stack-1x" style="font-size:1.0vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1.19vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.25vw;bottom:-0.312vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.55vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path style="stroke-opacity:0.4;stroke-width:24px;" class="bg" stroke="'+color1+'" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="'+i_id_1+'" class="meter statushud" style="stroke-width:24px;" stroke="'+color1+'" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
-                        }
+                        $("#statusv3").prepend('<span id="' + divid + '" class="fa-stack fa-2x" style="display:' + statuses[i].display + ';font-size:27px;position:relative;color:rgba(144, 144, 144, 0.876);float:left; margin-top:4px;margin-left:1px;"> <i class="fas fa-octagon fa-stack-2x" id="' + statuses[i].status + 'fabg" style="font-size:27px;color:' + bg + '"></i> <i id="' + blink + '" class="fal fa-octagon fa-stack-2x" style="font-size:26px;color:rgb(177 177 177 / 13%)"></i> <i id="' + i_id_1 + '" class="' + fa + ' fa-stack-1x" style="font-size:23px;color:' + color1 + ';z-index:1131;opacity:1.0;"></i> <i id="' + i_id_2 + '" class="' + fa + ' fa-stack-1x" style="font-size:23px;color:' + color2 + ';z-index:1130;opacity:1.0;"></i> </span>');
                     }
-                    statusbars[statuses[i].status] = false
                 } else {
-                    statusbars[statuses[i].status] = true
-                    $("#status_progress").append('<li style="height: 40px;position:relative;">\
+                    if (appendto) {
+                        float = 'right'
+                        $("#statusv3").append('<div id="' + divid + '" style="float:' + float + ';height:2.9vw;width:2.9vw;position:relative;display:' + statuses[i].display + '"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;"> <i class="fas fa-octagon fa-stack-2x" id="' + statuses[i].status + 'fabg" style="font-size:1.25vw;color:' + bg + ';margin-left:0.2vw;"></i> <i id="' + blink + '" class="fal fa-octagon fa-stack-2x" style="font-size:1.41vw;color:rgb(177 177 177 / 13%)"></i> <i id="' + i_id_2 + '" class="' + statuses[i].fa + ' fa-stack-1x" style="font-size:1.0vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1.19vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.25vw;bottom:-0.312vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.55vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path style="stroke-opacity:0.4;stroke-width:24px;" class="bg" stroke="' + color1 + '" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="' + i_id_1 + '" class="meter statushud" style="stroke-width:24px;" stroke="' + color1 + '" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
+                    } else {
+                        $("#statusv3").prepend('<div id="' + divid + '" style="float:' + float + ';height:2.9vw;width:2.9vw;position:relative;display:' + statuses[i].display + '"> <span class="fa-stack fa-2x" style="position:absolute;font-size:0.9vw;color:rgba(144, 144, 144, 0.876);bottom:1.0vw;"> <i class="fas fa-octagon fa-stack-2x" id="' + statuses[i].status + 'fabg" style="font-size:1.25vw;color:' + bg + ';margin-left:0.2vw;"></i> <i id="' + blink + '" class="fal fa-octagon fa-stack-2x" style="font-size:1.41vw;color:rgb(177 177 177 / 13%)"></i> <i id="' + i_id_2 + '" class="' + statuses[i].fa + ' fa-stack-1x" style="font-size:1.0vw;color:rgb(240, 240, 240);z-index:1131;opacity:1.0;left:1.19vw;"></i> <svg class="default" preserveAspectRatio="xMidYMin" style="position:absolute;left:-0.25vw;bottom:-0.312vw;display: block;margin:auto;z-index:1205;opacity:0.65;transform: rotate(0deg);height:2.55vw;" xmlns="http://www.w3.org/2000/svg" width="5.5vw" viewBox="0 0 200 200" data-value="1"> <path style="stroke-opacity:0.4;stroke-width:24px;" class="bg" stroke="' + color1 + '" d="M41 179.5a77 77 0 1 1 0.93 0"  fill="none"/> <path style="" id="' + i_id_1 + '" class="meter statushud" style="stroke-width:24px;" stroke="' + color1 + '" d="M41 179.5a77 77 0 1 1 0.93 0" fill="none" stroke-dasharray="480" stroke-dashoffset="480"/> </svg> </span>');
+                    }
+                }
+                statusbars[statuses[i].status] = false
+            } else {
+                statusbars[statuses[i].status] = true
+                $("#status_progress").append('<li style="height: 40px;position:relative;">\
                     <div class="prog-bar">\
                       <span class="bar">\
-                        <span style="background: '+statuses[i].i_id_1_color+';" class="prog_progress" id="'+rpuidiv+'"></span>\
+                        <span style="background: ' + statuses[i].i_id_1_color + ';" class="prog_progress" id="' + rpuidiv + '"></span>\
                       </span>\
                     </div>\
-                    <i style="position:absolute;right:23px;top:27px;z-index: 1350;color:white;font-size:20px;" class="tikol '+statuses[i].fa+'"></i>\
+                    <i style="position:absolute;right:23px;top:27px;z-index: 1350;color:white;font-size:20px;" class="tikol ' + statuses[i].fa + '"></i>\
                     <img style="position:relative;z-index:1205 !important;height:40px;" src="img/status_bar.png" />\
                 </li>');
                 $("tikol").removeClass("fa-stack-1x");
-                }
             }
         }
-        console.log(statusui,'statusui')
-        if (statusui == 'normal') {
-            //setting['uilook'] = statusui
-            if (document.getElementById("healthdiv")) {
-                document.getElementById("healthdiv").remove()
-            }
-            if (document.getElementById("armordiv")) {
-                document.getElementById("armordiv").remove()
-            }
-            if(document.getElementById("voipdiv")) {
-                document.getElementById("voipdiv").remove()
-                NormalUI()
-                document.getElementById("statusnormal").style.display = 'block';
-            }
+    }
+    console.log(statusui, 'statusui')
+    if (statusui == 'normal') {
+        //setting['uilook'] = statusui
+        if (document.getElementById("healthdiv")) {
+            document.getElementById("healthdiv").remove()
         }
+        if (document.getElementById("armordiv")) {
+            document.getElementById("armordiv").remove()
+        }
+        if (document.getElementById("voipdiv")) {
+            document.getElementById("voipdiv").remove()
+            NormalUI()
+            document.getElementById("statusnormal").style.display = 'block';
+        }
+    }
 
-        const toggle = document.querySelectorAll('.toggle');
-        if (setting['carhud']['refreshrate']) {
-            var p = (setting['carhud']['refreshrate'] / 300) * 100
-            document.getElementById('rval').innerHTML = setting['carhud']['refreshrate']
-            document.getElementById('refreshrate').value = setting['carhud']['refreshrate']
-            document.getElementById('refreshrate2').style.width = ''+p+'%'
-            post("setrefreshrate",{val:setting['carhud']['refreshrate']})
+    const toggle = document.querySelectorAll('.toggle');
+    if (setting['carhud']['refreshrate']) {
+        var p = (setting['carhud']['refreshrate'] / 300) * 100
+        document.getElementById('rval').innerHTML = setting['carhud']['refreshrate']
+        document.getElementById('refreshrate').value = setting['carhud']['refreshrate']
+        document.getElementById('refreshrate2').style.width = '' + p + '%'
+        post("setrefreshrate", { val: setting['carhud']['refreshrate'] })
+    }
+    for (var i = 0; toggle.length > i; i++) {
+        var statusname = toggle[i].id
+        statusname = statusname.replace("toggle", "");
+        if (usersetting['status'] && usersetting['status'][statusname] !== undefined) {
+            setting['status'][statusname].hideifmax = usersetting['status'][statusname].hideifmax
         }
-        for (var i = 0; toggle.length > i; i++) {
-            var statusname = toggle[i].id
-            statusname = statusname.replace("toggle", "");
-            if (usersetting['status'] && usersetting['status'][statusname] !== undefined) {
-                setting['status'][statusname].hideifmax = usersetting['status'][statusname].hideifmax
-            }
-            if (setting['status'][statusname] && setting['status'][statusname].hideifmax) {
-                //console.log('toggle',statusname)
-                toggle[i].classList.toggle('is-on');
-            }
-            //console.log(statusname)
-            if (setting['streethud'] && statusname == 'streethud') {
-                toggle[i].classList.toggle('is-on');
-            }
-            if (setting['carhud'] && setting['carhud']['turbohud'] && statusname == 'turbohud') {
-                toggle[i].classList.toggle('is-on');
-            }
-            if (setting['carhud'] && setting['carhud']['manualhud'] && statusname == 'manualhud') {
-                toggle[i].classList.toggle('is-on');
-            }
-            if (setting['weaponhud'] && statusname == 'weaponhud') {
-                toggle[i].classList.toggle('is-on');
-            }
-            toggle[i].addEventListener('click', function () {
-                this.classList.toggle('is-on');
-                const statusname = this.id.replace("toggle", "")
-                if (setting['status'][statusname] !== undefined) { // status only
-                    setting['status'][statusname].hideifmax = !setting['status'][statusname].hideifmax
-                    if (usersetting['status'] == undefined) {
-                        usersetting['status'] = {}
-                    }
-                    if (usersetting['status'][statusname] == undefined) {
-                        usersetting['status'][statusname] = {}
-                    }
-                    usersetting['status'][statusname].hideifmax = setting['status'][statusname].hideifmax
+        if (setting['status'][statusname] && setting['status'][statusname].hideifmax) {
+            //console.log('toggle',statusname)
+            toggle[i].classList.toggle('is-on');
+        }
+        //console.log(statusname)
+        if (setting['streethud'] && statusname == 'streethud') {
+            toggle[i].classList.toggle('is-on');
+        }
+        if (setting['carhud'] && setting['carhud']['turbohud'] && statusname == 'turbohud') {
+            toggle[i].classList.toggle('is-on');
+        }
+        if (setting['carhud'] && setting['carhud']['manualhud'] && statusname == 'manualhud') {
+            toggle[i].classList.toggle('is-on');
+        }
+        if (setting['weaponhud'] && statusname == 'weaponhud') {
+            toggle[i].classList.toggle('is-on');
+        }
+        toggle[i].addEventListener('click', function() {
+            this.classList.toggle('is-on');
+            const statusname = this.id.replace("toggle", "")
+            if (setting['status'][statusname] !== undefined) { // status only
+                setting['status'][statusname].hideifmax = !setting['status'][statusname].hideifmax
+                if (usersetting['status'] == undefined) {
+                    usersetting['status'] = {}
                 }
-                if (setting['carhud'][statusname] !== undefined && statusname == 'turbohud') { // status only
-                    setting['carhud'][statusname] = !setting['carhud'][statusname]
-                    usersetting['carhud'][statusname] = setting['carhud'][statusname]
-                    setShowTurboBoost(usersetting['carhud'][statusname],true)
+                if (usersetting['status'][statusname] == undefined) {
+                    usersetting['status'][statusname] = {}
                 }
+                usersetting['status'][statusname].hideifmax = setting['status'][statusname].hideifmax
+            }
+            if (setting['carhud'][statusname] !== undefined && statusname == 'turbohud') { // status only
+                setting['carhud'][statusname] = !setting['carhud'][statusname]
+                usersetting['carhud'][statusname] = setting['carhud'][statusname]
+                setShowTurboBoost(usersetting['carhud'][statusname], true)
+            }
 
-                if (setting['carhud'][statusname] !== undefined && statusname == 'manualhud') { // status only
-                    setting['carhud'][statusname] = !setting['carhud'][statusname]
-                    usersetting['carhud'][statusname] = setting['carhud'][statusname]
-                    setManual(usersetting['carhud'][statusname],true)
-                }
-                if (setting[statusname] !== undefined && statusname == 'streethud') { // status only
-                    setting[statusname] = !setting[statusname]
-                    usersetting[statusname] = setting[statusname]
-                    setCompass(setting['streethud'])
-                }
-                if (setting[statusname] !== undefined && statusname == 'weaponhud') { // status only
-                    setting[statusname] = !setting[statusname]
-                    usersetting[statusname] = setting[statusname]
-                    setWeaponUi(setting['weaponhud'],true)
-                }
-            });
-        }
-        const sliderInput = document.querySelectorAll('.slider__input');
-        for (var i = 0; sliderInput.length > i; i++) {
-            sliderInput[i].addEventListener('input', function () {
+            if (setting['carhud'][statusname] !== undefined && statusname == 'manualhud') { // status only
+                setting['carhud'][statusname] = !setting['carhud'][statusname]
+                usersetting['carhud'][statusname] = setting['carhud'][statusname]
+                setManual(usersetting['carhud'][statusname], true)
+            }
+            if (setting[statusname] !== undefined && statusname == 'streethud') { // status only
+                setting[statusname] = !setting[statusname]
+                usersetting[statusname] = setting[statusname]
+                setCompass(setting['streethud'])
+            }
+            if (setting[statusname] !== undefined && statusname == 'weaponhud') { // status only
+                setting[statusname] = !setting[statusname]
+                usersetting[statusname] = setting[statusname]
+                setWeaponUi(setting['weaponhud'], true)
+            }
+        });
+    }
+    const sliderInput = document.querySelectorAll('.slider__input');
+    for (var i = 0; sliderInput.length > i; i++) {
+        sliderInput[i].addEventListener('input', function() {
             var statusname = this.id
             statusname = statusname.replace("range", "");
             const valueContainer = this.parentNode.parentNode.querySelector('.slider__value');
@@ -2801,7 +2793,7 @@ function setKeyless(table) {
                     usersetting['carhud'] = {}
                 }
                 usersetting['carhud'][statusname] = sliderValue
-                post("setrefreshrate",{val:sliderValue})
+                post("setrefreshrate", { val: sliderValue })
                 v1 = sliderValue * 0.001
                 v2 = sliderValue * 0.01
             }
@@ -2817,34 +2809,34 @@ function setKeyless(table) {
                     usersetting['status'][statusname].min_val_hide = sliderValue
                 }
             }
-            });
-        }
-        RestoreStatusPosition()
+        });
     }
+    RestoreStatusPosition()
+}
 
-    console.clear();
+console.clear();
 
-    const radioItem = document.querySelectorAll('.radio__item');
+const radioItem = document.querySelectorAll('.radio__item');
 
-    for (var i = 0; radioItem.length > i; i++) {
-        radioItem[i].addEventListener('click', function () {
+for (var i = 0; radioItem.length > i; i++) {
+    radioItem[i].addEventListener('click', function() {
         const siblingItems = this.parentNode.getElementsByClassName('radio__item');
         for (var i = 0; siblingItems.length > i; i++) {
             siblingItems[i].classList.remove('is-active');
         }
         this.classList.toggle('is-active');
-        });
-    }
+    });
+}
 
-    function setShowTurboBoost(bool,s) {
+function setShowTurboBoost(bool, s) {
 
-    }
+}
 
-    function setTurboBoost(table) {
+function setTurboBoost(table) {
 
-    }
+}
 
-    var carstatusstring = `<div id="carinfo">Car Status:</div>
+var carstatusstring = `<div id="carinfo">Car Status:</div>
     <img style="z-index:900;position:absolute;right:440px;top:100px;opacity:0.7;height:650px;" src="img/bodybg.png" />
     <!-- <div class="pulse" style="z-index: 1111;"></div> -->
     <img id="carstatimg" style="z-index:1001;position:absolute;right:500px;top:100px;opacity:1;height:550px;" src="img/carstatus.png" />
@@ -2864,149 +2856,149 @@ function setKeyless(table) {
     <span id="mileagetext" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:654px;top:598.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;overflow:hidden;" src="img/leftleg.png">LVL 1</span>
     <img id="tirelevel" style="-webkit-filter: drop-shadow(1px -1px 8px rgb(5, 84, 255));z-index:1001;position:absolute;right:744px;top:641.8px;opacity:1.0;height:40px;" src="img/tire.png" />
     <span id="tiretext" style="-webkit-filter: drop-shadow(1px -1px 8px rgba(5, 122, 255, 0.575));z-index:1001;position:absolute;right:654px;top:658.8px;opacity:1.0;height:20px;color:#fff;font-size:11px;overflow:hidden;" src="img/leftleg.png">LVL 1</span>`
-    function setShowCarStatus(table) {
-        if (table['bool']) {
-            $('#carstatusui').append(carstatusstring)
-            $('#carstatusui').fadeIn('fast');
-        } else {
-            $('#carstatusui').html('')
-            $('#carstatusui').fadeOut('fast');
-        }
-        for (const i in table) {
-            //////console.log(i,table[i])
-            if (i == 'brake') {
-                $('#brakelevel').html("LVL "+(+table[i]+1))
-            }
-            if (i == 'tranny') {
-                $('#trannylevel').html("LVL "+(+table[i]+1))
-            }
-            if (i == 'turbo') {
-                if (table[i] == 'NOTURBO') {
-                    table[i] = 'NONE'
-                }
-                $('#turbolevel').html("LVL "+(+table[i]+1))
-            }
-            if (i == 'engine') {
-                $('#enginelevel').html("LVL "+(+table[i]+1))
-            }
-            if (i == 'suspension') {
-                $('#suspensionlevel').html("LVL "+(+table[i]+1))
-            }
-            if (i == 'tire') {
-                $('#tirelevel').html("LVL "+(+table[i]+1))
-            }
-            if (i == 'coolant') {
-                $('#coolanttext').html((+table[i]).toFixed(0)+"%")
-            }
-            if (i == 'oil') {
-                $('#oiltext').html((+table[i]).toFixed(0)+"%")
-            }
-            if (i == 'tires_health') {
-                $('#tiretext').html((+table[i]).toFixed(0)+"%")
-            }
-            if (i == 'mileage') {
-                $('#mileagetext').html((+table[i]).toFixed(0)+" Km")
-            }
-            if (i == 'trannytype') {
-                $('#trannytype').html(table[i])
-            }
-            if (i == 'enginename') {
-                $('#enginename').html(table[i])
-            }
-        }
-    }
-    
-    function setShooting(sleep) {
-    }
 
-    function NuiLoop() {
-
+function setShowCarStatus(table) {
+    if (table['bool']) {
+        $('#carstatusui').append(carstatusstring)
+        $('#carstatusui').fadeIn('fast');
+    } else {
+        $('#carstatusui').html('')
+        $('#carstatusui').fadeOut('fast');
     }
-
-    function Drag(bool) {
-        if (bool) {
-            $('#statusv3').draggable({
-                // ...
-                drag: function(event, ui) {
-                    $('#statusv3').css('inset', 'unset');
-                },
-                stop: function(event, ui) {
-                  console.log(ui.position.top + " x " + ui.position.left);
-                  localStorage.setItem("statustop", ui.position.top);
-                  localStorage.setItem("statusleft", ui.position.left);
-                },
-                scroll: false
-              }).draggable('enable');
-        } else {
-            $('#statusv3').draggable().draggable('disable');
+    for (const i in table) {
+        //////console.log(i,table[i])
+        if (i == 'brake') {
+            $('#brakelevel').html("LVL " + (+table[i] + 1))
         }
-        if (bool) {
-            $('#status_progress').draggable({
-                // ...
-                drag: function(event, ui) {
-                },
-                stop: function(event, ui) {
-                  console.log(ui.position.top + " x " + ui.position.left);
-                  localStorage.setItem("statusptop", ui.position.top);
-                  localStorage.setItem("statuspleft", ui.position.left);
-                },
-                scroll: false
-              }).draggable('enable');
-        } else {
-            $('#status_progress').draggable().draggable('disable');
+        if (i == 'tranny') {
+            $('#trannylevel').html("LVL " + (+table[i] + 1))
         }
-    }
-    function RestoreStatusPosition() {
-        var havedefault = false
-        if (localStorage.getItem("statusleft") &&  $('#statusv3')) {
-            havedefault = true
-            $('#statusv3').css('left', ''+localStorage.getItem("statusleft")+'px');
-            $('#statusv3').css('top', ''+localStorage.getItem("statustop")+'px');
-            $('#statusv3').css('right', 'unset');
-            $('#statusv3').css('bottom', 'unset');
-        }
-        if (localStorage.getItem("statuspleft") &&  $('#status_progress')) {
-            $('#status_progress').css('left', ''+localStorage.getItem("statuspleft")+'px');
-            $('#status_progress').css('top', ''+localStorage.getItem("statusptop")+'px');
-            $('#status_progress').css('right', 'unset');
-            $('#status_progress').css('bottom', 'unset');
-        }
-        return havedefault
-    }
-
-    function RestoreCarPosition() {
-        var havedefault = false
-        var screenh = $(window).height();
-        var screenw = $(window).width();
-        if (localStorage.getItem("carhudleft")) {
-            havedefault = true
-            $('#'+carui+'').css('left', ''+screenw * localStorage.getItem("carhudleft")+'px');
-            $('#'+carui+'').css('top', ''+screenh * localStorage.getItem("carhudtop")+'px');
-            $('#'+carui+'').css('right', 'auto');
-            $('#'+carui+'').css('bottom', 'auto');
-            console.log("have default")
-        }
-        return havedefault
-    }
-
-    function ResetStorages() {
-        localStorage.removeItem("carhudtop")
-        localStorage.removeItem("carhudleft")
-        localStorage.removeItem("statusptop")
-        localStorage.removeItem("statuspleft")
-        localStorage.removeItem("statustop")
-        localStorage.removeItem("statusleft")
-        for (const i in statcache) {
-            if (statcache[i].enable) {
-                localStorage.removeItem(""+statcache[i].status+"color1")
-                localStorage.removeItem(""+statcache[i].status+"color2")
+        if (i == 'turbo') {
+            if (table[i] == 'NOTURBO') {
+                table[i] = 'NONE'
             }
+            $('#turbolevel').html("LVL " + (+table[i] + 1))
+        }
+        if (i == 'engine') {
+            $('#enginelevel').html("LVL " + (+table[i] + 1))
+        }
+        if (i == 'suspension') {
+            $('#suspensionlevel').html("LVL " + (+table[i] + 1))
+        }
+        if (i == 'tire') {
+            $('#tirelevel').html("LVL " + (+table[i] + 1))
+        }
+        if (i == 'coolant') {
+            $('#coolanttext').html((+table[i]).toFixed(0) + "%")
+        }
+        if (i == 'oil') {
+            $('#oiltext').html((+table[i]).toFixed(0) + "%")
+        }
+        if (i == 'tires_health') {
+            $('#tiretext').html((+table[i]).toFixed(0) + "%")
+        }
+        if (i == 'mileage') {
+            $('#mileagetext').html((+table[i]).toFixed(0) + " Km")
+        }
+        if (i == 'trannytype') {
+            $('#trannytype').html(table[i])
+        }
+        if (i == 'enginename') {
+            $('#enginename').html(table[i])
         }
     }
+}
 
-    function DragCar(bool) {
-        if (bool) {
-            $('#simple').draggable({
+function setShooting(sleep) {}
+
+function NuiLoop() {
+
+}
+
+function Drag(bool) {
+    if (bool) {
+        $('#statusv3').draggable({
+            // ...
+            drag: function(event, ui) {
+                $('#statusv3').css('inset', 'unset');
+            },
+            stop: function(event, ui) {
+                console.log(ui.position.top + " x " + ui.position.left);
+                localStorage.setItem("statustop", ui.position.top);
+                localStorage.setItem("statusleft", ui.position.left);
+            },
+            scroll: false
+        }).draggable('enable');
+    } else {
+        $('#statusv3').draggable().draggable('disable');
+    }
+    if (bool) {
+        $('#status_progress').draggable({
+            // ...
+            drag: function(event, ui) {},
+            stop: function(event, ui) {
+                console.log(ui.position.top + " x " + ui.position.left);
+                localStorage.setItem("statusptop", ui.position.top);
+                localStorage.setItem("statuspleft", ui.position.left);
+            },
+            scroll: false
+        }).draggable('enable');
+    } else {
+        $('#status_progress').draggable().draggable('disable');
+    }
+}
+
+function RestoreStatusPosition() {
+    var havedefault = false
+    if (localStorage.getItem("statusleft") && $('#statusv3')) {
+        havedefault = true
+        $('#statusv3').css('left', '' + localStorage.getItem("statusleft") + 'px');
+        $('#statusv3').css('top', '' + localStorage.getItem("statustop") + 'px');
+        $('#statusv3').css('right', 'unset');
+        $('#statusv3').css('bottom', 'unset');
+    }
+    if (localStorage.getItem("statuspleft") && $('#status_progress')) {
+        $('#status_progress').css('left', '' + localStorage.getItem("statuspleft") + 'px');
+        $('#status_progress').css('top', '' + localStorage.getItem("statusptop") + 'px');
+        $('#status_progress').css('right', 'unset');
+        $('#status_progress').css('bottom', 'unset');
+    }
+    return havedefault
+}
+
+function RestoreCarPosition() {
+    var havedefault = false
+    var screenh = $(window).height();
+    var screenw = $(window).width();
+    if (localStorage.getItem("carhudleft")) {
+        havedefault = true
+        $('#' + carui + '').css('left', '' + screenw * localStorage.getItem("carhudleft") + 'px');
+        $('#' + carui + '').css('top', '' + screenh * localStorage.getItem("carhudtop") + 'px');
+        $('#' + carui + '').css('right', 'auto');
+        $('#' + carui + '').css('bottom', 'auto');
+        console.log("have default")
+    }
+    return havedefault
+}
+
+function ResetStorages() {
+    localStorage.removeItem("carhudtop")
+    localStorage.removeItem("carhudleft")
+    localStorage.removeItem("statusptop")
+    localStorage.removeItem("statuspleft")
+    localStorage.removeItem("statustop")
+    localStorage.removeItem("statusleft")
+    for (const i in statcache) {
+        if (statcache[i].enable) {
+            localStorage.removeItem("" + statcache[i].status + "color1")
+            localStorage.removeItem("" + statcache[i].status + "color2")
+        }
+    }
+}
+
+function DragCar(bool) {
+    if (bool) {
+        $('#simple').draggable({
             drag: function(event, ui) {
                 $('#simple').css('inset', 'unset');
             },
@@ -3015,13 +3007,13 @@ function setKeyless(table) {
                 var screenw = $(window).width();
                 var percentleft = ui.position.left / screenw
                 var percenttop = ui.position.top / screenh
-                console.log(ui.position.top + " x " + percenttop,screenh * percenttop,ui.position.top);
+                console.log(ui.position.top + " x " + percenttop, screenh * percenttop, ui.position.top);
                 localStorage.setItem("carhudtop", percenttop);
                 localStorage.setItem("carhudleft", percentleft);
             },
             scroll: false
-            }).draggable('enable');
-            $('#minimal').draggable({
+        }).draggable('enable');
+        $('#minimal').draggable({
             drag: function(event, ui) {
                 $('#minimal').css('inset', 'unset');
             },
@@ -3030,13 +3022,13 @@ function setKeyless(table) {
                 var screenw = $(window).width();
                 var percentleft = ui.position.left / screenw
                 var percenttop = ui.position.top / screenh
-                console.log(ui.position.top + " x " + percenttop,screenh * percenttop,ui.position.top);
+                console.log(ui.position.top + " x " + percenttop, screenh * percenttop, ui.position.top);
                 localStorage.setItem("carhudtop", percenttop);
                 localStorage.setItem("carhudleft", percentleft);
             },
             scroll: false
-            }).draggable('enable');
-            $('#modern').draggable({
+        }).draggable('enable');
+        $('#modern').draggable({
             drag: function(event, ui) {
                 $('#modern').css('inset', 'unset');
             },
@@ -3045,90 +3037,90 @@ function setKeyless(table) {
                 var screenw = $(window).width();
                 var percentleft = ui.position.left / screenw
                 var percenttop = ui.position.top / screenh
-                console.log(ui.position.top + " x " + percenttop,screenh * percenttop,ui.position.top);
+                console.log(ui.position.top + " x " + percenttop, screenh * percenttop, ui.position.top);
                 localStorage.setItem("carhudtop", percenttop);
                 localStorage.setItem("carhudleft", percentleft);
             },
             scroll: false
-            }).draggable('enable');
-        } else {
-            $('#modern').draggable().draggable('disable');
-            $('#simple').draggable().draggable('disable');
-            $('#minimal').draggable().draggable('disable');
-        }
+        }).draggable('enable');
+    } else {
+        $('#modern').draggable().draggable('disable');
+        $('#simple').draggable().draggable('disable');
+        $('#minimal').draggable().draggable('disable');
     }
+}
 
-    function setStatusType(type) {
-        status_type = type
+function setStatusType(type) {
+    status_type = type
+}
+
+function playerloaded() {
+    document.getElementById("uibody").style.display = 'block'
+}
+
+function isAmbulance(bool) {
+    isambulance = bool
+}
+
+function hideui(bool) {
+    if (bool) {
+        display = 'block'
+    } else {
+        display = 'none'
     }
+    document.getElementById("uibody").style.display = '' + display + ''
+}
 
-    function playerloaded() {
-        document.getElementById("uibody").style.display = 'block'
+function uiconfig(table) {
+    var r = document.querySelector(':root');
+    var acce = table.acceleration
+    if (acce == 'hardware') {
+        acce = 'hardware_acce'
+        $(".carhud").removeClass("gpu_acce");
+        $(".carhud").addClass(acce);
+        $(".statushud").addClass(acce);
+    } else if (acce == 'gpu') {
+        acce = 'gpu_acce'
+        $(".carhud").removeClass("hardware_acce");
+        $(".carhud").addClass(acce);
+        $(".statushud").addClass(acce);
+    } else {
+        $(".carhud").removeClass("hardware_acce");
+        $(".carhud").removeClass("gpu_acce");
+        $(".statushud").removeClass('gpu_acce');
+        $(".statushud").removeClass('hardware_acce');
     }
+    r.style.setProperty('--ms', table.animation_ms);
+    r.style.setProperty('--trans', table.transition);
+    r.style.setProperty('--mscar', table.animation_mscar);
+    r.style.setProperty('--transcar', table.transitioncar);
+}
 
-    function isAmbulance(bool) {
-        isambulance = bool
-    }
-
-    function hideui(bool) {
-        if (bool) {
-            display = 'block'
-        } else {
-            display = 'none'
-        }
-        document.getElementById("uibody").style.display = ''+display+''
-    }
-
-    function uiconfig(table) {
-        var r = document.querySelector(':root');
-        var acce = table.acceleration
-        if (acce == 'hardware') {
-            acce = 'hardware_acce'
-            $(".carhud").removeClass("gpu_acce");
-            $(".carhud").addClass(acce);
-            $(".statushud").addClass(acce);
-        } else if (acce == 'gpu') {
-            acce = 'gpu_acce'
-            $(".carhud").removeClass("hardware_acce");
-            $(".carhud").addClass(acce);
-            $(".statushud").addClass(acce);
-        } else {
-            $(".carhud").removeClass("hardware_acce");
-            $(".carhud").removeClass("gpu_acce");
-            $(".statushud").removeClass('gpu_acce');
-            $(".statushud").removeClass('hardware_acce');
-        }
-        r.style.setProperty('--ms', table.animation_ms);
-        r.style.setProperty('--trans', table.transition);
-        r.style.setProperty('--mscar', table.animation_mscar);
-        r.style.setProperty('--transcar', table.transitioncar);
-    }
-
-    function SetMetrics(v,s) {
-        if (setting !== undefined && setting['carhud'] !== undefined && setting['carhud']['speedmetric'] !== undefined) {
-            if (setting['carhud']['speedmetric'] !== v && s) {
-                metrics = v
-            } else {
-                metrics = setting['carhud']['speedmetric']
-            }
-        } else {
+function SetMetrics(v, s) {
+    if (setting !== undefined && setting['carhud'] !== undefined && setting['carhud']['speedmetric'] !== undefined) {
+        if (setting['carhud']['speedmetric'] !== v && s) {
             metrics = v
+        } else {
+            metrics = setting['carhud']['speedmetric']
         }
-        if (document.getElementById("speedtext")) {
-            document.getElementById("speedtext").innerHTML = metrics;
-        }
+    } else {
+        metrics = v
     }
+    if (document.getElementById("speedtext")) {
+        document.getElementById("speedtext").innerHTML = metrics;
+    }
+}
 
-    function Talking(bool) {
-        var voiceId = document.querySelector('#voipsimplebg');
-        if (voiceId) {
-            if (bool) { 
-                voiceId.classList.add('talking') 
-            } else { 
-                voiceId.classList.remove('talking')
-            }
+function Talking(bool) {
+    var voiceId = document.querySelector('#voipsimplebg');
+    if (voiceId) {
+        if (bool) {
+            voiceId.classList.add('talking')
+        } else {
+            voiceId.classList.remove('talking')
         }
     }
+}
 
 //FUNCTIONS
 var renzu_hud = {
@@ -3231,7 +3223,7 @@ window.addEventListener("message", event => {
     }
 });
 
-setTimeout(function(){
+setTimeout(function() {
     $(".fadeout").fadeOut();
     $(".loading").fadeOut();
     setMic(2)
