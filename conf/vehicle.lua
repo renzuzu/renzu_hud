@@ -8,6 +8,7 @@ config.available_carui = {
 	['minimal'] = true,
 	['modern'] = true,
 }
+config.seatbelt_2 = false
 config.enable_carui_perclass = true -- enable/disable the Vehicle Class UI config (if this is enable , the config.carui will be ignored)
 config.carui_perclass = {
 	--change and define each class to show the vehicle UI class

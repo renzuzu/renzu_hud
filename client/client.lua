@@ -600,6 +600,7 @@ end)
 RegisterCommand(config.commands['car_seatbelt'], function()
 	if Hud.vehicle ~= 0 then
 		if Hud:haveseatbelt() then
+			print(Hud.belt,config.seatbelt_2)
 			if Hud.belt then
 				SetTimeout(1000,function()
 					Hud.belt = false
@@ -633,7 +634,9 @@ RegisterCommand(config.commands['car_seatbelt'], function()
 						DisableControlAction(27, 75, true) -- Disable exit vehicle when Driving
 						Wait(4)
 					end
-					Hud.belt = false
+					if config.seatbelt_2 then
+						Hud.belt = false
+					end
 					--SendNuiSeatBelt()
 				end)
 			end
