@@ -358,7 +358,6 @@ function Hud:inVehicleFunctions()
 		if not config.enable_carui_perclass then
 			self:NuiShowMap()
 		end
-		self:SendNuiSeatBelt()
 		return
 	end)
 end
@@ -943,7 +942,22 @@ function Hud:SendNuiSeatBelt()
 		SetFlyThroughWindscreenParams(35.0, 45.0, 17.0, 2000.0)
 		SetPedConfigFlag(PlayerPedId(), 32, true)
 	end
-	if self.vehicle  ~= nil and self.vehicle  ~= 0 and config.enableseatbeltfunc and not config.seatbelt_2 then
+
+	if self.vehicle  ~= nil and self.vehicle  ~= 0 then
+		Citizen.CreateThreadNow(function()
+			while self.belt and self.invehicle do
+				local sleep = 5
+
+				if self.belt then
+					DisableControlAction(1, 75, true)  -- Disable exit vehicle when stop
+					DisableControlAction(27, 75, true) -- Disable exit vehicle when Driving
+				end
+				Wait(sleep)
+			end
+		end)
+
+		if config.seatbelt_2 then return end
+
 		CreateThread(function()
 			local Session = {}
 			local Velocity = {}
@@ -995,14 +1009,6 @@ function Hud:SendNuiSeatBelt()
 				end
 				Velocity[2] = Velocity[1]
 				Velocity[1] = GetEntityVelocity(self.vehicle )
-				Wait(sleep)
-			end
-			while config.enableseatbeltfunc and self.belt and self.invehicle do
-				local sleep = 5
-				if self.belt then
-					DisableControlAction(1, 75, true)  -- Disable exit vehicle when stop
-					DisableControlAction(27, 75, true) -- Disable exit vehicle when Driving
-				end
 				Wait(sleep)
 			end
 			Session[1],Session[2] = 0.0,0.0
