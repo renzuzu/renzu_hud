@@ -41,14 +41,27 @@ CreateThread(function()
 	DecorRegister("PLAYERLOADED", 1);DecorRegister("CHARSLOT", 1)
 end)
 
-RegisterNetEvent('esx:setJob')
-AddEventHandler('esx:setJob', function(job)
+RegisterNetEvent('esx:setJob', function(job)
 	xPlayer.job = job
 end)
 
-RegisterNetEvent('QBCore:Client:OnJobUpdate')
-AddEventHandler('QBCore:Client:OnJobUpdate', function(JobInfo)
+RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
     PlayerJob = JobInfo
+end)
+
+RegisterNetEvent('esx:onPlayerLogout', function()
+	print('logout')
+	SendNUIMessage({
+		type = "hideui",
+		content = false
+	})
+end)
+
+RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
+    SendNUIMessage({
+		type = "hideui",
+		content = false
+	})
 end)
 
 -----------------------------------------------------------------------------------------------------------------------------------------
@@ -56,8 +69,7 @@ end)
 -----------------------------------------------------------------------------------------------------------------------------------------
 
 --PMA VOICE LISTENER
-RegisterNetEvent("pma-voice:setTalkingMode")
-AddEventHandler("pma-voice:setTalkingMode", function(prox)
+RegisterNetEvent("pma-voice:setTalkingMode", function(prox)
 	Hud.voiceDisplay = prox
 	SendNUIMessage({
 		type = "setMic",
@@ -68,8 +80,7 @@ end)
 --MUMBLE VOIP SetVoice Listener
 local current_channel = 0
 local cdch = 0
-RegisterNetEvent("renzu_hud:SetVoiceData")
-AddEventHandler("renzu_hud:SetVoiceData", function(mode,val)
+RegisterNetEvent("renzu_hud:SetVoiceData", function(mode,val)
 	if mode == 'radio' then
 		Wait(0,math.random(500)) -- fix old rpradio ver
 	end
@@ -100,8 +111,7 @@ AddEventHandler("renzu_hud:SetVoiceData", function(mode,val)
 end)
 
 -- PMA RADIO CHANNEL LISTENER
-RegisterNetEvent("pma-voice:clSetPlayerRadio")
-AddEventHandler("pma-voice:clSetPlayerRadio", function(channel)
+RegisterNetEvent("pma-voice:clSetPlayerRadio", function(channel)
 	local channel = config.radiochannels[channel].text
 	if channel.job ~= 'all' and xPlayer ~= nil and xPlayer.job ~= nil and channel.job ~= xPlayer.job.name then
 		channel = false
@@ -113,8 +123,7 @@ AddEventHandler("pma-voice:clSetPlayerRadio", function(channel)
 end)
 
 -- PMA REMOVE PLAYER FROM CHANNEL RADIO
-RegisterNetEvent("pma-voice:removePlayerFromRadio")
-AddEventHandler("pma-voice:removePlayerFromRadio", function(channel)
+RegisterNetEvent("pma-voice:removePlayerFromRadio", function(channel)
 	SendNUIMessage({
 		type = "setRadioChannel",
 		content = false
@@ -148,8 +157,7 @@ CreateThread(function()
 	return
 end)
 
-RegisterNetEvent('renzu_hud:charslot')
-AddEventHandler('renzu_hud:charslot', function(charid)
+RegisterNetEvent('renzu_hud:charslot', function(charid)
 	Hud.charslot = charid
 	while not LocalPlayer.state.playerloaded do
 		Wait(100)
@@ -162,8 +170,7 @@ AddEventHandler('renzu_hud:charslot', function(charid)
 end)
 
 -- loaded events
-RegisterNetEvent('esx:playerLoaded')
-AddEventHandler('esx:playerLoaded', function(xPlayer)
+RegisterNetEvent('esx:playerLoaded', function(xPlayer)
 	Wait(1000)
 	LocalPlayer.state:set('playerloaded', true,true)
 	LocalPlayer.state.playerloaded = true
@@ -173,10 +180,13 @@ AddEventHandler('esx:playerLoaded', function(xPlayer)
 	Wait(5000)
 	SendNUIMessage({content = true, type = 'pedface'})
 	SendNUIMessage({content = true, type = 'playerloaded'})
+	SendNUIMessage({
+		type = "hideui",
+		content = true
+	})
 end)
 
-RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
-AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
 	Wait(1000)
 	LocalPlayer.state:set('playerloaded', true,true)
 	LocalPlayer.state.playerloaded = true
@@ -186,10 +196,13 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
 	Wait(5000)
 	SendNUIMessage({content = true, type = 'pedface'})
 	SendNUIMessage({content = true, type = 'playerloaded'})
+	SendNUIMessage({
+		type = "hideui",
+		content = true
+	})
 end)
 
-RegisterNetEvent('playerSpawned')
-AddEventHandler('playerSpawned', function(spawn)
+RegisterNetEvent('playerSpawned', function(spawn)
 	if config.framework ~= 'ESX' and config.framework ~= 'QBCORE' then
 		Wait(1000)
 		LocalPlayer.state:set('playerloaded', true,true)
@@ -600,7 +613,6 @@ end)
 RegisterCommand(config.commands['car_seatbelt'], function()
 	if Hud.vehicle ~= 0 then
 		if Hud:haveseatbelt() then
-			print(Hud.belt,config.seatbelt_2)
 			if Hud.belt then
 				SetTimeout(1000,function()
 					Hud.belt = false
@@ -614,7 +626,6 @@ RegisterCommand(config.commands['car_seatbelt'], function()
 					Hud:Notify('warning','Seatbelt',"Seatbelt has been Detached")
 					SetFlyThroughWindscreenParams(35.0, 45.0, 17.0, 2000.0)
 					SetPedConfigFlag(PlayerPedId(), 32, true)
-					--SendNuiSeatBelt()
 				end)
 			else
 				SetTimeout(1000,function()
@@ -637,7 +648,7 @@ RegisterCommand(config.commands['car_seatbelt'], function()
 					if config.seatbelt_2 then
 						Hud.belt = false
 					end
-					--SendNuiSeatBelt()
+					Hud:SendNuiSeatBelt()
 				end)
 			end
 		end
